@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace AsciiPinyin.Web.Models
@@ -8,6 +8,7 @@ namespace AsciiPinyin.Web.Models
         // Workaround for nulls.
         private string ipa = "";
         private string pinyin = "";
+        private string unicode = "";
 
         [JsonPropertyName("ipa")]
         public string Ipa { get => ipa; set => ipa = value; }
@@ -22,16 +23,37 @@ namespace AsciiPinyin.Web.Models
         [JsonPropertyName("strokes")]
         public byte Strokes { get; set; }
 
-        // Not needed, can be retrieved from Unicode.
-        //[JsonPropertyName("the_character")]
-        //public char TheCharacter { get; set; }
+        [JsonPropertyName("unicode")]
+        public string Unicode { get => unicode; set => unicode = value; }
 
         /*
-         * The code can't be lower than 1 => using unsigned type is possible.
-         * Highest theoretically possible code is 0x3134F = 201551 => ushort is too low (65535), uint is needed.
+         * Is not read from the database Json, doesn't have 'set' configured. But must have JsonProperty, because that serves even
+         * for the serialization to Json.
          */
-        [JsonPropertyName("unicode")]
-        public uint Unicode { get; set; }
+        [JsonPropertyName("the_character")]
+        public char TheCharacter
+        {
+            get
+            {
+                uint unicodeAsInt = 0;
+
+                try
+                {
+                    unicodeAsInt = uint.Parse(Unicode, System.Globalization.NumberStyles.HexNumber);
+                }
+                catch (ArgumentException)
+                {
+                    Console.Error.WriteLine($"Failed parsing of unicode '{Unicode}'.");
+                }
+
+                if (unicodeAsInt > 0)
+                {
+                    return (char)unicodeAsInt;
+                }
+
+                return '\x0000';
+            }
+        }
 
         public override bool Equals(object? obj)
         {
@@ -43,14 +65,14 @@ namespace AsciiPinyin.Web.Models
             return HashCode.Combine(Unicode, Piniyin, Ipa);
         }
 
-        // This doesn't work properly since the character was removed, but the character is still wanted in JSON.
-        //public override string ToString() => JsonSerializer.Serialize(this);
-
         public override string ToString()
         {
-            JObject jo = JObject.FromObject(this);
-            jo.Add("the_character", (char)Unicode);
-            return jo.ToString();
+            var options = new JsonSerializerOptions 
+            { 
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping 
+            };
+            
+            return JsonSerializer.Serialize(this, options);
         }
     }
 }

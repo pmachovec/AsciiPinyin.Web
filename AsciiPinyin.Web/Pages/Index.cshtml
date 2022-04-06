@@ -8,3 +8,8 @@
     <h1 class="display-4">Příliš žluťoučký kůň úpěl ďábelské ódy!</h1>
     <p>@DateTime.Now</p>
 </div>
+
+@foreach (var chachar in Model.Chachars)
+{
+    <h2>@chachar.ToString()</h2>
+}

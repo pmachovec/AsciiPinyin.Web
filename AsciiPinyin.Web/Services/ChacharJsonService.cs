@@ -17,16 +17,11 @@ namespace AsciiPinyin.Web.Services
         private IWebHostEnvironment WebHostEnvironment { get; }
 
         // Path to the database file retrieved programmatically from the WebHostEnvironment service.
-        private string ChacharJsonFilePath
-        {
-            get
-            {
-                return Path.Combine( // Path as string creator
-                    WebHostEnvironment.WebRootPath, // Path to the 'wwwroot' folder
-                    "database",
-                    "chachars.json");
-            }
-        }
+        private string ChacharJsonFilePath =>
+            Path.Combine( // Path as string creator
+                WebHostEnvironment.WebRootPath, // Path to the 'wwwroot' folder
+                "database",
+                "asciipinyin.json");
 
         /**
          * Transfers the Json database file (which must be in the expected location) to an IEnumerable of Chachars.
