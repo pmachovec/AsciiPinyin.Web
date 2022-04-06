@@ -9,7 +9,15 @@
     <p>@DateTime.Now</p>
 </div>
 
-@foreach (var chachar in Model.Chachars)
-{
-    <h2>@chachar.ToString()</h2>
-}
+<!--Using CSS from Bootstrap-->
+<div class="card-columns" style="column-count: 3;">
+    @foreach (var chachar in Model.Chachars)
+    {
+        <div class="card text-center">
+            <div class="card-body">
+                <h2 class="card-title">@chachar.TheCharacter</h2>
+                <p class="card-text">@chachar.Piniyin - @chachar.Ipa</p>
+            </div>
+        </div>
+    }
+</div>
