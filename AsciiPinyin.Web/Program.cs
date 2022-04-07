@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddControllers();
 builder.Services.AddTransient<ChacharJsonService>();
 
 var app = builder.Build();
@@ -22,23 +23,6 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 
-app.MapGet("/characters", (context) =>
-{
-    var chachars = app.Services.GetService<ChacharJsonService>()?.GetChachars();
-
-    if (chachars != null)
-    {
-        var options = new JsonSerializerOptions
-        {
-            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        };
-
-        var chacharsJson = JsonSerializer.Serialize(chachars, options);
-        context.Response.ContentType = "text/plain; charset=utf-8";
-        return context.Response.WriteAsync(chacharsJson);
-    }
-
-    return context.Response.WriteAsync("");
-});
+app.MapControllers();
 
 app.Run();
