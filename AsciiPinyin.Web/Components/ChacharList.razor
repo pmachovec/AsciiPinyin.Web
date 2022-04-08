@@ -21,11 +21,45 @@
     }
 </div>
 
+@if (_selectedChachar != null)
+{
+    <div id="chacharModal" tabindex="-1" role="dialog" aria-labelledby="theCharacter" aria-hidden="true">
+         <div class="modal-dialog modal-dialog-centered" role="document">
+             <div class="modal-content">
+                 <div class="modal-header">
+                     <h5 class="modal-title" id="theCharacter">@_selectedChachar.TheCharacter</h5>
+                     <button
+                         @onclick="_ => UnselectChachar()"
+                         type="button"
+                         class="btn btn-primary"
+                         aria-label="Close">
+                         <span>&times;</span>
+                     </button>
+                 </div>
+                 <div class="modal-body">
+                     <div class="card">
+                         <div class="card-body">
+                             <p class="card-text">Strokes: @_selectedChachar.Strokes</p>
+                             <p class="card-text">Pinyin: @_selectedChachar.Piniyin</p>
+                             <p class="card-text">IPA: @_selectedChachar.Ipa</p>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+     </div>
+}
+
 @code {
     Chachar? _selectedChachar;
 
     void SelectChachar(string unicode)
     {
         _selectedChachar = _chacharJsonService.GetChachars().First(c => c.Unicode == unicode);
+    }
+
+    void UnselectChachar()
+    {
+        _selectedChachar = null;
     }
 }
