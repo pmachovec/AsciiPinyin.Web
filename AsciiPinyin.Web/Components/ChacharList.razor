@@ -1,0 +1,31 @@
+﻿@using AsciiPinyin.Web.Models
+@using AsciiPinyin.Web.Services
+@inject ChacharJsonService _chacharJsonService
+
+<!--Using CSS from Bootstrap-->
+<div class="card-columns" style="column-count: 3;">
+    @foreach (var chachar in _chacharJsonService.GetChachars())
+    {
+        <div class="card text-center">
+            <div class="card-body">
+                <h2 class="card-title">@chachar.TheCharacter</h2>
+            </div>
+        </div>
+        <div class="card-footer">
+            <small class="text-muted">
+                <button
+                    @onclick="_ => SelectChachar(chachar.Unicode)"
+                    class="btn btn-primary">More info</button>
+            </small>
+        </div>
+    }
+</div>
+
+@code {
+    Chachar? _selectedChachar;
+
+    void SelectChachar(string unicode)
+    {
+        _selectedChachar = _chacharJsonService.GetChachars().First(c => c.Unicode == unicode);
+    }
+}

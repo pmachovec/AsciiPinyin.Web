@@ -1,4 +1,5 @@
 ﻿@page
+@using AsciiPinyin.Web.Components
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
@@ -9,15 +10,12 @@
     <p>@DateTime.Now</p>
 </div>
 
-<!--Using CSS from Bootstrap-->
-<div class="card-columns" style="column-count: 3;">
-    @foreach (var chachar in Model.Chachars)
-    {
-        <div class="card text-center">
-            <div class="card-body">
-                <h2 class="card-title">@chachar.TheCharacter</h2>
-                <p class="card-text">@chachar.Piniyin - @chachar.Ipa</p>
-            </div>
-        </div>
-    }
-</div>
+<!-- Including Razor component -->
+@(await Html.RenderComponentAsync<ChacharList>(RenderMode.ServerPrerendered))
+
+<!--
+    The JavaScript code handling page changes loading from the server (SignalR). Must be placed after components inclusion.
+    If IDE is complaining that it can't be found, just ignore the warning.
+-->
+@* ReSharper disable twice Html.PathError *@
+<script src="_framework/blazor.server.js"></script>
