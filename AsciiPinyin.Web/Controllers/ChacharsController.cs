@@ -1,24 +1,23 @@
-﻿using AsciiPinyin.Web.Models;
-using AsciiPinyin.Web.Services;
+﻿namespace AsciiPinyin.Web.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
+using Models;
+using Services;
 
-namespace AsciiPinyin.Web.Controllers
+[ApiController]
+[Route("/characters")]
+public class ChacharsController : ControllerBase
 {
-    [ApiController]
-    [Route("/characters")]
-    public class ChacharsController : ControllerBase
+    public ChacharsController(ChacharJsonService chacharJsonService)
     {
-        public ChacharsController(ChacharJsonService chacharJsonService)
-        {
-            this.ChacharJsonService = chacharJsonService;
-        }
+        ChacharJsonService = chacharJsonService;
+    }
 
-        private ChacharJsonService ChacharJsonService { get; }
+    private ChacharJsonService ChacharJsonService { get; }
 
-        [HttpGet]
-        public IEnumerable<Chachar> Get()
-        {
-            return ChacharJsonService.GetChachars();
-        }
+    [HttpGet]
+    public IEnumerable<Chachar> Get()
+    {
+        return ChacharJsonService.GetChachars();
     }
 }

@@ -1,28 +1,27 @@
-﻿using AsciiPinyin.Web.Models;
-using AsciiPinyin.Web.Services;
+﻿namespace AsciiPinyin.Web.Pages;
+
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Models;
+using Services;
 
-namespace AsciiPinyin.Web.Pages
+public class IndexModel : PageModel
 {
-    public class IndexModel : PageModel
+    private readonly ILogger<IndexModel> _logger;
+    private readonly ChacharJsonService _chacharJsonService;
+
+    public IndexModel(
+        ILogger<IndexModel> logger,
+        ChacharJsonService chacharJsonService) // Automatic constructor DI
     {
-        private readonly ILogger<IndexModel> _logger;
-        private readonly ChacharJsonService chacharJsonService;
-        private IEnumerable<Chachar> chachars = Enumerable.Empty<Chachar>();
+        _logger = logger;
+        _chacharJsonService = chacharJsonService;
+    }
 
-        public IEnumerable<Chachar> Chachars { get => chachars; }
+    public IEnumerable<Chachar> Chachars { get; private set; } = Enumerable.Empty<Chachar>();
 
-        public IndexModel(
-            ILogger<IndexModel> logger,
-            ChacharJsonService chacharJsonService) // Automatic constructor DI
-        {
-            _logger = logger;
-            this.chacharJsonService = chacharJsonService;
-        }
-
-        public void OnGet()
-        {
-            chachars = chacharJsonService.GetChachars();
-        }
+    // ReSharper disable once UnusedMember.Global
+    public void OnGet() // Doesn't override anything. It just has the expected name.
+    {
+        Chachars = _chacharJsonService.GetChachars();
     }
 }
