@@ -1,0 +1,33 @@
+﻿<header>
+    <nav class="navbar-expand-sm navbar-toggleable-sm navbar-light bg-white box-shadow mb-3">
+        <div class="text-center">
+            <h1 class="display-1">ASCII&nbsp;拼音</h1>
+        </div>
+        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <input type="button" class="nav-link text-dark @GetActiveIfActive("ChacharList")" @onclick='_ => SelectTab("ChacharList")' value="Characters" />
+                </li>
+                <li class="nav-item">
+                    <input type="button" class="nav-link text-dark @GetActiveIfActive("AlternativeList")" @onclick='_ => SelectTab("AlternativeList")' value="Alternatives" />
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<DynamicComponent Type="@(Type.GetType($"AsciiPinyin.Web.Components.{_selectedTabName}") ?? typeof(ChacharList))" />
+
+@code {
+    private string _selectedTabName = "ChacharList";
+
+    void SelectTab(string tabName)
+    {
+        _selectedTabName = tabName;
+    }
+
+    string GetActiveIfActive(string tabName)
+    {
+        return _selectedTabName == tabName ? "active" : "";
+    }
+}

@@ -1,17 +1,12 @@
 ﻿@page
-@using AsciiPinyin.Web.Components
+@using Index = AsciiPinyin.Web.Components.Index
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Characters";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Příliš žluťoučký kůň úpěl ďábelské ódy!</h1>
-    <p>@DateTime.Now</p>
-</div>
-
-<!-- Including Razor component -->
-@(await Html.RenderComponentAsync<ChacharList>(RenderMode.ServerPrerendered))
+<!-- Including main Razor component -->
+@(await Html.RenderComponentAsync<Index>(RenderMode.ServerPrerendered))
 
 <!--
     The JavaScript code handling page changes loading from the server (SignalR). Must be placed after components inclusion.
