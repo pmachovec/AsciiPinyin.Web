@@ -1,23 +1,23 @@
 ﻿namespace AsciiPinyin.Web.Controllers;
 
+using Data;
 using Microsoft.AspNetCore.Mvc;
 using Models;
-using Services;
 
 [ApiController]
 [Route("/characters")]
 public class ChacharsController : ControllerBase
 {
-    private ChacharJsonService ChacharJsonService { get; }
+    private AsciiPinyinContext AsciiPinyinContext { get; }
 
-    public ChacharsController(ChacharJsonService chacharJsonService)
+    public ChacharsController(AsciiPinyinContext asciiPinyinContext)
     {
-        ChacharJsonService = chacharJsonService;
+        AsciiPinyinContext = asciiPinyinContext;
     }
 
     [HttpGet]
     public IEnumerable<Chachar> Get()
     {
-        return ChacharJsonService.GetChachars();
+        return AsciiPinyinContext.Chachars;
     }
 }

@@ -1,4 +1,4 @@
-using AsciiPinyin.Web.Services;
+using AsciiPinyin.Web.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddTransient<ChacharJsonService>();
+builder.Services.AddEntityFrameworkSqlite().AddDbContext<AsciiPinyinContext>();
 
 var app = builder.Build();
 

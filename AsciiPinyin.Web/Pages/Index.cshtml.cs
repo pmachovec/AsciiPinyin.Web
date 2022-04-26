@@ -1,20 +1,20 @@
 ﻿namespace AsciiPinyin.Web.Pages;
 
+using Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Models;
-using Services;
 
 public class IndexModel : PageModel
 {
     // private readonly ILogger<IndexModel> _logger;
-    private readonly ChacharJsonService _chacharJsonService;
+    private readonly AsciiPinyinContext _asciiPinyinContext;
 
     public IndexModel(
         ILogger<IndexModel> logger,
-        ChacharJsonService chacharJsonService) // Automatic constructor DI
+        AsciiPinyinContext asciiPinyinContext) // Automatic constructor DI
     {
         // _logger = logger;
-        _chacharJsonService = chacharJsonService;
+        _asciiPinyinContext = asciiPinyinContext;
     }
 
     public IEnumerable<Chachar> Chachars { get; private set; } = Enumerable.Empty<Chachar>();
@@ -22,6 +22,6 @@ public class IndexModel : PageModel
     // ReSharper disable once UnusedMember.Global
     public void OnGet() // Doesn't override anything. It just has the expected name.
     {
-        Chachars = _chacharJsonService.GetChachars();
+        Chachars = _asciiPinyinContext.Chachars;
     }
 }

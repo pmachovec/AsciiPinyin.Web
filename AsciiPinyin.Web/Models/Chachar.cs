@@ -1,71 +1,50 @@
 ﻿namespace AsciiPinyin.Web.Models;
 
-using System.Globalization;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+[Table("chachar")]
 public class Chachar
 {
-    [JsonPropertyName("ipa")]
     // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
-    public string Ipa { get; set; } = "";
+    [JsonPropertyName("the_character")]
+    [Column("the_character")]
+    [Key]
+    public char TheCharacter { get; set; } = '\x0000';
 
-    [JsonPropertyName("pinyin")]
     // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
+    [JsonPropertyName("pinyin")]
+    [Column("pinyin")]
+    [Key]
     public string Piniyin { get; set; } = "";
+
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
+    [JsonPropertyName("ipa")]
+    [Column("ipa")]
+    [Required]
+    public string Ipa { get; set; } = "";
 
     /*
      * The number of strokes can't be lower than 1 => using unsigned type is possible.
      * Highest theoretically possible value is 84 => byte is enough (byte is unsigned, signed would be sbyte).
      */
-    [JsonPropertyName("strokes")]
     // ReSharper disable once UnusedAutoPropertyAccessor.Global
-    // ReSharper disable once UnusedMember.Global
+    [JsonPropertyName("strokes")]
+    [Column("strokes")]
+    [Required]
     public byte Strokes { get; set; }
 
-    [JsonPropertyName("unicode")]
-    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Global
-    // ReSharper disable once MemberCanBePrivate.Global
-    public string Unicode { get; set; } = "";
-
-    /*
-     * Is not read from the database Json, doesn't have 'set' configured. But must have JsonProperty, because that serves even
-     * for the serialization to Json.
-     */
-    [JsonPropertyName("the_character")]
-    public char TheCharacter
+    public override bool Equals(object? other)
     {
-        get
-        {
-            uint unicodeAsInt = 0;
-
-            try
-            {
-                unicodeAsInt = uint.Parse(Unicode, NumberStyles.HexNumber);
-            }
-            catch (ArgumentException)
-            {
-                Console.Error.WriteLine($"Failed parsing of unicode '{Unicode}'.");
-            }
-
-            if (unicodeAsInt > 0)
-            {
-                return (char)unicodeAsInt;
-            }
-
-            return '\x0000';
-        }
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return obj is Chachar chachar && Unicode == chachar.Unicode;
+        return other is Chachar otherChachar && otherChachar.TheCharacter == TheCharacter && otherChachar.Piniyin == Piniyin;
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Unicode, Piniyin, Ipa);
+        return HashCode.Combine(TheCharacter, Piniyin);
     }
 
     public override string ToString()

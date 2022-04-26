@@ -1,10 +1,10 @@
-﻿@using AsciiPinyin.Web.Models
-@using AsciiPinyin.Web.Services
-@inject ChacharJsonService ChacharJsonService
+﻿@using AsciiPinyin.Web.Data
+@using AsciiPinyin.Web.Models
+@inject AsciiPinyinContext AsciiPinyinContext
 
 <!--Using CSS from Bootstrap-->
 <div class="card-columns" style="column-count: 3;">
-    @foreach (var chachar in ChacharJsonService.GetChachars())
+    @foreach (var chachar in AsciiPinyinContext.Chachars)
     {
         <div class="card text-center">
             <div class="card-body">
@@ -14,7 +14,7 @@
         <div class="card-footer">
             <small class="text-muted">
                 <button
-                    @onclick="_ => SelectChachar(chachar.Unicode)"
+                    @onclick="_ => SelectChachar(chachar.TheCharacter, chachar.Piniyin)"
                     class="btn btn-primary">More info</button>
             </small>
         </div>
@@ -53,9 +53,12 @@
 @code {
     Chachar? _selectedChachar;
 
-    void SelectChachar(string unicode)
+    void SelectChachar(char theCharacter, string pinyin)
     {
-        _selectedChachar = ChacharJsonService.GetChachars().First(c => c.Unicode == unicode);
+        _selectedChachar = AsciiPinyinContext.Chachars.First
+        (
+            chachar => chachar.TheCharacter == theCharacter && chachar.Piniyin == pinyin
+        );
     }
 
     void UnselectChachar()
