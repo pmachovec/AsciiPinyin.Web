@@ -20,6 +20,7 @@ public class Chachar
      * Highest theoretically possible value is 84 => byte is enough (byte is unsigned, signed would be sbyte).
      */
     [JsonPropertyName("strokes")]
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     // ReSharper disable once UnusedMember.Global
     public byte Strokes { get; set; }
 
@@ -59,7 +60,7 @@ public class Chachar
 
     public override bool Equals(object? obj)
     {
-        return (obj != null) && (obj is Chachar chachar) && (Unicode == chachar.Unicode);
+        return obj is Chachar chachar && Unicode == chachar.Unicode;
     }
 
     public override int GetHashCode()

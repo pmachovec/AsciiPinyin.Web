@@ -1,5 +1,4 @@
 using AsciiPinyin.Web.Services;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,16 +15,11 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
 }
+
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
-
 app.MapRazorPages();
-
 app.MapControllers();
-
 app.MapBlazorHub();
-
 app.Run();

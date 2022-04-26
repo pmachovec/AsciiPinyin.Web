@@ -8,12 +8,12 @@ using Services;
 [Route("/characters")]
 public class ChacharsController : ControllerBase
 {
+    private ChacharJsonService ChacharJsonService { get; }
+
     public ChacharsController(ChacharJsonService chacharJsonService)
     {
         ChacharJsonService = chacharJsonService;
     }
-
-    private ChacharJsonService ChacharJsonService { get; }
 
     [HttpGet]
     public IEnumerable<Chachar> Get()

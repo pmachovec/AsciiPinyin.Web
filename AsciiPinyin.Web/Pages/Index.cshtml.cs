@@ -6,14 +6,14 @@ using Services;
 
 public class IndexModel : PageModel
 {
-    private readonly ILogger<IndexModel> _logger;
+    // private readonly ILogger<IndexModel> _logger;
     private readonly ChacharJsonService _chacharJsonService;
 
     public IndexModel(
         ILogger<IndexModel> logger,
         ChacharJsonService chacharJsonService) // Automatic constructor DI
     {
-        _logger = logger;
+        // _logger = logger;
         _chacharJsonService = chacharJsonService;
     }
 
