@@ -1,9 +1,6 @@
 ﻿@page
 @using Index = AsciiPinyin.Web.Components.Index
 @model IndexModel
-@{
-    ViewData["Title"] = "Characters";
-}
 
 <!-- Including main Razor component -->
 @(await Html.RenderComponentAsync<Index>(RenderMode.ServerPrerendered))

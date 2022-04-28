@@ -7,61 +7,65 @@
     {
         <div class="card text-center">
             <div class="card-body">
-                <h2 class="card-title">@chachar.TheCharacter</h2>
+                <h2 class="card-title fw-bold">@chachar.TheCharacter</h2>
             </div>
-        </div>
-        <div class="card-footer">
-            <small class="text-muted">
-                <button
-                    @onclick="_ => SelectChachar(chachar.TheCharacter, chachar.Piniyin)"
-                    class="btn btn-primary">More info</button>
-            </small>
+            <div class="card-footer bg-transparent fw-bold text-uppercase">
+                @chachar.Piniyin
+            </div>
+
+            <!-- Makes the whole card act like a button. -->
+            <a href="#" class="stretched-link" @onclick="_ => SelectChachar(chachar.TheCharacter, chachar.Piniyin)"></a>
         </div>
     }
 </div>
 
 @if (_selectedChachar != null)
 {
-    <div id="chacharModal" tabindex="-1" role="dialog" aria-labelledby="theCharacter" aria-hidden="true">
-         <div class="modal-dialog modal-dialog-centered" role="document">
-             <div class="modal-content">
-                 <div class="modal-header">
-                     <h5 class="modal-title" id="theCharacter">@_selectedChachar.TheCharacter</h5>
-                     <button
-                         @onclick="_ => UnselectChachar()"
-                         type="button"
-                         class="btn btn-primary"
-                         aria-label="Close">
-                         <span>&times;</span>
-                     </button>
-                 </div>
-                 <div class="modal-body">
-                     <div class="card">
-                         <div class="card-body">
-                             <p class="card-text">Strokes: @_selectedChachar.Strokes</p>
-                             <p class="card-text">Pinyin: @_selectedChachar.Piniyin</p>
-                             <p class="card-text">IPA: @_selectedChachar.Ipa</p>
-                         </div>
-                     </div>
-                 </div>
-             </div>
-         </div>
-     </div>
+    <div class="modal-backdrop fade @_modalShow"></div>
+    <div class="modal fade @_modalShow @_modalDisplay" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header align-content-center">
+                    <div></div>
+                    <h2 class="modal-title fw-bold" id="theCharacter">@_selectedChachar.TheCharacter</h2>
+                    <button
+                        @onclick="_ => UnselectChachar()"
+                        type="button"
+                        class="btn btn-primary"
+                        aria-label="Close">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="card-text">Pinyin: <span class="text-uppercase">@_selectedChachar.Piniyin</span></p>
+                    <p class="card-text">IPA: [@_selectedChachar.Ipa]</p>
+                    <p class="card-text">Strokes: @_selectedChachar.Strokes</p>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 @code {
+    string _modalShow = "";
+    string _modalDisplay = "d-none";
     Chachar? _selectedChachar;
 
-    void SelectChachar(char theCharacter, string pinyin)
+    async void SelectChachar(char theCharacter, string pinyin)
     {
-        _selectedChachar = AsciiPinyinContext.Chachars.First
-        (
-            chachar => chachar.TheCharacter == theCharacter && chachar.Piniyin == pinyin
-        );
+        _selectedChachar = AsciiPinyinContext.Chachars.First(chachar => chachar.TheCharacter == theCharacter && chachar.Piniyin == pinyin);
+        _modalDisplay = "d-block";
+        await Task.Delay(10);
+        _modalShow = "show";
+        StateHasChanged();
     }
 
-    void UnselectChachar()
+    async void UnselectChachar()
     {
+        _modalShow = "";
+        await Task.Delay(400);
+        _modalDisplay = "d-none";
         _selectedChachar = null;
+        StateHasChanged();
     }
 }

@@ -19,4 +19,8 @@
     <Content Remove="wwwroot\database\asciipinyin.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\js\site.js" />
+  </ItemGroup>
+
 </Project>
