@@ -1,6 +1,8 @@
 ﻿@using AsciiPinyin.Web.Data
 @using AsciiPinyin.Web.Models
 @inject AsciiPinyinContext AsciiPinyinContext
+@* ReSharper disable once InconsistentNaming *@
+@inject IJSRuntime JSRuntime
 
 <div class="card-columns" style="column-count: 3;">
     @foreach (var chachar in AsciiPinyinContext.Chachars)
@@ -67,5 +69,10 @@
         _modalDisplay = "d-none";
         _selectedChachar = null;
         StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Characters");
     }
 }

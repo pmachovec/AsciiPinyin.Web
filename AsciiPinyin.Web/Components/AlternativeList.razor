@@ -1,1 +1,11 @@
-﻿<h1>AlternativeList - tbd...</h1>
+﻿ @* ReSharper disable once InconsistentNaming *@
+ @inject IJSRuntime JSRuntime
+
+<h1>AlternativeList - tbd...</h1>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JSRuntime.InvokeVoidAsync("setTitle", "Alternatives");
+    }
+}
