@@ -1,0 +1,86 @@
+@using AsciiPinyin.Web.Shared.Models
+@inject HttpClient Http
+
+ <PageTitle>ASCII Pinyin - Characters</PageTitle>
+
+<div class="card-columns" style="column-count: 3;">
+    @if (_chachars != null)
+    {
+        foreach (var chachar in _chachars)
+        {
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="card-title fw-bold">@chachar.TheCharacter</h2>
+                </div>
+                <div class="card-footer bg-transparent fw-bold text-uppercase">
+                    @chachar.Piniyin
+                </div>
+
+                <!-- Makes the whole card act like a button. -->
+                <!-- The href="#" is necessary to change the mouse pointer to hand icon on hover. -->
+                <a href="#" class="stretched-link" @onclick="_ => SelectChachar(chachar.TheCharacter, chachar.Piniyin)"></a>
+            </div>
+        }
+    }
+</div>
+
+@if (_selectedChachar != null)
+{
+    <div class="modal-backdrop fade @_modalShow"></div>
+    <div class="modal fade @_modalShow @_modalDisplay" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header align-content-center">
+                    <div></div>
+                    <h2 class="modal-title fw-bold" id="theCharacter">@_selectedChachar.TheCharacter</h2>
+                    <button
+                        @onclick="_ => UnselectChachar()"
+                        type="button"
+                        class="btn btn-primary"
+                        aria-label="Close">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="card-text">Pinyin: <span class="text-uppercase">@_selectedChachar.Piniyin</span></p>
+                    <p class="card-text">IPA: [@_selectedChachar.Ipa]</p>
+                    <p class="card-text">Strokes: @_selectedChachar.Strokes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string _modalShow = "";
+    private string _modalDisplay = "d-none";
+    private Chachar[]? _chachars;
+    Chachar? _selectedChachar;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (_chachars == null)
+        {
+            _chachars = await Http.GetFromJsonAsync<Chachar[]>("characters");
+        }
+    }
+
+    async void SelectChachar(char theCharacter, string pinyin)
+    {
+        if (_chachars == null) return;
+        _selectedChachar = _chachars.First(chachar => chachar.TheCharacter == theCharacter && chachar.Piniyin == pinyin);
+        _modalDisplay = "d-block";
+        await Task.Delay(10);
+        _modalShow = "show";
+        StateHasChanged();
+    }
+
+    async void UnselectChachar()
+    {
+        _modalShow = "";
+        await Task.Delay(400);
+        _modalDisplay = "d-none";
+        _selectedChachar = null;
+        StateHasChanged();
+    }
+}
