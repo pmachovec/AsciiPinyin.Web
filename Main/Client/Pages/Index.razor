@@ -1,4 +1,5 @@
 @page "/"
+@inherits IndexBase
 @using AsciiPinyin.Web.Client.Components
 
 <header>
@@ -19,18 +20,4 @@
     </nav>
 </header>
 
-<DynamicComponent Type="@(Type.GetType($"AsciiPinyin.Web.Client.Components.{_selectedTabName}") ?? typeof(ChacharList))" />
-
-@code {
-    private string _selectedTabName = "ChacharList";
-
-    void SelectTab(string tabName)
-    {
-        _selectedTabName = tabName;
-    }
-
-    string GetActiveIfActive(string tabName)
-    {
-        return _selectedTabName == tabName ? "active" : "";
-    }
-}
+<DynamicComponent Type="@(Type.GetType($"AsciiPinyin.Web.Client.Components.{SelectedTabName}") ?? typeof(ChacharList))" />
