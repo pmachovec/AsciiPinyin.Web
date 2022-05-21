@@ -1,6 +1,5 @@
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Components;
-using System.Net.Http.Json;
 
 namespace AsciiPinyin.Web.Client.Components;
 
@@ -8,19 +7,10 @@ public class ChacharListBase: ComponentBase
 {
     protected string ModalShow { get; private set; } = "";
     protected string ModalDisplay { get; private set; } = "d-none";
-    protected Chachar[]? Chachars { get; private set; }
     protected Chachar? SelectedChachar { get; private set; }
 
-    [Inject]
-    private HttpClient? HttpClient { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        if (Chachars == null && HttpClient != null)
-        {
-            Chachars = await HttpClient.GetFromJsonAsync<Chachar[]>("characters");
-        }
-    }
+    [Parameter]
+    public Chachar[]? Chachars { protected get; set; }
 
     protected async void SelectChachar(char theCharacter, string pinyin)
     {

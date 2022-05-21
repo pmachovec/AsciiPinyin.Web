@@ -20,4 +20,12 @@
     </nav>
 </header>
 
-<DynamicComponent Type="@(Type.GetType($"AsciiPinyin.Web.Client.Components.{SelectedTabName}") ?? typeof(ChacharList))" />
+@if (SelectedTabName == ComponentNames.AlternativeList)
+{
+    <AlternativeList />
+    // <AlternativeList Alternatives="@Alternatives" />
+}
+else
+{
+    <ChacharList Chachars="@Chachars" />
+}
