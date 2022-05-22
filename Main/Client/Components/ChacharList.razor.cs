@@ -14,17 +14,22 @@ public class ChacharListBase: ComponentBase
 
     protected async void SelectChachar(char theCharacter, string pinyin)
     {
-        if (Chachars == null)
+        if (Chachars != null && Chachars.Length >= 1)
         {
-            // TODO something
-            return;
+            SelectedChachar = Chachars.First(chachar => chachar.TheCharacter == theCharacter && chachar.Piniyin == pinyin);
+            ModalDisplay = "d-block";
+            await Task.Delay(10);
+            ModalShow = "show";
+            StateHasChanged();
         }
-
-        SelectedChachar = Chachars.First(chachar => chachar.TheCharacter == theCharacter && chachar.Piniyin == pinyin);
-        ModalDisplay = "d-block";
-        await Task.Delay(10);
-        ModalShow = "show";
-        StateHasChanged();
+        else if (Chachars == null)
+        {
+            Console.Error.WriteLine("ChacharListBase.SelectChachar: Chachars are null");
+        }
+        else
+        {
+            Console.Error.WriteLine("ChacharListBase.SelectChachar: Chachars are empty");
+        }
     }
 
     protected async void UnselectChachar()

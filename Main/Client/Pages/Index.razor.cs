@@ -16,14 +16,14 @@ public class IndexBase: ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        if (HttpClient != null)
+        if (HttpClient == null)
         {
-            Chachars = await HttpClient.GetFromJsonAsync<Chachar[]>("characters");
-            // Alternatives = await HttpClient.GetFromJsonAsync<Alternative[]>("alternatives");
+            Console.Error.WriteLine("IndexBase.OnInitializedAsync: HttpClient is null");
         }
         else
         {
-            // TODO something
+            Chachars = await LoadEntitiesAsync<Chachar>(HttpClient, "characters");
+            // Alternatives = await  LoadEntitiesAsync<Alternative>(HttpClient, "alternatives");
         }
     }
 
@@ -35,5 +35,19 @@ public class IndexBase: ComponentBase
     protected string GetActiveIfActive(Type tabType)
     {
         return SelectedTabType.Equals(tabType) ? "active" : "";
+    }
+
+    private static async Task<T[]?> LoadEntitiesAsync<T>(HttpClient httpClient, string entitiesApiName) where T : IEntity
+    {
+        try
+        {
+            return await httpClient.GetFromJsonAsync<T[]>(entitiesApiName);
+        }
+        catch
+        {
+            Console.Error.WriteLine($"IndexBase.LoadEntitiesAsync: Loading of {entitiesApiName} failed");
+        }
+
+        return null;
     }
 }

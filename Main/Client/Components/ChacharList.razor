@@ -3,6 +3,10 @@
 <PageTitle>ASCII Pinyin - Characters</PageTitle>
 
 <div class="card-columns" style="column-count: 3;">
+    @*
+     Chachars are loaded asynchronously. If they're null, it's impossible to tell if it's because of error
+     or they haven't been loaded yet.
+     *@
     @if (Chachars != null)
     {
         foreach (var chachar in Chachars)
@@ -20,10 +24,6 @@
                 <a href="#" class="stretched-link" @onclick="_ => SelectChachar(chachar.TheCharacter, chachar.Piniyin)"></a>
             </div>
         }
-    }
-    else
-    {
-        // TODO something
     }
 </div>
 
