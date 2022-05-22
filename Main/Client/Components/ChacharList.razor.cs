@@ -14,7 +14,12 @@ public class ChacharListBase: ComponentBase
 
     protected async void SelectChachar(char theCharacter, string pinyin)
     {
-        if (Chachars == null) return;
+        if (Chachars == null)
+        {
+            // TODO something
+            return;
+        }
+
         SelectedChachar = Chachars.First(chachar => chachar.TheCharacter == theCharacter && chachar.Piniyin == pinyin);
         ModalDisplay = "d-block";
         await Task.Delay(10);

@@ -1,3 +1,4 @@
+using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
@@ -6,7 +7,7 @@ namespace AsciiPinyin.Web.Client.Pages;
 
 public class IndexBase: ComponentBase
 {
-    protected string SelectedTabName { get; private set; } = "ChacharList";
+    protected Type SelectedTabType { get; private set; } = typeof(ChacharList);
     protected Chachar[]? Chachars { get; private set; }
     // protected Alternative[]? Alternatives { get; private set; }
 
@@ -20,15 +21,19 @@ public class IndexBase: ComponentBase
             Chachars = await HttpClient.GetFromJsonAsync<Chachar[]>("characters");
             // Alternatives = await HttpClient.GetFromJsonAsync<Alternative[]>("alternatives");
         }
+        else
+        {
+            // TODO something
+        }
     }
 
-    protected void SelectTab(string tabName)
+    protected void SelectTab(Type tabType)
     {
-        SelectedTabName = tabName;
+        SelectedTabType = tabType;
     }
 
-    protected string GetActiveIfActive(string tabName)
+    protected string GetActiveIfActive(Type tabType)
     {
-        return SelectedTabName == tabName ? "active" : "";
+        return SelectedTabType.Equals(tabType) ? "active" : "";
     }
 }

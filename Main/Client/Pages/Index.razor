@@ -10,17 +10,17 @@
         <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
             <ul class="nav nav-tabs">
                 <li class="nav-item">
-                    <input type="button" class="nav-link text-dark @GetActiveIfActive("ChacharList")" @onclick='_ => SelectTab("ChacharList")' value="Characters" />
+                    <input type="button" class="nav-link text-dark @GetActiveIfActive(typeof(ChacharList))" @onclick='_ => SelectTab(typeof(ChacharList))' value="Characters" />
                 </li>
                 <li class="nav-item">
-                    <input type="button" class="nav-link text-dark @GetActiveIfActive("AlternativeList")" @onclick='_ => SelectTab("AlternativeList")' value="Alternatives" />
+                    <input type="button" class="nav-link text-dark @GetActiveIfActive(typeof(AlternativeList))" @onclick='_ => SelectTab(typeof(AlternativeList))' value="Alternatives" />
                 </li>
             </ul>
         </div>
     </nav>
 </header>
 
-@if (SelectedTabName == ComponentNames.AlternativeList)
+@if (SelectedTabType.Equals(typeof(AlternativeList)))
 {
     <AlternativeList />
     // <AlternativeList Alternatives="@Alternatives" />
