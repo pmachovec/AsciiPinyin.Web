@@ -15,7 +15,7 @@ public class AsciiPinyinContext : DbContext
     {
         // Needed because of two-value primary key.
         builder.Entity<Chachar>().HasKey(chachar => new {
-            chachar.TheCharacter, chachar.Piniyin
+            chachar.TheCharacter, chachar.Pinyin
         });
     }
 }

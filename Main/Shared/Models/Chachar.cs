@@ -17,7 +17,7 @@ public class Chachar: IEntity
     [JsonPropertyName("pinyin")]
     [Column("pinyin")]
     [Key]
-    public string Piniyin { get; set; } = "";
+    public string Pinyin { get; set; } = "";
 
     [JsonPropertyName("ipa")]
     [Column("ipa")]
@@ -35,12 +35,12 @@ public class Chachar: IEntity
 
     public override bool Equals(object? other)
     {
-        return other is Chachar otherChachar && otherChachar.TheCharacter == TheCharacter && otherChachar.Piniyin == Piniyin;
+        return other is Chachar otherChachar && otherChachar.TheCharacter == TheCharacter && otherChachar.Pinyin == Pinyin;
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(TheCharacter, Piniyin);
+        return HashCode.Combine(TheCharacter, Pinyin);
     }
 
     public override string ToString()

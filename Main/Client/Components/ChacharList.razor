@@ -2,54 +2,33 @@
 
 <PageTitle>ASCII Pinyin - Characters</PageTitle>
 
-<div class="card-columns" style="column-count: 3;">
-    @*
-     Chachars are loaded asynchronously. If they're null, it's impossible to tell if it's because of error
-     or they haven't been loaded yet.
-     *@
-    @if (Chachars != null)
-    {
-        foreach (var chachar in Chachars)
-        {
-            <div class="card text-center">
-                <div class="card-body">
-                    <h2 class="card-title fw-bold">@chachar.TheCharacter</h2>
-                </div>
-                <div class="card-footer bg-transparent fw-bold text-uppercase">
-                    @chachar.Piniyin
-                </div>
-
-                <!-- Makes the whole card act like a button. -->
-                <!-- The href="#" is necessary to change the mouse pointer to hand icon on hover. -->
-                <a href="#" class="stretched-link" @onclick="_ => SelectChachar(chachar.TheCharacter, chachar.Piniyin)"></a>
-            </div>
-        }
-    }
-</div>
-
-@if (SelectedChachar != null)
+@*Chachars are loaded asynchronously. If they're null, it's impossible to tell if it's because of error or they haven't been loaded yet.*@
+@if (Chachars != null)
 {
-    <div class="modal-backdrop fade @ModalShow"></div>
-    <div class="modal fade @ModalShow @ModalDisplay" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header align-content-center">
-                    <div></div>
-                    <h2 class="modal-title fw-bold" id="theCharacter">@SelectedChachar.TheCharacter</h2>
-                    <button
-                        @onclick="_ => UnselectChachar()"
-                        type="button"
-                        class="btn btn-primary"
-                        aria-label="Close">
-                        <span>&times;</span>
-                    </button>
+    @if (Chachars.Length < 1)
+    {
+        Console.WriteLine("ChacharList: WARNING! Chachars retrieved from the server are empty.");
+    }
+    else
+    {
+        <div class="card-columns" style="column-count: 3;">
+            @foreach (var chachar in Chachars)
+            {
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h2 class="card-title fw-bold">@chachar.TheCharacter</h2>
+                    </div>
+                    <div class="card-footer bg-transparent fw-bold text-uppercase">
+                        @chachar.Pinyin
+                    </div>
+
+                    <!-- Makes the whole card act like a button. -->
+                    <!-- The href="#" is necessary to change the mouse pointer to hand icon on hover. -->
+                <a href="#" class="stretched-link" @onclick="_ => SelectChachar(chachar)"></a>
                 </div>
-                <div class="modal-body">
-                    <p class="card-text">Pinyin: <span class="text-uppercase">@SelectedChachar.Piniyin</span></p>
-                    <p class="card-text">IPA: [@SelectedChachar.Ipa]</p>
-                    <p class="card-text">Strokes: @SelectedChachar.Strokes</p>
-                </div>
-            </div>
+            }
         </div>
-    </div>
+    }
 }
+
+<ChacharViewDialog @ref="chacharViewDialog" />
