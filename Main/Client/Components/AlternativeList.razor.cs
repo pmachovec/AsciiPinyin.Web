@@ -1,30 +1,19 @@
 using AsciiPinyin.Web.Client.Shared;
 using AsciiPinyin.Web.Client.Shared.Resources;
-using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Components;
 
-public class ChacharListBase : ComponentBase
+public class AlternativeListBase : ComponentBase
 {
-    [Parameter]
-    public Chachar[]? Chachars { protected get; set; }
-
     #pragma warning disable CS8618
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; }
-
-    protected ChacharViewDialog chacharViewDialog;
     #pragma warning restore CS8618
-
-    protected async void SelectChachar(Chachar chachar)
-    {
-        await chacharViewDialog.SetChachar(chachar);
-    }
 
     protected string GetLocalizedString(string theString)
     {
-        return SafeLocalization.GetLocalizedString(Localizer, theString, "ChacharListBase");
+        return SafeLocalization.GetLocalizedString(Localizer, theString, "AlternativeListBase");
     }
 }

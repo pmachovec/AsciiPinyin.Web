@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 [Table("chachar")]
-public class Chachar: IEntity
+public class Chachar : IEntity
 {
     [JsonPropertyName("the_character")]
     [Column("the_character")]

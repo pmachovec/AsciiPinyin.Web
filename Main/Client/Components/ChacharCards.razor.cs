@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace AsciiPinyin.Web.Client.Components;
 
-public class ChacharCardsBase: ComponentBase
+public class ChacharCardsBase : ComponentBase
 {
     #pragma warning disable CS8618
     [Parameter]

@@ -1,6 +1,7 @@
 @page "/"
 @inherits IndexBase
 @using AsciiPinyin.Web.Client.Components
+@using System.Globalization
 
 <header>
     <nav class="navbar-expand-sm navbar-toggleable-sm navbar-light bg-white box-shadow mb-3">
@@ -10,10 +11,18 @@
         <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
             <ul class="nav nav-tabs">
                 <li class="nav-item">
-                    <input type="button" class="nav-link text-dark @GetActiveIfActive(typeof(ChacharList))" @onclick='_ => SelectTab(typeof(ChacharList))' value="Characters" />
+                    <input
+                        class="nav-link text-capitalize text-dark @GetActiveIfActive(typeof(ChacharList))"
+                        type="button"
+                        value="@GetLocalizedString("Characters")"
+                        @onclick='_ => SelectTab(typeof(ChacharList))'/>
                 </li>
                 <li class="nav-item">
-                    <input type="button" class="nav-link text-dark @GetActiveIfActive(typeof(AlternativeList))" @onclick='_ => SelectTab(typeof(AlternativeList))' value="Alternatives" />
+                    <input
+                        class="nav-link text-capitalize text-dark @GetActiveIfActive(typeof(AlternativeList))"
+                        type="button"
+                        value="@GetLocalizedString("Alternatives")"
+                        @onclick='_ => SelectTab(typeof(AlternativeList))'/>
                 </li>
             </ul>
         </div>

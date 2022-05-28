@@ -1,30 +1,31 @@
 using AsciiPinyin.Web.Client.Components;
+using AsciiPinyin.Web.Client.Shared;
+using AsciiPinyin.Web.Client.Shared.Resources;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
 using System.Net.Http.Json;
 
 namespace AsciiPinyin.Web.Client.Pages;
 
-public class IndexBase: ComponentBase
+public class IndexBase : ComponentBase
 {
     protected Type SelectedTabType { get; private set; } = typeof(ChacharList);
     protected Chachar[]? Chachars { get; private set; }
     // protected Alternative[]? Alternatives { get; private set; }
 
+    #pragma warning disable CS8618
     [Inject]
-    private HttpClient? HttpClient { get; set; }
+    protected IStringLocalizer<Resource> Localizer { get; set; }
+
+    [Inject]
+    private HttpClient HttpClient { get; set; }
+    #pragma warning restore CS8618
 
     protected override async Task OnInitializedAsync()
     {
-        if (HttpClient == null)
-        {
-            Console.Error.WriteLine("IndexBase.OnInitializedAsync: HttpClient is null");
-        }
-        else
-        {
-            Chachars = await LoadEntitiesAsync<Chachar>(HttpClient, "characters");
-            // Alternatives = await  LoadEntitiesAsync<Alternative>(HttpClient, "alternatives");
-        }
+        Chachars = await LoadEntitiesAsync<Chachar>(HttpClient, "characters");
+        // Alternatives = await  LoadEntitiesAsync<Alternative>(HttpClient, "alternatives");
     }
 
     protected void SelectTab(Type tabType)
@@ -35,6 +36,11 @@ public class IndexBase: ComponentBase
     protected string GetActiveIfActive(Type tabType)
     {
         return SelectedTabType.Equals(tabType) ? "active" : "";
+    }
+
+    protected string GetLocalizedString(string theString)
+    {
+        return SafeLocalization.GetLocalizedString(Localizer, theString, "IndexBase");
     }
 
     private static async Task<T[]?> LoadEntitiesAsync<T>(HttpClient httpClient, string entitiesApiName) where T : IEntity

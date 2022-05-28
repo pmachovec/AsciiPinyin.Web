@@ -1,4 +1,5 @@
 @inherits ChacharViewDialogBase
+@using AsciiPinyin.Web.Client.Shared.Constants
 
 <div class="modal-backdrop fade @ModalShow @ModalDisplay"></div>
 <div class="modal fade @ModalShow @ModalDisplay" tabindex="-1" role="dialog">
@@ -16,9 +17,15 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p class="card-text">Pinyin: <span class="text-uppercase">@Chachar?.Pinyin</span></p>
-                <p class="card-text">IPA: [@Chachar?.Ipa]</p>
-                <p class="card-text">Strokes: @Chachar?.Strokes</p>
+                <p class="card-text">
+                    <span class="text-capitalize">@GetLocalizedString("Pinyin")</span>: <span class="text-uppercase">@Chachar?.Pinyin</span>
+                </p>
+                <p class="card-text">
+                    <span class="text-uppercase">@GetLocalizedString("IPA")</span>: @Chachar?.Ipa
+                </p>
+                <p class="card-text">
+                    <span class="text-capitalize">@GetLocalizedString("Strokes")</span>: @Chachar?.Strokes
+                </p>
             </div>
         </div>
     </div>
