@@ -4,27 +4,49 @@ using System.Globalization;
 
 namespace AsciiPinyin.Web.Client.Shared;
 
+/// <summary>
+/// Localization methods with safe measurements against not found translations.
+/// </summary>
 public class SafeLocalization
 {
-    public static string GetLocalizedString(IStringLocalizer<Resource> localizer, string theString, string callerNameForLogs)
-    {
-        if (localizer[theString] == null)
-        {
-            Console.WriteLine($"SafeLocalizationSingleton.GetLocalizedString: Localized value for '{theString}' not found in {callerNameForLogs}.");
-            return GetInvariantString(theString, callerNameForLogs);
-        }
+    private readonly IStringLocalizer<Resource> _localizer;
 
-        return localizer[theString];
+    public SafeLocalization(IStringLocalizer<Resource> localizer)
+    {
+        _localizer = localizer;
     }
 
-    private static string GetInvariantString(string theString, string callerNameForLogs)
+    /// <summary>
+    /// Returns a localization for the given key. If not found, writes a warning to the console and uses a default invariant localization
+    /// for the given key. If not found, writes another warning to the console and returns the key itself.
+    /// </summary>
+    /// <param name="key">The key to find a localization for.</param>
+    /// <param name="callerNameForConsole">Name of the caller to be mentioned in warning messages in the console.</param>
+    public string GetLocalizedString(string key, string callerNameForConsole)
     {
-        var invariantString = Resource.ResourceManager.GetString(theString, CultureInfo.InvariantCulture);
+        if (_localizer[key] == null)
+        {
+            Console.WriteLine($"SafeLocalizationSingleton.GetLocalizedString: Localized value for '{key}' not found in {callerNameForConsole}.");
+            return GetInvariantString(key, callerNameForConsole);
+        }
+
+        return _localizer[key];
+    }
+
+    /// <summary>
+    /// Returns a default invariant localization for the given key. If not found, writes another warning to the console and returns
+    /// the key itself.
+    /// </summary>
+    /// <param name="key">The key to find an invariant localization for.</param>
+    /// <param name="callerNameForConsole">Name of the caller to be mentioned in warning messages in the console.</param>
+    private static string GetInvariantString(string key, string callerNameForConsole)
+    {
+        var invariantString = Resource.ResourceManager.GetString(key, CultureInfo.InvariantCulture);
 
         if (invariantString == null)
         {
-            Console.WriteLine($"SafeLocalizationSingleton.GetInvariantString: Invariant value for '{theString}' not found in {callerNameForLogs}.");
-            return theString;
+            Console.WriteLine($"SafeLocalizationSingleton.GetInvariantString: Invariant value for '{key}' not found in {callerNameForConsole}.");
+            return key;
         }
 
         return invariantString;

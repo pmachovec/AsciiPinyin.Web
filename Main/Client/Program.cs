@@ -1,4 +1,5 @@
 using AsciiPinyin.Web.Client;
+using AsciiPinyin.Web.Client.Shared;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -8,5 +9,6 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddLocalization();
+builder.Services.AddSingleton<SafeLocalization>();
 
 await builder.Build().RunAsync();

@@ -2,10 +2,8 @@ using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.Shared;
 using AsciiPinyin.Web.Client.Shared.Constants;
 using AsciiPinyin.Web.Client.Shared.JSInterop;
-using AsciiPinyin.Web.Client.Shared.Resources;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Localization;
 using Microsoft.JSInterop;
 using System.Net.Http.Json;
 
@@ -17,16 +15,16 @@ public class IndexBase : ComponentBase
     protected Chachar[]? Chachars { get; private set; }
     // protected Alternative[]? Alternatives { get; private set; }
 
-    #pragma warning disable CS8618
+#pragma warning disable CS8618
     [Inject]
     private HttpClient HttpClient { get; set; }
 
     [Inject]
-    protected IStringLocalizer<Resource> Localizer { get; set; }
+    private IJSRuntime JSRuntime { get; set; }
 
     [Inject]
-    private IJSRuntime JSRuntime { get; set; }
-    #pragma warning restore CS8618
+    private SafeLocalization SafeLocalization { get; set; }
+#pragma warning restore CS8618
 
     protected override async Task OnInitializedAsync()
     {
@@ -46,9 +44,9 @@ public class IndexBase : ComponentBase
         return SelectedTabType.Equals(tabType) ? "active" : "";
     }
 
-    protected string GetLocalizedString(string theString)
+    protected string GetLocalizedString(string key)
     {
-        return SafeLocalization.GetLocalizedString(Localizer, theString, "IndexBase");
+        return SafeLocalization.GetLocalizedString(key, "IndexBase");
     }
 
     private static async Task<T[]?> LoadEntitiesAsync<T>(HttpClient httpClient, string entitiesApiName) where T : IEntity

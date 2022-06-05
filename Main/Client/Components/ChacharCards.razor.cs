@@ -5,11 +5,11 @@ namespace AsciiPinyin.Web.Client.Components;
 
 public class ChacharCardsBase : ComponentBase
 {
-    #pragma warning disable CS8618
+#pragma warning disable CS8618
     [Parameter]
     public Chachar[] Chachars { protected get; set; }
 
     [Parameter]
     public Action<Chachar> SelectChachar { protected get; set; }
-    #pragma warning restore CS8618
+#pragma warning restore CS8618
 }
