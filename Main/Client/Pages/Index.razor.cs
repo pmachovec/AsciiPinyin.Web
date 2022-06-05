@@ -1,9 +1,12 @@
 using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.Shared;
+using AsciiPinyin.Web.Client.Shared.Constants;
+using AsciiPinyin.Web.Client.Shared.JSInterop;
 using AsciiPinyin.Web.Client.Shared.Resources;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
+using Microsoft.JSInterop;
 using System.Net.Http.Json;
 
 namespace AsciiPinyin.Web.Client.Pages;
@@ -16,21 +19,26 @@ public class IndexBase : ComponentBase
 
     #pragma warning disable CS8618
     [Inject]
+    private HttpClient HttpClient { get; set; }
+
+    [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; }
 
     [Inject]
-    private HttpClient HttpClient { get; set; }
+    private IJSRuntime JSRuntime { get; set; }
     #pragma warning restore CS8618
 
     protected override async Task OnInitializedAsync()
     {
         Chachars = await LoadEntitiesAsync<Chachar>(HttpClient, "characters");
         // Alternatives = await  LoadEntitiesAsync<Alternative>(HttpClient, "alternatives");
+        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} -  {GetLocalizedString("Characters")}", JSRuntime);
     }
 
-    protected void SelectTab(Type tabType)
+    protected void SelectTabWithLocalizedTitle(Type tabType, string titleLocalizedPartKey)
     {
         SelectedTabType = tabType;
+        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} -  {GetLocalizedString(titleLocalizedPartKey)}", JSRuntime);
     }
 
     protected string GetActiveIfActive(Type tabType)
