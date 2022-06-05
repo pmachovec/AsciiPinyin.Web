@@ -1,3 +1,4 @@
+using AsciiPinyin.Web.Client.Shared.JSInterop;
 using AsciiPinyin.Web.Client.Shared.Resources;
 using Microsoft.Extensions.Localization;
 using System.Globalization;
@@ -10,15 +11,19 @@ namespace AsciiPinyin.Web.Client.Shared;
 public class SafeLocalization
 {
     private readonly IStringLocalizer<Resource> _localizer;
+    private readonly JSInteropConsole _jsIteropConsole;
 
-    public SafeLocalization(IStringLocalizer<Resource> localizer)
+    public SafeLocalization(
+        IStringLocalizer<Resource> localizer,
+        JSInteropConsole jsInteropConsole)
     {
         _localizer = localizer;
+        _jsIteropConsole = jsInteropConsole;
     }
 
     /// <summary>
     /// Returns a localization for the given key. If not found, writes a warning to the console and uses a default invariant localization
-    /// for the given key. If not found, writes another warning to the console and returns the key itself.
+    /// for the given key. If not found, writes error to the console and returns the key itself.
     /// </summary>
     /// <param name="key">The key to find a localization for.</param>
     /// <param name="callerNameForConsole">Name of the caller to be mentioned in warning messages in the console.</param>
@@ -26,7 +31,7 @@ public class SafeLocalization
     {
         if (_localizer[key] == null)
         {
-            Console.WriteLine($"SafeLocalizationSingleton.GetLocalizedString: Localized value for '{key}' not found in {callerNameForConsole}.");
+            _jsIteropConsole.ConsoleWarning($"SafeLocalizationSingleton.GetLocalizedString: Localized value for '{key}' not found in {callerNameForConsole}.");
             return GetInvariantString(key, callerNameForConsole);
         }
 
@@ -34,18 +39,17 @@ public class SafeLocalization
     }
 
     /// <summary>
-    /// Returns a default invariant localization for the given key. If not found, writes another warning to the console and returns
-    /// the key itself.
+    /// Returns a default invariant localization for the given key. If not found, writes error to the console and returns the key itself.
     /// </summary>
     /// <param name="key">The key to find an invariant localization for.</param>
     /// <param name="callerNameForConsole">Name of the caller to be mentioned in warning messages in the console.</param>
-    private static string GetInvariantString(string key, string callerNameForConsole)
+    private string GetInvariantString(string key, string callerNameForConsole)
     {
         var invariantString = Resource.ResourceManager.GetString(key, CultureInfo.InvariantCulture);
 
         if (invariantString == null)
         {
-            Console.WriteLine($"SafeLocalizationSingleton.GetInvariantString: Invariant value for '{key}' not found in {callerNameForConsole}.");
+            _jsIteropConsole.ConsoleError($"SafeLocalizationSingleton.GetInvariantString: Invariant value for '{key}' not found in {callerNameForConsole}.");
             return key;
         }
 

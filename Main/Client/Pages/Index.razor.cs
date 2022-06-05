@@ -4,7 +4,6 @@ using AsciiPinyin.Web.Client.Shared.Constants;
 using AsciiPinyin.Web.Client.Shared.JSInterop;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 using System.Net.Http.Json;
 
 namespace AsciiPinyin.Web.Client.Pages;
@@ -20,7 +19,7 @@ public class IndexBase : ComponentBase
     private HttpClient HttpClient { get; set; }
 
     [Inject]
-    private IJSRuntime JSRuntime { get; set; }
+    private JSInteropDOM JSInteropDOM { get; set; }
 
     [Inject]
     private SafeLocalization SafeLocalization { get; set; }
@@ -30,13 +29,13 @@ public class IndexBase : ComponentBase
     {
         Chachars = await LoadEntitiesAsync<Chachar>(HttpClient, "characters");
         // Alternatives = await  LoadEntitiesAsync<Alternative>(HttpClient, "alternatives");
-        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} -  {GetLocalizedString("Characters")}", JSRuntime);
+        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} -  {GetLocalizedString("Characters")}");
     }
 
     protected void SelectTabWithLocalizedTitle(Type tabType, string titleLocalizedPartKey)
     {
         SelectedTabType = tabType;
-        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} -  {GetLocalizedString(titleLocalizedPartKey)}", JSRuntime);
+        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} -  {GetLocalizedString(titleLocalizedPartKey)}");
     }
 
     protected string GetActiveIfActive(Type tabType)

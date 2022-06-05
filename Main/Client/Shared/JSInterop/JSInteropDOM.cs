@@ -2,10 +2,24 @@ using Microsoft.JSInterop;
 
 namespace AsciiPinyin.Web.Client.Shared.JSInterop;
 
+/// <summary>
+/// Methods for calling JavaScript methods manipulating with DOM.
+/// </summary>
 public class JSInteropDOM
 {
-    public static async void SetTitle(string title, IJSRuntime jsRuntime)
+    private readonly IJSRuntime _jsRuntime;
+
+    public JSInteropDOM(IJSRuntime jsRuntime)
     {
-        await jsRuntime.InvokeVoidAsync("setTitle", title);
+        _jsRuntime = jsRuntime;
+    }
+
+    /// <summary>
+    /// Sets title of the page.
+    /// </summary>
+    /// <param name="title">The title to be set.</param>
+    public async void SetTitle(string title)
+    {
+        await _jsRuntime.InvokeVoidAsync("setTitle", title);
     }
 }

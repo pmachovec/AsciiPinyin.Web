@@ -1,4 +1,5 @@
 using AsciiPinyin.Web.Client.Shared;
+using AsciiPinyin.Web.Client.Shared.JSInterop;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Components;
 
@@ -11,6 +12,9 @@ public class ChacharListBase : ComponentBase
 
 #pragma warning disable CS8618
     protected ChacharViewDialog chacharViewDialog;
+
+    [Inject]
+    protected JSInteropConsole JSInteropConsole { get; set; }
 
     [Inject]
     private SafeLocalization SafeLocalization { get; set; }

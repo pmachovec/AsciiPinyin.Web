@@ -3,7 +3,6 @@ using AsciiPinyin.Web.Client.Shared.Constants;
 using AsciiPinyin.Web.Client.Shared.JSInterop;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 
 namespace AsciiPinyin.Web.Client.Components;
 
@@ -11,7 +10,7 @@ public class ChacharViewDialogBase : ComponentBase
 {
 #pragma warning disable CS8618
     [Inject]
-    private IJSRuntime JSRuntime { get; set; }
+    private JSInteropDOM JSInteropDOM { get; set; }
 
     [Inject]
     private SafeLocalization SafeLocalization { get; set; }
@@ -23,7 +22,7 @@ public class ChacharViewDialogBase : ComponentBase
 
     public async Task SetChachar(Chachar chachar)
     {
-        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} - {chachar.TheCharacter}", JSRuntime);
+        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} - {chachar.TheCharacter}");
         Chachar = chachar;
         ModalDisplay = "d-block";
         StateHasChanged(); // Must be also here, otherwise, the fade effect doesn't work.
@@ -34,7 +33,7 @@ public class ChacharViewDialogBase : ComponentBase
 
     protected async void UnsetChachar()
     {
-        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} - {GetLocalizedString("Characters")}", JSRuntime);
+        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} - {GetLocalizedString("Characters")}");
         ModalShow = "";
         await Task.Delay(400);
         ModalDisplay = "d-none";

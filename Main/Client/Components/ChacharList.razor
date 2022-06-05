@@ -1,12 +1,11 @@
 @inherits ChacharListBase
-@using AsciiPinyin.Web.Client.Shared.Constants
 
 @*Chachars are loaded asynchronously. If they're null, it's impossible to tell if it's because of error or they haven't been loaded yet.*@
 @if (Chachars != null)
 {
     @if (Chachars.Length < 1)
     {
-        Console.WriteLine("ChacharList: WARNING! Chachars retrieved from the server are empty.");
+        JSInteropConsole.ConsoleWarning("ChacharList: Chachars retrieved from the server are empty.");
     }
     else
     {
