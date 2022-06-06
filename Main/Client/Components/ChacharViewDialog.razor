@@ -17,13 +17,13 @@
             </div>
             <div class="modal-body">
                 <p class="card-text">
-                    <span class="text-capitalize">@GetLocalizedString("Pinyin")</span>: <span class="text-uppercase">@Chachar?.Pinyin</span>
+                    <span class="text-capitalize">@SafeLocalizer.GetString("Pinyin")</span>: <span class="text-uppercase">@Chachar?.Pinyin</span>
                 </p>
                 <p class="card-text">
-                    <span class="text-uppercase">@GetLocalizedString("IPA")</span>: @Chachar?.Ipa
+                    <span class="text-uppercase">@SafeLocalizer.GetString("IPA")</span>: @Chachar?.Ipa
                 </p>
                 <p class="card-text">
-                    <span class="text-capitalize">@GetLocalizedString("Strokes")</span>: @Chachar?.Strokes
+                    <span class="text-capitalize">@SafeLocalizer.GetString("Strokes")</span>: @Chachar?.Strokes
                 </p>
             </div>
         </div>

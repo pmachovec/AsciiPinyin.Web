@@ -12,6 +12,6 @@ builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.H
 builder.Services.AddLocalization();
 builder.Services.AddSingleton<JSInteropConsole>();
 builder.Services.AddSingleton<JSInteropDOM>();
-builder.Services.AddSingleton<SafeLocalization>();
+builder.Services.AddSingleton<SafeLocalizer>();
 
 await builder.Build().RunAsync();

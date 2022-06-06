@@ -15,18 +15,10 @@ public class ChacharListBase : ComponentBase
 
     [Inject]
     protected JSInteropConsole JSInteropConsole { get; set; }
-
-    [Inject]
-    private SafeLocalization SafeLocalization { get; set; }
 #pragma warning restore CS8618
 
     protected async void SelectChachar(Chachar chachar)
     {
         await chacharViewDialog.SetChachar(chachar);
-    }
-
-    protected string GetLocalizedString(string theString)
-    {
-        return SafeLocalization.GetLocalizedString(theString, "ChacharListBase");
     }
 }

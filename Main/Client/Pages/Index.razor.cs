@@ -16,36 +16,31 @@ public class IndexBase : ComponentBase
 
 #pragma warning disable CS8618
     [Inject]
+    protected SafeLocalizer SafeLocalizer { get; set; }
+
+    [Inject]
     private HttpClient HttpClient { get; set; }
 
     [Inject]
     private JSInteropDOM JSInteropDOM { get; set; }
-
-    [Inject]
-    private SafeLocalization SafeLocalization { get; set; }
 #pragma warning restore CS8618
 
     protected override async Task OnInitializedAsync()
     {
         Chachars = await LoadEntitiesAsync<Chachar>(HttpClient, "characters");
         // Alternatives = await  LoadEntitiesAsync<Alternative>(HttpClient, "alternatives");
-        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} -  {GetLocalizedString("Characters")}");
+        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} -  {SafeLocalizer.GetString("Characters")}");
     }
 
     protected void SelectTabWithLocalizedTitle(Type tabType, string titleLocalizedPartKey)
     {
         SelectedTabType = tabType;
-        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} -  {GetLocalizedString(titleLocalizedPartKey)}");
+        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} -  {SafeLocalizer.GetString(titleLocalizedPartKey)}");
     }
 
     protected string GetActiveIfActive(Type tabType)
     {
         return SelectedTabType.Equals(tabType) ? "active" : "";
-    }
-
-    protected string GetLocalizedString(string key)
-    {
-        return SafeLocalization.GetLocalizedString(key, "IndexBase");
     }
 
     private static async Task<T[]?> LoadEntitiesAsync<T>(HttpClient httpClient, string entitiesApiName) where T : IEntity

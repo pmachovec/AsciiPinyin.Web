@@ -10,10 +10,10 @@ public class ChacharViewDialogBase : ComponentBase
 {
 #pragma warning disable CS8618
     [Inject]
-    private JSInteropDOM JSInteropDOM { get; set; }
+    protected SafeLocalizer SafeLocalizer { get; set; }
 
     [Inject]
-    private SafeLocalization SafeLocalization { get; set; }
+    private JSInteropDOM JSInteropDOM { get; set; }
 #pragma warning restore CS8618
 
     protected Chachar? Chachar { get; set; }
@@ -33,16 +33,11 @@ public class ChacharViewDialogBase : ComponentBase
 
     protected async void UnsetChachar()
     {
-        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} - {GetLocalizedString("Characters")}");
+        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} - {SafeLocalizer.GetString("Characters")}");
         ModalShow = "";
         await Task.Delay(400);
         ModalDisplay = "d-none";
         Chachar = null;
         StateHasChanged();
-    }
-
-    protected string GetLocalizedString(string theString)
-    {
-        return SafeLocalization.GetLocalizedString(theString, "ChacharViewDialogBase");
     }
 }

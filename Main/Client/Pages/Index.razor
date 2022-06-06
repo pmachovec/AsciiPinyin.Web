@@ -13,14 +13,14 @@
                     <input
                         class="nav-link text-capitalize text-dark @GetActiveIfActive(typeof(ChacharList))"
                         type="button"
-                        value="@GetLocalizedString("Characters")"
+                        value="@SafeLocalizer.GetString("Characters")"
                         @onclick='_ => SelectTabWithLocalizedTitle(typeof(ChacharList), "Characters")'/>
                 </li>
                 <li class="nav-item">
                     <input
                         class="nav-link text-capitalize text-dark @GetActiveIfActive(typeof(AlternativeList))"
                         type="button"
-                        value="@GetLocalizedString("Alternatives")"
+                        value="@SafeLocalizer.GetString("Alternatives")"
                         @onclick='_ => SelectTabWithLocalizedTitle(typeof(AlternativeList), "Alternatives")'/>
                 </li>
             </ul>
