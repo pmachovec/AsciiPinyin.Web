@@ -17,7 +17,7 @@ public class AsciiPinyinContext : DbContext
         builder.Entity<Chachar>().HasKey(chachar => new
         {
             chachar.TheCharacter,
-            chachar.Pinyin
+            chachar.AsciiPinyin
         });
     }
 }
