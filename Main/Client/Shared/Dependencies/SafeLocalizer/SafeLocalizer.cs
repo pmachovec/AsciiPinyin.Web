@@ -1,32 +1,23 @@
-using AsciiPinyin.Web.Client.Shared.JSInterop;
 using AsciiPinyin.Web.Client.Shared.Resources;
 using Microsoft.Extensions.Localization;
 using System.Diagnostics;
 using System.Globalization;
 
-namespace AsciiPinyin.Web.Client.Shared;
+namespace AsciiPinyin.Web.Client.Shared.Dependencies.SafeLocalizer;
 
-/// <summary>
-/// Localization methods with safe measurements against not found translations.
-/// </summary>
-public class SafeLocalizer
+public class SafeLocalizer : ISafeLocalizer
 {
+    private readonly IJSInteropConsole _jsIteropConsole;
     private readonly IStringLocalizer<Resource> _localizer;
-    private readonly JSInteropConsole _jsIteropConsole;
 
     public SafeLocalizer(
-        IStringLocalizer<Resource> localizer,
-        JSInteropConsole jsInteropConsole)
+        IJSInteropConsole jsInteropConsole,
+        IStringLocalizer<Resource> localizer)
     {
-        _localizer = localizer;
         _jsIteropConsole = jsInteropConsole;
+        _localizer = localizer;
     }
 
-    /// <summary>
-    /// Returns a localization for the given key. If not found, writes an error to the console and uses a default invariant localization
-    /// for the given key. If not found, writes another error to the console and returns the key itself.
-    /// </summary>
-    /// <param name="key">The key to find a localization for.</param>
     public string GetString(string key)
     {
         if (_localizer[key] == null)

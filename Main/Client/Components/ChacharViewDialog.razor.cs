@@ -1,6 +1,5 @@
-using AsciiPinyin.Web.Client.Shared;
 using AsciiPinyin.Web.Client.Shared.Constants;
-using AsciiPinyin.Web.Client.Shared.JSInterop;
+using AsciiPinyin.Web.Client.Shared.Dependencies;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Components;
 
@@ -10,10 +9,10 @@ public class ChacharViewDialogBase : ComponentBase
 {
 #pragma warning disable CS8618
     [Inject]
-    protected SafeLocalizer SafeLocalizer { get; set; }
+    protected ISafeLocalizer SafeLocalizer { get; set; }
 
     [Inject]
-    private JSInteropDOM JSInteropDOM { get; set; }
+    private IJSInteropDOM JSInteropDOM { get; set; }
 #pragma warning restore CS8618
 
     protected Chachar? Chachar { get; set; }

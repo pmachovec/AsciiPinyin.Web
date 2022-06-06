@@ -1,6 +1,7 @@
 using AsciiPinyin.Web.Client;
-using AsciiPinyin.Web.Client.Shared;
-using AsciiPinyin.Web.Client.Shared.JSInterop;
+using AsciiPinyin.Web.Client.Shared.Dependencies;
+using AsciiPinyin.Web.Client.Shared.Dependencies.JSInterop;
+using AsciiPinyin.Web.Client.Shared.Dependencies.SafeLocalizer;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -10,8 +11,8 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddLocalization();
-builder.Services.AddSingleton<JSInteropConsole>();
-builder.Services.AddSingleton<JSInteropDOM>();
-builder.Services.AddSingleton<SafeLocalizer>();
+builder.Services.AddSingleton<IJSInteropConsole, JSInteropConsole>();
+builder.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
+builder.Services.AddSingleton<ISafeLocalizer, SafeLocalizer>();
 
 await builder.Build().RunAsync();
