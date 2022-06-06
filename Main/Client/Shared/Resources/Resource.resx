@@ -120,16 +120,28 @@
   <data name="Alternatives" xml:space="preserve">
     <value>Alternatives</value>
   </data>
+  <data name="ASCII" xml:space="preserve">
+    <value>ASCII</value>
+  </data>
+  <data name="ASCIIPinyin" xml:space="preserve">
+    <value>ASCII Pinyin</value>
+  </data>
+  <data name="BaseCharacter" xml:space="preserve">
+    <value>Base character</value>
+  </data>
+  <data name="BaseCharacterASCIIPinyin" xml:space="preserve">
+    <value>ASCII Pinyin of base character</value>
+  </data>
   <data name="Characters" xml:space="preserve">
     <value>Characters</value>
   </data>
   <data name="IPA" xml:space="preserve">
     <value>IPA</value>
   </data>
+  <data name="NumberOfStrokes" xml:space="preserve">
+    <value>Number of strokes</value>
+  </data>
   <data name="Pinyin" xml:space="preserve">
     <value>Pinyin</value>
-  </data>
-  <data name="Strokes" xml:space="preserve">
-    <value>Strokes</value>
   </data>
 </root>

@@ -1,10 +1,10 @@
-using AsciiPinyin.Web.Client.Shared.Dependencies;
+using AsciiPinyin.Web.Client.Shared.JSInterop;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Components;
 
-namespace AsciiPinyin.Web.Client.Components;
+namespace AsciiPinyin.Web.Client.Components.Chachars;
 
-public class ChacharListBase : ComponentBase
+public class ChacharsTabBase : ComponentBase
 {
     [Parameter]
     public Chachar[]? Chachars { protected get; set; }
@@ -16,7 +16,7 @@ public class ChacharListBase : ComponentBase
     protected IJSInteropConsole JSInteropConsole { get; set; }
 #pragma warning restore CS8618
 
-    protected async void SelectChachar(Chachar chachar)
+        protected async void SelectChachar(Chachar chachar)
     {
         await chacharViewDialog.SetChachar(chachar);
     }

@@ -1,4 +1,4 @@
-namespace AsciiPinyin.Web.Client.Shared.Dependencies;
+namespace AsciiPinyin.Web.Client.Shared.JSInterop;
 
 /// <summary>
 /// Methods for calling JavaScript methods manipulating with DOM.

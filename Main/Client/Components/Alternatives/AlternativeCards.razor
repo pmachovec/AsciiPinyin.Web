@@ -1,0 +1,21 @@
+@inherits AlternativeCardsBase
+
+<div class="row">
+    @foreach (var alternative in Alternatives)
+    {
+        <div class="col-sm-2 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="card-title fw-bold">@alternative.TheCharacter</h2>
+                </div>
+                <div class="card-footer bg-transparent fw-bold">
+                    @alternative.OriginalCharacter
+                </div>
+
+                <!-- Makes the whole card act like a button. -->
+                <!-- The href="#" is necessary to change the mouse pointer to hand icon on hover. -->
+                <a href="#" class="stretched-link" @onclick="_ => SelectAlternative(alternative)"></a>
+            </div>
+        </div>
+    }
+</div>

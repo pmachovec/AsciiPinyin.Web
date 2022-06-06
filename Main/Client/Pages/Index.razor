@@ -1,39 +1,40 @@
 @page "/"
 @inherits IndexBase
-@using AsciiPinyin.Web.Client.Components
+@using AsciiPinyin.Web.Client.Components.Alternatives
+@using AsciiPinyin.Web.Client.Components.Chachars
+@using AsciiPinyin.Web.Client.Shared.Constants
 
 <header>
     <nav class="navbar-expand-sm navbar-toggleable-sm navbar-light bg-white box-shadow mb-3">
         <div class="text-center">
-            <h1 class="display-1 fw-bolder">ASCII&nbsp;拼音</h1>
+            <h1 class="display-1 fw-bolder">@(Lokal.Ascii)&nbsp;@(StringConstants.PINYIN_CHINESE)</h1>
         </div>
         <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
             <ul class="nav nav-tabs">
                 <li class="nav-item">
                     <input
-                        class="nav-link text-capitalize text-dark @GetActiveIfActive(typeof(ChacharList))"
+                        class="nav-link text-dark @GetActiveIfActive(typeof(ChacharsTab))"
                         type="button"
-                        value="@SafeLocalizer.GetString("Characters")"
-                        @onclick='_ => SelectTabWithLocalizedTitle(typeof(ChacharList), "Characters")'/>
+                        value="@Lokal.Characters"
+                        @onclick='_ => SelectTabWithPageTitleChange(typeof(ChacharsTab), $"{Lokal.AsciiPinyin} - {Lokal.Characters}")'/>
                 </li>
                 <li class="nav-item">
                     <input
-                        class="nav-link text-capitalize text-dark @GetActiveIfActive(typeof(AlternativeList))"
+                        class="nav-link text-dark @GetActiveIfActive(typeof(AlternativesTab))"
                         type="button"
-                        value="@SafeLocalizer.GetString("Alternatives")"
-                        @onclick='_ => SelectTabWithLocalizedTitle(typeof(AlternativeList), "Alternatives")'/>
+                        value="@Lokal.Alternatives"
+                        @onclick='_ => SelectTabWithPageTitleChange(typeof(AlternativesTab), $"{Lokal.AsciiPinyin} - {Lokal.Alternatives}")'/>
                 </li>
             </ul>
         </div>
     </nav>
 </header>
 
-@if (SelectedTabType.Equals(typeof(AlternativeList)))
+@if (SelectedTabType.Equals(typeof(AlternativesTab)))
 {
-    <AlternativeList />
-    // <AlternativeList Alternatives="@Alternatives" />
+    <AlternativesTab Alternatives="@Alternatives" />
 }
 else
 {
-    <ChacharList Chachars="@Chachars" />
+    <ChacharsTab Chachars="@Chachars" />
 }

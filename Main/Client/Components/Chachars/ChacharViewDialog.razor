@@ -1,0 +1,32 @@
+@using AsciiPinyin.Web.Client.Shared.Constants
+@inherits ChacharViewDialogBase
+
+<div class="modal-backdrop fade @ModalShow @ModalDisplay"></div>
+<div class="modal fade @ModalShow @ModalDisplay" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header align-content-center">
+                <div></div>
+                <h2 class="modal-title fw-bold" id="theCharacter">@Chachar?.TheCharacter</h2>
+                <button
+                    @onclick="(_ => UnsetChachar())"
+                    type="button"
+                    class="btn btn-primary"
+                    aria-label="Close">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="card-text">
+                    @(Lokal.AsciiPinyin):&nbsp;@(Chachar?.AsciiPinyin)
+                </p>
+                <p class="card-text">
+                    @(Lokal.Ipa):&nbsp;@(Chachar?.Ipa)
+                </p>
+                <p class="card-text">
+                    @(Lokal.NumberOfStrokes):&nbsp;@(Chachar?.Strokes)
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

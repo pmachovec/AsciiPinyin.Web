@@ -5,19 +5,19 @@ using Microsoft.AspNetCore.Mvc;
 namespace AsciiPinyin.Web.Server.Controllers;
 
 [ApiController]
-[Route("/characters")]
-public class ChacharsController : ControllerBase
+[Route("/alternatives")]
+public class AlternativesController : ControllerBase
 {
     private AsciiPinyinContext AsciiPinyinContext { get; }
 
-    public ChacharsController(AsciiPinyinContext asciiPinyinContext)
+    public AlternativesController(AsciiPinyinContext asciiPinyinContext)
     {
         AsciiPinyinContext = asciiPinyinContext;
     }
 
     [HttpGet]
-    public IEnumerable<Chachar> Get()
+    public IEnumerable<Alternative> Get()
     {
-        return AsciiPinyinContext.Chachars.ToArray();
+        return AsciiPinyinContext.Alternatives.ToArray();
     }
 }

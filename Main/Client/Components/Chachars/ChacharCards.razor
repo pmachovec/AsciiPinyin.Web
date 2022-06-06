@@ -1,0 +1,21 @@
+@inherits ChacharCardsBase
+
+<div class="row">
+    @foreach (var chachar in Chachars)
+    {
+        <div class="col-sm-2 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="card-title fw-bold">@chachar.TheCharacter</h2>
+                </div>
+                <div class="card-footer bg-transparent fw-bold">
+                    @chachar.AsciiPinyin
+                </div>
+
+                <!-- Makes the whole card act like a button. -->
+                <!-- The href="#" is necessary to change the mouse pointer to hand icon on hover. -->
+                <a href="#" class="stretched-link" @onclick="_ => SelectChachar(chachar)"></a>
+            </div>
+        </div>
+    }
+</div>

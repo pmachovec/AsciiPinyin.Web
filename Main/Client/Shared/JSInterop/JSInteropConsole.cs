@@ -1,8 +1,8 @@
 using Microsoft.JSInterop;
 
-namespace AsciiPinyin.Web.Client.Shared.Dependencies.JSInterop;
+namespace AsciiPinyin.Web.Client.Shared.JSInterop;
 
-public class JSInteropConsole : IJSInteropConsole
+internal class JSInteropConsole : IJSInteropConsole
 {
     private readonly IJSRuntime _jsRuntime;
 

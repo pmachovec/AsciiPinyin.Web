@@ -1,6 +1,6 @@
-using AsciiPinyin.Web.Client.Components;
-using AsciiPinyin.Web.Client.Shared.Constants;
-using AsciiPinyin.Web.Client.Shared.Dependencies;
+using AsciiPinyin.Web.Client.Components.Chachars;
+using AsciiPinyin.Web.Client.Shared.JSInterop;
+using AsciiPinyin.Web.Client.Shared.Lokal;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
@@ -9,16 +9,19 @@ namespace AsciiPinyin.Web.Client.Pages;
 
 public class IndexBase : ComponentBase
 {
-    protected Type SelectedTabType { get; private set; } = typeof(ChacharList);
+    protected Type SelectedTabType { get; private set; } = typeof(ChacharsTab);
     protected Chachar[]? Chachars { get; private set; }
-    // protected Alternative[]? Alternatives { get; private set; }
+    protected Alternative[]? Alternatives { get; private set; }
 
 #pragma warning disable CS8618
     [Inject]
-    protected ISafeLocalizer SafeLocalizer { get; set; }
+    protected ILokal Lokal { get; set; }
 
     [Inject]
     private HttpClient HttpClient { get; set; }
+
+    [Inject]
+    private IJSInteropConsole JSInteropConsole { get; set; }
 
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; }
@@ -27,14 +30,14 @@ public class IndexBase : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         Chachars = await LoadEntitiesAsync<Chachar>(HttpClient, "characters");
-        // Alternatives = await  LoadEntitiesAsync<Alternative>(HttpClient, "alternatives");
-        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} -  {SafeLocalizer.GetString("Characters")}");
+        Alternatives = await LoadEntitiesAsync<Alternative>(HttpClient, "alternatives");
+        JSInteropDOM.SetTitle($"{Lokal.AsciiPinyin} -  {Lokal.Characters}");
     }
 
-    protected void SelectTabWithLocalizedTitle(Type tabType, string titleLocalizedPartKey)
+    protected void SelectTabWithPageTitleChange(Type tabType, string title)
     {
         SelectedTabType = tabType;
-        JSInteropDOM.SetTitle($"{StringConstants.AsciiPinyin} -  {SafeLocalizer.GetString(titleLocalizedPartKey)}");
+        JSInteropDOM.SetTitle(title);
     }
 
     protected string GetActiveIfActive(Type tabType)
@@ -42,7 +45,7 @@ public class IndexBase : ComponentBase
         return SelectedTabType.Equals(tabType) ? "active" : "";
     }
 
-    private static async Task<T[]?> LoadEntitiesAsync<T>(HttpClient httpClient, string entitiesApiName) where T : IEntity
+    private async Task<T[]?> LoadEntitiesAsync<T>(HttpClient httpClient, string entitiesApiName) where T : IEntity
     {
         try
         {
@@ -50,7 +53,7 @@ public class IndexBase : ComponentBase
         }
         catch
         {
-            Console.Error.WriteLine($"IndexBase.LoadEntitiesAsync: Loading of {entitiesApiName} failed");
+            JSInteropConsole.ConsoleWarning($"IndexBase.LoadEntitiesAsync: Loading of {entitiesApiName} failed");
         }
 
         return null;

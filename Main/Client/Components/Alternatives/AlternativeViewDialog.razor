@@ -1,4 +1,4 @@
-@inherits ChacharViewDialogBase
+@inherits AlternativeViewDialogBase
 
 <div class="modal-backdrop fade @ModalShow @ModalDisplay"></div>
 <div class="modal fade @ModalShow @ModalDisplay" tabindex="-1" role="dialog">
@@ -6,9 +6,9 @@
         <div class="modal-content">
             <div class="modal-header align-content-center">
                 <div></div>
-                <h2 class="modal-title fw-bold" id="theCharacter">@Chachar?.TheCharacter</h2>
+                <h2 class="modal-title fw-bold" id="theCharacter">@Alternative?.TheCharacter</h2>
                 <button
-                    @onclick="(_ => UnsetChachar())"
+                    @onclick="(_ => UnsetAlternative())"
                     type="button"
                     class="btn btn-primary"
                     aria-label="Close">
@@ -17,13 +17,13 @@
             </div>
             <div class="modal-body">
                 <p class="card-text">
-                    <span class="text-capitalize">ASCII @SafeLocalizer.GetString("Pinyin")</span>: @Chachar?.AsciiPinyin
+                    @(Lokal.NumberOfStrokes):&nbsp;@(Alternative?.Strokes)
                 </p>
                 <p class="card-text">
-                    <span class="text-uppercase">@SafeLocalizer.GetString("IPA")</span>: @Chachar?.Ipa
+                    @(Lokal.BaseCharacter):&nbsp;@(Alternative?.OriginalCharacter)
                 </p>
                 <p class="card-text">
-                    <span class="text-capitalize">@SafeLocalizer.GetString("Strokes")</span>: @Chachar?.Strokes
+                    @(Lokal.BaseCharacterAsciiPinyin):&nbsp;@(Alternative?.OriginalAsciiPinyin)
                 </p>
             </div>
         </div>

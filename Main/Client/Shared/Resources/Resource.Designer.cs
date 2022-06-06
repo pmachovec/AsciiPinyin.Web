@@ -70,6 +70,42 @@ namespace AsciiPinyin.Web.Client.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ASCII.
+        /// </summary>
+        public static string ASCII {
+            get {
+                return ResourceManager.GetString("ASCII", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ASCII Pinyin.
+        /// </summary>
+        public static string ASCIIPinyin {
+            get {
+                return ResourceManager.GetString("ASCIIPinyin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Base character.
+        /// </summary>
+        public static string BaseCharacter {
+            get {
+                return ResourceManager.GetString("BaseCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ASCII Pinyin of base character.
+        /// </summary>
+        public static string BaseCharacterASCIIPinyin {
+            get {
+                return ResourceManager.GetString("BaseCharacterASCIIPinyin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Characters.
         /// </summary>
         public static string Characters {
@@ -88,20 +124,20 @@ namespace AsciiPinyin.Web.Client.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Number of strokes.
+        /// </summary>
+        public static string NumberOfStrokes {
+            get {
+                return ResourceManager.GetString("NumberOfStrokes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Pinyin.
         /// </summary>
         public static string Pinyin {
             get {
                 return ResourceManager.GetString("Pinyin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Strokes.
-        /// </summary>
-        public static string Strokes {
-            get {
-                return ResourceManager.GetString("Strokes", resourceCulture);
             }
         }
     }
