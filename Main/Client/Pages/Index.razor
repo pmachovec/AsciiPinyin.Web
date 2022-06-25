@@ -6,35 +6,29 @@
 
 <header>
     <nav class="navbar-expand-sm navbar-toggleable-sm navbar-light bg-white box-shadow mb-3">
-        <div class="text-center">
+        <div class="mt-3 text-center">
             <h1 class="display-1 fw-bolder">@(Lokal.Ascii)&nbsp;@(StringConstants.PINYIN_CHINESE)</h1>
         </div>
         <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
             <ul class="nav nav-tabs">
                 <li class="nav-item">
                     <input
-                        class="nav-link text-dark @GetActiveIfActive(typeof(ChacharsTab))"
+                        class="nav-link text-dark @GetActiveIfActive(chacharsTab)"
                         type="button"
                         value="@Lokal.Characters"
-                        @onclick='_ => SelectTabWithPageTitleChange(typeof(ChacharsTab), $"{Lokal.AsciiPinyin} - {Lokal.Characters}")'/>
+                        @onclick='_ => SelectTab(chacharsTab)'/>
                 </li>
                 <li class="nav-item">
                     <input
-                        class="nav-link text-dark @GetActiveIfActive(typeof(AlternativesTab))"
+                        class="nav-link text-dark @GetActiveIfActive(alternativesTab)"
                         type="button"
                         value="@Lokal.Alternatives"
-                        @onclick='_ => SelectTabWithPageTitleChange(typeof(AlternativesTab), $"{Lokal.AsciiPinyin} - {Lokal.Alternatives}")'/>
+                        @onclick='_ => SelectTab(alternativesTab)'/>
                 </li>
             </ul>
         </div>
     </nav>
 </header>
 
-@if (SelectedTabType.Equals(typeof(AlternativesTab)))
-{
-    <AlternativesTab Alternatives="@Alternatives" />
-}
-else
-{
-    <ChacharsTab Chachars="@Chachars" />
-}
+<AlternativesTab @ref="alternativesTab" Alternatives="@Alternatives"/>
+<ChacharsTab @ref="chacharsTab" Chachars="@Chachars" />

@@ -1,3 +1,4 @@
+using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.Components.Chachars;
 using AsciiPinyin.Web.Client.Shared.JSInterop;
 using AsciiPinyin.Web.Client.Shared.Lokal;
@@ -12,8 +13,12 @@ public class IndexBase : ComponentBase
     protected Type SelectedTabType { get; private set; } = typeof(ChacharsTab);
     protected Chachar[]? Chachars { get; private set; }
     protected Alternative[]? Alternatives { get; private set; }
+    private ITab? _selectedTab;
 
 #pragma warning disable CS8618
+    protected ITab chacharsTab;
+    protected ITab alternativesTab;
+
     [Inject]
     protected ILokal Lokal { get; set; }
 
@@ -29,27 +34,33 @@ public class IndexBase : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        Chachars = await LoadEntitiesAsync<Chachar>(HttpClient, "characters");
-        Alternatives = await LoadEntitiesAsync<Alternative>(HttpClient, "alternatives");
-        JSInteropDOM.SetTitle($"{Lokal.AsciiPinyin} -  {Lokal.Characters}");
+        Chachars = await LoadEntitiesAsync<Chachar>("characters");
+        Alternatives = await LoadEntitiesAsync<Alternative>("alternatives");
+        SelectTab(chacharsTab);
     }
 
-    protected void SelectTabWithPageTitleChange(Type tabType, string title)
+    protected void SelectTab(ITab tab)
     {
-        SelectedTabType = tabType;
-        JSInteropDOM.SetTitle(title);
+        if (_selectedTab != null)
+        {
+            _selectedTab.IsVisible = false;
+        }
+
+        tab.IsVisible = true;
+        _selectedTab = tab;
+        JSInteropDOM.SetTitle(tab.Title);
     }
 
-    protected string GetActiveIfActive(Type tabType)
+    protected string GetActiveIfActive(ITab tab)
     {
-        return SelectedTabType.Equals(tabType) ? "active" : "";
+        return (_selectedTab != null) && _selectedTab.GetType().Equals(tab.GetType()) ? "active" : "";
     }
 
-    private async Task<T[]?> LoadEntitiesAsync<T>(HttpClient httpClient, string entitiesApiName) where T : IEntity
+    private async Task<T[]?> LoadEntitiesAsync<T>(string entitiesApiName) where T : IEntity
     {
         try
         {
-            return await httpClient.GetFromJsonAsync<T[]>(entitiesApiName);
+            return await HttpClient.GetFromJsonAsync<T[]>(entitiesApiName);
         }
         catch
         {
