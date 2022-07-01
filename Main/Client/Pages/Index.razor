@@ -13,14 +13,14 @@
             <ul class="nav nav-tabs">
                 <li class="nav-item">
                     <input
-                        class="nav-link text-dark @GetActiveIfActive(chacharsTab)"
+                        class="nav-link text-dark @GetActiveIfVisible(chacharsTab)"
                         type="button"
                         value="@Lokal.Characters"
                         @onclick='_ => SelectTab(chacharsTab)'/>
                 </li>
                 <li class="nav-item">
                     <input
-                        class="nav-link text-dark @GetActiveIfActive(alternativesTab)"
+                        class="nav-link text-dark @GetActiveIfVisible(alternativesTab)"
                         type="button"
                         value="@Lokal.Alternatives"
                         @onclick='_ => SelectTab(alternativesTab)'/>
@@ -30,5 +30,5 @@
     </nav>
 </header>
 
-<AlternativesTab @ref="alternativesTab" Alternatives="@Alternatives"/>
-<ChacharsTab @ref="chacharsTab" Chachars="@Chachars" />
+<AlternativesTab @ref="alternativesTab" />
+<ChacharsTab @ref="chacharsTab" />

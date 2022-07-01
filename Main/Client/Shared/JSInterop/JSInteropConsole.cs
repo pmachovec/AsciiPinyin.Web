@@ -11,6 +11,11 @@ internal class JSInteropConsole : IJSInteropConsole
         _jsRuntime = jsRuntime;
     }
 
+    public async void ConsoleInfo(string infoText)
+    {
+        await _jsRuntime.InvokeVoidAsync("consoleInfo", infoText);
+    }
+
     public async void ConsoleWarning(string warningText)
     {
         await _jsRuntime.InvokeVoidAsync("consoleWarning", warningText);

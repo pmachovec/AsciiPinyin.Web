@@ -1,18 +1,16 @@
 @inherits ChacharsTabBase
 
-<div hidden="@(!IsVisible)">
-    @*Chachars are loaded asynchronously. If they're null, it's impossible to tell if it's because of error or they haven't been loaded yet.*@
+<div id="@CHACHARS_TAB_DIV">
     @if (Chachars != null)
     {
         @if (Chachars.Length < 1)
         {
-            JSInteropConsole.ConsoleWarning("ChacharList: Chachars retrieved from the server are empty.");
+            JSInteropConsole.ConsoleWarning("ChacharsTab: Chachars retrieved from the server are empty.");
         }
         else
         {
             <ChacharCards Chachars="@Chachars" SelectChachar="@SelectChachar"/>
         }
-    
     }
 
     <ChacharViewDialog @ref="chacharViewDialog" />

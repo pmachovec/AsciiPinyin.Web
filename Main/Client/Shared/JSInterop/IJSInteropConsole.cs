@@ -6,6 +6,12 @@ namespace AsciiPinyin.Web.Client.Shared.JSInterop;
 public interface IJSInteropConsole
 {
     /// <summary>
+    /// Write an info to the console.
+    /// </summary>
+    /// <param name="warningText">The text to be written as an info to the console.</param>
+    void ConsoleInfo(string infoText);
+
+    /// <summary>
     /// Write a warning to the console.
     /// </summary>
     /// <param name="warningText">The text to be written as a warning to the console.</param>

@@ -1,18 +1,16 @@
 @inherits AlternativesTabBase
 
-<div hidden="@(!IsVisible)">
-    @*Alternatives are loaded asynchronously. If they're null, it's impossible to tell if it's because of error or they haven't been loaded yet.*@
+<div id="@ALTERNATIVES_TAB_DIV">
     @if (Alternatives != null)
     {
         @if (Alternatives.Length < 1)
         {
-            JSInteropConsole.ConsoleWarning("AlternativeList: Alternatives retrieved from the server are empty.");
+            JSInteropConsole.ConsoleWarning("AlternativesTab: Alternatives retrieved from the server are empty.");
         }
         else
         {
             <AlternativeCards Alternatives="@Alternatives" SelectAlternative="@SelectAlternative"/>
         }
-    
     }
 
     <AlternativeViewDialog @ref="alternativeViewDialog" />
