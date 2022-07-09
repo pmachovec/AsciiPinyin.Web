@@ -1,7 +1,7 @@
 using AsciiPinyin.Web.Server.Data;
 
+// Configure the application.
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddEntityFrameworkSqlite().AddDbContext<AsciiPinyinContext>();
