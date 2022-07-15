@@ -21,7 +21,7 @@ public class IndexBase : ComponentBase
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; }
 #pragma warning restore CS8618
- 
+
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)

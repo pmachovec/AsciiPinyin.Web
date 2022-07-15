@@ -14,5 +14,4 @@ builder.Services.AddSingleton<IEntityLoader, EntityLoader>();
 builder.Services.AddSingleton<IJSInteropConsole, JSInteropConsole>();
 builder.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
 builder.Services.AddSingleton<ILokal, Lokal>();
-
 await builder.Build().RunAsync();

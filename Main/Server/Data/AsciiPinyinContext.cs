@@ -15,13 +15,15 @@ public class AsciiPinyinContext : DbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.Entity<Chachar>()
-            .HasKey(chachar => new {
+            .HasKey(chachar => new
+            {
                 chachar.TheCharacter,
                 chachar.AsciiPinyin
             });
 
         builder.Entity<Alternative>()
-            .HasKey(alternative => new {
+            .HasKey(alternative => new
+            {
                 alternative.TheCharacter,
                 alternative.OriginalCharacter,
                 alternative.OriginalAsciiPinyin
@@ -30,11 +32,13 @@ public class AsciiPinyinContext : DbContext
         builder.Entity<Chachar>()
             .HasOne(chachar => chachar.RadicalChachar)
             .WithOne()
-            .HasForeignKey<Chachar>(chachar => new {
+            .HasForeignKey<Chachar>(chachar => new
+            {
                 chachar.RadicalCharacter,
                 chachar.RadicalAsciiPinyin
             })
-            .HasPrincipalKey<Chachar>(radicalChachar => new {
+            .HasPrincipalKey<Chachar>(radicalChachar => new
+            {
                 radicalChachar.TheCharacter,
                 radicalChachar.AsciiPinyin
             });
@@ -42,12 +46,14 @@ public class AsciiPinyinContext : DbContext
         builder.Entity<Chachar>()
             .HasOne(chachar => chachar.RadicalAlternative)
             .WithOne()
-            .HasForeignKey<Chachar>(chachar => new {
+            .HasForeignKey<Chachar>(chachar => new
+            {
                 chachar.RadicalAlternativeCharacter,
                 chachar.RadicalCharacter,
                 chachar.RadicalAsciiPinyin
             })
-            .HasPrincipalKey<Alternative>(radicalAlternative => new {
+            .HasPrincipalKey<Alternative>(radicalAlternative => new
+            {
                 radicalAlternative.TheCharacter,
                 radicalAlternative.OriginalCharacter,
                 radicalAlternative.OriginalAsciiPinyin

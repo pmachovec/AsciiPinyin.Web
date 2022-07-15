@@ -25,7 +25,7 @@ public class EntityLoader : IEntityLoader
         }
         catch
         {
-            _jsInteropConsole.ConsoleWarning($"EntityLoader.LoadEntitiesAsync: Loading of {entitiesApiName} failed");
+            _jsInteropConsole.ConsoleWarning($"EntityLoader.LoadEntitiesAsync: Error occured on the server side when retrieving '{entitiesApiName}'");
         }
 
         return null;
