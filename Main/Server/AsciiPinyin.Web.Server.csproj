@@ -21,4 +21,8 @@
         <ProjectReference Include="..\Shared\AsciiPinyin.Web.Shared.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="Data\asciipinyin.sqlite" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+
 </Project>

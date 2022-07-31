@@ -2,6 +2,11 @@
 [Bb]in/
 [Oo]bj/
 
+# Publish profiles
+**/*.pubxml
+**/*.pubxml.user
+**/*.csproj.user
+
 # IntelliJ
 .idea/
 
