@@ -9,7 +9,7 @@
             {
                 "ASPNETCORE_ENVIRONMENT": "Development"
             },
-            "applicationUrl": "https://localhost:443;http://localhost:80"
+            "applicationUrl": "https://localhost:443"
         }
     }
 }

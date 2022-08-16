@@ -1,0 +1,11 @@
+version: '0.1.0'
+
+services:
+  asciipinyin.web:
+    container_name: asciipinyin.web
+    image: ghcr.io/pmachovec/asciipinyin.web:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '443:443'
