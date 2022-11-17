@@ -11,16 +11,14 @@ public class IndexBase : ComponentBase
 {
     private IEntityTab? _selectedTab;
 
-#pragma warning disable CS8618
-    protected ChacharsTab chacharsTab;
-    protected AlternativesTab alternativesTab;
+    protected ChacharsTab chacharsTab = default!;
+    protected AlternativesTab alternativesTab = default!;
 
     [Inject]
-    protected ILokal Lokal { get; set; }
+    protected ILokal Lokal { get; set; } = default!;
 
     [Inject]
-    private IJSInteropDOM JSInteropDOM { get; set; }
-#pragma warning restore CS8618
+    private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -32,10 +30,7 @@ public class IndexBase : ComponentBase
 
     protected void SelectTab(IEntityTab tab)
     {
-        if (_selectedTab != null)
-        {
-            _selectedTab.Hide();
-        }
+        _selectedTab?.Hide();
 
         if (!tab.AreEntitiesInitialized)
         {

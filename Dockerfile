@@ -20,3 +20,5 @@ WORKDIR /app
 COPY --from=publish /root/.dotnet/corefx/cryptography/x509stores/my/* /root/.dotnet/corefx/cryptography/x509stores/my/
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "AsciiPinyin.Web.Server.dll"]
+
+LABEL org.opencontainers.image.description "AsciiPinyin.Web - in development"

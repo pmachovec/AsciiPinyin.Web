@@ -6,7 +6,7 @@ namespace AsciiPinyin.Web.Server.Controllers;
 
 [ApiController]
 [Route("/alternatives")]
-public class AlternativesController : ControllerBase
+public sealed class AlternativesController : ControllerBase
 {
     private AsciiPinyinContext AsciiPinyinContext { get; }
 

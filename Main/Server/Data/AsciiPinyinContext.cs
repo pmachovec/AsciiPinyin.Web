@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AsciiPinyin.Web.Server.Data;
 
 // Represents a DB session
-public class AsciiPinyinContext : DbContext
+public sealed class AsciiPinyinContext : DbContext
 {
     public DbSet<Chachar> Chachars => Set<Chachar>();
     public DbSet<Alternative> Alternatives => Set<Alternative>();

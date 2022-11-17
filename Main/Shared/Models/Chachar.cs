@@ -1,13 +1,12 @@
+using AsciiPinyin.Web.Shared.Models.Shared;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace AsciiPinyin.Web.Shared.Models;
 
 [Table("chachar")]
-public class Chachar : IEntity
+public sealed class Chachar : IEntity
 {
     [JsonPropertyName("the_character")]
     [Column("the_character")]
@@ -44,13 +43,23 @@ public class Chachar : IEntity
     [JsonPropertyName("radical_alternative_character")]
     [Column("radical_alternative_character")]
     public char? RadicalAlternativeCharacter { get; set; }
+
     public Chachar? RadicalChachar { get; set; }
 
     public Alternative? RadicalAlternative { get; set; }
 
+    public static bool operator ==(Chachar left, Chachar right)
+    {
+        return Comparator.EqualsForOperator(left, right);
+    }
+
+    public static bool operator !=(Chachar left, Chachar right) => !(left == right);
+
     public override bool Equals(object? other)
     {
-        return other is Chachar otherChachar && otherChachar.TheCharacter == TheCharacter && otherChachar.AsciiPinyin == AsciiPinyin;
+        return other is Chachar otherChachar
+            && otherChachar.TheCharacter == TheCharacter
+            && otherChachar.AsciiPinyin == AsciiPinyin;
     }
 
     public override int GetHashCode()
@@ -60,11 +69,6 @@ public class Chachar : IEntity
 
     public override string ToString()
     {
-        var options = new JsonSerializerOptions
-        {
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        };
-
-        return JsonSerializer.Serialize(this, options);
+        return JsonCreator.ToJson(this);
     }
 }

@@ -23,21 +23,19 @@ public class ChacharsTabBase : ComponentBase, IEntityTab
         }
     }
 
-#pragma warning disable CS8618
-    protected ChacharViewDialog chacharViewDialog;
+    protected ChacharViewDialog chacharViewDialog = default!;
 
     [Inject]
-    private IEntityLoader EntityLoader { get; set; }
+    private IEntityLoader EntityLoader { get; set; } = default!;
 
     [Inject]
-    private ILokal Lokal { get; set; }
+    private ILokal Lokal { get; set; } = default!;
 
     [Inject]
-    protected IJSInteropConsole JSInteropConsole { get; set; }
+    protected IJSInteropConsole JSInteropConsole { get; set; } = default!;
 
     [Inject]
-    private IJSInteropDOM JSInteropDOM { get; set; }
-#pragma warning restore CS8618
+    private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
     protected override void OnInitialized()
     {

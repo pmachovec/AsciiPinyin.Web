@@ -5,6 +5,8 @@
 # Publish profiles
 **/*.pubxml
 **/*.pubxml.user
+
+# User project files
 **/*.csproj.user
 
 # IntelliJ

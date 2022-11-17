@@ -7,13 +7,11 @@ namespace AsciiPinyin.Web.Client.Components.Alternatives;
 
 public class AlternativeViewDialogBase : ComponentBase
 {
-#pragma warning disable CS8618
     [Inject]
-    protected ILokal Lokal { get; set; }
+    protected ILokal Lokal { get; set; } = default!;
 
     [Inject]
-    private IJSInteropDOM JSInteropDOM { get; set; }
-#pragma warning restore CS8618
+    private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
     protected Alternative? Alternative { get; set; }
     protected string ModalShow { get; set; } = "";

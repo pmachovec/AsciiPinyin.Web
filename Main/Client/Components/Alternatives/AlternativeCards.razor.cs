@@ -5,12 +5,11 @@ namespace AsciiPinyin.Web.Client.Components.Alternatives;
 
 public class AlternativeCardsBase : ComponentBase
 {
-#pragma warning disable CS8618
     [Parameter]
-    public Alternative[] Alternatives { protected get; set; }
+    public Alternative[] Alternatives { get; set; } = default!;
 
     [Parameter]
-    public Action<Alternative> SelectAlternative { protected get; set; }
-#pragma warning restore CS8618sa
+    public Action<Alternative> SelectAlternative { get; set; } = default!;
+
     protected int NumberOfLines { get; set; } = 10;
 }

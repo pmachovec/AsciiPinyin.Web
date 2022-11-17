@@ -6,7 +6,7 @@ namespace AsciiPinyin.Web.Server.Controllers;
 
 [ApiController]
 [Route("/characters")]
-public class ChacharsController : ControllerBase
+public sealed class ChacharsController : ControllerBase
 {
     private AsciiPinyinContext AsciiPinyinContext { get; }
 
