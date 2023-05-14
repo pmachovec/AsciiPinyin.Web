@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AsciiPinyin.Web.Server.Controllers;
 
 [ApiController]
-[Route("/alternatives")]
+[Route("/asciipinyin/alternatives")]
 public sealed class AlternativesController : ControllerBase
 {
     private AsciiPinyinContext AsciiPinyinContext { get; }

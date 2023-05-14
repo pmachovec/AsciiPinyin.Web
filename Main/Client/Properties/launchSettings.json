@@ -9,7 +9,7 @@
             {
                 "ASPNETCORE_ENVIRONMENT": "Development"
             },
-            "applicationUrl": "https://localhost:443"
+            "applicationUrl": "https://localhost:443/asciipinyin"
         }
     }
 }

@@ -15,10 +15,10 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
+app.UseBlazorFrameworkFiles("/asciipinyin");
 app.UseRouting();
 app.MapRazorPages();
 app.MapControllers();
-app.MapFallbackToFile("index.html");
+app.MapFallbackToFile("/asciipinyin/index.html");
 app.Run();

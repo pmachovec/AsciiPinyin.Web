@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AsciiPinyin.Web.Server.Controllers;
 
 [ApiController]
-[Route("/characters")]
+[Route("/asciipinyin/characters")]
 public sealed class ChacharsController : ControllerBase
 {
     private AsciiPinyinContext AsciiPinyinContext { get; }
