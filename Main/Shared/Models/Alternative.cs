@@ -1,4 +1,4 @@
-using AsciiPinyin.Web.Shared.Models.Shared;
+using AsciiPinyin.Web.Shared.Models.Tools;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
@@ -28,28 +28,19 @@ public sealed class Alternative : IEntity
     [Required]
     public byte Strokes { get; set; }
 
-    public static bool operator ==(Alternative left, Alternative right)
-    {
-        return Comparator.EqualsForOperator(left, right);
-    }
+    public static bool operator ==(Alternative left, Alternative right) => Comparator.EqualsForOperator(left, right);
 
     public static bool operator !=(Alternative left, Alternative right) => !(left == right);
 
-    public override bool Equals(object? other)
+    public override bool Equals(object? obj)
     {
-        return other is Alternative otherAlternative
+        return obj is Alternative otherAlternative
             && otherAlternative.TheCharacter == TheCharacter
             && otherAlternative.OriginalCharacter == OriginalCharacter
             && otherAlternative.OriginalAsciiPinyin == OriginalAsciiPinyin;
     }
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(TheCharacter, OriginalCharacter, OriginalAsciiPinyin);
-    }
+    public override int GetHashCode() => HashCode.Combine(TheCharacter, OriginalCharacter, OriginalAsciiPinyin);
 
-    public override string ToString()
-    {
-        return JsonCreator.ToJson(this);
-    }
+    public override string ToString() => JsonCreator.ToJson(this);
 }

@@ -1,0 +1,17 @@
+@inherits ChacharsTabBase
+
+<div id="@CHACHARS_TAB_DIV">
+    @if (Chachars != null)
+    {
+        @if (Chachars.Length < 1)
+        {
+            JSInteropConsole.ConsoleWarning("ChacharsTab: Chachars retrieved from the server are empty.");
+        }
+        else
+        {
+            <ChacharCards Chachars="@Chachars" SelectChachar="@SelectChachar" />
+        }
+    }
+
+    <ChacharViewDialog @ref="ChacharViewDialog" />
+</div>

@@ -11,7 +11,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseHsts();
+    _ = app.UseHsts();
 }
 
 app.UseHttpsRedirection();

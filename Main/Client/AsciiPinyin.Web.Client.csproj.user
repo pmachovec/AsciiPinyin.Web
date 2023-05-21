@@ -2,13 +2,13 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
-    <EmbeddedResource Update="Shared\Resources\Resource.cs.resx">
+    <EmbeddedResource Update="Resources\Resource.cs.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Update="Shared\Resources\Resource.de.resx">
+    <EmbeddedResource Update="Resources\Resource.de.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Update="Shared\Resources\Resource.zh.resx">
+    <EmbeddedResource Update="Resources\Resource.zh.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

@@ -1,7 +1,7 @@
 using AsciiPinyin.Web.Client;
-using AsciiPinyin.Web.Client.Shared.EntityLoader;
-using AsciiPinyin.Web.Client.Shared.JSInterop;
-using AsciiPinyin.Web.Client.Shared.Lokal;
+using AsciiPinyin.Web.Client.EntityLoader;
+using AsciiPinyin.Web.Client.JSInterop;
+using AsciiPinyin.Web.Client.Lokal;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 

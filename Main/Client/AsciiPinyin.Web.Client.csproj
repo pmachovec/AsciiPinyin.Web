@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
-        <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <StaticWebAssetBasePath>asciipinyin</StaticWebAssetBasePath>
+        <NeutralLanguage>en</NeutralLanguage>
+        <Nullable>enable</Nullable>
         <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+        <StaticWebAssetBasePath>asciipinyin</StaticWebAssetBasePath>
+        <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,7 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Update="Shared\Resources\Resource.Designer.cs">
+        <Compile Update="Resources\Resource.Designer.cs">
             <DesignTime>True</DesignTime>
             <AutoGen>True</AutoGen>
             <DependentUpon>Resource.resx</DependentUpon>
@@ -31,10 +32,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Update="Shared\Resources\Resource.cs.resx">
+        <EmbeddedResource Update="Resources\Resource.cs.resx">
             <Generator>PublicResXFileCodeGenerator</Generator>
         </EmbeddedResource>
-        <EmbeddedResource Update="Shared\Resources\Resource.resx">
+        <EmbeddedResource Update="Resources\Resource.resx">
             <Generator>PublicResXFileCodeGenerator</Generator>
             <LastGenOutput>Resource.Designer.cs</LastGenOutput>
         </EmbeddedResource>

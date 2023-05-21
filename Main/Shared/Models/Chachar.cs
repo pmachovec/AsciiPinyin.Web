@@ -1,4 +1,4 @@
-using AsciiPinyin.Web.Shared.Models.Shared;
+using AsciiPinyin.Web.Shared.Models.Tools;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
@@ -48,27 +48,18 @@ public sealed class Chachar : IEntity
 
     public Alternative? RadicalAlternative { get; set; }
 
-    public static bool operator ==(Chachar left, Chachar right)
-    {
-        return Comparator.EqualsForOperator(left, right);
-    }
+    public static bool operator ==(Chachar left, Chachar right) => Comparator.EqualsForOperator(left, right);
 
     public static bool operator !=(Chachar left, Chachar right) => !(left == right);
 
-    public override bool Equals(object? other)
+    public override bool Equals(object? obj)
     {
-        return other is Chachar otherChachar
+        return obj is Chachar otherChachar
             && otherChachar.TheCharacter == TheCharacter
             && otherChachar.AsciiPinyin == AsciiPinyin;
     }
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(TheCharacter, AsciiPinyin);
-    }
+    public override int GetHashCode() => HashCode.Combine(TheCharacter, AsciiPinyin);
 
-    public override string ToString()
-    {
-        return JsonCreator.ToJson(this);
-    }
+    public override string ToString() => JsonCreator.ToJson(this);
 }

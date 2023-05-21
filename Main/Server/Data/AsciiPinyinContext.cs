@@ -10,18 +10,18 @@ public sealed class AsciiPinyinContext : DbContext
     public DbSet<Alternative> Alternatives => Set<Alternative>();
 
     // Configures EF to load an Sqlite database file from the specified path.
-    protected override void OnConfiguring(DbContextOptionsBuilder options) => options.UseSqlite("Data Source=Data/asciipinyin.sqlite");
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => _ = optionsBuilder.UseSqlite("Data Source=Data/asciipinyin.sqlite");
 
-    protected override void OnModelCreating(ModelBuilder builder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        builder.Entity<Chachar>()
+        _ = modelBuilder.Entity<Chachar>()
             .HasKey(chachar => new
             {
                 chachar.TheCharacter,
                 chachar.AsciiPinyin
             });
 
-        builder.Entity<Alternative>()
+        _ = modelBuilder.Entity<Alternative>()
             .HasKey(alternative => new
             {
                 alternative.TheCharacter,
@@ -29,7 +29,7 @@ public sealed class AsciiPinyinContext : DbContext
                 alternative.OriginalAsciiPinyin
             });
 
-        builder.Entity<Chachar>()
+        _ = modelBuilder.Entity<Chachar>()
             .HasOne(chachar => chachar.RadicalChachar)
             .WithOne()
             .HasForeignKey<Chachar>(chachar => new
@@ -43,7 +43,7 @@ public sealed class AsciiPinyinContext : DbContext
                 radicalChachar.AsciiPinyin
             });
 
-        builder.Entity<Chachar>()
+        _ = modelBuilder.Entity<Chachar>()
             .HasOne(chachar => chachar.RadicalAlternative)
             .WithOne()
             .HasForeignKey<Chachar>(chachar => new

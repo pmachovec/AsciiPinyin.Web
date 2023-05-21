@@ -1,0 +1,17 @@
+@inherits AlternativesTabBase
+
+<div id="@ALTERNATIVES_TAB_DIV">
+    @if (Alternatives != null)
+    {
+        @if (Alternatives.Length < 1)
+        {
+            JSInteropConsole.ConsoleWarning("AlternativesTab: Alternatives retrieved from the server are empty.");
+        }
+        else
+        {
+            <AlternativeCards Alternatives="@Alternatives" SelectAlternative="@SelectAlternative" />
+        }
+    }
+
+    <AlternativeViewDialog @ref="AlternativeViewDialog" />
+</div>
