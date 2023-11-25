@@ -19,13 +19,13 @@
             </div>
             <div class="modal-body">
                 <p class="card-text">
-                    @(Lokal.AsciiPinyin):&nbsp;@(Chachar?.AsciiPinyin)
+                    @($"{Lokal.AsciiPinyin}: {Chachar?.AsciiPinyin}{Chachar?.Tone}")
                 </p>
                 <p class="card-text">
-                    @(Lokal.Ipa):&nbsp;@(Chachar?.Ipa)
+                    @($"{Lokal.Ipa}: {Chachar?.Ipa}")
                 </p>
                 <p class="card-text">
-                    @(Lokal.NumberOfStrokes):&nbsp;@(Chachar?.Strokes)
+                    @($"{Lokal.NumberOfStrokes}: {Chachar?.Strokes}")
                 </p>
             </div>
         </div>

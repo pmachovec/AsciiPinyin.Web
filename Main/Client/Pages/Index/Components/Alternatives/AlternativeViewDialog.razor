@@ -17,13 +17,13 @@
             </div>
             <div class="modal-body">
                 <p class="card-text">
-                    @(Lokal.NumberOfStrokes):&nbsp;@(Alternative?.Strokes)
+                    @($"{Lokal.NumberOfStrokes}: {Alternative?.Strokes}")
                 </p>
                 <p class="card-text">
-                    @(Lokal.BaseCharacter):&nbsp;@(Alternative?.OriginalCharacter)
+                    @($"{Lokal.BaseCharacter}: {Alternative?.OriginalCharacter}")
                 </p>
                 <p class="card-text">
-                    @(Lokal.BaseCharacterAsciiPinyin):&nbsp;@(Alternative?.OriginalAsciiPinyin)
+                    @($"{Lokal.BaseCharacterAsciiPinyin}: {Alternative?.OriginalAsciiPinyin}{Alternative?.OriginalTone}")
                 </p>
             </div>
         </div>
