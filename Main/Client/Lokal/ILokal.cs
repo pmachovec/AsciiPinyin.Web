@@ -9,7 +9,7 @@ public interface ILokal
     string Ascii { get; }
     string AsciiPinyin { get; }
     string BaseCharacter { get; }
-    string BaseCharacterAsciiPinyin { get; }
+    string BaseCharacterPinyin { get; }
     string Characters { get; }
     string Ipa { get; }
     string Pinyin { get; }

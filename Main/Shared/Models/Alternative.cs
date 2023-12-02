@@ -18,10 +18,10 @@ public sealed class Alternative : IEntity
     [Required]
     public char OriginalCharacter { get; set; } = char.MinValue;
 
-    [JsonPropertyName("original_ascii_pinyin")]
-    [Column("original_ascii_pinyin")]
+    [JsonPropertyName("original_pinyin")]
+    [Column("original_pinyin")]
     [Required]
-    public string OriginalAsciiPinyin { get; set; } = string.Empty;
+    public string OriginalPinyin { get; set; } = string.Empty;
 
     [JsonPropertyName("original_tone")]
     [Column("original_tone")]
@@ -42,11 +42,11 @@ public sealed class Alternative : IEntity
         return obj is Alternative otherAlternative
             && otherAlternative.TheCharacter == TheCharacter
             && otherAlternative.OriginalCharacter == OriginalCharacter
-            && otherAlternative.OriginalAsciiPinyin == OriginalAsciiPinyin
+            && otherAlternative.OriginalPinyin == OriginalPinyin
             && otherAlternative.OriginalTone == OriginalTone;
     }
 
-    public override int GetHashCode() => HashCode.Combine(TheCharacter, OriginalCharacter, OriginalAsciiPinyin);
+    public override int GetHashCode() => HashCode.Combine(TheCharacter, OriginalCharacter, OriginalPinyin);
 
     public override string ToString() => JsonCreator.ToJson(this);
 }

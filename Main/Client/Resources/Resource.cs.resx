@@ -120,22 +120,22 @@
   <data name="Alternatives" xml:space="preserve">
     <value>Alternativy</value>
   </data>
-  <data name="ASCII" xml:space="preserve">
+  <data name="Ascii" xml:space="preserve">
     <value>ASCII</value>
   </data>
-  <data name="ASCIIPinyin" xml:space="preserve">
+  <data name="AsciiPinyin" xml:space="preserve">
     <value>ASCII Pinyin</value>
   </data>
   <data name="BaseCharacter" xml:space="preserve">
     <value>Základní znak</value>
   </data>
-  <data name="BaseCharacterASCIIPinyin" xml:space="preserve">
-    <value>ASCII Pinyin zákldaního znaku</value>
+  <data name="BaseCharacterPinyin" xml:space="preserve">
+    <value>Pinyin zákldaního znaku</value>
   </data>
   <data name="Characters" xml:space="preserve">
     <value>Znaky</value>
   </data>
-  <data name="IPA" xml:space="preserve">
+  <data name="Ipa" xml:space="preserve">
     <value>IPA</value>
   </data>
   <data name="NumberOfStrokes" xml:space="preserve">

@@ -13,10 +13,10 @@ public sealed class Chachar : IEntity
     [Required]
     public char TheCharacter { get; set; }
 
-    [JsonPropertyName("ascii_pinyin")]
-    [Column("ascii_pinyin")]
+    [JsonPropertyName("pinyin")]
+    [Column("pinyin")]
     [Required]
-    public string AsciiPinyin { get; set; } = string.Empty;
+    public string Pinyin { get; set; } = string.Empty;
 
     [JsonPropertyName("tone")]
     [Column("tone")]
@@ -41,9 +41,9 @@ public sealed class Chachar : IEntity
     [Column("radical_character")]
     public char? RadicalCharacter { get; set; }
 
-    [JsonPropertyName("radical_ascii_pinyin")]
-    [Column("radical_ascii_pinyin")]
-    public string? RadicalAsciiPinyin { get; set; }
+    [JsonPropertyName("radical_pinyin")]
+    [Column("radical_pinyin")]
+    public string? RadicalPinyin { get; set; }
 
     [JsonPropertyName("radical_tone")]
     [Column("radical_tone")]
@@ -65,11 +65,11 @@ public sealed class Chachar : IEntity
     {
         return obj is Chachar otherChachar
             && otherChachar.TheCharacter == TheCharacter
-            && otherChachar.AsciiPinyin == AsciiPinyin
+            && otherChachar.Pinyin == Pinyin
             && otherChachar.Tone == Tone;
     }
 
-    public override int GetHashCode() => HashCode.Combine(TheCharacter, AsciiPinyin, Tone);
+    public override int GetHashCode() => HashCode.Combine(TheCharacter, Pinyin, Tone);
 
     public override string ToString() => JsonCreator.ToJson(this);
 }

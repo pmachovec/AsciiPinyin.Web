@@ -18,7 +18,7 @@ public sealed class AsciiPinyinContext : DbContext
             .HasKey(chachar => new
             {
                 chachar.TheCharacter,
-                chachar.AsciiPinyin
+                chachar.Pinyin
             });
 
         _ = modelBuilder.Entity<Alternative>()
@@ -26,7 +26,7 @@ public sealed class AsciiPinyinContext : DbContext
             {
                 alternative.TheCharacter,
                 alternative.OriginalCharacter,
-                alternative.OriginalAsciiPinyin
+                alternative.OriginalPinyin
             });
 
         _ = modelBuilder.Entity<Chachar>()
@@ -35,12 +35,12 @@ public sealed class AsciiPinyinContext : DbContext
             .HasForeignKey<Chachar>(chachar => new
             {
                 chachar.RadicalCharacter,
-                chachar.RadicalAsciiPinyin
+                chachar.RadicalPinyin
             })
             .HasPrincipalKey<Chachar>(radicalChachar => new
             {
                 radicalChachar.TheCharacter,
-                radicalChachar.AsciiPinyin
+                radicalChachar.Pinyin
             });
 
         _ = modelBuilder.Entity<Chachar>()
@@ -50,13 +50,13 @@ public sealed class AsciiPinyinContext : DbContext
             {
                 chachar.RadicalAlternativeCharacter,
                 chachar.RadicalCharacter,
-                chachar.RadicalAsciiPinyin
+                chachar.RadicalPinyin
             })
             .HasPrincipalKey<Alternative>(radicalAlternative => new
             {
                 radicalAlternative.TheCharacter,
                 radicalAlternative.OriginalCharacter,
-                radicalAlternative.OriginalAsciiPinyin
+                radicalAlternative.OriginalPinyin
             });
     }
 }

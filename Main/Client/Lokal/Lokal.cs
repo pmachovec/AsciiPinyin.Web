@@ -15,12 +15,12 @@ internal class Lokal : ILokal
     private readonly IStringLocalizer<Resource> _localizer;
 
     public string Alternatives => GetSafeString("Alternatives");
-    public string Ascii => GetSafeString("ASCII");
-    public string AsciiPinyin => GetSafeString("ASCIIPinyin");
+    public string Ascii => GetSafeString("Ascii");
+    public string AsciiPinyin => GetSafeString("AsciiPinyin");
     public string BaseCharacter => GetSafeString("BaseCharacter");
-    public string BaseCharacterAsciiPinyin => GetSafeString("BaseCharacterASCIIPinyin");
+    public string BaseCharacterPinyin => GetSafeString("BaseCharacterPinyin");
     public string Characters => GetSafeString("Characters");
-    public string Ipa => GetSafeString("IPA");
+    public string Ipa => GetSafeString("Ipa");
     public string Pinyin => GetSafeString("Pinyin");
     public string NumberOfStrokes => GetSafeString("NumberOfStrokes");
 
