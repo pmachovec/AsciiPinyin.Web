@@ -1,9 +1,10 @@
 using AsciiPinyin.Web.Client.Constants;
 using AsciiPinyin.Web.Client.EntityLoader;
 using AsciiPinyin.Web.Client.JSInterop;
-using AsciiPinyin.Web.Client.Lokal;
+using AsciiPinyin.Web.Client.Resources;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Pages.Index.Components.Chachars;
 
@@ -23,15 +24,16 @@ public class ChacharsTabBase : ComponentBase, IEntityTab
     private IEntityLoader EntityLoader { get; set; } = default!;
 
     [Inject]
-    private ILokal Lokal { get; set; } = default!;
+    private IJSInteropDOM JSInteropDOM { get; set; } = default!;
+
+    [Inject]
+    private IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
     [Inject]
     protected IJSInteropConsole JSInteropConsole { get; set; } = default!;
 
-    [Inject]
-    private IJSInteropDOM JSInteropDOM { get; set; } = default!;
-
-    protected override void OnInitialized() => Title = $"{Lokal.AsciiPinyin} - {Lokal.Characters}";
+    protected override void OnInitialized()
+        => Title = $"{Localizer[Resource.AsciiPinyin]} - {Localizer[Resource.Characters]}";
 
     public async void InitializeEntites()
     {
