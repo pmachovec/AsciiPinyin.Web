@@ -1,10 +1,13 @@
 @using AsciiPinyin.Web.Client
+@using AsciiPinyin.Web.Server.Resources
 @using Microsoft.AspNetCore.Components.Web
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 
+@inherits AppBase
+
 <!DOCTYPE html>
 
-<html lang="en">
+<html>
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,6 +23,6 @@
         <script src="/asciipinyin/js/JSInteropDOM.js"></script>
         <script src="/asciipinyin/js/lib/jquery-3.6.0.min.js"></script>
         <script src="/asciipinyin/_framework/blazor.web.js"></script>
-        <div id="loading">Loading...</div>
+        <div id="loading">@(Localizer[Resource.Loading])&hellip;</div>
     </body>
 </html>
