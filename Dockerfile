@@ -1,7 +1,7 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 RUN dotnet dev-certs https
 WORKDIR /src
 COPY ["Main/Server/AsciiPinyin.Web.Server.csproj", "Main/Server/"]
