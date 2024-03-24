@@ -4,7 +4,7 @@ using System.Net.Http.Json;
 
 namespace AsciiPinyin.Web.Client.EntityLoader;
 
-public class EntityLoader(
+public sealed class EntityLoader(
     HttpClient httpClient,
     IJSInteropConsole jsInteropConsole) : IEntityLoader
 {

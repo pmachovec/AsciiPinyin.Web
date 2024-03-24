@@ -2,7 +2,7 @@ using Microsoft.JSInterop;
 
 namespace AsciiPinyin.Web.Client.JSInterop;
 
-internal class JSInteropDOM(IJSRuntime jsRuntime) : IJSInteropDOM
+internal sealed class JSInteropDOM(IJSRuntime jsRuntime) : IJSInteropDOM
 {
     private readonly IJSRuntime _jsRuntime = jsRuntime;
 
