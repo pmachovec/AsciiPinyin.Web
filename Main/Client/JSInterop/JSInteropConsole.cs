@@ -2,11 +2,9 @@ using Microsoft.JSInterop;
 
 namespace AsciiPinyin.Web.Client.JSInterop;
 
-internal class JSInteropConsole : IJSInteropConsole
+internal class JSInteropConsole(IJSRuntime jsRuntime) : IJSInteropConsole
 {
-    private readonly IJSRuntime _jsRuntime;
-
-    public JSInteropConsole(IJSRuntime jsRuntime) => _jsRuntime = jsRuntime;
+    private readonly IJSRuntime _jsRuntime = jsRuntime;
 
     public async void ConsoleInfo(string infoText) => await _jsRuntime.InvokeVoidAsync("consoleInfo", infoText);
 
