@@ -2,7 +2,8 @@ using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages.Index.Components;
 using AsciiPinyin.Web.Client.Pages.Index.Components.Alternatives;
 using AsciiPinyin.Web.Client.Pages.Index.Components.Chachars;
-using AsciiPinyin.Web.Client.Resources;
+using AsciiPinyin.Web.Shared.Constants;
+using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 
@@ -25,7 +26,7 @@ public class IndexBase : ComponentBase
     {
         if (firstRender)
         {
-            JSInteropDOM.HideElement("loading");
+            JSInteropDOM.HideElement(IDs.LOADING_SPLASH);
             SelectTab(chacharsTab);
         }
     }

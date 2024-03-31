@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AsciiPinyin.Web.Client.Resources {
+namespace AsciiPinyin.Web.Shared.Resources {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace AsciiPinyin.Web.Client.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AsciiPinyin.Web.Client.Resources.Resource", typeof(Resource).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AsciiPinyin.Web.Shared.Resources.Resource", typeof(Resource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -120,6 +120,15 @@ namespace AsciiPinyin.Web.Client.Resources {
         public static string Ipa {
             get {
                 return ResourceManager.GetString("Ipa", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading.
+        /// </summary>
+        public static string Loading {
+            get {
+                return ResourceManager.GetString("Loading", resourceCulture);
             }
         }
         

@@ -1,10 +1,10 @@
-using AsciiPinyin.Web.Client.Resources;
+using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 
-namespace AsciiPinyin.Web.Server.Pages;
+namespace AsciiPinyin.Web.Shared.Components;
 
-public class AppBase : ComponentBase
+public class LoadingBase : ComponentBase
 {
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;

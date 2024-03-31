@@ -1,8 +1,8 @@
 using AsciiPinyin.Web.Client.Constants;
 using AsciiPinyin.Web.Client.EntityLoader;
 using AsciiPinyin.Web.Client.JSInterop;
-using AsciiPinyin.Web.Client.Resources;
 using AsciiPinyin.Web.Shared.Models;
+using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 

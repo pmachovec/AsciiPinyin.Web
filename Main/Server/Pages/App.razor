@@ -1,9 +1,8 @@
 @using AsciiPinyin.Web.Client
-@using AsciiPinyin.Web.Server.Resources
+@using AsciiPinyin.Web.Shared.Components
+@using AsciiPinyin.Web.Shared.Constants
 @using Microsoft.AspNetCore.Components.Web
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
-
-@inherits AppBase
 
 <!DOCTYPE html>
 
@@ -23,6 +22,8 @@
         <script src="/asciipinyin/js/JSInteropDOM.js"></script>
         <script src="/asciipinyin/js/lib/jquery-3.6.0.min.js"></script>
         <script src="/asciipinyin/_framework/blazor.web.js"></script>
-        <div id="loading">@(Localizer[Resource.Loading])&hellip;</div>
+        <div id="@IDs.LOADING_SPLASH">
+            <Loading />
+        </div>
     </body>
 </html>

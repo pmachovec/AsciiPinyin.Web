@@ -24,6 +24,12 @@ a, .btn-link {
     padding-top: 1.1rem;
 }
 
+#loading-spinner {
+    width: 6rem;
+    height: 6rem;
+    border: 0.5rem solid currentColor;
+}
+
 .invalid {
     outline: 1px solid red;
 }
