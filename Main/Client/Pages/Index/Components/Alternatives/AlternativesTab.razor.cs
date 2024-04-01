@@ -10,8 +10,6 @@ namespace AsciiPinyin.Web.Client.Pages.Index.Components.Alternatives;
 
 public class AlternativesTabBase : ComponentBase, IEntityTab
 {
-    protected const string ALTERNATIVES_TAB_DIV = "alternativesTabDiv";
-
     public Alternative[]? Alternatives { get; private set; }
     public bool IsVisible { get; private set; }
     public string Title { get; private set; } = StringConstants.ALTERNATIVES;
@@ -38,19 +36,20 @@ public class AlternativesTabBase : ComponentBase, IEntityTab
     public async void InitializeEntites()
     {
         Alternatives = await EntityLoader.LoadEntitiesAsync<Alternative>("alternatives");
+        JSInteropDOM.HideElement(IDs.ALTERNATIVES_TAB_LOADING);
         StateHasChanged();
     }
 
     public void Hide()
     {
         IsVisible = false;
-        JSInteropDOM.HideElement(ALTERNATIVES_TAB_DIV);
+        JSInteropDOM.HideElement(IDs.ALTERNATIVES_TAB_ROOT);
     }
 
     public void Show()
     {
         IsVisible = true;
-        JSInteropDOM.ShowElement(ALTERNATIVES_TAB_DIV);
+        JSInteropDOM.ShowElement(IDs.ALTERNATIVES_TAB_ROOT);
     }
 
     protected async void SelectAlternative(Alternative alternative) => await AlternativeViewDialog.SetAlternative(alternative);

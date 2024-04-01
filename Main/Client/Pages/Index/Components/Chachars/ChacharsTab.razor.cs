@@ -10,8 +10,6 @@ namespace AsciiPinyin.Web.Client.Pages.Index.Components.Chachars;
 
 public class ChacharsTabBase : ComponentBase, IEntityTab
 {
-    protected const string CHACHARS_TAB_DIV = "chacharsTabDiv";
-
     public Chachar[]? Chachars { get; private set; }
     public bool IsVisible { get; private set; }
     public string Title { get; private set; } = StringConstants.CHARACTERS;
@@ -38,19 +36,20 @@ public class ChacharsTabBase : ComponentBase, IEntityTab
     public async void InitializeEntites()
     {
         Chachars = await EntityLoader.LoadEntitiesAsync<Chachar>("characters");
+        JSInteropDOM.HideElement(IDs.CHACHARS_TAB_LOADING);
         StateHasChanged();
     }
 
     public void Hide()
     {
         IsVisible = false;
-        JSInteropDOM.HideElement(CHACHARS_TAB_DIV);
+        JSInteropDOM.HideElement(IDs.CHACHARS_TAB_ROOT);
     }
 
     public void Show()
     {
         IsVisible = true;
-        JSInteropDOM.ShowElement(CHACHARS_TAB_DIV);
+        JSInteropDOM.ShowElement(IDs.CHACHARS_TAB_ROOT);
     }
 
     protected async void SelectChachar(Chachar chachar) => await ChacharViewDialog.SetChachar(chachar);
