@@ -1,4 +1,4 @@
-namespace AsciiPinyin.Web.Client.Constants;
+namespace AsciiPinyin.Web.Shared.Constants;
 
 public static class StringConstants
 {

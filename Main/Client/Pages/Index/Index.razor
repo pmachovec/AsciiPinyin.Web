@@ -1,37 +1,37 @@
-@using AsciiPinyin.Web.Client.Constants
 @using AsciiPinyin.Web.Client.Pages.Index.Components.Alternatives
 @using AsciiPinyin.Web.Client.Pages.Index.Components.Chachars
+@using AsciiPinyin.Web.Shared.Components
 @using AsciiPinyin.Web.Shared.Resources
 @using Microsoft.AspNetCore.Components.Web
 
 @page "/"
 @inherits IndexBase
 
-<header>
-    <nav class="navbar-expand-sm navbar-toggleable-sm navbar-light bg-white box-shadow mb-3">
-        <div class="mt-3 text-center">
-            <h1 class="display-1 fw-bolder">@(StringConstants.ASCII)&nbsp;@(StringConstants.PINYIN_CHINESE)</h1>
-        </div>
-        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-            <ul class="nav nav-tabs">
-                <li class="nav-item">
-                    <input
-                        class="nav-link text-dark @GetActiveIfVisible(chacharsTab)"
-                        type="button"
-                        value="@Localizer[Resource.Characters]"
-                        @onclick='_ => SelectTab(chacharsTab)' />
-                </li>
-                <li class="nav-item">
-                    <input
-                        class="nav-link text-dark @GetActiveIfVisible(alternativesTab)"
-                        type="button"
-                        value="@Localizer[Resource.Alternatives]"
-                        @onclick='_ => SelectTab(alternativesTab)' />
-                </li>
-            </ul>
-        </div>
-    </nav>
-</header>
-
-<AlternativesTab @ref="alternativesTab" />
-<ChacharsTab @ref="chacharsTab" />
+<Header />
+<div class="container">
+    <main class="pb-3">
+        <nav class="navbar-expand-sm navbar-toggleable-sm navbar-light bg-white box-shadow mb-3">
+            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <input
+                            class="nav-link text-dark @GetActiveIfVisible(chacharsTab)"
+                            type="button"
+                            value="@Localizer[Resource.Characters]"
+                            @onclick='_ => SelectTab(chacharsTab)' />
+                    </li>
+                    <li class="nav-item">
+                        <input
+                            class="nav-link text-dark @GetActiveIfVisible(alternativesTab)"
+                            type="button"
+                            value="@Localizer[Resource.Alternatives]"
+                            @onclick='_ => SelectTab(alternativesTab)' />
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <AlternativesTab @ref="alternativesTab" />
+        <ChacharsTab @ref="chacharsTab" />
+    </main>
+</div>
+<Footer />
