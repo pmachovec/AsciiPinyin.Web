@@ -8,17 +8,20 @@
         <Loading />
     </div>
 
-    @if (Alternatives is null)
+    @if (IsVisible)
     {
-        JSInteropConsole.ConsoleWarning("AlternativesTab: No alternatives retrieved from the server.");
-    }
-    else if (Alternatives.Length < 1)
-    {
-        JSInteropConsole.ConsoleWarning("AlternativesTab: Alternatives retrieved from the server are empty.");
-    }
-    else
-    {
-        <AlternativeCards Alternatives="@Alternatives" SelectAlternative="@SelectAlternative" />
+        @if (Alternatives is null)
+        {
+            JSInteropConsole.ConsoleWarning("AlternativesTab: No alternatives retrieved from the server.");
+        }
+        else if (Alternatives.Length < 1)
+        {
+            JSInteropConsole.ConsoleWarning("AlternativesTab: Alternatives retrieved from the server are empty.");
+        }
+        else
+        {
+            <AlternativeCards Alternatives="@Alternatives" SelectAlternative="@SelectAlternative" />
+        }
     }
 
     <AlternativeViewDialog @ref="AlternativeViewDialog" />

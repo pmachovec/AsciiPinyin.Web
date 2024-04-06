@@ -8,17 +8,20 @@
         <Loading />
     </div>
 
-    @if (Chachars is null)
+    @if (IsVisible)
     {
-        JSInteropConsole.ConsoleWarning("ChacharsTab: No chachars retrieved from the server.");
-    }
-    else if (Chachars.Length < 1)
-    {
-        JSInteropConsole.ConsoleWarning("ChacharsTab: Chachars retrieved from the server are empty.");
-    }
-    else
-    {
-        <ChacharCards Chachars="@Chachars" SelectChachar="@SelectChachar" />
+        @if (Chachars is null)
+        {
+            JSInteropConsole.ConsoleWarning("ChacharsTab: No chachars retrieved from the server.");
+        }
+        else if (Chachars.Length < 1)
+        {
+            JSInteropConsole.ConsoleWarning("ChacharsTab: Chachars retrieved from the server are empty.");
+        }
+        else
+        {
+            <ChacharCards Chachars="@Chachars" SelectChachar="@SelectChachar" />
+        }
     }
 
     <ChacharViewDialog @ref="ChacharViewDialog" />
