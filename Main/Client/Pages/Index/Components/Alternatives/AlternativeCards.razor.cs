@@ -12,4 +12,9 @@ public class AlternativeCardsBase : ComponentBase
     public Action<Alternative> SelectAlternative { get; set; } = default!;
 
     protected int NumberOfLines { get; set; } = 10;
+
+    protected static void ShowAlternativeForm()
+    {
+        //TODO
+    }
 }

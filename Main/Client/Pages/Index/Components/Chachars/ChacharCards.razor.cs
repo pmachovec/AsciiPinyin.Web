@@ -12,4 +12,9 @@ public class ChacharCardsBase : ComponentBase
     public Action<Chachar> SelectChachar { get; set; } = default!;
 
     protected int NumberOfLines { get; set; } = 10;
+
+    protected static void ShowChacharForm()
+    {
+        //TODO
+    }
 }
