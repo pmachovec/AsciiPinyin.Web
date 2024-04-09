@@ -1,0 +1,25 @@
+@using AsciiPinyin.Web.Client
+@using Microsoft.AspNetCore.Components.Web
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <base href="/asciipinyin/" />
+        <link rel="stylesheet" href="/asciipinyin/css/app.css" />
+        <link rel="stylesheet" href="/asciipinyin/css/bootstrap/bootstrap.min.css" />
+        <link rel="stylesheet" href="/asciipinyin/AsciiPinyin.Web.Server.styles.css" />
+        <HeadOutlet @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
+    </head>
+    <body>
+        <Routes @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
+        <script src="/asciipinyin/js/JSInteropConsole.js"></script>
+        <script src="/asciipinyin/js/JSInteropDOM.js"></script>
+        <script src="/asciipinyin/js/lib/jquery-3.6.0.min.js"></script>
+        <script src="/asciipinyin/_framework/blazor.web.js"></script>
+        <div id="loading">Loading...</div>
+    </body>
+</html>

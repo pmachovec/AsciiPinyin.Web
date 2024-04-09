@@ -4,18 +4,12 @@ using System.Net.Http.Json;
 
 namespace AsciiPinyin.Web.Client.EntityLoader;
 
-public class EntityLoader : IEntityLoader
+public sealed class EntityLoader(
+    HttpClient httpClient,
+    IJSInteropConsole jsInteropConsole) : IEntityLoader
 {
-    private readonly HttpClient _httpClient;
-    private readonly IJSInteropConsole _jsInteropConsole;
-
-    public EntityLoader(
-        HttpClient httpClient,
-        IJSInteropConsole jsInteropConsole)
-    {
-        _httpClient = httpClient;
-        _jsInteropConsole = jsInteropConsole;
-    }
+    private readonly HttpClient _httpClient = httpClient;
+    private readonly IJSInteropConsole _jsInteropConsole = jsInteropConsole;
 
     public async Task<T[]?> LoadEntitiesAsync<T>(string entitiesApiName) where T : IEntity
     {

@@ -6,12 +6,10 @@ namespace AsciiPinyin.Web.Server.Controllers;
 
 [ApiController]
 [Route("/asciipinyin/characters")]
-public sealed class ChacharsController : ControllerBase
+public sealed class ChacharsController(AsciiPinyinContext asciiPinyinContext) : ControllerBase
 {
-    private AsciiPinyinContext AsciiPinyinContext { get; }
-
-    public ChacharsController(AsciiPinyinContext asciiPinyinContext) => AsciiPinyinContext = asciiPinyinContext;
+    private AsciiPinyinContext AsciiPinyinContext { get; } = asciiPinyinContext;
 
     [HttpGet]
-    public IEnumerable<Chachar> Get() => AsciiPinyinContext.Chachars.ToArray();
+    public IEnumerable<Chachar> Get() => [.. AsciiPinyinContext.Chachars];
 }

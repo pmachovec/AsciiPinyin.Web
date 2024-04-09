@@ -25,6 +25,7 @@ public class IndexBase : ComponentBase
     {
         if (firstRender)
         {
+            JSInteropDOM.HideElement("loading");
             SelectTab(chacharsTab);
         }
     }

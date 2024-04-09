@@ -1,9 +1,17 @@
+using AsciiPinyin.Web.Server.Pages;
 using AsciiPinyin.Web.Server.Data;
+using Index = AsciiPinyin.Web.Client.Pages.Index.Index;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddRazorPages();
-builder.Services.AddEntityFrameworkSqlite().AddDbContext<AsciiPinyinContext>();
+_ = builder.Services
+    .AddRazorComponents()
+    .AddInteractiveServerComponents()
+    .AddInteractiveWebAssemblyComponents();
+_ = builder.Services.AddControllers();
+_ = builder.Services.AddEntityFrameworkSqlite().AddDbContext<AsciiPinyinContext>();
+
 var app = builder.Build();
+_ = app.UsePathBase("/asciipinyin");
 
 if (app.Environment.IsDevelopment())
 {
@@ -11,14 +19,17 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
+    _ = app.UseExceptionHandler("/Error", createScopeForErrors: true);
     _ = app.UseHsts();
 }
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseBlazorFrameworkFiles("/asciipinyin");
-app.UseRouting();
-app.MapRazorPages();
-app.MapControllers();
-app.MapFallbackToFile("/asciipinyin/index.html");
+_ = app.UseHttpsRedirection();
+_ = app.UseStaticFiles();
+_ = app.UseAntiforgery();
+_ = app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode()
+    .AddInteractiveWebAssemblyRenderMode()
+    .AddAdditionalAssemblies(typeof(Index).Assembly);
+_ = app.MapControllers();
+
 app.Run();
