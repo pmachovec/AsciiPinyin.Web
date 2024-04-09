@@ -1,3 +1,4 @@
+@using AsciiPinyin.Web.Shared.Models
 @using Microsoft.AspNetCore.Components.Web
 
 @inherits ChacharCardsBase
@@ -7,16 +8,11 @@
 
     @foreach (var chachar in Chachars)
     {
-        <div class="col-sm-2 mb-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h2 class="card-title fw-bold">@chachar.TheCharacter</h2>
-                </div>
-                <div class="card-footer bg-transparent fw-bold">
-                    @($"{chachar.Pinyin}{chachar.Tone}")
-                </div>
-                <div class="stretched-link" @onclick="_ => SelectChachar(chachar)"></div>
-            </div>
-        </div>
+        <EntityCard
+            TEntity="Chachar"
+            Body="@chachar.TheCharacter"
+            Footer="@($"{chachar.Pinyin}{chachar.Tone}")"
+            SelectEntity="@SelectChachar"
+            SelectEntityArgument="@chachar" />
     }
 </div>
