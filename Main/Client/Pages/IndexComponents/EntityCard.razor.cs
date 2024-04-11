@@ -1,7 +1,7 @@
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Components;
 
-namespace AsciiPinyin.Web.Client.Pages.Index.Components;
+namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public class EntityCardBase<TEntity> : ComponentBase where TEntity : IEntity
 {

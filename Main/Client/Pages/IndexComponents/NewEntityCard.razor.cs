@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace AsciiPinyin.Web.Client.Pages.Index.Components;
+namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public class NewEntityCardBase : ComponentBase
 {

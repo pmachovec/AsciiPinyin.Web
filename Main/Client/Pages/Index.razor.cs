@@ -1,13 +1,11 @@
 using AsciiPinyin.Web.Client.JSInterop;
-using AsciiPinyin.Web.Client.Pages.Index.Components;
-using AsciiPinyin.Web.Client.Pages.Index.Components.Alternatives;
-using AsciiPinyin.Web.Client.Pages.Index.Components.Chachars;
+using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 
-namespace AsciiPinyin.Web.Client.Pages.Index;
+namespace AsciiPinyin.Web.Client.Pages;
 
 public class IndexBase : ComponentBase
 {
@@ -47,5 +45,5 @@ public class IndexBase : ComponentBase
     }
 
     protected static string GetActiveIfVisible(IEntityTab? tab)
-        => (tab != null) && tab.IsVisible ? "active" : string.Empty;
+        => tab != null && tab.IsVisible ? "active" : string.Empty;
 }

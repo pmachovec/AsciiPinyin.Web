@@ -1,4 +1,4 @@
-namespace AsciiPinyin.Web.Client.Pages.Index.Components;
+namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public interface IEntityTab
 {

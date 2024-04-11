@@ -1,7 +1,8 @@
+@using AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents.ChacharsCardsComponents
 @using AsciiPinyin.Web.Shared.Models
 @using Microsoft.AspNetCore.Components.Web
 
-@inherits ChacharCardsBase
+@inherits ChacharsCardsBase
 
 <div class="row">
     <NewEntityCard ShowEntityForm="ShowChacharForm" />
@@ -16,3 +17,4 @@
             SelectEntityArgument="@chachar" />
     }
 </div>
+<ChacharViewDialog @ref="ChacharViewDialog" />

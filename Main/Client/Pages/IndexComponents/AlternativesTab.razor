@@ -1,3 +1,4 @@
+@using AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents
 @using AsciiPinyin.Web.Shared.Components
 @using AsciiPinyin.Web.Shared.Constants
 
@@ -20,9 +21,7 @@
         }
         else
         {
-            <AlternativeCards Alternatives="@Alternatives" SelectAlternative="@SelectAlternative" />
+            <AlternativesCards Alternatives="@Alternatives" />
         }
     }
-
-    <AlternativeViewDialog @ref="AlternativeViewDialog" />
 </div>

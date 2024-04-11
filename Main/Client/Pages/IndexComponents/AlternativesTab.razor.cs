@@ -1,22 +1,21 @@
 using AsciiPinyin.Web.Client.EntityLoader;
 using AsciiPinyin.Web.Client.JSInterop;
+using AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 
-namespace AsciiPinyin.Web.Client.Pages.Index.Components.Chachars;
+namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
-public class ChacharsTabBase : ComponentBase, IEntityTab
+public class AlternativesTabBase : ComponentBase, IEntityTab
 {
-    public Chachar[]? Chachars { get; private set; }
+    public Alternative[]? Alternatives { get; private set; }
     public bool IsVisible { get; private set; }
-    public string Title { get; private set; } = StringConstants.CHARACTERS;
+    public string Title { get; private set; } = StringConstants.ALTERNATIVES;
 
-    public bool AreEntitiesInitialized => Chachars != null;
-
-    protected ChacharViewDialog ChacharViewDialog = default!;
+    public bool AreEntitiesInitialized => Alternatives != null;
 
     [Inject]
     private IEntityLoader EntityLoader { get; set; } = default!;
@@ -31,26 +30,24 @@ public class ChacharsTabBase : ComponentBase, IEntityTab
     protected IJSInteropConsole JSInteropConsole { get; set; } = default!;
 
     protected override void OnInitialized()
-        => Title = $"{Localizer[Resource.AsciiPinyin]} - {Localizer[Resource.Characters]}";
+        => Title = $"{Localizer[Resource.AsciiPinyin]} - {Localizer[Resource.Alternatives]}";
 
     public async void InitializeEntites()
     {
-        Chachars = await EntityLoader.LoadEntitiesAsync<Chachar>("characters");
-        JSInteropDOM.HideElement(IDs.CHACHARS_TAB_LOADING);
+        Alternatives = await EntityLoader.LoadEntitiesAsync<Alternative>("alternatives");
+        JSInteropDOM.HideElement(IDs.ALTERNATIVES_TAB_LOADING);
         StateHasChanged();
     }
 
     public void Hide()
     {
         IsVisible = false;
-        JSInteropDOM.HideElement(IDs.CHACHARS_TAB_ROOT);
+        JSInteropDOM.HideElement(IDs.ALTERNATIVES_TAB_ROOT);
     }
 
     public void Show()
     {
         IsVisible = true;
-        JSInteropDOM.ShowElement(IDs.CHACHARS_TAB_ROOT);
+        JSInteropDOM.ShowElement(IDs.ALTERNATIVES_TAB_ROOT);
     }
-
-    protected async void SelectChachar(Chachar chachar) => await ChacharViewDialog.SetChachar(chachar);
 }

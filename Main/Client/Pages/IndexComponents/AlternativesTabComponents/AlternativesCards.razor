@@ -1,7 +1,8 @@
+@using AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents.AlternativesCardsComponents
 @using AsciiPinyin.Web.Shared.Models
 @using Microsoft.AspNetCore.Components.Web
 
-@inherits AlternativeCardsBase
+@inherits AlternativesCardsBase
 
 <div class="row">
     <NewEntityCard ShowEntityForm="ShowAlternativeForm"/>
@@ -16,3 +17,4 @@
             SelectEntityArgument="@alternative" />
     }
 </div>
+<AlternativeViewDialog @ref="AlternativeViewDialog" />

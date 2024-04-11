@@ -1,8 +1,8 @@
 using AsciiPinyin.Web.Server.Pages;
 using AsciiPinyin.Web.Server.Data;
-using Index = AsciiPinyin.Web.Client.Pages.Index.Index;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
+using Index = AsciiPinyin.Web.Client.Pages.Index;
 
 var builder = WebApplication.CreateBuilder(args);
 _ = builder.Services

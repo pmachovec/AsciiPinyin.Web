@@ -4,11 +4,11 @@ using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 
-namespace AsciiPinyin.Web.Client.Pages.Index.Components.Alternatives;
+namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents.ChacharsCardsComponents;
 
-public class AlternativeViewDialogBase : ComponentBase
+public class ChacharViewDialogBase : ComponentBase
 {
-    protected Alternative? Alternative { get; set; }
+    protected Chachar? Chachar { get; set; }
     protected string ModalShow { get; set; } = string.Empty;
     protected string ModalDisplay { get; set; } = "d-none";
 
@@ -18,24 +18,24 @@ public class AlternativeViewDialogBase : ComponentBase
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    public async Task SetAlternative(Alternative alternative)
+    public async Task SetChachar(Chachar chachar)
     {
-        JSInteropDOM.SetTitle($"{Localizer[Resource.AsciiPinyin]} - {alternative.TheCharacter}");
-        Alternative = alternative;
+        JSInteropDOM.SetTitle($"{Localizer[Resource.AsciiPinyin]} - {chachar.TheCharacter}");
+        Chachar = chachar;
         ModalDisplay = "d-block";
-        StateHasChanged();
+        StateHasChanged(); // Must be also here, otherwise, the fade effect doesn't work.
         await Task.Delay(10);
         ModalShow = "show";
         StateHasChanged();
     }
 
-    protected async void UnsetAlternative()
+    protected async void UnsetChachar()
     {
-        JSInteropDOM.SetTitle($"{Localizer[Resource.AsciiPinyin]} - {Localizer[Resource.Alternatives]}");
+        JSInteropDOM.SetTitle($"{Localizer[Resource.AsciiPinyin]} - {Localizer[Resource.Characters]}");
         ModalShow = string.Empty;
         await Task.Delay(400);
         ModalDisplay = "d-none";
-        Alternative = null;
+        Chachar = null;
         StateHasChanged();
     }
 }
