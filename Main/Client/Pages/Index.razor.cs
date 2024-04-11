@@ -1,6 +1,8 @@
+using AsciiPinyin.Web.Client.EntityLoader;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Shared.Constants;
+using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
@@ -14,33 +16,45 @@ public class IndexBase : ComponentBase
     protected AlternativesTab alternativesTab = default!;
     protected ChacharsTab chacharsTab = default!;
 
+    public IEnumerable<Alternative> Alternatives { get; private set; } = [];
+
+    public IEnumerable<Chachar> Chachars { get; private set; } = [];
+
+    [Inject]
+    private IEntityLoader EntityLoader { get; set; } = default!;
+
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnInitializedAsync()
+    {
+        await JSInteropDOM.SetTitleAsync(@StringConstants.ASCII_PINYIN, CancellationToken.None);
+        await JSInteropDOM.HideElementAsync(IDs.LOADING_SPLASH, CancellationToken.None);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            JSInteropDOM.HideElement(IDs.LOADING_SPLASH);
-            SelectTab(chacharsTab);
+            Alternatives = await EntityLoader.LoadEntitiesAsync<Alternative>("alternatives", CancellationToken.None);
+            Chachars = await EntityLoader.LoadEntitiesAsync<Chachar>("characters", CancellationToken.None);
+            await SelectTabAsync(chacharsTab, CancellationToken.None);
+            await JSInteropDOM.HideElementAsync(IDs.ENTITIES_TABS_LOADING, CancellationToken.None);
         }
     }
 
-    protected void SelectTab(IEntityTab tab)
+    protected async Task SelectTabAsync(IEntityTab tab, CancellationToken cancellationToken)
     {
-        _selectedTab?.Hide();
-
-        if (!tab.AreEntitiesInitialized)
+        if (_selectedTab is { } selectedTab)
         {
-            tab.InitializeEntites();
+            await selectedTab.HideAsync(cancellationToken);
         }
 
-        tab.Show();
         _selectedTab = tab;
-        JSInteropDOM.SetTitle(tab.Title);
+        await tab.ShowAsync(cancellationToken);
         StateHasChanged();
     }
 

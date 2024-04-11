@@ -1,3 +1,15 @@
+showElement = (elementId) => { $(`#${elementId}`).show(); };
+
+hideElement = (elementId) => { $(`#${elementId}`).hide(); };
+
+enable = (elementId) => { $(`#${elementId}`).prop('disabled', false); }
+
+disable = (elementId) => { $(`#${elementId}`).prop('disabled', true); }
+
+addClass = (elementId, theClass) => { $(`#${elementId}`).addClass(theClass); }
+
+removeClass = (elementId, theClass) => { $(`#${elementId}`).removeClass(theClass); }
+
 setTitle = (title) => { $(document).prop('title', title); };
-hideElement = (elementId) => { $('#' + elementId).hide(); };
-showElement = (elementId) => { $('#' + elementId).show(); };
+
+setZIndex = (elementId, value) => { $(`#${elementId}`).css('z-index', value); };

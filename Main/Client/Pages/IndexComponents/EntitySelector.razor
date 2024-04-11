@@ -1,0 +1,27 @@
+@using AsciiPinyin.Web.Shared.Constants
+@using AsciiPinyin.Web.Shared.Models
+@using AsciiPinyin.Web.Shared.Resources
+
+@typeparam TEntity where TEntity : IEntity
+@inherits EntitySelectorBase<TEntity>
+
+<div
+    class="modal fade @CssClasses.D_NONE"
+    tabindex="-1"
+    role="dialog"
+    id="@RootId">
+    <div class="modal-dialog modal-dialog-centered modal-entity-selector" role="document">
+        <div class="modal-content">
+            <div class="modal-header justify-content-between">
+                <h4 class="modal-title fw-bold ms-3" id="theCharacter">@Title</h4>
+                <CloseButton CloseAsync="CloseAsync" CancellationToken="CancellationToken.None" />
+            </div>
+            <div class="container-cards container-cards-entity-selector">
+                <EntityCards
+                    TEntity="TEntity"
+                    Entities="Entities"
+                    SelectEntityAsync="SelectEntityAsync"/>
+            </div>
+        </div>
+    </div>
+</div>

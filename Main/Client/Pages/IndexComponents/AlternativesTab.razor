@@ -1,27 +1,31 @@
 @using AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents
 @using AsciiPinyin.Web.Shared.Components
 @using AsciiPinyin.Web.Shared.Constants
+@using AsciiPinyin.Web.Shared.Models
+@using AsciiPinyin.Web.Shared.Resources
 
 @inherits AlternativesTabBase
 
-<div id="@IDs.ALTERNATIVES_TAB_ROOT" style="display: none">
-    <div id="@IDs.ALTERNATIVES_TAB_LOADING">
-        <Loading />
-    </div>
-
+<div class="tab-root" id="@IDs.ALTERNATIVES_TAB_ROOT">
     @if (IsVisible)
     {
-        @if (Alternatives is null)
+        @if (!Index.Alternatives.Any())
         {
             JSInteropConsole.ConsoleWarning("AlternativesTab: No alternatives retrieved from the server.");
         }
-        else if (Alternatives.Length < 1)
-        {
-            JSInteropConsole.ConsoleWarning("AlternativesTab: Alternatives retrieved from the server are empty.");
-        }
         else
         {
-            <AlternativesCards Alternatives="@Alternatives" />
+            <div class="container-cards container-cards-tab">
+                <NewEntityCard
+                    Label="@($"{Localizer[Resource.NewFemale]}...")"
+                    ShowEntityFormAsync="ShowAlternativeFormAsync" />
+                <EntityCards
+                    TEntity="Alternative"
+                    Entities="Index.Alternatives"
+                    SelectEntityAsync="SelectAlternativeAsync"/>
+            </div>
         }
     }
 </div>
+<AlternativeForm @ref="AlternativeForm" Index="Index" />
+<AlternativeViewDialog @ref="AlternativeViewDialog" />

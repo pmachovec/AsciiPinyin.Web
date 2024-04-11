@@ -1,0 +1,28 @@
+@using AsciiPinyin.Web.Shared.Models
+@using Microsoft.AspNetCore.Components.Web
+
+@typeparam TEntity where TEntity : IEntity
+@inherits EntityCardsBase<TEntity>
+
+@foreach (var entity in Entities)
+{
+    <div class="card card-entity text-center">
+        <div class="card-body">
+            <h2 class="card-title fw-bold">@entity.TheCharacter</h2>
+        </div>
+        <div class="card-footer bg-transparent fw-bold">
+            @if (entity is Chachar chachar)
+            {
+                @chachar.RealPinyin
+            }
+            else if (entity is Alternative alternative)
+            {
+                @alternative.OriginalCharacter
+            }
+        </div>
+        <div
+            class="stretched-link"
+            @onclick="async _ => await SelectEntityAsync(entity, CancellationToken.None)">
+        </div>
+    </div>
+}

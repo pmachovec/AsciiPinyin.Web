@@ -8,15 +8,19 @@ namespace AsciiPinyin.Web.Shared.Models;
 [Table("alternative")]
 public sealed class Alternative : IEntity
 {
+    /*
+     * The string type must be used even for single characters.
+     * The char type tends to malfunction when sent over HTTP requests.
+     */
     [JsonPropertyName("the_character")]
     [Column("the_character")]
     [Required]
-    public char TheCharacter { get; set; } = char.MinValue;
+    public string TheCharacter { get; set; } = string.Empty;
 
     [JsonPropertyName("original_character")]
     [Column("original_character")]
     [Required]
-    public char OriginalCharacter { get; set; } = char.MinValue;
+    public string OriginalCharacter { get; set; } = string.Empty;
 
     [JsonPropertyName("original_pinyin")]
     [Column("original_pinyin")]
@@ -32,6 +36,10 @@ public sealed class Alternative : IEntity
     [Column("strokes")]
     [Required]
     public byte Strokes { get; set; }
+
+    // To be replaced by conversion to showing tones by diacritics.
+    [JsonIgnore]
+    public string OriginalRealPinyin => OriginalPinyin + OriginalTone;
 
     public static bool operator ==(Alternative left, Alternative right) => Comparator.EqualsForOperator(left, right);
 

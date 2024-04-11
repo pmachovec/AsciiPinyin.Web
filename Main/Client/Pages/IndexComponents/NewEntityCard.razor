@@ -1,14 +1,15 @@
+@using AsciiPinyin.Web.Shared.Resources
 @using Microsoft.AspNetCore.Components.Web
 
 @inherits NewEntityCardBase
 
-<div class="col-sm-2 mb-3">
-    <div class="card text-center h-100">
-        <div class="card-header h-10"></div>
-        <div class="card-body">
-            <h1 class="fw-bold m-0">&#x271A;</h1>
-        </div>
-        <div class="card-footer h-10"></div>
-        <div class="stretched-link" @onclick="_ => ShowEntityForm()"></div>
+<div class="card card-entity text-center text-white bg-primary h-100">
+    <div class="card-body">
+        <h2 class="card-title fw-bold m-0">&#x271A;</h2>
+    </div>
+    <div class="card-footer bg-transparent fw-bold">@Label</div>
+    <div
+        class="stretched-link"
+        @onclick="async _ => await ShowEntityFormAsync(CancellationToken.None)">
     </div>
 </div>

@@ -117,14 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AlternativeCharacter" xml:space="preserve">
+    <value>Alternative character</value>
+  </data>
   <data name="Alternatives" xml:space="preserve">
     <value>Alternatives</value>
-  </data>
-  <data name="Ascii" xml:space="preserve">
-    <value>ASCII</value>
-  </data>
-  <data name="AsciiPinyin" xml:space="preserve">
-    <value>ASCII Pinyin</value>
   </data>
   <data name="BaseCharacter" xml:space="preserve">
     <value>Base character</value>
@@ -135,16 +132,61 @@
   <data name="Characters" xml:space="preserve">
     <value>Characters</value>
   </data>
+  <data name="ChineseCharacter" xml:space="preserve">
+    <value>Chinese character</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="CreateNewAlternative" xml:space="preserve">
+    <value>Create new alternative</value>
+  </data>
+  <data name="CreateNewCharacter" xml:space="preserve">
+    <value>Create new character</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
   <data name="Ipa" xml:space="preserve">
     <value>IPA</value>
   </data>
   <data name="Loading" xml:space="preserve">
     <value>Loading</value>
   </data>
+  <data name="NewFemale" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="NewMale" xml:space="preserve">
+    <value>New</value>
+  </data>
   <data name="NumberOfStrokes" xml:space="preserve">
     <value>Number of strokes</value>
   </data>
   <data name="Pinyin" xml:space="preserve">
     <value>Pinyin</value>
+  </data>
+  <data name="Radical" xml:space="preserve">
+    <value>Radical</value>
+  </data>
+  <data name="RadicalAlternative" xml:space="preserve">
+    <value>Radical alternative</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="SelectBaseCharacter" xml:space="preserve">
+    <value>Select base character</value>
+  </data>
+  <data name="SelectRadical" xml:space="preserve">
+    <value>Select radical</value>
+  </data>
+  <data name="SelectRadicalAlternative" xml:space="preserve">
+    <value>Select radical alternative</value>
+  </data>
+  <data name="Tone" xml:space="preserve">
+    <value>Tone</value>
   </data>
 </root>

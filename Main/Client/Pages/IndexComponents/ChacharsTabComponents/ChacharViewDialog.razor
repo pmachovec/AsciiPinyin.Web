@@ -1,0 +1,50 @@
+@using AsciiPinyin.Web.Shared.Constants
+@using AsciiPinyin.Web.Shared.Resources
+@using Microsoft.AspNetCore.Components.Web
+
+@inherits ChacharViewDialogBase
+
+<div
+    class="modal-backdrop fade @CssClasses.D_NONE"
+    id="@BackdropId">
+</div>
+<div
+    class="modal fade @CssClasses.D_NONE"
+    tabindex="-1"
+    role="dialog"
+    id="@RootId">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header justify-content-between">
+                <div></div>
+                <h2 class="modal-title fw-bold" id="theCharacter">@Chachar?.TheCharacter</h2>
+                <CloseButton CloseAsync="CloseAsync" CancellationToken="CancellationToken.None" />
+            </div>
+            <div class="modal-body">
+                <p class="card-text">
+                    @($"{Localizer[Resource.Pinyin]}: {Chachar?.RealPinyin}")
+                </p>
+                <p class="card-text">
+                    @($"{Localizer[Resource.Ipa]}: {Chachar?.Ipa}")
+                </p>
+                <p class="card-text">
+                    @($"{Localizer[Resource.NumberOfStrokes]}: {Chachar?.Strokes}")
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-modal btn-danger"
+                    aria-label="@Localizer[Resource.Delete]">
+                    <span>@Localizer[Resource.Delete]</span>
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-modal btn-primary"
+                    aria-label="@Localizer[Resource.Edit]">
+                    <span>@Localizer[Resource.Edit]</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

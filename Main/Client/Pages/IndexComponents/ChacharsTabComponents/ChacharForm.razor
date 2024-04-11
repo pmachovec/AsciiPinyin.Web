@@ -1,0 +1,153 @@
+@using AsciiPinyin.Web.Client.Pages.IndexComponents
+@using AsciiPinyin.Web.Shared.Constants
+@using AsciiPinyin.Web.Shared.Models
+@using AsciiPinyin.Web.Shared.Resources
+@using Microsoft.AspNetCore.Components.Web
+
+@inherits ChacharFormBase
+
+<div
+    class="modal-backdrop fade @CssClasses.D_NONE"
+    id="@BackdropId">
+</div>
+<div
+    class="modal fade @CssClasses.D_NONE"
+    tabindex="-1"
+    role="dialog"
+    id="@IDs.CHACHAR_FORM_ROOT">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header justify-content-between">
+                <h4 class="modal-title fw-bold ms-3" id="theCharacter">@Localizer[Resource.CreateNewCharacter]</h4>
+                <CloseButton CloseAsync="CloseAsync" CancellationToken="CancellationToken.None" />
+            </div>
+            <div class="modal-body m-3">
+                <form>
+                    <div class="mb-3">
+                        <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.ChineseCharacter]</div>
+                        <div class="input-group">
+                            <input
+                                type="text"
+                                class="form-control"
+                                maxlength="1"
+                                @bind-value="TheCharacter">
+                        </div>
+                        <div class="error-label form-text mx-1 mt-0 text-danger d-inline"></div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Pinyin]</div>
+                        <div class="input-group">
+                            <input
+                                type="text"
+                                class="form-control"
+                                @bind-value="Pinyin">
+                        </div>
+                        <div class="error-label form-text mx-1 mt-0 text-danger"></div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Ipa]</div>
+                        <div class="input-group">
+                            <input
+                                type="text"
+                                class="form-control"
+                                @bind-value="Ipa">
+                        </div>
+                        <div class="error-label form-text mx-1 mt-0 text-danger"></div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Tone]</div>
+                        <div class="input-group">
+                            <input
+                                type="number"
+                                class="form-control"
+                                min="@ByteConstants.MIN_TONE"
+                                max="@ByteConstants.MAX_TONE"
+                                @bind-value="Tone">
+                        </div>
+                        <div class="error-label form-text mx-1 mt-0 text-danger"></div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.NumberOfStrokes]</div>
+                        <div class="input-group">
+                            <input
+                                type="number"
+                                class="form-control"
+                                min="@ByteConstants.MIN_STROKES"
+                                max="@ByteConstants.MAX_STROKES"
+                                @bind-value="Strokes">
+                        </div>
+                        <div class="error-label form-text mx-1 mt-0 text-danger"></div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Radical]</div>
+                        <div class="input-group">
+                            <button
+                                type="button"
+                                class="btn-input-text form-control"
+                                @onclick="async _ => await OpenRadicalSelectorAsync(CancellationToken.None)">
+                                @RadicalCharacter
+                            </button>
+                            <button
+                                type="button"
+                                class="btn @CssClasses.BTN_OUTLINE_PRIMARY"
+                                @onclick="ClearRadical">
+                                &#x2715;
+                            </button>
+                        </div>
+                        <div class="error-label form-text mx-1 mt-0 text-danger"></div>
+                    </div>
+                    <div class="mb-3">
+                        <div
+                            class="form-text mx-1"
+                            id="@IDs.CHACHAR_FORM_ALTERNATIVE_LABEL">
+                            @Localizer[Resource.RadicalAlternative]
+                        </div>
+                        <div class="input-group">
+                            <button
+                                type="button"
+                                class="btn-input-text form-control"
+                                id="@IDs.CHACHAR_FORM_ALTERNATIVE"
+                                @onclick="async _ => await OpenAlternativeSelectorAsync(CancellationToken.None)">
+                                @RadicalAlternativeCharacter
+                            </button>
+                            <button
+                                type="button"
+                                class="btn"
+                                id="@IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE"
+                                @onclick="ClearAlternative">
+                                &#x2715;
+                            </button>
+                        </div>
+                        <div class="error-label form-text mx-1 mt-0 text-danger">
+                            @AlternativeError
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-modal btn-primary"
+                    aria-label="@Localizer[Resource.Save]">
+                    <span>@Localizer[Resource.Save]</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<EntitySelector
+    @ref="RadicalSelector"
+    TEntity="Chachar"
+    Entities="Index.Chachars.Where(chachar => chachar.IsRadical)"
+    HtmlTitle="@Localizer[Resource.SelectRadical]"
+    Title="@Localizer[Resource.SelectRadical]"
+    RootId="@IDs.CHACHAR_FORM_RADICAL_SELECTOR"
+    SelectEntityAsync="SelectRadicalAsync"/>
+<EntitySelector
+    @ref="AlternativeSelector"
+    TEntity="Alternative"
+    Entities="AvailableAlternatives"
+    HtmlTitle="@Localizer[Resource.SelectRadicalAlternative]"
+    Title="@Localizer[Resource.SelectRadicalAlternative]"
+    RootId="@IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR"
+    SelectEntityAsync="SelectAlternativeAsync"/>

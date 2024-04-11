@@ -4,9 +4,11 @@
 @using Microsoft.AspNetCore.Components.Web
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 
+@inherits AppBase
+
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,6 +17,7 @@
         <link rel="stylesheet" href="/asciipinyin/css/app.css" />
         <link rel="stylesheet" href="/asciipinyin/css/bootstrap/bootstrap.min.css" />
         <link rel="stylesheet" href="/asciipinyin/AsciiPinyin.Web.Server.styles.css" />
+        <title>@StringConstants.ASCII_PINYIN</title>
         <HeadOutlet @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
     </head>
     <body>

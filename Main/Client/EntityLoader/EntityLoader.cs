@@ -11,17 +11,33 @@ public sealed class EntityLoader(
     private readonly HttpClient _httpClient = httpClient;
     private readonly IJSInteropConsole _jsInteropConsole = jsInteropConsole;
 
-    public async Task<T[]?> LoadEntitiesAsync<T>(string entitiesApiName) where T : IEntity
+    public async Task<IEnumerable<TEntity>> LoadEntitiesAsync<TEntity>(
+        string entitiesApiName,
+        CancellationToken cancellationToken) where TEntity : IEntity
     {
         try
         {
-            return await _httpClient.GetFromJsonAsync<T[]>(entitiesApiName);
+            var result = await _httpClient.GetFromJsonAsync<IEnumerable<TEntity>>(entitiesApiName, cancellationToken);
+
+            if (result is null)
+            {
+                jsInteropConsole.ConsoleError($"EntityLoader.LoadEntitiesAsync: Result of retrieving '{entitiesApiName}' is null.");
+                return [];
+            }
+
+            if (!result.Any())
+            {
+                jsInteropConsole.ConsoleError($"EntityLoader.LoadEntitiesAsync: Result of retrieving '{entitiesApiName}' is empty.");
+            }
+
+            return result;
         }
-        catch
+        catch (Exception ex)
         {
-            _jsInteropConsole.ConsoleWarning($"EntityLoader.LoadEntitiesAsync: Error occured on the server side when retrieving '{entitiesApiName}'");
+            _jsInteropConsole.ConsoleError($"EntityLoader.LoadEntitiesAsync: Error occured on the server side when retrieving '{entitiesApiName}'.");
+            _jsInteropConsole.ConsoleError(ex);
         }
 
-        return null;
+        return [];
     }
 }

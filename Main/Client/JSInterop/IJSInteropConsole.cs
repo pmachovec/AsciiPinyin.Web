@@ -22,4 +22,10 @@ public interface IJSInteropConsole
     /// </summary>
     /// <param name="errorText">The text to be written as an error to the console.</param>
     void ConsoleError(string errorText);
+
+    /// <summary>
+    /// Write an exception to the console.
+    /// </summary>
+    /// <param name="exception">The exception to be transformed to a string and written as an error to the console.</param>
+    void ConsoleError(Exception exception);
 }

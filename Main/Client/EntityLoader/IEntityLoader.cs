@@ -4,5 +4,5 @@ namespace AsciiPinyin.Web.Client.EntityLoader;
 
 public interface IEntityLoader
 {
-    Task<T[]?> LoadEntitiesAsync<T>(string entitiesApiName) where T : IEntity;
+    Task<IEnumerable<TEntity>> LoadEntitiesAsync<TEntity>(string entitiesApiName, CancellationToken cancellationToken) where TEntity : IEntity;
 }

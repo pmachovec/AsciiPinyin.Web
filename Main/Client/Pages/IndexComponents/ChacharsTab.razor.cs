@@ -1,4 +1,3 @@
-using AsciiPinyin.Web.Client.EntityLoader;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 using AsciiPinyin.Web.Shared.Constants;
@@ -11,43 +10,56 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public class ChacharsTabBase : ComponentBase, IEntityTab
 {
-    public Chachar[]? Chachars { get; private set; }
+    private string _htmlTitle = $"{StringConstants.ASCII_PINYIN} - {StringConstants.CHARACTERS}";
+
+    protected ChacharForm ChacharForm { get; set; } = default!;
+
+    protected ChacharViewDialog ChacharViewDialog { get; set; } = default!;
+
     public bool IsVisible { get; private set; }
-    public string Title { get; private set; } = StringConstants.CHARACTERS;
-
-    public bool AreEntitiesInitialized => Chachars != null;
-
-    [Inject]
-    private IEntityLoader EntityLoader { get; set; } = default!;
 
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
     [Inject]
-    private IStringLocalizer<Resource> Localizer { get; set; } = default!;
-
-    [Inject]
     protected IJSInteropConsole JSInteropConsole { get; set; } = default!;
 
-    protected override void OnInitialized()
-        => Title = $"{Localizer[Resource.AsciiPinyin]} - {Localizer[Resource.Characters]}";
+    [Inject]
+    protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    public async void InitializeEntites()
+    [Parameter]
+    public required Index Index { get; set; } = default!;
+
+    protected override void OnInitialized() =>
+        _htmlTitle = $"{StringConstants.ASCII_PINYIN} - {Localizer[Resource.Characters]}";
+
+    protected override void OnAfterRender(bool firstRender)
     {
-        Chachars = await EntityLoader.LoadEntitiesAsync<Chachar>("characters");
-        JSInteropDOM.HideElement(IDs.CHACHARS_TAB_LOADING);
-        StateHasChanged();
+        if (firstRender)
+        {
+            ChacharForm.EventOnClose +=
+                async (_, _) => await JSInteropDOM.SetTitleAsync(_htmlTitle, CancellationToken.None);
+            ChacharViewDialog.EventOnClose +=
+                async (_, _) => await JSInteropDOM.SetTitleAsync(_htmlTitle, CancellationToken.None);
+        }
     }
 
-    public void Hide()
+    public async Task HideAsync(CancellationToken cancellationToken)
     {
         IsVisible = false;
-        JSInteropDOM.HideElement(IDs.CHACHARS_TAB_ROOT);
+        await JSInteropDOM.HideElementAsync(IDs.CHACHARS_TAB_ROOT, cancellationToken);
     }
 
-    public void Show()
+    public async Task ShowAsync(CancellationToken cancellationToken)
     {
         IsVisible = true;
-        JSInteropDOM.ShowElement(IDs.CHACHARS_TAB_ROOT);
+        await JSInteropDOM.SetTitleAsync(_htmlTitle, cancellationToken);
+        await JSInteropDOM.ShowElementAsync(IDs.CHACHARS_TAB_ROOT, cancellationToken);
     }
+
+    protected async Task ShowChacharFormAsync(CancellationToken cancellationToken) =>
+        await ChacharForm.OpenAsync(cancellationToken);
+
+    protected async Task SelectChacharAsync(Chachar chachar, CancellationToken cancellationToken) =>
+        await ChacharViewDialog.OpenAsync(chachar, cancellationToken);
 }

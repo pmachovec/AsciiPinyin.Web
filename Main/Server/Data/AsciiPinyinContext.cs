@@ -28,35 +28,5 @@ public sealed class AsciiPinyinContext : DbContext
                 alternative.OriginalCharacter,
                 alternative.OriginalPinyin
             });
-
-        _ = modelBuilder.Entity<Chachar>()
-            .HasOne(chachar => chachar.RadicalChachar)
-            .WithOne()
-            .HasForeignKey<Chachar>(chachar => new
-            {
-                chachar.RadicalCharacter,
-                chachar.RadicalPinyin
-            })
-            .HasPrincipalKey<Chachar>(radicalChachar => new
-            {
-                radicalChachar.TheCharacter,
-                radicalChachar.Pinyin
-            });
-
-        _ = modelBuilder.Entity<Chachar>()
-            .HasOne(chachar => chachar.RadicalAlternative)
-            .WithOne()
-            .HasForeignKey<Chachar>(chachar => new
-            {
-                chachar.RadicalAlternativeCharacter,
-                chachar.RadicalCharacter,
-                chachar.RadicalPinyin
-            })
-            .HasPrincipalKey<Alternative>(radicalAlternative => new
-            {
-                radicalAlternative.TheCharacter,
-                radicalAlternative.OriginalCharacter,
-                radicalAlternative.OriginalPinyin
-            });
     }
 }

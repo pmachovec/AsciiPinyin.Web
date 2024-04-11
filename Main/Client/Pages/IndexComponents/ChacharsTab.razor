@@ -1,27 +1,31 @@
 @using AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents
 @using AsciiPinyin.Web.Shared.Components
 @using AsciiPinyin.Web.Shared.Constants
+@using AsciiPinyin.Web.Shared.Models
+@using AsciiPinyin.Web.Shared.Resources
 
 @inherits ChacharsTabBase
 
-<div id="@IDs.CHACHARS_TAB_ROOT" style="display: none">
-    <div id="@IDs.CHACHARS_TAB_LOADING">
-        <Loading />
-    </div>
-
+<div class="tab-root" id="@IDs.CHACHARS_TAB_ROOT">
     @if (IsVisible)
     {
-        @if (Chachars is null)
+        @if (!Index.Chachars.Any())
         {
             JSInteropConsole.ConsoleWarning("ChacharsTab: No chachars retrieved from the server.");
         }
-        else if (Chachars.Length < 1)
-        {
-            JSInteropConsole.ConsoleWarning("ChacharsTab: Chachars retrieved from the server are empty.");
-        }
         else
         {
-            <ChacharsCards Chachars="@Chachars" />
+            <div class="container-cards container-cards-tab">
+                <NewEntityCard
+                    Label="@($"{Localizer[Resource.NewMale]}...")"
+                    ShowEntityFormAsync="ShowChacharFormAsync" />
+                <EntityCards
+                    TEntity="Chachar"
+                    Entities="Index.Chachars"
+                    SelectEntityAsync="SelectChacharAsync" />
+            </div>
         }
     }
 </div>
+<ChacharForm @ref="ChacharForm" Index="Index" />
+<ChacharViewDialog @ref="ChacharViewDialog" />

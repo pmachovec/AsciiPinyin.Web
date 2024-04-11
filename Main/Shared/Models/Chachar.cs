@@ -8,10 +8,14 @@ namespace AsciiPinyin.Web.Shared.Models;
 [Table("chachar")]
 public sealed class Chachar : IEntity
 {
+    /*
+     * The string type must be used even for single characters.
+     * The char type tends to malfunction when sent over HTTP requests.
+     */
     [JsonPropertyName("the_character")]
     [Column("the_character")]
     [Required]
-    public char TheCharacter { get; set; }
+    public string TheCharacter { get; set; } = string.Empty;
 
     [JsonPropertyName("pinyin")]
     [Column("pinyin")]
@@ -39,7 +43,7 @@ public sealed class Chachar : IEntity
 
     [JsonPropertyName("radical_character")]
     [Column("radical_character")]
-    public char? RadicalCharacter { get; set; }
+    public string? RadicalCharacter { get; set; }
 
     [JsonPropertyName("radical_pinyin")]
     [Column("radical_pinyin")]
@@ -51,11 +55,14 @@ public sealed class Chachar : IEntity
 
     [JsonPropertyName("radical_alternative_character")]
     [Column("radical_alternative_character")]
-    public char? RadicalAlternativeCharacter { get; set; }
+    public string? RadicalAlternativeCharacter { get; set; }
 
-    public Chachar? RadicalChachar { get; set; }
+    // To be replaced by conversion to showing tones by diacritics.
+    [JsonIgnore]
+    public string RealPinyin => Pinyin + Tone;
 
-    public Alternative? RadicalAlternative { get; set; }
+    [JsonIgnore]
+    public bool IsRadical => RadicalCharacter is null;
 
     public static bool operator ==(Chachar left, Chachar right) => Comparator.EqualsForOperator(left, right);
 

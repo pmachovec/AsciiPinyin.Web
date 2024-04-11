@@ -1,4 +1,3 @@
-using AsciiPinyin.Web.Client.EntityLoader;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 using AsciiPinyin.Web.Shared.Constants;
@@ -11,43 +10,56 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public class AlternativesTabBase : ComponentBase, IEntityTab
 {
-    public Alternative[]? Alternatives { get; private set; }
+    private string _htmlTitle = $"{StringConstants.ASCII_PINYIN} - {StringConstants.ALTERNATIVES}";
+
+    protected AlternativeForm AlternativeForm { get; set; } = default!;
+
+    protected AlternativeViewDialog AlternativeViewDialog { get; set; } = default!;
+
     public bool IsVisible { get; private set; }
-    public string Title { get; private set; } = StringConstants.ALTERNATIVES;
-
-    public bool AreEntitiesInitialized => Alternatives != null;
-
-    [Inject]
-    private IEntityLoader EntityLoader { get; set; } = default!;
 
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
     [Inject]
-    private IStringLocalizer<Resource> Localizer { get; set; } = default!;
-
-    [Inject]
     protected IJSInteropConsole JSInteropConsole { get; set; } = default!;
 
-    protected override void OnInitialized()
-        => Title = $"{Localizer[Resource.AsciiPinyin]} - {Localizer[Resource.Alternatives]}";
+    [Inject]
+    protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    public async void InitializeEntites()
+    [Parameter]
+    public required Index Index { get; set; } = default!;
+
+    protected override void OnInitialized() =>
+        _htmlTitle = $"{StringConstants.ASCII_PINYIN} - {Localizer[Resource.Alternatives]}";
+
+    protected override void OnAfterRender(bool firstRender)
     {
-        Alternatives = await EntityLoader.LoadEntitiesAsync<Alternative>("alternatives");
-        JSInteropDOM.HideElement(IDs.ALTERNATIVES_TAB_LOADING);
-        StateHasChanged();
+        if (firstRender)
+        {
+            AlternativeForm.EventOnClose +=
+                async (_, _) => await JSInteropDOM.SetTitleAsync(_htmlTitle, CancellationToken.None);
+            AlternativeViewDialog.EventOnClose +=
+                async (_, _) => await JSInteropDOM.SetTitleAsync(_htmlTitle, CancellationToken.None);
+        }
     }
 
-    public void Hide()
+    public async Task HideAsync(CancellationToken cancellationToken)
     {
         IsVisible = false;
-        JSInteropDOM.HideElement(IDs.ALTERNATIVES_TAB_ROOT);
+        await JSInteropDOM.HideElementAsync(IDs.ALTERNATIVES_TAB_ROOT, cancellationToken);
     }
 
-    public void Show()
+    public async Task ShowAsync(CancellationToken cancellationToken)
     {
         IsVisible = true;
-        JSInteropDOM.ShowElement(IDs.ALTERNATIVES_TAB_ROOT);
+        await JSInteropDOM.SetTitleAsync(_htmlTitle, cancellationToken);
+        await JSInteropDOM.ShowElementAsync(IDs.ALTERNATIVES_TAB_ROOT, cancellationToken);
     }
+
+    protected async Task ShowAlternativeFormAsync(CancellationToken cancellationToken) =>
+        await AlternativeForm.OpenAsync(cancellationToken);
+
+    public async Task SelectAlternativeAsync(Alternative alternative, CancellationToken cancellationToken) =>
+        await AlternativeViewDialog.OpenAsync(alternative, cancellationToken);
 }

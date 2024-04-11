@@ -61,29 +61,20 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Alternative character.
+        /// </summary>
+        public static string AlternativeCharacter {
+            get {
+                return ResourceManager.GetString("AlternativeCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Alternatives.
         /// </summary>
         public static string Alternatives {
             get {
                 return ResourceManager.GetString("Alternatives", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ASCII.
-        /// </summary>
-        public static string Ascii {
-            get {
-                return ResourceManager.GetString("Ascii", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ASCII Pinyin.
-        /// </summary>
-        public static string AsciiPinyin {
-            get {
-                return ResourceManager.GetString("AsciiPinyin", resourceCulture);
             }
         }
         
@@ -115,6 +106,60 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Chinese character.
+        /// </summary>
+        public static string ChineseCharacter {
+            get {
+                return ResourceManager.GetString("ChineseCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Close.
+        /// </summary>
+        public static string Close {
+            get {
+                return ResourceManager.GetString("Close", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create new alternative.
+        /// </summary>
+        public static string CreateNewAlternative {
+            get {
+                return ResourceManager.GetString("CreateNewAlternative", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create new character.
+        /// </summary>
+        public static string CreateNewCharacter {
+            get {
+                return ResourceManager.GetString("CreateNewCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        public static string Delete {
+            get {
+                return ResourceManager.GetString("Delete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit.
+        /// </summary>
+        public static string Edit {
+            get {
+                return ResourceManager.GetString("Edit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to IPA.
         /// </summary>
         public static string Ipa {
@@ -133,6 +178,24 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to New.
+        /// </summary>
+        public static string NewFemale {
+            get {
+                return ResourceManager.GetString("NewFemale", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New.
+        /// </summary>
+        public static string NewMale {
+            get {
+                return ResourceManager.GetString("NewMale", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Number of strokes.
         /// </summary>
         public static string NumberOfStrokes {
@@ -147,6 +210,69 @@ namespace AsciiPinyin.Web.Shared.Resources {
         public static string Pinyin {
             get {
                 return ResourceManager.GetString("Pinyin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Radical.
+        /// </summary>
+        public static string Radical {
+            get {
+                return ResourceManager.GetString("Radical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Radical alternative.
+        /// </summary>
+        public static string RadicalAlternative {
+            get {
+                return ResourceManager.GetString("RadicalAlternative", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save.
+        /// </summary>
+        public static string Save {
+            get {
+                return ResourceManager.GetString("Save", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select base character.
+        /// </summary>
+        public static string SelectBaseCharacter {
+            get {
+                return ResourceManager.GetString("SelectBaseCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select radical.
+        /// </summary>
+        public static string SelectRadical {
+            get {
+                return ResourceManager.GetString("SelectRadical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select radical alternative.
+        /// </summary>
+        public static string SelectRadicalAlternative {
+            get {
+                return ResourceManager.GetString("SelectRadicalAlternative", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tone.
+        /// </summary>
+        public static string Tone {
+            get {
+                return ResourceManager.GetString("Tone", resourceCulture);
             }
         }
     }
