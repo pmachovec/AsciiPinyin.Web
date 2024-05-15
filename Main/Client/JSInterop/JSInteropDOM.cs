@@ -27,6 +27,15 @@ internal sealed class JSInteropDOM(IJSRuntime jsRuntime) : IJSInteropDOM
     public async Task SetTitleAsync(string title, CancellationToken cancellationToken) =>
         await _jsRuntime.InvokeVoidAsync("setTitle", cancellationToken, title);
 
+    public async Task SetTextAsync(string elementId, string text, CancellationToken cancellationToken) =>
+        await _jsRuntime.InvokeVoidAsync("setText", cancellationToken, elementId, text);
+
+    public async Task SetValueAsync(string elementId, string value, CancellationToken cancellationToken) =>
+        await _jsRuntime.InvokeVoidAsync("setValue", cancellationToken, elementId, value);
+
+    public async Task RemoveTextAsync(string elementId, CancellationToken cancellationToken) =>
+        await _jsRuntime.InvokeVoidAsync("removeText", cancellationToken, elementId);
+
     public async Task SetZIndexAsync(string elementId, int value, CancellationToken cancellationToken) =>
         await _jsRuntime.InvokeVoidAsync("setZIndex", cancellationToken, elementId, value);
 }

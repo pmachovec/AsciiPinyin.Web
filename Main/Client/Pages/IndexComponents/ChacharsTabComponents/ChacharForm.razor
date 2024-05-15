@@ -29,10 +29,17 @@
                             <input
                                 type="text"
                                 class="form-control"
-                                maxlength="1"
-                                @bind-value="TheCharacter">
+                                id="@IDs.CHACHAR_FORM_THE_CHARACTER_INPUT"
+                                @oninput="changeEventArgs => PreventTooLongCharacterInputAsync(changeEventArgs, CancellationToken.None)"
+                                @onclick="async _ => await ClearWrongInputAsync(
+                                    IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
+                                    IDs.CHACHAR_FORM_THE_CHARACTER_ERROR,
+                                    CancellationToken.None)">
                         </div>
-                        <div class="error-label form-text mx-1 mt-0 text-danger d-inline"></div>
+                        <div
+                            class="error-label form-text mx-1 mt-0 text-danger d-inline"
+                            id="@IDs.CHACHAR_FORM_THE_CHARACTER_ERROR">
+                        </div>
                     </div>
                     <div class="mb-3">
                         <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Pinyin]</div>
@@ -128,7 +135,8 @@
                 <button
                     type="button"
                     class="btn btn-modal btn-primary"
-                    aria-label="@Localizer[Resource.Save]">
+                    aria-label="@Localizer[Resource.Save]"
+                    @onclick="async _ => await CheckAndSubmitAsync(CancellationToken.None)">
                     <span>@Localizer[Resource.Save]</span>
                 </button>
             </div>

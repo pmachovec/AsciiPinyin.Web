@@ -56,6 +56,32 @@ public interface IJSInteropDOM
     Task RemoveClassAsync(string elementId, string theClass, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Sets the given text to the given element.
+    /// </summary>
+    /// <param name="elementId">ID of the elemet for to which the text should be set.</param>
+    /// <param name="text">The text to be set.</param>
+    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
+    /// <returns></returns>
+    Task SetTextAsync(string elementId, string text, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets the given value to the given element.
+    /// </summary>
+    /// <param name="elementId">ID of the elemet for to which the value should be set.</param>
+    /// <param name="value">The value to be set.</param>
+    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
+    /// <returns></returns>
+    Task SetValueAsync(string elementId, string value, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets the text of the given element to null.
+    /// </summary>
+    /// <param name="elementId">ID of the element for which the text should be set to null.</param>
+    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
+    /// <returns></returns>
+    Task RemoveTextAsync(string elementId, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Sets title of the page.
     /// </summary>
     /// <param name="title">The title to be set.</param>

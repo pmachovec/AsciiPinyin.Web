@@ -2,6 +2,7 @@ using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
+using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 
@@ -160,5 +161,75 @@ public class ChacharFormBase : ModalWithBackdropBaseGeneral
     {
         RadicalAlternativeCharacter = null;
         StateHasChanged();
+    }
+
+    protected async Task PreventTooLongCharacterInputAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
+    {
+        if (changeEventArgs.Value is null)
+        {
+            TheCharacter = null;
+            await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, string.Empty, cancellationToken);
+            return;
+        }
+
+        if (
+            changeEventArgs.Value is string theCharacter
+            && (theCharacter.Length <= 1 || TextUtils.GetStringRealLength(theCharacter) <= 1))
+        {
+            TheCharacter = theCharacter;
+        }
+        else
+        {
+            await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, TheCharacter ?? string.Empty, cancellationToken);
+        }
+    }
+
+    protected async Task ClearWrongInputAsync(string inputId, string errorId, CancellationToken cancellationToken)
+    {
+        await JSInteropDOM.RemoveClassAsync(inputId, CssClasses.BORDER_DANGER, cancellationToken);
+        await JSInteropDOM.RemoveTextAsync(errorId, cancellationToken);
+    }
+
+    protected async Task CheckAndSubmitAsync(CancellationToken cancellationToken)
+    {
+        var success = await CheckTheCharacter(cancellationToken);
+        // TODO && CheckPinyin && CheckStrokes etc.
+
+        if (success)
+        {
+            // TODO submit
+        }
+    }
+
+    private async Task<bool> CheckTheCharacter(CancellationToken cancellationToken)
+    {
+        var theCharacterErrorText = GetTheCharacterErrorText();
+
+        if (theCharacterErrorText is { } yesThereIsTheCharacterErrorText)
+        {
+            await JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, CssClasses.BORDER_DANGER, cancellationToken);
+            await JSInteropDOM.SetTextAsync(IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, yesThereIsTheCharacterErrorText, cancellationToken);
+            return false;
+        }
+
+        return true;
+    }
+
+    private string? GetTheCharacterErrorText()
+    {
+        if (string.IsNullOrEmpty(TheCharacter))
+        {
+            return Localizer[Resource.CompulsoryValue];
+        }
+        else if (TextUtils.GetStringRealLength(TheCharacter) > 1)
+        {
+            return Localizer[Resource.OnlyOneCharacterAllowed];
+        }
+        else if (!TextUtils.IsOnlyChineseCharacters(TheCharacter))
+        {
+            return Localizer[Resource.MustBeChineseCharacter];
+        }
+
+        return null;
     }
 }

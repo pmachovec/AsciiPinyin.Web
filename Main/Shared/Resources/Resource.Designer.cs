@@ -124,6 +124,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Compulsory value.
+        /// </summary>
+        public static string CompulsoryValue {
+            get {
+                return ResourceManager.GetString("CompulsoryValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create new alternative.
         /// </summary>
         public static string CreateNewAlternative {
@@ -178,6 +187,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Must be a Chinese character.
+        /// </summary>
+        public static string MustBeChineseCharacter {
+            get {
+                return ResourceManager.GetString("MustBeChineseCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New.
         /// </summary>
         public static string NewFemale {
@@ -201,6 +219,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         public static string NumberOfStrokes {
             get {
                 return ResourceManager.GetString("NumberOfStrokes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only one character allowed.
+        /// </summary>
+        public static string OnlyOneCharacterAllowed {
+            get {
+                return ResourceManager.GetString("OnlyOneCharacterAllowed", resourceCulture);
             }
         }
         
