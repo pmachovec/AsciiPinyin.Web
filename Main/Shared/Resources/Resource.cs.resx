@@ -171,9 +171,6 @@
   <data name="NumberOfStrokes" xml:space="preserve">
     <value>Počet tahů</value>
   </data>
-  <data name="OnlyOneCharacterAllowed" xml:space="preserve">
-    <value>Povolen pouze jeden znak</value>
-  </data>
   <data name="Pinyin" xml:space="preserve">
     <value>Pinyin</value>
   </data>

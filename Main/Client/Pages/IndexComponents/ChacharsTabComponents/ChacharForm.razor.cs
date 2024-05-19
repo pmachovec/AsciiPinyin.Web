@@ -163,7 +163,7 @@ public class ChacharFormBase : ModalWithBackdropBaseGeneral
         StateHasChanged();
     }
 
-    protected async Task PreventTooLongCharacterInputAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
+    protected async Task PreventMultipleCharacters(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
     {
         if (changeEventArgs.Value is null)
         {
@@ -171,23 +171,26 @@ public class ChacharFormBase : ModalWithBackdropBaseGeneral
             await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, string.Empty, cancellationToken);
             return;
         }
-
-        if (
-            changeEventArgs.Value is string theCharacter
-            && (theCharacter.Length <= 1 || TextUtils.GetStringRealLength(theCharacter) <= 1))
+        else if (changeEventArgs.Value is string theCharacter)
         {
-            TheCharacter = theCharacter;
-        }
-        else
-        {
-            await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, TheCharacter ?? string.Empty, cancellationToken);
+            if (theCharacter.Length <= 1 || TextUtils.GetStringRealLength(theCharacter) <= 1)
+            {
+                TheCharacter = theCharacter;
+            }
+            else
+            {
+                var theCharacterStart = TextUtils.GetStringFirstCharacterAsString(theCharacter);
+                TheCharacter = theCharacterStart;
+                await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, theCharacterStart, cancellationToken);
+            }
         }
     }
 
     protected async Task ClearWrongInputAsync(string inputId, string errorId, CancellationToken cancellationToken)
     {
-        await JSInteropDOM.RemoveClassAsync(inputId, CssClasses.BORDER_DANGER, cancellationToken);
-        await JSInteropDOM.RemoveTextAsync(errorId, cancellationToken);
+        await Task.WhenAll(
+            JSInteropDOM.RemoveClassAsync(inputId, CssClasses.BORDER_DANGER, cancellationToken),
+            JSInteropDOM.RemoveTextAsync(errorId, cancellationToken));
     }
 
     protected async Task CheckAndSubmitAsync(CancellationToken cancellationToken)
@@ -207,8 +210,9 @@ public class ChacharFormBase : ModalWithBackdropBaseGeneral
 
         if (theCharacterErrorText is { } yesThereIsTheCharacterErrorText)
         {
-            await JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, CssClasses.BORDER_DANGER, cancellationToken);
-            await JSInteropDOM.SetTextAsync(IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, yesThereIsTheCharacterErrorText, cancellationToken);
+            await Task.WhenAll(
+                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, CssClasses.BORDER_DANGER, cancellationToken),
+                JSInteropDOM.SetTextAsync(IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, yesThereIsTheCharacterErrorText, cancellationToken));
             return false;
         }
 
@@ -221,14 +225,12 @@ public class ChacharFormBase : ModalWithBackdropBaseGeneral
         {
             return Localizer[Resource.CompulsoryValue];
         }
-        else if (TextUtils.GetStringRealLength(TheCharacter) > 1)
-        {
-            return Localizer[Resource.OnlyOneCharacterAllowed];
-        }
         else if (!TextUtils.IsOnlyChineseCharacters(TheCharacter))
         {
             return Localizer[Resource.MustBeChineseCharacter];
         }
+
+        // Multi-character input is unreachable thanks to PreventMultipleCharacters, no need to handle this case.
 
         return null;
     }

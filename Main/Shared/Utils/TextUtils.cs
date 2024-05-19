@@ -46,6 +46,9 @@ public static class TextUtils
     public static int GetStringRealLength(string theString) =>
         new StringInfo(theString).LengthInTextElements;
 
+    public static string GetStringFirstCharacterAsString(string theString) =>
+        new StringInfo(theString).SubstringByTextElements(0, 1);
+
     public static bool IsOnlyChineseCharacters(string theString)
     {
         var stringInfo = new StringInfo(theString);

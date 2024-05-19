@@ -98,3 +98,6 @@ dotnet_diagnostic.CA1707.severity = none
 
 # CA1716: Identifiers should not match keywords
 dotnet_code_quality.CA1716.analyzed_symbol_kinds = NamedType,Method,Property,Event,Parameter
+
+# CS9124: Parameter is captured into the state of the enclosing type and its value is also used to initialize a field, property, or event.
+dotnet_diagnostic.CS9124.severity = none

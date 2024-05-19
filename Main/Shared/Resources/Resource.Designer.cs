@@ -223,15 +223,6 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Only one character allowed.
-        /// </summary>
-        public static string OnlyOneCharacterAllowed {
-            get {
-                return ResourceManager.GetString("OnlyOneCharacterAllowed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Pinyin.
         /// </summary>
         public static string Pinyin {

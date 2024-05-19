@@ -30,8 +30,8 @@
                                 type="text"
                                 class="form-control"
                                 id="@IDs.CHACHAR_FORM_THE_CHARACTER_INPUT"
-                                @oninput="changeEventArgs => PreventTooLongCharacterInputAsync(changeEventArgs, CancellationToken.None)"
-                                @onclick="async _ => await ClearWrongInputAsync(
+                                @oninput="changeEventArgs => PreventMultipleCharacters(changeEventArgs, CancellationToken.None)"
+                                @onmousedown="async _ => await ClearWrongInputAsync(
                                     IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
                                     IDs.CHACHAR_FORM_THE_CHARACTER_ERROR,
                                     CancellationToken.None)">
@@ -136,6 +136,7 @@
                     type="button"
                     class="btn btn-modal btn-primary"
                     aria-label="@Localizer[Resource.Save]"
+                    id="@IDs.CHACHAR_FORM_SUBMIT_BUTTON"
                     @onclick="async _ => await CheckAndSubmitAsync(CancellationToken.None)">
                     <span>@Localizer[Resource.Save]</span>
                 </button>

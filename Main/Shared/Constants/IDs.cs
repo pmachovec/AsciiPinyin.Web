@@ -15,6 +15,7 @@ public static class IDs
     public const string CHACHAR_FORM_CLEAR_ALTERNATIVE = "chachar-form-clear-alternative";
     public const string CHACHAR_FORM_RADICAL_SELECTOR = "chachar-form-radical-selector";
     public const string CHACHAR_FORM_ROOT = "chachar-form-root";
+    public const string CHACHAR_FORM_SUBMIT_BUTTON = "chachar-form-submit-button";
     public const string CHACHAR_FORM_THE_CHARACTER_ERROR = "chachar-form-the-character-error";
     public const string CHACHAR_FORM_THE_CHARACTER_INPUT = "chachar-form-the-character-input";
     public const string CHACHAR_VIEW_DIALOG_BACKDROP = "chachar-view-dialog-backdrop";

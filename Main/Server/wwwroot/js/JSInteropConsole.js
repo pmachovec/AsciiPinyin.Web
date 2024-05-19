@@ -1,2 +1,5 @@
+consoleInfo = (warningText) => { console.warn(warningText); };
+
 consoleWarning = (warningText) => { console.warn(warningText); };
-errorWarning = (errorText) => { console.error(errorText); };
+
+consoleError = (errorText) => { console.error(errorText); };
