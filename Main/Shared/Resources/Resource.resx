@@ -171,6 +171,9 @@
   <data name="NumberOfStrokes" xml:space="preserve">
     <value>Number of strokes</value>
   </data>
+  <data name="OnlyAsciiAllowed" xml:space="preserve">
+    <value>Can contain only basic letters A-Z</value>
+  </data>
   <data name="Pinyin" xml:space="preserve">
     <value>Pinyin</value>
   </data>

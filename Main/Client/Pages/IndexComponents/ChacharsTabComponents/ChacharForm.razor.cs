@@ -5,11 +5,15 @@ using AsciiPinyin.Web.Shared.Resources;
 using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
+using System.Text.RegularExpressions;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
-public class ChacharFormBase : ModalWithBackdropBaseGeneral
+public partial class ChacharFormBase : ModalWithBackdropBaseGeneral
 {
+    [GeneratedRegex("^[a-zA-Z]+$")]
+    private static partial Regex AsciiLettersRegex();
+
     protected EntitySelector<Alternative> AlternativeSelector { get; set; } = default!;
 
     protected EntitySelector<Chachar> RadicalSelector { get; set; } = default!;
@@ -195,10 +199,14 @@ public class ChacharFormBase : ModalWithBackdropBaseGeneral
 
     protected async Task CheckAndSubmitAsync(CancellationToken cancellationToken)
     {
-        var success = await CheckTheCharacter(cancellationToken);
+        var separateCheckSuccesses = await Task.WhenAll(
+            CheckTheCharacter(cancellationToken),
+            CheckPinyin(cancellationToken));
         // TODO && CheckPinyin && CheckStrokes etc.
 
-        if (success)
+        var totalSuccess = separateCheckSuccesses.All(success => success);
+
+        if (totalSuccess)
         {
             // TODO submit
         }
@@ -219,6 +227,21 @@ public class ChacharFormBase : ModalWithBackdropBaseGeneral
         return true;
     }
 
+    private async Task<bool> CheckPinyin(CancellationToken cancellationToken)
+    {
+        var pinyinErrorText = GetPinyinErrorText();
+
+        if (pinyinErrorText is { } yesThereIsPinyinErrorText)
+        {
+            await Task.WhenAll(
+                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_PINYIN_INPUT, CssClasses.BORDER_DANGER, cancellationToken),
+                JSInteropDOM.SetTextAsync(IDs.CHACHAR_FORM_PINYIN_ERROR, yesThereIsPinyinErrorText, cancellationToken));
+            return false;
+        }
+
+        return true;
+    }
+
     private string? GetTheCharacterErrorText()
     {
         if (string.IsNullOrEmpty(TheCharacter))
@@ -231,6 +254,20 @@ public class ChacharFormBase : ModalWithBackdropBaseGeneral
         }
 
         // Multi-character input is unreachable thanks to PreventMultipleCharacters, no need to handle this case.
+
+        return null;
+    }
+
+    private string? GetPinyinErrorText()
+    {
+        if (string.IsNullOrEmpty(Pinyin))
+        {
+            return Localizer[Resource.CompulsoryValue];
+        }
+        else if (!AsciiLettersRegex().IsMatch(Pinyin))
+        {
+            return Localizer[Resource.OnlyAsciiAllowed];
+        }
 
         return null;
     }

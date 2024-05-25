@@ -221,6 +221,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
                 return ResourceManager.GetString("NumberOfStrokes", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Can contain only basic letters A-Z.
+        /// </summary>
+        public static string OnlyAsciiAllowed {
+            get {
+                return ResourceManager.GetString("OnlyAsciiAllowed", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Pinyin.

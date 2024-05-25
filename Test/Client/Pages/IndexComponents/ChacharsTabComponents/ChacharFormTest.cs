@@ -21,6 +21,7 @@ internal sealed class ChacharFormTest : IDisposable
 {
     private const string COMPULSORY_VALUE = nameof(COMPULSORY_VALUE);
     private const string MUST_BE_CHINESE_CHARACTER = nameof(MUST_BE_CHINESE_CHARACTER);
+    private const string ONLY_ASCII_ALLOWED = nameof(ONLY_ASCII_ALLOWED);
 
     private readonly Index _indexMock = Mock.Of<Index>();
     private readonly IStringLocalizer<Resource> _localizerMock = Mock.Of<IStringLocalizer<Resource>>();
@@ -32,6 +33,7 @@ internal sealed class ChacharFormTest : IDisposable
     {
         _ = Mock.Get(_localizerMock).Setup(localizer => localizer[Resource.CompulsoryValue]).Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE));
         _ = Mock.Get(_localizerMock).Setup(localizer => localizer[Resource.MustBeChineseCharacter]).Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER));
+        _ = Mock.Get(_localizerMock).Setup(localizer => localizer[Resource.OnlyAsciiAllowed]).Returns(new LocalizedString(ONLY_ASCII_ALLOWED, ONLY_ASCII_ALLOWED));
     }
 
     [SetUp]
@@ -46,7 +48,6 @@ internal sealed class ChacharFormTest : IDisposable
         _ = _testContext.ComponentFactories.Add(radicalSelectorMock);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.DISABLE, IDs.CHACHAR_FORM_ALTERNATIVE);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, string.Empty);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, null);
         _ = _testContext.Services.AddSingleton(_localizerMock);
         _ = _testContext.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
     }
@@ -93,7 +94,7 @@ internal sealed class ChacharFormTest : IDisposable
         var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
         var setValueInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, theInput);
         var chacharFormTheCharacterInput = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_THE_CHARACTER_INPUT}");
-        chacharFormTheCharacterInput.Input(theInput);
+        chacharFormTheCharacterInput.Change(theInput);
 
         setValueInvocationHandler.VerifyNotInvoke(DOMFunctions.SET_VALUE);
     }
@@ -154,7 +155,7 @@ internal sealed class ChacharFormTest : IDisposable
 
         var setValueInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, expectedContent);
         var chacharFormTheCharacterInput = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_THE_CHARACTER_INPUT}");
-        chacharFormTheCharacterInput.Input(theInput);
+        chacharFormTheCharacterInput.Change(theInput);
 
         var setValueInvocation = setValueInvocationHandler.VerifyInvoke(DOMFunctions.SET_VALUE);
         Assert.That(setValueInvocation.Arguments.Count, Is.EqualTo(2));
@@ -162,7 +163,6 @@ internal sealed class ChacharFormTest : IDisposable
         Assert.That(setValueInvocation.Arguments[1], Is.EqualTo(expectedContent));
     }
 
-    [TestCase(null, COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - null")]
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - empty string")]
     [TestCase("true", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - true as string")]
     [TestCase("false", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - false as string")]
@@ -225,13 +225,13 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("ДжЛщЫюЯ", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - multiple Russian non-ASCII characters case combination")]
     [TestCase("Слишком желтая лошадь ржала дьявольские оды", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - longer russian text with spaces")]
     [TestCase("0-1${@}#'\"\\aAāĀřŘяЯ中⺫㆕   𫇂\n𫟖\t𬩽", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - crazy combination of 30 characters, symbols and whitespaces")]
-    public void TheCharacterWrongSubmitTest(string? theInput, string expectedError)
+    public void TheCharacterWrongSubmitTest(string theInput, string expectedError)
     {
         // Multi-character inputs are cut to the first character thanks to PreventMultipleCharacters.
 
-        if (theInput is string theInputString && TextUtils.GetStringRealLength(theInputString) > 1)
+        if (TextUtils.GetStringRealLength(theInput) > 1)
         {
-            _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, TextUtils.GetStringFirstCharacterAsString(theInputString));
+            _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, TextUtils.GetStringFirstCharacterAsString(theInput));
         }
 
         var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
@@ -239,7 +239,7 @@ internal sealed class ChacharFormTest : IDisposable
         var setTextInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TEXT, IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, expectedError);
         var chacharFormTheCharacterInput = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_THE_CHARACTER_INPUT}");
         var chacharFormSubmitButton = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_SUBMIT_BUTTON}");
-        chacharFormTheCharacterInput.Input(theInput);
+        chacharFormTheCharacterInput.Change(theInput);
         chacharFormSubmitButton.Click();
 
         var addClassInvocation = addClassInvocationHandler.VerifyInvoke(DOMFunctions.ADD_CLASS);
@@ -279,6 +279,8 @@ internal sealed class ChacharFormTest : IDisposable
     {
         // Multi-character inputs are cut to the first character thanks to PreventMultipleCharacters.
 
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_PINYIN_INPUT, CssClasses.BORDER_DANGER);
+
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, TextUtils.GetStringFirstCharacterAsString(theInput));
 
         var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
@@ -286,7 +288,132 @@ internal sealed class ChacharFormTest : IDisposable
         var setTextInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TEXT, IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, It.IsAny<string>());
         var chacharFormTheCharacterInput = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_THE_CHARACTER_INPUT}");
         var chacharFormSubmitButton = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_SUBMIT_BUTTON}");
-        chacharFormTheCharacterInput.Input(theInput);
+        chacharFormTheCharacterInput.Change(theInput);
+        chacharFormSubmitButton.Click();
+
+        addClassInvocationHandler.VerifyNotInvoke(DOMFunctions.ADD_CLASS);
+        setTextInvocationHandler.VerifyNotInvoke(DOMFunctions.SET_TEXT);
+    }
+
+    [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - empty string")]
+    [TestCase("0", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - zero as string")]
+    [TestCase("1", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single digit positive integer as string")]
+    [TestCase("-1", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single digit negative integer as string")]
+    [TestCase("123", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple digits positive integer as string")]
+    [TestCase("-123", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple digits negative integer as string")]
+    [TestCase("0.1", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - two digits positive float as string")]
+    [TestCase("-0.1", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - two digits negative float as string")]
+    [TestCase("123.456", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - two digits positive float as string")]
+    [TestCase("-123.456", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - two digits negative float as string")]
+    [TestCase(" ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - space")]
+    [TestCase("   ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple spaces")]
+    [TestCase("\n", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - new line")]
+    [TestCase("\n\n\n", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple new lines")]
+    [TestCase("\t", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - tabluar")]
+    [TestCase("\t\t\t", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple tabulars")]
+    [TestCase(" \n\t", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - space, new line and tabular together")]
+    [TestCase("\\", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - backslash")]
+    [TestCase("\'", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - apostrophe")]
+    [TestCase("\"", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - quotes")]
+    [TestCase("@", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - at sign")]
+    [TestCase("#", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - hash sign")]
+    [TestCase("$", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - dollar sign")]
+    [TestCase("{", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - opening curly bracket")]
+    [TestCase("}", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - closing curly bracket")]
+    [TestCase("{0}", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - placeholder")]
+    [TestCase("${@}#\'\"\\", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - ${{@}}#\'\"\\")]
+    [TestCase("This is a longer ASCII text", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - longer ASCII text with spaces")]
+    [TestCase("ā", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single pinyin character lowercase")]
+    [TestCase("Ā", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single pinyin character uppercase")]
+    [TestCase("zhōng", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin single syllable lowercase")]
+    [TestCase("ZHŌNG", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin single syllable uppercase")]
+    [TestCase("ZhŌnG", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin single syllable case combination")]
+    [TestCase("dàkǎoyàn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables lowercase")]
+    [TestCase("DÀKǍOYÀN", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables uppercase")]
+    [TestCase("DàKǎOyÀn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables case combination")]
+    [TestCase("dà kǎo yàn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables lowercase with spaces")]
+    [TestCase("DÀ KǍO YÀN", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables uppercase with spaces")]
+    [TestCase("Dà KǎO yÀn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables case combination with spaces")]
+    [TestCase("Dà\nKǎo\nYàn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables lowercase with new lines")]
+    [TestCase("Dà\tKǎo\tYàn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables lowercase with tabulars")]
+    [TestCase("Dà\tKǎo\tYàn ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables lowercase with new line, tabular and space")]
+    [TestCase("ř", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Czech non-ASCII character lowercase")]
+    [TestCase("Ř", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Czech non-ASCII character uppercase")]
+    [TestCase("žščřďťň", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Czech non-ASCII characters lowercase")]
+    [TestCase("ŽŠČŘĎŤŇ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Czech non-ASCII characters uppercase")]
+    [TestCase("ŽšČřĎťŇ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Czech non-ASCII characters case combination")]
+    [TestCase("Příliš žluťoučký kůň úpěl ďábelské ódy", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - longer Czech text with spaces")]
+    [TestCase("я", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Russian non-ASCII character lowercase")]
+    [TestCase("Я", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Russian non-ASCII character uppercase")]
+    [TestCase("джлщыюя", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Russian non-ASCII characters lowercase")]
+    [TestCase("ДЖЛЩЫЮЯ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Russian non-ASCII characters uppercase")]
+    [TestCase("ДжЛщЫюЯ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Russian non-ASCII characters case combination")]
+    [TestCase("Слишком желтая лошадь ржала дьявольские оды", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - longer russian text with spaces")]
+    [TestCase("中", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK unified ideographs")]
+    [TestCase("⺫", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK radicals supplement")]
+    [TestCase("㆕", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - Kanbun")]
+    [TestCase("晴", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK compatibility ideographs")]
+    [TestCase("輸", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK compatibility ideographs supplement")]
+    [TestCase("㒡", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK extension A")]
+    [TestCase("𥒯", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK extension B")]
+    [TestCase("𫇂", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK extension C")]
+    [TestCase("𫟖", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK extension D")]
+    [TestCase("𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK extension E")]
+    [TestCase("𭕄", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK extension F")]
+    [TestCase("\U000310f9", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK extension G")]
+    [TestCase("大考验", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs")]
+    [TestCase("大 考 验", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs with spaces")]
+    [TestCase("大\n考\n验", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs with new lines")]
+    [TestCase("大\t考\t验", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs with tabulars")]
+    [TestCase("大\t考\t验 ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs with new line, tabular and space")]
+    [TestCase("𫇂𫟖𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination")]
+    [TestCase("𫇂 𫟖 𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with spaces")]
+    [TestCase("𫇂\n𫟖\n𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with new lines")]
+    [TestCase("𫇂\t𫟖\t𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
+    [TestCase("𫇂\n𫟖\t𬩽 ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
+    [TestCase("0-1${@}#'\"\\aAāĀřŘяЯ中⺫㆕   𫇂\n𫟖\t𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - crazy combination of 30 characters, symbols and whitespaces")]
+    public void PinyinWrongSubmitTest(string theInput, string expectedError)
+    {
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, CssClasses.BORDER_DANGER);
+
+        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
+        var addClassInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_PINYIN_INPUT, CssClasses.BORDER_DANGER);
+        var setTextInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TEXT, IDs.CHACHAR_FORM_PINYIN_ERROR, expectedError);
+        var chacharFormPinyinInput = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_PINYIN_INPUT}");
+        var chacharFormSubmitButton = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_SUBMIT_BUTTON}");
+        chacharFormPinyinInput.Change(theInput);
+        chacharFormSubmitButton.Click();
+
+        var addClassInvocation = addClassInvocationHandler.VerifyInvoke(DOMFunctions.ADD_CLASS);
+        Assert.That(addClassInvocation.Arguments.Count, Is.EqualTo(2));
+        Assert.That(addClassInvocation.Arguments[0], Is.EqualTo(IDs.CHACHAR_FORM_PINYIN_INPUT));
+        Assert.That(addClassInvocation.Arguments[1], Is.EqualTo(CssClasses.BORDER_DANGER));
+
+        var setTextInvocation = setTextInvocationHandler.VerifyInvoke(DOMFunctions.SET_TEXT);
+        Assert.That(setTextInvocation.Arguments.Count, Is.EqualTo(2));
+        Assert.That(setTextInvocation.Arguments[0], Is.EqualTo(IDs.CHACHAR_FORM_PINYIN_ERROR));
+        Assert.That(setTextInvocation.Arguments[1], Is.EqualTo(expectedError));
+    }
+
+    [TestCase("true", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - true as string")]
+    [TestCase("false", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - false as string")]
+    [TestCase("a",TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - single ASCII character lowercase")]
+    [TestCase("A",TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - single ASCII character uppercase")]
+    [TestCase("abc", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - multiple ASCII characters lowercase")]
+    [TestCase("ABC", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - multiple ASCII characters uppercase")]
+    [TestCase("AbCdE", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - multiple ASCII characters case combination")]
+    public void PinyinCorrectSubmitTest(string theInput)
+    {
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, CssClasses.BORDER_DANGER);
+
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_PINYIN_INPUT, theInput);
+
+        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
+        var addClassInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_PINYIN_INPUT, CssClasses.BORDER_DANGER);
+        var setTextInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TEXT, IDs.CHACHAR_FORM_PINYIN_ERROR, It.IsAny<string>());
+        var chacharFormPinyinInput = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_PINYIN_INPUT}");
+        var chacharFormSubmitButton = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_SUBMIT_BUTTON}");
+        chacharFormPinyinInput.Change(theInput);
         chacharFormSubmitButton.Click();
 
         addClassInvocationHandler.VerifyNotInvoke(DOMFunctions.ADD_CLASS);

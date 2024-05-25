@@ -13,6 +13,8 @@ public static class IDs
     public const string CHACHAR_FORM_ALTERNATIVE_SELECTOR = "chachar-form-alternative-selector";
     public const string CHACHAR_FORM_BACKDROP = "chachar-form-backdrop";
     public const string CHACHAR_FORM_CLEAR_ALTERNATIVE = "chachar-form-clear-alternative";
+    public const string CHACHAR_FORM_PINYIN_ERROR = "chachar-form-pinyin-error";
+    public const string CHACHAR_FORM_PINYIN_INPUT = "chachar-form-pinyin-input";
     public const string CHACHAR_FORM_RADICAL_SELECTOR = "chachar-form-radical-selector";
     public const string CHACHAR_FORM_ROOT = "chachar-form-root";
     public const string CHACHAR_FORM_SUBMIT_BUTTON = "chachar-form-submit-button";

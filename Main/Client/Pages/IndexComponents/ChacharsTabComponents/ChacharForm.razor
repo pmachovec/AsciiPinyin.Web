@@ -30,6 +30,7 @@
                                 type="text"
                                 class="form-control"
                                 id="@IDs.CHACHAR_FORM_THE_CHARACTER_INPUT"
+                                @onchange="changeEventArgs => PreventMultipleCharacters(changeEventArgs, CancellationToken.None)"
                                 @oninput="changeEventArgs => PreventMultipleCharacters(changeEventArgs, CancellationToken.None)"
                                 @onmousedown="async _ => await ClearWrongInputAsync(
                                     IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
@@ -47,9 +48,17 @@
                             <input
                                 type="text"
                                 class="form-control"
-                                @bind-value="Pinyin">
+                                id="@IDs.CHACHAR_FORM_PINYIN_INPUT"
+                                @bind-value="Pinyin"
+                                @onmousedown="async _ => await ClearWrongInputAsync(
+                                    IDs.CHACHAR_FORM_PINYIN_INPUT,
+                                    IDs.CHACHAR_FORM_PINYIN_ERROR,
+                                    CancellationToken.None)">
                         </div>
-                        <div class="error-label form-text mx-1 mt-0 text-danger"></div>
+                        <div
+                            class="error-label form-text mx-1 mt-0 text-danger"
+                            id="@IDs.CHACHAR_FORM_PINYIN_ERROR">
+                        </div>
                     </div>
                     <div class="mb-3">
                         <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Ipa]</div>
