@@ -66,9 +66,17 @@
                             <input
                                 type="text"
                                 class="form-control"
-                                @bind-value="Ipa">
+                                id="@IDs.CHACHAR_FORM_IPA_INPUT"
+                                @bind-value="Ipa"
+                                @onmousedown="async _ => await ClearWrongInputAsync(
+                                    IDs.CHACHAR_FORM_IPA_INPUT,
+                                    IDs.CHACHAR_FORM_IPA_ERROR,
+                                    CancellationToken.None)">
                         </div>
-                        <div class="error-label form-text mx-1 mt-0 text-danger"></div>
+                        <div
+                            class="error-label form-text mx-1 mt-0 text-danger"
+                            id="@IDs.CHACHAR_FORM_IPA_ERROR">
+                        </div>
                     </div>
                     <div class="mb-3">
                         <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Tone]</div>

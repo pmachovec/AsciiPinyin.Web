@@ -200,8 +200,9 @@ public partial class ChacharFormBase : ModalWithBackdropBaseGeneral
     protected async Task CheckAndSubmitAsync(CancellationToken cancellationToken)
     {
         var separateCheckSuccesses = await Task.WhenAll(
-            CheckTheCharacter(cancellationToken),
-            CheckPinyin(cancellationToken));
+            CheckInput(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, GetTheCharacterErrorText, cancellationToken),
+            CheckInput(IDs.CHACHAR_FORM_PINYIN_INPUT, IDs.CHACHAR_FORM_PINYIN_ERROR, GetPinyinErrorText, cancellationToken),
+            CheckInput(IDs.CHACHAR_FORM_IPA_INPUT, IDs.CHACHAR_FORM_IPA_ERROR, GetIpaErrorText, cancellationToken));
         // TODO && CheckPinyin && CheckStrokes etc.
 
         var totalSuccess = separateCheckSuccesses.All(success => success);
@@ -211,12 +212,6 @@ public partial class ChacharFormBase : ModalWithBackdropBaseGeneral
             // TODO submit
         }
     }
-
-    private async Task<bool> CheckTheCharacter(CancellationToken cancellationToken) =>
-        await CheckInput(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, GetTheCharacterErrorText, cancellationToken);
-
-    private async Task<bool> CheckPinyin(CancellationToken cancellationToken) =>
-        await CheckInput(IDs.CHACHAR_FORM_PINYIN_INPUT, IDs.CHACHAR_FORM_PINYIN_ERROR, GetPinyinErrorText, cancellationToken);
 
     private async Task<bool> CheckInput(
         string inputId,
@@ -260,6 +255,20 @@ public partial class ChacharFormBase : ModalWithBackdropBaseGeneral
         else if (!AsciiLettersRegex().IsMatch(Pinyin))
         {
             return Localizer[Resource.OnlyAsciiAllowed];
+        }
+
+        return null;
+    }
+
+    private string? GetIpaErrorText()
+    {
+        if (string.IsNullOrEmpty(Ipa))
+        {
+            return Localizer[Resource.CompulsoryValue];
+        }
+        else if (!TextUtils.IsOnlyIpaCharacters(Ipa))
+        {
+            return Localizer[Resource.OnlyIpaAllowed];
         }
 
         return null;
