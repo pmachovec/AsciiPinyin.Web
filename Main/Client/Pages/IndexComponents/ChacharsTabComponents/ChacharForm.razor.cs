@@ -212,30 +212,23 @@ public partial class ChacharFormBase : ModalWithBackdropBaseGeneral
         }
     }
 
-    private async Task<bool> CheckTheCharacter(CancellationToken cancellationToken)
-    {
-        var theCharacterErrorText = GetTheCharacterErrorText();
+    private async Task<bool> CheckTheCharacter(CancellationToken cancellationToken) =>
+        await CheckInput(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, GetTheCharacterErrorText, cancellationToken);
 
-        if (theCharacterErrorText is { } yesThereIsTheCharacterErrorText)
+    private async Task<bool> CheckPinyin(CancellationToken cancellationToken) =>
+        await CheckInput(IDs.CHACHAR_FORM_PINYIN_INPUT, IDs.CHACHAR_FORM_PINYIN_ERROR, GetPinyinErrorText, cancellationToken);
+
+    private async Task<bool> CheckInput(
+        string inputId,
+        string errorDivId,
+        Func<string?> getErrorText,
+        CancellationToken cancellationToken)
+    {
+        if (getErrorText() is { } errorText)
         {
             await Task.WhenAll(
-                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, CssClasses.BORDER_DANGER, cancellationToken),
-                JSInteropDOM.SetTextAsync(IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, yesThereIsTheCharacterErrorText, cancellationToken));
-            return false;
-        }
-
-        return true;
-    }
-
-    private async Task<bool> CheckPinyin(CancellationToken cancellationToken)
-    {
-        var pinyinErrorText = GetPinyinErrorText();
-
-        if (pinyinErrorText is { } yesThereIsPinyinErrorText)
-        {
-            await Task.WhenAll(
-                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_PINYIN_INPUT, CssClasses.BORDER_DANGER, cancellationToken),
-                JSInteropDOM.SetTextAsync(IDs.CHACHAR_FORM_PINYIN_ERROR, yesThereIsPinyinErrorText, cancellationToken));
+                JSInteropDOM.AddClassAsync(inputId, CssClasses.BORDER_DANGER, cancellationToken),
+                JSInteropDOM.SetTextAsync(errorDivId, errorText, cancellationToken));
             return false;
         }
 

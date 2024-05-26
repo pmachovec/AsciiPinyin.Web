@@ -234,23 +234,7 @@ internal sealed class ChacharFormTest : IDisposable
             _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, TextUtils.GetStringFirstCharacterAsString(theInput));
         }
 
-        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        var addClassInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, CssClasses.BORDER_DANGER);
-        var setTextInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TEXT, IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, expectedError);
-        var chacharFormTheCharacterInput = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_THE_CHARACTER_INPUT}");
-        var chacharFormSubmitButton = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_SUBMIT_BUTTON}");
-        chacharFormTheCharacterInput.Change(theInput);
-        chacharFormSubmitButton.Click();
-
-        var addClassInvocation = addClassInvocationHandler.VerifyInvoke(DOMFunctions.ADD_CLASS);
-        Assert.That(addClassInvocation.Arguments.Count, Is.EqualTo(2));
-        Assert.That(addClassInvocation.Arguments[0], Is.EqualTo(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT));
-        Assert.That(addClassInvocation.Arguments[1], Is.EqualTo(CssClasses.BORDER_DANGER));
-
-        var setTextInvocation = setTextInvocationHandler.VerifyInvoke(DOMFunctions.SET_TEXT);
-        Assert.That(setTextInvocation.Arguments.Count, Is.EqualTo(2));
-        Assert.That(setTextInvocation.Arguments[0], Is.EqualTo(IDs.CHACHAR_FORM_THE_CHARACTER_ERROR));
-        Assert.That(setTextInvocation.Arguments[1], Is.EqualTo(expectedError));
+        WrongSubmitTest(theInput, expectedError, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, IDs.CHACHAR_FORM_THE_CHARACTER_ERROR);
     }
 
     [TestCase("中", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - CJK unified ideographs")]
@@ -279,20 +263,12 @@ internal sealed class ChacharFormTest : IDisposable
     {
         // Multi-character inputs are cut to the first character thanks to PreventMultipleCharacters.
 
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_PINYIN_INPUT, CssClasses.BORDER_DANGER);
-
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, TextUtils.GetStringFirstCharacterAsString(theInput));
-
-        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        var addClassInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, CssClasses.BORDER_DANGER);
-        var setTextInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TEXT, IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, It.IsAny<string>());
-        var chacharFormTheCharacterInput = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_THE_CHARACTER_INPUT}");
-        var chacharFormSubmitButton = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_SUBMIT_BUTTON}");
-        chacharFormTheCharacterInput.Change(theInput);
-        chacharFormSubmitButton.Click();
-
-        addClassInvocationHandler.VerifyNotInvoke(DOMFunctions.ADD_CLASS);
-        setTextInvocationHandler.VerifyNotInvoke(DOMFunctions.SET_TEXT);
+        CorrectSubmitTest(
+            theInput,
+            IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
+            IDs.CHACHAR_FORM_THE_CHARACTER_ERROR,
+            IDs.CHACHAR_FORM_PINYIN_INPUT);
     }
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - empty string")]
@@ -372,28 +348,8 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("𫇂\t𫟖\t𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
     [TestCase("𫇂\n𫟖\t𬩽 ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
     [TestCase("0-1${@}#'\"\\aAāĀřŘяЯ中⺫㆕   𫇂\n𫟖\t𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - crazy combination of 30 characters, symbols and whitespaces")]
-    public void PinyinWrongSubmitTest(string theInput, string expectedError)
-    {
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, CssClasses.BORDER_DANGER);
-
-        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        var addClassInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_PINYIN_INPUT, CssClasses.BORDER_DANGER);
-        var setTextInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TEXT, IDs.CHACHAR_FORM_PINYIN_ERROR, expectedError);
-        var chacharFormPinyinInput = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_PINYIN_INPUT}");
-        var chacharFormSubmitButton = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_SUBMIT_BUTTON}");
-        chacharFormPinyinInput.Change(theInput);
-        chacharFormSubmitButton.Click();
-
-        var addClassInvocation = addClassInvocationHandler.VerifyInvoke(DOMFunctions.ADD_CLASS);
-        Assert.That(addClassInvocation.Arguments.Count, Is.EqualTo(2));
-        Assert.That(addClassInvocation.Arguments[0], Is.EqualTo(IDs.CHACHAR_FORM_PINYIN_INPUT));
-        Assert.That(addClassInvocation.Arguments[1], Is.EqualTo(CssClasses.BORDER_DANGER));
-
-        var setTextInvocation = setTextInvocationHandler.VerifyInvoke(DOMFunctions.SET_TEXT);
-        Assert.That(setTextInvocation.Arguments.Count, Is.EqualTo(2));
-        Assert.That(setTextInvocation.Arguments[0], Is.EqualTo(IDs.CHACHAR_FORM_PINYIN_ERROR));
-        Assert.That(setTextInvocation.Arguments[1], Is.EqualTo(expectedError));
-    }
+    public void PinyinWrongSubmitTest(string theInput, string expectedError) =>
+        WrongSubmitTest(theInput, expectedError, IDs.CHACHAR_FORM_PINYIN_INPUT, IDs.CHACHAR_FORM_PINYIN_ERROR);
 
     [TestCase("true", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - true as string")]
     [TestCase("false", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - false as string")]
@@ -402,18 +358,47 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("abc", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - multiple ASCII characters lowercase")]
     [TestCase("ABC", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - multiple ASCII characters uppercase")]
     [TestCase("AbCdE", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - multiple ASCII characters case combination")]
-    public void PinyinCorrectSubmitTest(string theInput)
-    {
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, CssClasses.BORDER_DANGER);
+    public void PinyinCorrectSubmitTest(string theInput) =>
+        CorrectSubmitTest(
+            theInput,
+            IDs.CHACHAR_FORM_PINYIN_INPUT,
+            IDs.CHACHAR_FORM_PINYIN_ERROR,
+            IDs.CHACHAR_FORM_THE_CHARACTER_INPUT);
 
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_PINYIN_INPUT, theInput);
+    private void WrongSubmitTest(string theInput, string expectedError, string inputId, string errorDivId)
+    {
+        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
+        var addClassInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, inputId, CssClasses.BORDER_DANGER);
+        var setTextInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TEXT, errorDivId, expectedError);
+        var chacharFormInput = chacharFormComponent.Find($"#{inputId}");
+        var chacharFormSubmitButton = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_SUBMIT_BUTTON}");
+        chacharFormInput.Change(theInput);
+        chacharFormSubmitButton.Click();
+
+        var addClassInvocation = addClassInvocationHandler.VerifyInvoke(DOMFunctions.ADD_CLASS);
+        Assert.That(addClassInvocation.Arguments.Count, Is.EqualTo(2));
+        Assert.That(addClassInvocation.Arguments[0], Is.EqualTo(inputId));
+        Assert.That(addClassInvocation.Arguments[1], Is.EqualTo(CssClasses.BORDER_DANGER));
+
+        var setTextInvocation = setTextInvocationHandler.VerifyInvoke(DOMFunctions.SET_TEXT);
+        Assert.That(setTextInvocation.Arguments.Count, Is.EqualTo(2));
+        Assert.That(setTextInvocation.Arguments[0], Is.EqualTo(errorDivId));
+        Assert.That(setTextInvocation.Arguments[1], Is.EqualTo(expectedError));
+    }
+
+    private void CorrectSubmitTest(string theInput, string inputId, string errorDivId, params string[] otherInputIds)
+    {
+        foreach (var otherInputId in otherInputIds)
+        {
+            _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, otherInputId, CssClasses.BORDER_DANGER);
+        }
 
         var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        var addClassInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_PINYIN_INPUT, CssClasses.BORDER_DANGER);
-        var setTextInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TEXT, IDs.CHACHAR_FORM_PINYIN_ERROR, It.IsAny<string>());
-        var chacharFormPinyinInput = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_PINYIN_INPUT}");
+        var addClassInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, inputId, CssClasses.BORDER_DANGER);
+        var setTextInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TEXT, errorDivId, It.IsAny<string>());
+        var chacharFormInput = chacharFormComponent.Find($"#{inputId}");
         var chacharFormSubmitButton = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_SUBMIT_BUTTON}");
-        chacharFormPinyinInput.Change(theInput);
+        chacharFormInput.Change(theInput);
         chacharFormSubmitButton.Click();
 
         addClassInvocationHandler.VerifyNotInvoke(DOMFunctions.ADD_CLASS);
