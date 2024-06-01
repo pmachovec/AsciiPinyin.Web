@@ -22,6 +22,8 @@ public static class IDs
     public const string CHACHAR_FORM_SUBMIT_BUTTON = "chachar-form-submit-button";
     public const string CHACHAR_FORM_THE_CHARACTER_ERROR = "chachar-form-the-character-error";
     public const string CHACHAR_FORM_THE_CHARACTER_INPUT = "chachar-form-the-character-input";
+    public const string CHACHAR_FORM_TONE_ERROR = "chachar-form-tone-error";
+    public const string CHACHAR_FORM_TONE_INPUT = "chachar-form-tone-input";
     public const string CHACHAR_VIEW_DIALOG_BACKDROP = "chachar-view-dialog-backdrop";
     public const string CHACHAR_VIEW_DIALOG_ROOT = "chachar-view-dialog-root";
     public const string CHACHARS_TAB_ROOT = "chachars-tab-root";

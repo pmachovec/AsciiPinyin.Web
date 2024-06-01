@@ -223,7 +223,7 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Can contain only basic letters A-Z.
+        ///   Looks up a localized string similar to Must contain only basic letters A-Z.
         /// </summary>
         public static string OnlyAsciiAllowed {
             get {
@@ -232,7 +232,7 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Can contain only IPA characters.
+        ///   Looks up a localized string similar to Must contain only IPA characters.
         /// </summary>
         public static string OnlyIpaAllowed {
             get {

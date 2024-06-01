@@ -74,6 +74,14 @@ public interface IJSInteropDOM
     Task SetValueAsync(string elementId, string value, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Decides if the given element contains an invalid input value by the EcmaScript definition of 'validity.badInput'.
+    /// </summary>
+    /// <param name="elementId">The element whose input value is to be checked.</param>
+    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
+    /// <returns></returns>
+    Task<bool> IsValidInputAsync(string elementId, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Sets the text of the given element to null.
     /// </summary>
     /// <param name="elementId">ID of the element for which the text should be set to null.</param>

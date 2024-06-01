@@ -172,10 +172,10 @@
     <value>Number of strokes</value>
   </data>
   <data name="OnlyAsciiAllowed" xml:space="preserve">
-    <value>Can contain only basic letters A-Z</value>
+    <value>Must contain only basic letters A-Z</value>
   </data>
   <data name="OnlyIpaAllowed" xml:space="preserve">
-    <value>Can contain only IPA characters</value>
+    <value>Must contain only IPA characters</value>
   </data>
   <data name="Pinyin" xml:space="preserve">
     <value>Pinyin</value>

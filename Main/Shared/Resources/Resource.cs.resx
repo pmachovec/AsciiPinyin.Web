@@ -172,10 +172,10 @@
     <value>Počet tahů</value>
   </data>
   <data name="OnlyAsciiAllowed" xml:space="preserve">
-    <value>Může obsahovat pouze základní písmena A-Z</value>
+    <value>Musí obsahovat pouze základní písmena A-Z</value>
   </data>
   <data name="OnlyIpaAllowed" xml:space="preserve">
-    <value>Může obsahovat pouze znaky IPA</value>
+    <value>Musí obsahovat pouze znaky IPA</value>
   </data>
   <data name="Pinyin" xml:space="preserve">
     <value>Pinyin</value>

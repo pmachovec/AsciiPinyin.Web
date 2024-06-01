@@ -34,6 +34,9 @@ public sealed class JSInteropDOM(IJSRuntime jsRuntime) : IJSInteropDOM
     public async Task SetValueAsync(string elementId, string value, CancellationToken cancellationToken) =>
         await _jsRuntime.InvokeVoidAsync(DOMFunctions.SET_VALUE, cancellationToken, elementId, value);
 
+    public async Task<bool> IsValidInputAsync(string elementId, CancellationToken cancellationToken) =>
+        await _jsRuntime.InvokeAsync<bool>(DOMFunctions.IS_VALID_INPUT, cancellationToken, elementId);
+
     public async Task RemoveTextAsync(string elementId, CancellationToken cancellationToken) =>
         await _jsRuntime.InvokeVoidAsync(DOMFunctions.REMOVE_TEXT, cancellationToken, elementId);
 

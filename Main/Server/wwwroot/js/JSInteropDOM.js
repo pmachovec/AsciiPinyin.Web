@@ -10,11 +10,13 @@ addClass = (elementId, theClass) => { $(`#${elementId}`).addClass(theClass); }
 
 removeClass = (elementId, theClass) => { $(`#${elementId}`).removeClass(theClass); }
 
-setText = (elementId, text) => { $(`#${elementId}`).text(text) }
+setText = (elementId, text) => { $(`#${elementId}`).text(text); }
 
-setValue = (elementId, value) => { $(`#${elementId}`).val(value) };
+setValue = (elementId, value) => { $(`#${elementId}`).val(value); };
 
-removeText = (elementId) => { $(`#${elementId}`).text(null) }
+isValidInput = (elementId) => { return $(`#${elementId}`)[0].validity.valid; }
+
+removeText = (elementId) => { $(`#${elementId}`).text(null); }
 
 setTitle = (title) => { $(document).prop('title', title); };
 
