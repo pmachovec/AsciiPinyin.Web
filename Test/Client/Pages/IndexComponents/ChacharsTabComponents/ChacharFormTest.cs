@@ -26,10 +26,11 @@ internal sealed class ChacharFormTest : IDisposable
 
     private readonly IEnumerable<string> _inputIds =
     [
-        IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
-        IDs.CHACHAR_FORM_PINYIN_INPUT,
         IDs.CHACHAR_FORM_IPA_INPUT,
-        IDs.CHACHAR_FORM_TONE_INPUT
+        IDs.CHACHAR_FORM_PINYIN_INPUT,
+        IDs.CHACHAR_FORM_STROKES_INPUT,
+        IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
+        IDs.CHACHAR_FORM_TONE_INPUT,
     ];
 
     private readonly Index _indexMock = Mock.Of<Index>();
@@ -493,36 +494,20 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputAdjustedTest)} - previous value zero")]
     [TestCase("1", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputAdjustedTest)} - previous value one")]
     [TestCase("4", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputAdjustedTest)} - previous value four")]
-    public void ToneOnInputAdjustedTest(string previousValidInput)
-    {
-        // Mock the input to be valid first.
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_TONE_INPUT, previousValidInput);
-        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_TONE_INPUT).SetResult(true);
-        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        var chacharFormToneInput = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_TONE_INPUT}");
-        chacharFormToneInput.Change(previousValidInput);
-
-        // Now mock invalid input and verify that it was changed to the previous valid one.
-        // Substitutes all invalid inputs, no need to run the test for each one separately.
-        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_TONE_INPUT).SetResult(false);
-        VerifyInputValueSet(chacharFormComponent, IDs.CHACHAR_FORM_TONE_INPUT, It.IsAny<string>(), previousValidInput);
-    }
+    public void ToneOnInputAdjustedTest(string previousValidInput) =>
+        NumberInputAdjustedTest(IDs.CHACHAR_FORM_TONE_INPUT, previousValidInput);
 
     [TestCase("", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputUnchangedTest)} - empty string")]
     [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputUnchangedTest)} - zero")]
     [TestCase("1", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputUnchangedTest)} - one")]
     [TestCase("4", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputUnchangedTest)} - four")]
-    public void ToneOnInputUnchangedTest(string theInput)
-    {
-        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_TONE_INPUT).SetResult(true);
-        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        VerifyInputValueSet(chacharFormComponent, IDs.CHACHAR_FORM_TONE_INPUT, theInput, theInput);
-    }
+    public void ToneOnInputUnchangedTest(string theInput) =>
+        NumberInputUnchangedTest(IDs.CHACHAR_FORM_TONE_INPUT, theInput);
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneWrongSubmitTest)} - empty string")]
     public void ToneWrongSubmitTest(string theInput, string expectedError)
     {
-        // Null tone is the only reachable wrong input.
+        // Empty tone is the only reachable wrong input.
         // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to test this case.
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_TONE_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_TONE_INPUT, theInput);
@@ -546,6 +531,80 @@ internal sealed class ChacharFormTest : IDisposable
             theInput,
             IDs.CHACHAR_FORM_TONE_INPUT,
             IDs.CHACHAR_FORM_TONE_ERROR);
+    }
+
+    [TestCase("", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value empty string")]
+    [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value zero")]
+    [TestCase("1", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value one")]
+    [TestCase("9", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value nine")]
+    [TestCase("13", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value thirteen")]
+    [TestCase("66", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value sixty-six")]
+    [TestCase("99", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value ninety-nine")]
+    public void StrokesOnInputAdjustedTest(string previousValidInput) =>
+        NumberInputAdjustedTest(IDs.CHACHAR_FORM_STROKES_INPUT, previousValidInput);
+
+    [TestCase("", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - empty string")]
+    [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - zero")]
+    [TestCase("1", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - one")]
+    [TestCase("9", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - nine")]
+    [TestCase("13", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - thirteen")]
+    [TestCase("66", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - sixty-six")]
+    [TestCase("99", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - ninety-nine")]
+    public void StrokesOnInputUnchangedTest(string theInput) =>
+        NumberInputUnchangedTest(IDs.CHACHAR_FORM_STROKES_INPUT, theInput);
+
+    [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesWrongSubmitTest)} - empty string")]
+    public void StrokesWrongSubmitTest(string theInput, string expectedError)
+    {
+        // Empty strokes is the only reachable wrong input.
+        // Invalid inputs are unreachable thanks to PreventStrokesInvalidAsync, no need to test this case.
+        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_STROKES_INPUT).SetResult(true);
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_STROKES_INPUT, theInput);
+
+        WrongSubmitTest(
+            theInput,
+            expectedError,
+            IDs.CHACHAR_FORM_STROKES_INPUT,
+            IDs.CHACHAR_FORM_STROKES_ERROR);
+    }
+
+    [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesCorrectSubmitTest)} - zero")]
+    [TestCase("1", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesCorrectSubmitTest)} - one")]
+    [TestCase("9", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesCorrectSubmitTest)} - nine")]
+    [TestCase("13", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesCorrectSubmitTest)} - thirteen")]
+    [TestCase("66", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesCorrectSubmitTest)} - sixty-six")]
+    [TestCase("99", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesCorrectSubmitTest)} - ninety-nine")]
+    public void StrokesCorrectSubmitTest(string theInput)
+    {
+        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_STROKES_INPUT).SetResult(true);
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_STROKES_INPUT, theInput);
+
+        CorrectSubmitTest(
+            theInput,
+            IDs.CHACHAR_FORM_STROKES_INPUT,
+            IDs.CHACHAR_FORM_STROKES_ERROR);
+    }
+
+    private void NumberInputAdjustedTest(string inputId, string previousValidInput)
+    {
+        // Mock the input to be valid first.
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, previousValidInput);
+        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, inputId).SetResult(true);
+        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
+        var chacharFormNumberInput = chacharFormComponent.Find($"#{inputId}");
+        chacharFormNumberInput.Change(previousValidInput);
+
+        // Now mock invalid input and verify that it was changed to the previous valid one.
+        // Substitutes all invalid inputs, no need to run the test for each one separately.
+        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, inputId).SetResult(false);
+        VerifyInputValueSet(chacharFormComponent, inputId, It.IsAny<string>(), previousValidInput);
+    }
+
+    private void NumberInputUnchangedTest(string inputId, string theInput)
+    {
+        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, inputId).SetResult(true);
+        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
+        VerifyInputValueSet(chacharFormComponent, inputId, theInput, theInput);
     }
 
     private void VerifyInputValueSet(

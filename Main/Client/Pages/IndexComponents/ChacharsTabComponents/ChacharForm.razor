@@ -107,9 +107,17 @@
                                 class="form-control"
                                 min="@ByteConstants.MIN_STROKES"
                                 max="@ByteConstants.MAX_STROKES"
-                                @bind-value="Strokes">
+                                id="@IDs.CHACHAR_FORM_STROKES_INPUT"
+                                @onchange="async changeEventArgs => await PreventStrokesInvalidAsync(changeEventArgs, CancellationToken.None)"
+                                @oninput="async changeEventArgs => await PreventStrokesInvalidAsync(changeEventArgs, CancellationToken.None)"
+                                @onmousedown="async _ => await ClearWrongInputAsync(
+                                    IDs.CHACHAR_FORM_STROKES_INPUT,
+                                    IDs.CHACHAR_FORM_STROKES_ERROR,
+                                    CancellationToken.None)">
                         </div>
-                        <div class="error-label form-text mx-1 mt-0 text-danger"></div>
+                        <div
+                            class="error-label form-text mx-1 mt-0 text-danger"
+                            id="@IDs.CHACHAR_FORM_STROKES_ERROR"></div>
                     </div>
                     <div class="mb-3">
                         <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Radical]</div>

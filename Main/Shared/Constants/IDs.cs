@@ -19,6 +19,8 @@ public static class IDs
     public const string CHACHAR_FORM_PINYIN_INPUT = "chachar-form-pinyin-input";
     public const string CHACHAR_FORM_RADICAL_SELECTOR = "chachar-form-radical-selector";
     public const string CHACHAR_FORM_ROOT = "chachar-form-root";
+    public const string CHACHAR_FORM_STROKES_ERROR = "chachar-form-strokes-error";
+    public const string CHACHAR_FORM_STROKES_INPUT = "chachar-form-strokes-input";
     public const string CHACHAR_FORM_SUBMIT_BUTTON = "chachar-form-submit-button";
     public const string CHACHAR_FORM_THE_CHARACTER_ERROR = "chachar-form-the-character-error";
     public const string CHACHAR_FORM_THE_CHARACTER_INPUT = "chachar-form-the-character-input";

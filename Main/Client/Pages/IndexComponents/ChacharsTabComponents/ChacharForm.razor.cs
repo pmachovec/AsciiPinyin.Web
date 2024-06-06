@@ -192,30 +192,14 @@ public partial class ChacharFormBase : ModalWithBackdropBaseGeneral
 
     protected async Task PreventToneInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
     {
-        // When the user types dot in an environment, where the dot is not decimal delimiter, the ChangeEventArgs value is null.
-        // This is the only way how to distinguish typing the dot and having really empty number input in such situation.
-        // If the dot is typed, the result is false, but with really empty input, it's true.
-        var isToneInputValid = await JSInteropDOM.IsValidInputAsync(IDs.CHACHAR_FORM_TONE_INPUT, cancellationToken);
+        Tone = await GetCorrectNumberInputValue(IDs.CHACHAR_FORM_TONE_INPUT, changeEventArgs.Value, Tone, cancellationToken);
+        await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_TONE_INPUT, Tone.ToString()!, cancellationToken);
+    }
 
-        if ((changeEventArgs.Value is null || (changeEventArgs.Value is string toneAsStringEmpty && toneAsStringEmpty.Length == 0))
-            && isToneInputValid)
-        {
-            // At this point, the input is really empty.
-            Tone = null;
-            await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_TONE_INPUT, string.Empty, cancellationToken);
-        }
-        else
-        {
-            if (isToneInputValid
-                && changeEventArgs.Value is string toneAsString
-                && byte.TryParse(toneAsString.AsSpan(0, Math.Min(1, toneAsString.Length)), out var tone))
-            {
-                Tone = tone;
-            }
-
-            // The value is retyped even when it's valid, it prevents decimal delimiter to be typed.
-            await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_TONE_INPUT, Tone.ToString() ?? string.Empty, cancellationToken);
-        }
+    protected async Task PreventStrokesInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
+    {
+        Strokes = await GetCorrectNumberInputValue(IDs.CHACHAR_FORM_STROKES_INPUT, changeEventArgs.Value, Strokes, cancellationToken);
+        await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_STROKES_INPUT, Strokes.ToString()!, cancellationToken);
     }
 
     protected async Task ClearWrongInputAsync(string inputId, string errorId, CancellationToken cancellationToken)
@@ -231,14 +215,42 @@ public partial class ChacharFormBase : ModalWithBackdropBaseGeneral
             CheckInput(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, GetTheCharacterErrorText, cancellationToken),
             CheckInput(IDs.CHACHAR_FORM_PINYIN_INPUT, IDs.CHACHAR_FORM_PINYIN_ERROR, GetPinyinErrorText, cancellationToken),
             CheckInput(IDs.CHACHAR_FORM_IPA_INPUT, IDs.CHACHAR_FORM_IPA_ERROR, GetIpaErrorText, cancellationToken),
-            CheckInput(IDs.CHACHAR_FORM_TONE_INPUT, IDs.CHACHAR_FORM_TONE_ERROR, GetToneErrorText, cancellationToken));
-        // TODO && CheckPinyin && CheckStrokes etc.
+            CheckInput(IDs.CHACHAR_FORM_TONE_INPUT, IDs.CHACHAR_FORM_TONE_ERROR, GetToneErrorText, cancellationToken),
+            CheckInput(IDs.CHACHAR_FORM_STROKES_INPUT, IDs.CHACHAR_FORM_STROKES_ERROR, GetStrokesErrorText, cancellationToken));
 
         var totalSuccess = separateCheckSuccesses.All(success => success);
 
         if (totalSuccess)
         {
             // TODO submit
+        }
+    }
+
+    private async Task<byte?> GetCorrectNumberInputValue(
+        string inputId,
+        object? changeEventArgsValue,
+        byte? originalValue,
+        CancellationToken cancellationToken)
+    {
+        // When the user types dot in an environment, where the dot is not decimal delimiter, the ChangeEventArgs value is empty string.
+        // This is the only way how to distinguish typing the dot and having really empty number input in such situation.
+        // If the dot is typed, the result is false, but with really empty input, it's true.
+        var isInputValid = await JSInteropDOM.IsValidInputAsync(inputId, cancellationToken);
+
+        if (changeEventArgsValue is string emptyInputNumberAsStringEmpty
+            && emptyInputNumberAsStringEmpty.Length == 0
+            && isInputValid)
+        {
+            // At this point, the input is really empty.
+            return null;
+        }
+        else
+        {
+            return isInputValid
+                && changeEventArgsValue is string inputNumberAsString
+                && byte.TryParse(inputNumberAsString.AsSpan(0, Math.Max(1, inputNumberAsString.Length)), out var inputNumber)
+                ? inputNumber
+                : originalValue;
         }
     }
 
@@ -311,6 +323,19 @@ public partial class ChacharFormBase : ModalWithBackdropBaseGeneral
         }
 
         // Null tone is the only reachable wrong input.
+        // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to handle this case.
+
+        return null;
+    }
+
+    private string? GetStrokesErrorText()
+    {
+        if (Strokes is null)
+        {
+            return Localizer[Resource.CompulsoryValue];
+        }
+
+        // Null strokes is the only reachable wrong input.
         // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to handle this case.
 
         return null;

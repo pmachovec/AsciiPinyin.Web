@@ -2,6 +2,9 @@
 [Bb]in/
 [Oo]bj/
 
+# Test results
+TestResults/
+
 # Publish profiles
 **/*.pubxml
 **/*.pubxml.user
