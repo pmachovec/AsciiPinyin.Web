@@ -186,6 +186,7 @@ internal sealed class ChacharFormTest : IDisposable
         chacharFormTheCharacterInput.Change(theInput);
 
         setValueInvocationHandler.VerifyNotInvoke(DOMFunctions.SET_VALUE);
+        _ = setValueInvocationHandler.SetVoidResult();
     }
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - empty string")]
@@ -621,6 +622,7 @@ internal sealed class ChacharFormTest : IDisposable
         Assert.That(setValueInvocation.Arguments.Count, Is.EqualTo(2));
         Assert.That(setValueInvocation.Arguments[0], Is.EqualTo(inputId));
         Assert.That(setValueInvocation.Arguments[1], Is.EqualTo(expectedContent));
+        _ = setValueInvocationHandler.SetVoidResult();
     }
 
     private void WrongSubmitTest(string theInput, string expectedError, string inputId, string errorDivId)
@@ -642,6 +644,8 @@ internal sealed class ChacharFormTest : IDisposable
         Assert.That(setTextInvocation.Arguments.Count, Is.EqualTo(2));
         Assert.That(setTextInvocation.Arguments[0], Is.EqualTo(errorDivId));
         Assert.That(setTextInvocation.Arguments[1], Is.EqualTo(expectedError));
+        _ = addClassInvocationHandler.SetVoidResult();
+        _ = setTextInvocationHandler.SetVoidResult();
     }
 
     private void CorrectSubmitTest(string theInput, string inputId, string errorDivId)
@@ -664,6 +668,8 @@ internal sealed class ChacharFormTest : IDisposable
 
         addClassInvocationHandler.VerifyNotInvoke(DOMFunctions.ADD_CLASS);
         setTextInvocationHandler.VerifyNotInvoke(DOMFunctions.SET_TEXT);
+        _ = addClassInvocationHandler.SetVoidResult();
+        _ = setTextInvocationHandler.SetVoidResult();
     }
 
     public void Dispose() => _testContext?.Dispose();

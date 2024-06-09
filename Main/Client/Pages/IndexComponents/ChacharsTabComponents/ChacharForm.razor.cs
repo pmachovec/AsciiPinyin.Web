@@ -169,13 +169,7 @@ public partial class ChacharFormBase : ModalWithBackdropBaseGeneral
 
     protected async Task PreventMultipleCharactersAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
     {
-        if (changeEventArgs.Value is null)
-        {
-            TheCharacter = null;
-            await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, string.Empty, cancellationToken);
-            return;
-        }
-        else if (changeEventArgs.Value is string theCharacter)
+        if (changeEventArgs.Value is string theCharacter)
         {
             if (theCharacter.Length <= 1 || TextUtils.GetStringRealLength(theCharacter) <= 1)
             {
