@@ -7,7 +7,7 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
-public class AlternativeFormBase : ModalWithBackdropBaseGeneral
+public class AlternativeFormBase : EntityFormBase
 {
     protected EntitySelector<Chachar> OriginalSelector { get; set; } = default!;
 
@@ -17,9 +17,9 @@ public class AlternativeFormBase : ModalWithBackdropBaseGeneral
 
     protected byte? OriginalTone { get; set; }
 
-    protected byte? Strokes { get; set; }
+    public override byte? Strokes { get; set; }
 
-    protected string? TheCharacter { get; set; }
+    public override string? TheCharacter { get; set; }
 
     public override string BackdropId { get; } = IDs.ALTERNATIVE_FORM_BACKDROP;
 

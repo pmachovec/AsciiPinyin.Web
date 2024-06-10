@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
-public partial class ChacharFormBase : ModalWithBackdropBaseGeneral
+public partial class ChacharFormBase : EntityFormBase
 {
     [GeneratedRegex("^[a-zA-Z]+$")]
     private static partial Regex AsciiLettersRegex();
@@ -34,11 +34,11 @@ public partial class ChacharFormBase : ModalWithBackdropBaseGeneral
 
     protected byte? RadicalTone { get; set; }
 
-    protected byte? Strokes { get; set; }
-
-    protected string? TheCharacter { get; set; }
-
     protected byte? Tone { get; set; }
+
+    public override byte? Strokes { get; set; }
+
+    public override string? TheCharacter { get; set; }
 
     public override string BackdropId { get; } = IDs.CHACHAR_FORM_BACKDROP;
 
@@ -169,32 +169,21 @@ public partial class ChacharFormBase : ModalWithBackdropBaseGeneral
 
     protected async Task PreventMultipleCharactersAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
     {
-        if (changeEventArgs.Value is string theCharacter)
-        {
-            if (theCharacter.Length <= 1 || TextUtils.GetStringRealLength(theCharacter) <= 1)
-            {
-                TheCharacter = theCharacter;
-            }
-            else
-            {
-                var theCharacterStart = TextUtils.GetStringFirstCharacterAsString(theCharacter);
-                TheCharacter = theCharacterStart;
-                await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, theCharacterStart, cancellationToken);
-            }
-        }
+        await this.PreventMultipleCharactersAsyncExtension(
+            JSInteropDOM,
+            IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
+            changeEventArgs,
+            cancellationToken);
     }
 
     protected async Task PreventToneInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
     {
-        Tone = await GetCorrectNumberInputValue(IDs.CHACHAR_FORM_TONE_INPUT, changeEventArgs.Value, Tone, cancellationToken);
+        Tone = await this.GetCorrectNumberInputValueAsyncExtension(JSInteropDOM, IDs.CHACHAR_FORM_TONE_INPUT, changeEventArgs.Value, Tone, cancellationToken);
         await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_TONE_INPUT, Tone.ToString()!, cancellationToken);
     }
 
-    protected async Task PreventStrokesInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
-    {
-        Strokes = await GetCorrectNumberInputValue(IDs.CHACHAR_FORM_STROKES_INPUT, changeEventArgs.Value, Strokes, cancellationToken);
-        await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_STROKES_INPUT, Strokes.ToString()!, cancellationToken);
-    }
+    protected async Task PreventStrokesInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken) =>
+        await this.PreventStrokesInvalidAsyncExtension(JSInteropDOM, changeEventArgs, cancellationToken);
 
     protected async Task ClearWrongInputAsync(string inputId, string errorId, CancellationToken cancellationToken)
     {
