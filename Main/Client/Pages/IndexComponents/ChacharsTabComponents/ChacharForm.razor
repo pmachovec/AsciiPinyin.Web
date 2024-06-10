@@ -30,7 +30,6 @@
                                 type="text"
                                 class="form-control"
                                 id="@IDs.CHACHAR_FORM_THE_CHARACTER_INPUT"
-                                @onchange="async changeEventArgs => await PreventMultipleCharactersAsync(changeEventArgs, CancellationToken.None)"
                                 @oninput="async changeEventArgs => await PreventMultipleCharactersAsync(changeEventArgs, CancellationToken.None)"
                                 @onmousedown="async _ => await ClearWrongInputAsync(
                                     IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
@@ -87,7 +86,6 @@
                                 min="@ByteConstants.MIN_TONE"
                                 max="@ByteConstants.MAX_TONE"
                                 id="@IDs.CHACHAR_FORM_TONE_INPUT"
-                                @onchange="async changeEventArgs => await PreventToneInvalidAsync(changeEventArgs, CancellationToken.None)"
                                 @oninput="async changeEventArgs => await PreventToneInvalidAsync(changeEventArgs, CancellationToken.None)"
                                 @onmousedown="async _ => await ClearWrongInputAsync(
                                     IDs.CHACHAR_FORM_TONE_INPUT,
@@ -108,7 +106,6 @@
                                 min="@ByteConstants.MIN_STROKES"
                                 max="@ByteConstants.MAX_STROKES"
                                 id="@IDs.CHACHAR_FORM_STROKES_INPUT"
-                                @onchange="async changeEventArgs => await PreventStrokesInvalidAsync(changeEventArgs, CancellationToken.None)"
                                 @oninput="async changeEventArgs => await PreventStrokesInvalidAsync(changeEventArgs, CancellationToken.None)"
                                 @onmousedown="async _ => await ClearWrongInputAsync(
                                     IDs.CHACHAR_FORM_STROKES_INPUT,

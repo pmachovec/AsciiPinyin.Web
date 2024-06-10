@@ -209,34 +209,6 @@ public partial class ChacharFormBase : EntityFormBase
         }
     }
 
-    private async Task<byte?> GetCorrectNumberInputValue(
-        string inputId,
-        object? changeEventArgsValue,
-        byte? originalValue,
-        CancellationToken cancellationToken)
-    {
-        // When the user types dot in an environment, where the dot is not decimal delimiter, the ChangeEventArgs value is empty string.
-        // This is the only way how to distinguish typing the dot and having really empty number input in such situation.
-        // If the dot is typed, the result is false, but with really empty input, it's true.
-        var isInputValid = await JSInteropDOM.IsValidInputAsync(inputId, cancellationToken);
-
-        if (changeEventArgsValue is string emptyInputNumberAsStringEmpty
-            && emptyInputNumberAsStringEmpty.Length == 0
-            && isInputValid)
-        {
-            // At this point, the input is really empty.
-            return null;
-        }
-        else
-        {
-            return isInputValid
-                && changeEventArgsValue is string inputNumberAsString
-                && byte.TryParse(inputNumberAsString.AsSpan(0, Math.Max(1, inputNumberAsString.Length)), out var inputNumber)
-                ? inputNumber
-                : originalValue;
-        }
-    }
-
     private async Task<bool> CheckInput(
         string inputId,
         string errorDivId,
