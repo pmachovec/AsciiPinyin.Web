@@ -18,7 +18,7 @@ public class AlternativeViewDialogBase : ModalWithBackdropBaseSpecific<Alternati
     public override event EventHandler EventOnClose = default!;
 
     [Inject]
-    private IJSInteropDOM JSInteropDOM { get; set; } = default!;
+    private IModalWithBackdropCommons ModalWithBackdropCommons { get; set; } = default!;
 
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
@@ -26,8 +26,8 @@ public class AlternativeViewDialogBase : ModalWithBackdropBaseSpecific<Alternati
     public override async Task OpenAsync(Alternative entity, CancellationToken cancellationToken)
     {
         Alternative = entity;
-        await this.OpenAsyncExtension(
-            JSInteropDOM,
+        await ModalWithBackdropCommons.OpenAsyncCommon(
+            this,
             $"{StringConstants.ASCII_PINYIN} - {entity.TheCharacter}",
             cancellationToken);
         StateHasChanged();
@@ -36,8 +36,8 @@ public class AlternativeViewDialogBase : ModalWithBackdropBaseSpecific<Alternati
     public override async Task CloseAsync(CancellationToken cancellationToken)
     {
         Alternative = null;
-        await this.CloseAsyncExtension(
-            JSInteropDOM,
+        await ModalWithBackdropCommons.CloseAsyncCommon(
+            this,
             EventOnClose,
             cancellationToken);
         StateHasChanged();

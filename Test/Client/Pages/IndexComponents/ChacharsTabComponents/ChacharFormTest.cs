@@ -61,7 +61,9 @@ internal sealed class ChacharFormTest : IDisposable
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.DISABLE, IDs.CHACHAR_FORM_ALTERNATIVE);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, string.Empty);
         _ = _testContext.Services.AddSingleton(_localizerMock);
+        _ = _testContext.Services.AddSingleton<IEntityFormCommons, EntityFormCommons>();
         _ = _testContext.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
+        _ = _testContext.Services.AddSingleton<IModalWithBackdropCommons, ModalWithBackdropCommons>();
     }
 
     [TearDown]

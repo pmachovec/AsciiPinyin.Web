@@ -31,6 +31,9 @@ public class AlternativeFormBase : EntityFormBase
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
     [Inject]
+    private IModalWithBackdropCommons ModalWithBackdropCommons { get; set; } = default!;
+
+    [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
     [Parameter]
@@ -50,16 +53,16 @@ public class AlternativeFormBase : EntityFormBase
 
     public override async Task OpenAsync(CancellationToken cancellationToken)
     {
-        await this.OpenAsyncExtension(
-            JSInteropDOM,
+        await ModalWithBackdropCommons.OpenAsyncCommon(
+            this,
             Localizer[Resource.CreateNewAlternative],
             cancellationToken);
     }
 
     public override async Task CloseAsync(CancellationToken cancellationToken)
     {
-        await this.CloseAsyncExtension(
-            JSInteropDOM,
+        await ModalWithBackdropCommons.CloseAsyncCommon(
+            this,
             EventOnClose,
             cancellationToken);
     }

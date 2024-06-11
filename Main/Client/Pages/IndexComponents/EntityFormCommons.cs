@@ -5,11 +5,10 @@ using Microsoft.AspNetCore.Components;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
-public static class EntityFormExtension
+public class EntityFormCommons(IJSInteropDOM _jSInteropDOM) : IEntityFormCommons
 {
-    internal static async Task PreventMultipleCharactersAsyncExtension(
-        this EntityFormBase entityForm,
-        IJSInteropDOM jSInteropDOM,
+    public async Task PreventMultipleCharactersAsyncCommon(
+        EntityFormBase entityForm,
         string inputId,
         ChangeEventArgs changeEventArgs,
         CancellationToken cancellationToken)
@@ -24,29 +23,25 @@ public static class EntityFormExtension
             {
                 var theCharacterStart = TextUtils.GetStringFirstCharacterAsString(theCharacter);
                 entityForm.TheCharacter = theCharacterStart;
-                await jSInteropDOM.SetValueAsync(inputId, theCharacterStart, cancellationToken);
+                await _jSInteropDOM.SetValueAsync(inputId, theCharacterStart, cancellationToken);
             }
         }
     }
 
-    internal static async Task PreventStrokesInvalidAsyncExtension(
-        this EntityFormBase entityForm,
-        IJSInteropDOM jSInteropDOM,
+    public async Task PreventStrokesInvalidAsyncCommon(
+        EntityFormBase entityForm,
         ChangeEventArgs changeEventArgs,
         CancellationToken cancellationToken)
     {
-        entityForm.Strokes = await entityForm.GetCorrectNumberInputValueAsyncExtension(
-            jSInteropDOM,
+        entityForm.Strokes = await GetCorrectNumberInputValueAsyncCommon(
             IDs.CHACHAR_FORM_STROKES_INPUT,
             changeEventArgs.Value,
             entityForm.Strokes,
             cancellationToken);
-        await jSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_STROKES_INPUT, entityForm.Strokes.ToString()!, cancellationToken);
+        await _jSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_STROKES_INPUT, entityForm.Strokes.ToString()!, cancellationToken);
     }
 
-    internal static async Task<byte?> GetCorrectNumberInputValueAsyncExtension(
-        this EntityFormBase _,
-        IJSInteropDOM jSInteropDOM,
+    public async Task<byte?> GetCorrectNumberInputValueAsyncCommon(
         string inputId,
         object? changeEventArgsValue,
         byte? originalValue,
@@ -55,7 +50,7 @@ public static class EntityFormExtension
         // When the user types dot in an environment, where the dot is not decimal delimiter, the ChangeEventArgs value is empty string.
         // This is the only way how to distinguish typing the dot and having really empty number input in such situation.
         // If the dot is typed, the result is false, but with really empty input, it's true.
-        var isInputValid = await jSInteropDOM.IsValidInputAsync(inputId, cancellationToken);
+        var isInputValid = await _jSInteropDOM.IsValidInputAsync(inputId, cancellationToken);
 
         if (changeEventArgsValue is string emptyInputNumberAsStringEmpty
             && emptyInputNumberAsStringEmpty.Length == 0

@@ -47,7 +47,13 @@ public partial class ChacharFormBase : EntityFormBase
     public override event EventHandler EventOnClose = default!;
 
     [Inject]
+    private IEntityFormCommons EntityFormCommons { get; set; } = default!;
+
+    [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
+
+    [Inject]
+    private IModalWithBackdropCommons ModalWithBackdropCommons { get; set; } = default!;
 
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
@@ -95,16 +101,16 @@ public partial class ChacharFormBase : EntityFormBase
 
     public override async Task OpenAsync(CancellationToken cancellationToken)
     {
-        await this.OpenAsyncExtension(
-            JSInteropDOM,
+        await ModalWithBackdropCommons.OpenAsyncCommon(
+            this,
             Localizer[Resource.CreateNewCharacter],
             cancellationToken);
     }
 
     public override async Task CloseAsync(CancellationToken cancellationToken)
     {
-        await this.CloseAsyncExtension(
-            JSInteropDOM,
+        await ModalWithBackdropCommons.CloseAsyncCommon(
+            this,
             EventOnClose,
             cancellationToken);
     }
@@ -169,8 +175,8 @@ public partial class ChacharFormBase : EntityFormBase
 
     protected async Task PreventMultipleCharactersAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
     {
-        await this.PreventMultipleCharactersAsyncExtension(
-            JSInteropDOM,
+        await EntityFormCommons.PreventMultipleCharactersAsyncCommon(
+            this,
             IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
             changeEventArgs,
             cancellationToken);
@@ -178,12 +184,12 @@ public partial class ChacharFormBase : EntityFormBase
 
     protected async Task PreventToneInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
     {
-        Tone = await this.GetCorrectNumberInputValueAsyncExtension(JSInteropDOM, IDs.CHACHAR_FORM_TONE_INPUT, changeEventArgs.Value, Tone, cancellationToken);
+        Tone = await EntityFormCommons.GetCorrectNumberInputValueAsyncCommon(IDs.CHACHAR_FORM_TONE_INPUT, changeEventArgs.Value, Tone, cancellationToken);
         await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_TONE_INPUT, Tone.ToString()!, cancellationToken);
     }
 
     protected async Task PreventStrokesInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken) =>
-        await this.PreventStrokesInvalidAsyncExtension(JSInteropDOM, changeEventArgs, cancellationToken);
+        await EntityFormCommons.PreventStrokesInvalidAsyncCommon(this, changeEventArgs, cancellationToken);
 
     protected async Task ClearWrongInputAsync(string inputId, string errorId, CancellationToken cancellationToken)
     {
