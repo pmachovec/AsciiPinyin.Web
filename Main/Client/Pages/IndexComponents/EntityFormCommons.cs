@@ -7,7 +7,7 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public class EntityFormCommons(IJSInteropDOM _jSInteropDOM) : IEntityFormCommons
 {
-    public async Task PreventMultipleCharactersAsyncCommon(
+    public async Task PreventMultipleCharactersAsync(
         EntityFormBase entityForm,
         string inputId,
         ChangeEventArgs changeEventArgs,
@@ -28,20 +28,21 @@ public class EntityFormCommons(IJSInteropDOM _jSInteropDOM) : IEntityFormCommons
         }
     }
 
-    public async Task PreventStrokesInvalidAsyncCommon(
+    public async Task PreventStrokesInvalidAsync(
         EntityFormBase entityForm,
+        string inputId,
         ChangeEventArgs changeEventArgs,
         CancellationToken cancellationToken)
     {
-        entityForm.Strokes = await GetCorrectNumberInputValueAsyncCommon(
-            IDs.CHACHAR_FORM_STROKES_INPUT,
+        entityForm.Strokes = await GetCorrectNumberInputValueAsync(
+            inputId,
             changeEventArgs.Value,
             entityForm.Strokes,
             cancellationToken);
-        await _jSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_STROKES_INPUT, entityForm.Strokes.ToString()!, cancellationToken);
+        await _jSInteropDOM.SetValueAsync(inputId, entityForm.Strokes.ToString()!, cancellationToken);
     }
 
-    public async Task<byte?> GetCorrectNumberInputValueAsyncCommon(
+    public async Task<byte?> GetCorrectNumberInputValueAsync(
         string inputId,
         object? changeEventArgsValue,
         byte? originalValue,
@@ -67,5 +68,40 @@ public class EntityFormCommons(IJSInteropDOM _jSInteropDOM) : IEntityFormCommons
                 ? inputNumber
                 : originalValue;
         }
+    }
+
+    public async Task ClearWrongInputAsync(string inputId, string errorDivId, CancellationToken cancellationToken)
+    {
+        await Task.WhenAll(
+            _jSInteropDOM.RemoveClassAsync(inputId, CssClasses.BORDER_DANGER, cancellationToken),
+            _jSInteropDOM.RemoveTextAsync(errorDivId, cancellationToken));
+    }
+
+    public async Task<bool> AreAllInputsValidAsync(
+        CancellationToken cancellationToken,
+        params (string inputId, string errorDivId, Func<string?> getErrorText)[] inputs)
+    {
+        var separateCheckSuccesses = await Task.WhenAll(
+            inputs.Select(input => CheckInputAsync(input.inputId, input.errorDivId, input.getErrorText, cancellationToken)));
+
+        return separateCheckSuccesses.All(success => success);
+    }
+
+    private async Task<bool> CheckInputAsync(
+        string inputId,
+        string errorDivId,
+        Func<string?> getErrorText,
+        CancellationToken cancellationToken)
+    {
+        if (getErrorText() is { } errorText)
+        {
+            await Task.WhenAll(
+                _jSInteropDOM.AddClassAsync(inputId, CssClasses.BORDER_DANGER, cancellationToken),
+                _jSInteropDOM.SetTextAsync(errorDivId, errorText, cancellationToken));
+
+            return false;
+        }
+
+        return true;
     }
 }

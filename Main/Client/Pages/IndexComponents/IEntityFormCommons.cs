@@ -4,20 +4,30 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public interface IEntityFormCommons
 {
-    Task PreventMultipleCharactersAsyncCommon(
+    Task PreventMultipleCharactersAsync(
         EntityFormBase entityForm,
         string inputId,
         ChangeEventArgs changeEventArgs,
         CancellationToken cancellationToken);
 
-    Task PreventStrokesInvalidAsyncCommon(
+    Task PreventStrokesInvalidAsync(
         EntityFormBase entityForm,
+        string inputId,
         ChangeEventArgs changeEventArgs,
         CancellationToken cancellationToken);
 
-    Task<byte?> GetCorrectNumberInputValueAsyncCommon(
+    Task<byte?> GetCorrectNumberInputValueAsync(
         string inputId,
         object? changeEventArgsValue,
         byte? originalValue,
         CancellationToken cancellationToken);
+
+    Task ClearWrongInputAsync(
+        string inputId,
+        string errorDivId,
+        CancellationToken cancellationToken);
+
+    Task<bool> AreAllInputsValidAsync(
+        CancellationToken cancellationToken,
+        params (string inputId, string errorDivId, Func<string?> getErrorText)[] inputs);
 }

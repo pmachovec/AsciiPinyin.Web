@@ -175,7 +175,7 @@ public partial class ChacharFormBase : EntityFormBase
 
     protected async Task PreventMultipleCharactersAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
     {
-        await EntityFormCommons.PreventMultipleCharactersAsyncCommon(
+        await EntityFormCommons.PreventMultipleCharactersAsync(
             this,
             IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
             changeEventArgs,
@@ -184,52 +184,30 @@ public partial class ChacharFormBase : EntityFormBase
 
     protected async Task PreventToneInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
     {
-        Tone = await EntityFormCommons.GetCorrectNumberInputValueAsyncCommon(IDs.CHACHAR_FORM_TONE_INPUT, changeEventArgs.Value, Tone, cancellationToken);
+        Tone = await EntityFormCommons.GetCorrectNumberInputValueAsync(IDs.CHACHAR_FORM_TONE_INPUT, changeEventArgs.Value, Tone, cancellationToken);
         await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_TONE_INPUT, Tone.ToString()!, cancellationToken);
     }
 
     protected async Task PreventStrokesInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken) =>
-        await EntityFormCommons.PreventStrokesInvalidAsyncCommon(this, changeEventArgs, cancellationToken);
+        await EntityFormCommons.PreventStrokesInvalidAsync(this, IDs.CHACHAR_FORM_STROKES_INPUT, changeEventArgs, cancellationToken);
 
-    protected async Task ClearWrongInputAsync(string inputId, string errorId, CancellationToken cancellationToken)
-    {
-        await Task.WhenAll(
-            JSInteropDOM.RemoveClassAsync(inputId, CssClasses.BORDER_DANGER, cancellationToken),
-            JSInteropDOM.RemoveTextAsync(errorId, cancellationToken));
-    }
+    protected async Task ClearWrongInputAsync(string inputId, string errorId, CancellationToken cancellationToken) =>
+        await EntityFormCommons.ClearWrongInputAsync(inputId, errorId, cancellationToken);
 
     protected async Task CheckAndSubmitAsync(CancellationToken cancellationToken)
     {
-        var separateCheckSuccesses = await Task.WhenAll(
-            CheckInput(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, GetTheCharacterErrorText, cancellationToken),
-            CheckInput(IDs.CHACHAR_FORM_PINYIN_INPUT, IDs.CHACHAR_FORM_PINYIN_ERROR, GetPinyinErrorText, cancellationToken),
-            CheckInput(IDs.CHACHAR_FORM_IPA_INPUT, IDs.CHACHAR_FORM_IPA_ERROR, GetIpaErrorText, cancellationToken),
-            CheckInput(IDs.CHACHAR_FORM_TONE_INPUT, IDs.CHACHAR_FORM_TONE_ERROR, GetToneErrorText, cancellationToken),
-            CheckInput(IDs.CHACHAR_FORM_STROKES_INPUT, IDs.CHACHAR_FORM_STROKES_ERROR, GetStrokesErrorText, cancellationToken));
+        var areAllInputsValid = await EntityFormCommons.AreAllInputsValidAsync(
+            cancellationToken,
+            (IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, GetTheCharacterErrorText),
+            (IDs.CHACHAR_FORM_PINYIN_INPUT, IDs.CHACHAR_FORM_PINYIN_ERROR, GetPinyinErrorText),
+            (IDs.CHACHAR_FORM_IPA_INPUT, IDs.CHACHAR_FORM_IPA_ERROR, GetIpaErrorText),
+            (IDs.CHACHAR_FORM_TONE_INPUT, IDs.CHACHAR_FORM_TONE_ERROR, GetToneErrorText),
+            (IDs.CHACHAR_FORM_STROKES_INPUT, IDs.CHACHAR_FORM_STROKES_ERROR, GetStrokesErrorText));
 
-        var totalSuccess = separateCheckSuccesses.All(success => success);
-
-        if (totalSuccess)
+        if (areAllInputsValid)
         {
             // TODO submit
         }
-    }
-
-    private async Task<bool> CheckInput(
-        string inputId,
-        string errorDivId,
-        Func<string?> getErrorText,
-        CancellationToken cancellationToken)
-    {
-        if (getErrorText() is { } errorText)
-        {
-            await Task.WhenAll(
-                JSInteropDOM.AddClassAsync(inputId, CssClasses.BORDER_DANGER, cancellationToken),
-                JSInteropDOM.SetTextAsync(errorDivId, errorText, cancellationToken));
-            return false;
-        }
-
-        return true;
     }
 
     private string? GetTheCharacterErrorText()

@@ -5,6 +5,11 @@ public static class IDs
     public const string ALTERNATIVE_FORM_BACKDROP = "alternative-form-backdrop";
     public const string ALTERNATIVE_FORM_ORIGINAL_SELECTOR = "alternative-form-original-selector";
     public const string ALTERNATIVE_FORM_ROOT = "alternative-form-root";
+    public const string ALTERNATIVE_FORM_STROKES_ERROR = "alternative-form-strokes-error";
+    public const string ALTERNATIVE_FORM_STROKES_INPUT = "alternative-form-strokes-input";
+    public const string ALTERNATIVE_FORM_SUBMIT_BUTTON = "alternative-form-submit-button";
+    public const string ALTERNATIVE_FORM_THE_CHARACTER_ERROR = "alternative-form-the-character-error";
+    public const string ALTERNATIVE_FORM_THE_CHARACTER_INPUT = "alternative-form-the-character-input";
     public const string ALTERNATIVE_VIEW_DIALOG_BACKDROP = "alternative-view-dialog-backdrop";
     public const string ALTERNATIVE_VIEW_DIALOG_ROOT = "alternative-view-dialog-root";
     public const string ALTERNATIVES_TAB_ROOT = "alternatives-tab-root";

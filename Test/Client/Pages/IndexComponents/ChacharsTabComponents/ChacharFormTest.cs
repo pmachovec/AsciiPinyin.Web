@@ -55,11 +55,9 @@ internal sealed class ChacharFormTest : IDisposable
         var radicalSelectorMock = Mock.Of<EntitySelector<Chachar>>();
 
         _testContext = new TestContext();
-
         _ = _testContext.ComponentFactories.Add(alternativeSelectorMock);
         _ = _testContext.ComponentFactories.Add(radicalSelectorMock);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.DISABLE, IDs.CHACHAR_FORM_ALTERNATIVE);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, string.Empty);
         _ = _testContext.Services.AddSingleton(_localizerMock);
         _ = _testContext.Services.AddSingleton<IEntityFormCommons, EntityFormCommons>();
         _ = _testContext.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
