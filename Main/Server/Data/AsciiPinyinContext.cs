@@ -7,6 +7,7 @@ namespace AsciiPinyin.Web.Server.Data;
 public sealed class AsciiPinyinContext : DbContext
 {
     public DbSet<Chachar> Chachars => Set<Chachar>();
+
     public DbSet<Alternative> Alternatives => Set<Alternative>();
 
     // Configures EF to load an Sqlite database file from the specified path.
@@ -18,7 +19,8 @@ public sealed class AsciiPinyinContext : DbContext
             .HasKey(chachar => new
             {
                 chachar.TheCharacter,
-                chachar.Pinyin
+                chachar.Pinyin,
+                chachar.Tone
             });
 
         _ = modelBuilder.Entity<Alternative>()
@@ -26,7 +28,8 @@ public sealed class AsciiPinyinContext : DbContext
             {
                 alternative.TheCharacter,
                 alternative.OriginalCharacter,
-                alternative.OriginalPinyin
+                alternative.OriginalPinyin,
+                alternative.OriginalTone
             });
     }
 }

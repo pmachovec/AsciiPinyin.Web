@@ -1,4 +1,4 @@
-using AsciiPinyin.Web.Client.EntityLoader;
+using AsciiPinyin.Web.Client.EntityClient;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Shared.Constants;
@@ -21,7 +21,7 @@ public class IndexBase : ComponentBase
     public IEnumerable<Chachar> Chachars { get; private set; } = [];
 
     [Inject]
-    private IEntityLoader EntityLoader { get; set; } = default!;
+    private IEntityClient EntityClient { get; set; } = default!;
 
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
@@ -39,8 +39,8 @@ public class IndexBase : ComponentBase
     {
         if (firstRender)
         {
-            Alternatives = await EntityLoader.LoadEntitiesAsync<Alternative>("alternatives", CancellationToken.None);
-            Chachars = await EntityLoader.LoadEntitiesAsync<Chachar>("characters", CancellationToken.None);
+            Alternatives = await EntityClient.LoadEntitiesAsync<Alternative>("alternatives", CancellationToken.None);
+            Chachars = await EntityClient.LoadEntitiesAsync<Chachar>("characters", CancellationToken.None);
             await SelectTabAsync(chacharsTab, CancellationToken.None);
             await JSInteropDOM.HideElementAsync(IDs.ENTITIES_TABS_LOADING, CancellationToken.None);
         }

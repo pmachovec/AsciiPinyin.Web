@@ -2,11 +2,11 @@ using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Shared.Models;
 using System.Net.Http.Json;
 
-namespace AsciiPinyin.Web.Client.EntityLoader;
+namespace AsciiPinyin.Web.Client.EntityClient;
 
-public sealed class EntityLoader(
+public sealed class EntityClient(
     HttpClient httpClient,
-    IJSInteropConsole jsInteropConsole) : IEntityLoader
+    IJSInteropConsole jsInteropConsole) : IEntityClient
 {
     private readonly HttpClient _httpClient = httpClient;
     private readonly IJSInteropConsole _jsInteropConsole = jsInteropConsole;
@@ -21,20 +21,20 @@ public sealed class EntityLoader(
 
             if (result is null)
             {
-                jsInteropConsole.ConsoleError($"EntityLoader.LoadEntitiesAsync: Result of retrieving '{entitiesApiName}' is null.");
+                _jsInteropConsole.ConsoleError($"{nameof(EntityClient)}.{nameof(LoadEntitiesAsync)}: Result of retrieving '{entitiesApiName}' is null.");
                 return [];
             }
 
             if (!result.Any())
             {
-                jsInteropConsole.ConsoleError($"EntityLoader.LoadEntitiesAsync: Result of retrieving '{entitiesApiName}' is empty.");
+                _jsInteropConsole.ConsoleError($"{nameof(EntityClient)}.{nameof(LoadEntitiesAsync)}: Result of retrieving '{entitiesApiName}' is empty.");
             }
 
             return result;
         }
         catch (Exception ex)
         {
-            _jsInteropConsole.ConsoleError($"EntityLoader.LoadEntitiesAsync: Error occured on the server side when retrieving '{entitiesApiName}'.");
+            _jsInteropConsole.ConsoleError($"{nameof(EntityClient)}.{nameof(LoadEntitiesAsync)}: Error occured on the server side when retrieving '{entitiesApiName}'.");
             _jsInteropConsole.ConsoleError(ex);
         }
 

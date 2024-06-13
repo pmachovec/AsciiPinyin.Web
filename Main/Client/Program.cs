@@ -1,4 +1,4 @@
-using AsciiPinyin.Web.Client.EntityLoader;
+using AsciiPinyin.Web.Client.EntityClient;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -12,7 +12,7 @@ _ = builder.Services.AddSingleton(_ => new HttpClient
 });
 
 _ = builder.Services.AddSingleton<IEntityFormCommons, EntityFormCommons>();
-_ = builder.Services.AddSingleton<IEntityLoader, EntityLoader>();
+_ = builder.Services.AddSingleton<IEntityClient, EntityClient>();
 _ = builder.Services.AddSingleton<IJSInteropConsole, JSInteropConsole>();
 _ = builder.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
 _ = builder.Services.AddSingleton<IModalWithBackdropCommons, ModalWithBackdropCommons>();
