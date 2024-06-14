@@ -27,7 +27,7 @@ public interface IEntityFormCommons
         string errorDivId,
         CancellationToken cancellationToken);
 
-    Task<bool> AreAllInputsValidAsync(
+    Task<bool> CheckInputsAsync(
         CancellationToken cancellationToken,
         params (string inputId, string errorDivId, Func<string?> getErrorText)[] inputs);
 }

@@ -111,7 +111,7 @@ public class AlternativeFormBase : EntityFormBase
 
     protected async Task CheckAndSubmitAsync(CancellationToken cancellationToken)
     {
-        var areAllInputsValid = await EntityFormCommons.AreAllInputsValidAsync(
+        var areAllInputsValid = await EntityFormCommons.CheckInputsAsync(
             cancellationToken,
             (IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, IDs.ALTERNATIVE_FORM_THE_CHARACTER_ERROR, GetTheCharacterErrorText),
             (IDs.ALTERNATIVE_FORM_STROKES_INPUT, IDs.ALTERNATIVE_FORM_STROKES_ERROR, GetStrokesErrorText));

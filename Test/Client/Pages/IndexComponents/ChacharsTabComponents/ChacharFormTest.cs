@@ -1,4 +1,5 @@
 using AngleSharp.Dom;
+using AsciiPinyin.Web.Client.EntityClient;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
@@ -59,7 +60,9 @@ internal sealed class ChacharFormTest : IDisposable
         _ = _testContext.ComponentFactories.Add(radicalSelectorMock);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.DISABLE, IDs.CHACHAR_FORM_ALTERNATIVE);
         _ = _testContext.Services.AddSingleton(_localizerMock);
+        _ = _testContext.Services.AddSingleton<IEntityClient, EntityClient>();
         _ = _testContext.Services.AddSingleton<IEntityFormCommons, EntityFormCommons>();
+        _ = _testContext.Services.AddSingleton<IJSInteropConsole, JSInteropConsole>();
         _ = _testContext.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
         _ = _testContext.Services.AddSingleton<IModalWithBackdropCommons, ModalWithBackdropCommons>();
     }

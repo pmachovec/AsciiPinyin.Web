@@ -77,7 +77,7 @@ public class EntityFormCommons(IJSInteropDOM _jSInteropDOM) : IEntityFormCommons
             _jSInteropDOM.RemoveTextAsync(errorDivId, cancellationToken));
     }
 
-    public async Task<bool> AreAllInputsValidAsync(
+    public async Task<bool> CheckInputsAsync(
         CancellationToken cancellationToken,
         params (string inputId, string errorDivId, Func<string?> getErrorText)[] inputs)
     {

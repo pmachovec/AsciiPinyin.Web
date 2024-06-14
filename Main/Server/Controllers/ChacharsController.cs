@@ -12,4 +12,11 @@ public sealed class ChacharsController(AsciiPinyinContext asciiPinyinContext) : 
 
     [HttpGet]
     public IEnumerable<Chachar> Get() => [.. AsciiPinyinContext.Chachars];
+
+    [HttpPost]
+    public ActionResult<Chachar> Post(Chachar chachar)
+    {
+        Console.WriteLine($"Got this: {chachar}");
+        return StatusCode(StatusCodes.Status501NotImplemented, "POST handling not implemented");
+    }
 }

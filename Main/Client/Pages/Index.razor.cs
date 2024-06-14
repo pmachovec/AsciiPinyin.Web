@@ -39,8 +39,8 @@ public class IndexBase : ComponentBase
     {
         if (firstRender)
         {
-            Alternatives = await EntityClient.LoadEntitiesAsync<Alternative>("alternatives", CancellationToken.None);
-            Chachars = await EntityClient.LoadEntitiesAsync<Chachar>("characters", CancellationToken.None);
+            Alternatives = await EntityClient.LoadEntitiesAsync<Alternative>(ApiNames.ALTERNATIVES, CancellationToken.None);
+            Chachars = await EntityClient.LoadEntitiesAsync<Chachar>(ApiNames.CHARACTERS, CancellationToken.None);
             await SelectTabAsync(chacharsTab, CancellationToken.None);
             await JSInteropDOM.HideElementAsync(IDs.ENTITIES_TABS_LOADING, CancellationToken.None);
         }

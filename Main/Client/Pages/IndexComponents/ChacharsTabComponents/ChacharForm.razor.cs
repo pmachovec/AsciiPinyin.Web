@@ -1,3 +1,4 @@
+using AsciiPinyin.Web.Client.EntityClient;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
@@ -5,6 +6,7 @@ using AsciiPinyin.Web.Shared.Resources;
 using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
@@ -45,6 +47,9 @@ public partial class ChacharFormBase : EntityFormBase
     public override string RootId { get; } = IDs.CHACHAR_FORM_ROOT;
 
     public override event EventHandler EventOnClose = default!;
+
+    [Inject]
+    private IEntityClient EntityClient { get; set; } = default!;
 
     [Inject]
     private IEntityFormCommons EntityFormCommons { get; set; } = default!;
@@ -196,7 +201,7 @@ public partial class ChacharFormBase : EntityFormBase
 
     protected async Task CheckAndSubmitAsync(CancellationToken cancellationToken)
     {
-        var areAllInputsValid = await EntityFormCommons.AreAllInputsValidAsync(
+        var areAllInputsValid = await EntityFormCommons.CheckInputsAsync(
             cancellationToken,
             (IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, GetTheCharacterErrorText),
             (IDs.CHACHAR_FORM_PINYIN_INPUT, IDs.CHACHAR_FORM_PINYIN_ERROR, GetPinyinErrorText),
@@ -206,7 +211,31 @@ public partial class ChacharFormBase : EntityFormBase
 
         if (areAllInputsValid)
         {
-            // TODO submit
+            var chachar = new Chachar()
+            {
+                Ipa = Ipa!,
+                Pinyin = Pinyin!,
+                RadicalAlternativeCharacter = RadicalAlternativeCharacter!,
+                RadicalCharacter = RadicalCharacter!,
+                RadicalPinyin = RadicalPinyin!,
+                RadicalTone = RadicalTone!,
+                Strokes = (byte)Strokes!,
+                Tone = (byte)Tone!,
+                TheCharacter = TheCharacter!
+            };
+
+            var statusCode = await EntityClient.CreateEntityAsync(ApiNames.CHARACTERS, chachar, cancellationToken);
+
+            if (statusCode == HttpStatusCode.OK)
+            {
+                // Alert OK
+                // Close form
+            }
+            else
+            {
+                // Alert ERROR
+                // Keep form opened
+            }
         }
     }
 

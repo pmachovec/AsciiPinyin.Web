@@ -1,5 +1,6 @@
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Shared.Models;
+using System.Net;
 using System.Net.Http.Json;
 
 namespace AsciiPinyin.Web.Client.EntityClient;
@@ -39,5 +40,27 @@ public sealed class EntityClient(
         }
 
         return [];
+    }
+
+    public async Task<HttpStatusCode> CreateEntityAsync<TEntity>(
+        string entitiesApiName,
+        TEntity entity,
+        CancellationToken cancellationToken) where TEntity : IEntity
+    {
+        _jsInteropConsole.ConsoleInfo($"CREATE {entity.GetType()}: {entity}");
+        var result = await _httpClient.PostAsJsonAsync(entitiesApiName, entity, cancellationToken);
+
+        if (result.StatusCode == HttpStatusCode.OK)
+        {
+            _jsInteropConsole.ConsoleInfo("Success");
+        }
+        else
+        {
+            var content = await result.Content.ReadAsStringAsync(cancellationToken);
+            _jsInteropConsole.ConsoleError("Failure");
+            _jsInteropConsole.ConsoleError($"Status code: {result.StatusCode}, message: {content}");
+        }
+
+        return result.StatusCode;
     }
 }
