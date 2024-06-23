@@ -1,6 +1,6 @@
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
-public abstract class ModalWithBackdropBaseGeneral : ModalWithBackdropBase
+public abstract class ModalBaseGeneral : ModalBase
 {
     public abstract Task OpenAsync(CancellationToken cancellationToken);
 }

@@ -15,6 +15,6 @@ _ = builder.Services.AddSingleton<IEntityFormCommons, EntityFormCommons>();
 _ = builder.Services.AddSingleton<IEntityClient, EntityClient>();
 _ = builder.Services.AddSingleton<IJSInteropConsole, JSInteropConsole>();
 _ = builder.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
-_ = builder.Services.AddSingleton<IModalWithBackdropCommons, ModalWithBackdropCommons>();
+_ = builder.Services.AddSingleton<IModalCommons, ModalCommons>();
 
 await builder.Build().RunAsync();

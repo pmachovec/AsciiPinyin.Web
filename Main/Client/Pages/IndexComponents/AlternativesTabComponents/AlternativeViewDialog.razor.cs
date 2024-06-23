@@ -6,18 +6,16 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
-public class AlternativeViewDialogBase : ModalWithBackdropBaseSpecific<Alternative>
+public class AlternativeViewDialogBase : ModalBaseEntitySpecific<Alternative>
 {
     protected Alternative? Alternative { get; set; }
-
-    public override string BackdropId { get; } = IDs.ALTERNATIVE_VIEW_DIALOG_BACKDROP;
 
     public override string RootId { get; } = IDs.ALTERNATIVE_VIEW_DIALOG_ROOT;
 
     public override event EventHandler EventOnClose = default!;
 
     [Inject]
-    private IModalWithBackdropCommons ModalWithBackdropCommons { get; set; } = default!;
+    private IModalCommons ModalWithBackdropCommons { get; set; } = default!;
 
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;

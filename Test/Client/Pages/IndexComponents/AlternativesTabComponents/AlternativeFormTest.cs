@@ -50,7 +50,7 @@ internal sealed class AlternativeFormTest : IDisposable
         _ = _testContext.Services.AddSingleton(_localizerMock);
         _ = _testContext.Services.AddSingleton<IEntityFormCommons, EntityFormCommons>();
         _ = _testContext.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
-        _ = _testContext.Services.AddSingleton<IModalWithBackdropCommons, ModalWithBackdropCommons>();
+        _ = _testContext.Services.AddSingleton<IModalCommons, ModalCommons>();
     }
 
     [TestCase("-1", "-", TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - single digit negative integer")]

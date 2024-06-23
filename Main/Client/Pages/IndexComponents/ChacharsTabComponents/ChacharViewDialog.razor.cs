@@ -7,18 +7,16 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
-public class ChacharViewDialogBase : ModalWithBackdropBaseSpecific<Chachar>
+public class ChacharViewDialogBase : ModalBaseEntitySpecific<Chachar>
 {
     protected Chachar? Chachar { get; set; }
-
-    public override string BackdropId { get; } = IDs.CHACHAR_VIEW_DIALOG_BACKDROP;
 
     public override string RootId { get; } = IDs.CHACHAR_VIEW_DIALOG_ROOT;
 
     public override event EventHandler EventOnClose = default!;
 
     [Inject]
-    private IModalWithBackdropCommons ModalWithBackdropCommons { get; set; } = default!;
+    private IModalCommons ModalWithBackdropCommons { get; set; } = default!;
 
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;

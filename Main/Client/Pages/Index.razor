@@ -7,8 +7,15 @@
 @page "/"
 @inherits IndexBase
 
+<div
+    class="modal-backdrop fade @CssClasses.D_NONE"
+    style="z-index: @ByteConstants.INDEX_BACKDROP_Z"
+    id="@IDs.INDEX_BACKDROP">
+</div>
 <Header />
-<div class="container" id="index">
+<div
+    class="container"
+    id="@IDs.INDEX">
     <main class="pb-3">
         <nav class="navbar-expand-sm navbar-toggleable-sm navbar-light bg-white box-shadow mb-3">
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">

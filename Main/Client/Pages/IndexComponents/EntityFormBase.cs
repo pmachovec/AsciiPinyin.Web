@@ -1,6 +1,6 @@
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
-public abstract class EntityFormBase : ModalWithBackdropBaseGeneral
+public abstract class EntityFormBase : ModalBaseGeneral
 {
     public abstract byte? Strokes { get; set; }
 

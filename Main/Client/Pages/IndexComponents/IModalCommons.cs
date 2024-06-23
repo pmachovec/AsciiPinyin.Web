@@ -1,14 +1,14 @@
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
-public interface IModalWithBackdropCommons
+public interface IModalCommons
 {
     Task OpenAsyncCommon(
-        ModalWithBackdropBase modalComponent,
+        ModalBase modalComponent,
         string htmlTitle,
         CancellationToken cancellationToken);
 
     Task CloseAsyncCommon(
-        ModalWithBackdropBase modalComponent,
+        ModalBase modalComponent,
         EventHandler? EventOnClose,
         CancellationToken cancellationToken);
 }

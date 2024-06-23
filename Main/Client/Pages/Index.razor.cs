@@ -31,8 +31,10 @@ public class IndexBase : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        await JSInteropDOM.SetTitleAsync(@StringConstants.ASCII_PINYIN, CancellationToken.None);
-        await JSInteropDOM.HideElementAsync(IDs.LOADING_SPLASH, CancellationToken.None);
+        await Task.WhenAll(
+            JSInteropDOM.SetTitleAsync(StringConstants.ASCII_PINYIN, CancellationToken.None),
+            JSInteropDOM.HideElementAsync(IDs.LOADING_SPLASH, CancellationToken.None)
+        );
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -41,8 +43,10 @@ public class IndexBase : ComponentBase
         {
             Alternatives = await EntityClient.LoadEntitiesAsync<Alternative>(ApiNames.ALTERNATIVES, CancellationToken.None);
             Chachars = await EntityClient.LoadEntitiesAsync<Chachar>(ApiNames.CHARACTERS, CancellationToken.None);
-            await SelectTabAsync(chacharsTab, CancellationToken.None);
-            await JSInteropDOM.HideElementAsync(IDs.ENTITIES_TABS_LOADING, CancellationToken.None);
+
+            await Task.WhenAll(
+                SelectTabAsync(chacharsTab, CancellationToken.None),
+                JSInteropDOM.HideElementAsync(IDs.ENTITIES_TABS_LOADING, CancellationToken.None));
         }
     }
 

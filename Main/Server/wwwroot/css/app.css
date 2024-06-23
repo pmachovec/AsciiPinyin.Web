@@ -2,6 +2,7 @@
     --card-entity-height: 120px;
     --card-entity-width: 120px;
     --index-max-width: 1320px;
+    z-index: 0;
 }
 
 html, body {
@@ -85,10 +86,6 @@ a, .btn-link {
 
 .invalid {
     outline: 1px solid red;
-}
-
-.modal-backdrop {
-    z-index: 1 !important;
 }
 
 .modal-entity-selector {

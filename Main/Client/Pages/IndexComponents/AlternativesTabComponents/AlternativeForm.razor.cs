@@ -22,8 +22,6 @@ public class AlternativeFormBase : EntityFormBase
 
     public override string? TheCharacter { get; set; }
 
-    public override string BackdropId { get; } = IDs.ALTERNATIVE_FORM_BACKDROP;
-
     public override string RootId { get; } = IDs.ALTERNATIVE_FORM_ROOT;
 
     public override event EventHandler EventOnClose = default!;
@@ -35,7 +33,7 @@ public class AlternativeFormBase : EntityFormBase
     private IEntityFormCommons EntityFormCommons { get; set; } = default!;
 
     [Inject]
-    private IModalWithBackdropCommons ModalWithBackdropCommons { get; set; } = default!;
+    private IModalCommons ModalWithBackdropCommons { get; set; } = default!;
 
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
@@ -49,8 +47,9 @@ public class AlternativeFormBase : EntityFormBase
         {
             OriginalSelector.EventOnClose += async (_, _) =>
             {
-                await JSInteropDOM.SetTitleAsync(Localizer[Resource.CreateNewAlternative], CancellationToken.None);
-                await JSInteropDOM.SetZIndexAsync(IDs.ALTERNATIVE_FORM_ROOT, 1, CancellationToken.None);
+                await Task.WhenAll(
+                    JSInteropDOM.SetTitleAsync(Localizer[Resource.CreateNewAlternative], CancellationToken.None),
+                    JSInteropDOM.SetZIndexAsync(IDs.ALTERNATIVE_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z + 1, CancellationToken.None));
             };
         }
     }
@@ -73,8 +72,9 @@ public class AlternativeFormBase : EntityFormBase
 
     protected async Task OpenOriginalSelectorAsync(CancellationToken cancellationToken)
     {
-        await JSInteropDOM.SetZIndexAsync(IDs.ALTERNATIVE_FORM_ROOT, 0, cancellationToken);
-        await OriginalSelector.OpenAsync(cancellationToken);
+        await Task.WhenAll(
+            JSInteropDOM.SetZIndexAsync(IDs.ALTERNATIVE_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
+            OriginalSelector.OpenAsync(cancellationToken));
     }
 
     protected async Task SelectOriginalAsync(Chachar originalChachar, CancellationToken cancellationToken)

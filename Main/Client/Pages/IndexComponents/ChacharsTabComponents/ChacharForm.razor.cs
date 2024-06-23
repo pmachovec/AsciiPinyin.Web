@@ -42,8 +42,6 @@ public partial class ChacharFormBase : EntityFormBase
 
     public override string? TheCharacter { get; set; }
 
-    public override string BackdropId { get; } = IDs.CHACHAR_FORM_BACKDROP;
-
     public override string RootId { get; } = IDs.CHACHAR_FORM_ROOT;
 
     public override event EventHandler EventOnClose = default!;
@@ -58,7 +56,7 @@ public partial class ChacharFormBase : EntityFormBase
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
     [Inject]
-    private IModalWithBackdropCommons ModalWithBackdropCommons { get; set; } = default!;
+    private IModalCommons ModalWithBackdropCommons { get; set; } = default!;
 
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
@@ -72,35 +70,39 @@ public partial class ChacharFormBase : EntityFormBase
         {
             AlternativeSelector.EventOnClose += async (_, _) =>
             {
-                await JSInteropDOM.SetTitleAsync(Localizer[Resource.CreateNewCharacter], CancellationToken.None);
-                await JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, 1, CancellationToken.None);
+                await Task.WhenAll(
+                    JSInteropDOM.SetTitleAsync(Localizer[Resource.CreateNewCharacter], CancellationToken.None),
+                    JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z + 1, CancellationToken.None));
             };
 
             RadicalSelector.EventOnClose += async (_, _) =>
             {
-                await JSInteropDOM.SetTitleAsync(Localizer[Resource.CreateNewCharacter], CancellationToken.None);
-                await JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, 1, CancellationToken.None);
+                await Task.WhenAll(
+                    JSInteropDOM.SetTitleAsync(Localizer[Resource.CreateNewCharacter], CancellationToken.None),
+                    JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z + 1, CancellationToken.None));
             };
         }
 
-        // No need to set these properties for these element explicitly in the HTML part.
+        // No need to set these properties for these elements explicitly in the HTML part.
         if (AvailableAlternatives.Any())
         {
-            await JSInteropDOM.EnableAsync(IDs.CHACHAR_FORM_ALTERNATIVE, CancellationToken.None);
-            await JSInteropDOM.EnableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CancellationToken.None);
-            await JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50, CancellationToken.None);
-            await JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK, CancellationToken.None);
-            await JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY, CancellationToken.None);
-            await JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY, CancellationToken.None);
+            await Task.WhenAll(
+                JSInteropDOM.EnableAsync(IDs.CHACHAR_FORM_ALTERNATIVE, CancellationToken.None),
+                JSInteropDOM.EnableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CancellationToken.None),
+                JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50, CancellationToken.None),
+                JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY, CancellationToken.None),
+                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK, CancellationToken.None),
+                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY, CancellationToken.None));
         }
         else
         {
-            await JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_ALTERNATIVE, CancellationToken.None);
-            await JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CancellationToken.None);
-            await JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK, CancellationToken.None);
-            await JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50, CancellationToken.None);
-            await JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY, CancellationToken.None);
-            await JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY, CancellationToken.None);
+            await Task.WhenAll(
+                JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_ALTERNATIVE, CancellationToken.None),
+                JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CancellationToken.None),
+                JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK, CancellationToken.None),
+                JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY, CancellationToken.None),
+                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50, CancellationToken.None),
+                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY, CancellationToken.None));
         }
     }
 
@@ -122,14 +124,16 @@ public partial class ChacharFormBase : EntityFormBase
 
     protected async Task OpenRadicalSelectorAsync(CancellationToken cancellationToken)
     {
-        await JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, 0, cancellationToken);
-        await RadicalSelector.OpenAsync(cancellationToken);
+        await Task.WhenAll(
+            JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
+            RadicalSelector.OpenAsync(cancellationToken));
     }
 
     protected async Task OpenAlternativeSelectorAsync(CancellationToken cancellationToken)
     {
-        await JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, 0, cancellationToken);
-        await AlternativeSelector.OpenAsync(cancellationToken);
+        await Task.WhenAll(
+            JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
+            AlternativeSelector.OpenAsync(cancellationToken));
     }
 
     protected async Task SelectRadicalAsync(Chachar radicalChachar, CancellationToken cancellationToken)
