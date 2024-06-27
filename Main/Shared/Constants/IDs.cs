@@ -31,7 +31,9 @@ public static class IDs
     public const string CHACHAR_VIEW_DIALOG_ROOT = "chachar-view-dialog-root";
     public const string CHACHARS_TAB_ROOT = "chachars-tab-root";
     public const string ENTITIES_TABS_LOADING = "entities-tabs-loading";
-    public const string INDEX = "index";
     public const string INDEX_BACKDROP = "index-backdrop";
+    public const string INDEX_ROOT = "index-root";
     public const string LOADING_SPLASH = "loading-splash";
+    public const string SAVE_FAILED_ROOT = "save-failed-root";
+    public const string SAVE_SUCCESS_ROOT = "save-success-root";
 }
