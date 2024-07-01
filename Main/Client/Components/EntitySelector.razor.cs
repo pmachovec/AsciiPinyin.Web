@@ -5,7 +5,7 @@ using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 
-namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
+namespace AsciiPinyin.Web.Client.Components;
 
 public class EntitySelectorBase<TEntity> : ComponentBase where TEntity : IEntity
 {

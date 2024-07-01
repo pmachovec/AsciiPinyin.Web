@@ -22,21 +22,23 @@ public class AlternativeViewDialogBase : ModalBaseEntitySpecific<Alternative>
 
     public override async Task OpenAsync(Alternative entity, CancellationToken cancellationToken)
     {
-        Alternative = entity;
         await ModalWithBackdropCommons.OpenAsyncCommon(
             this,
             $"{StringConstants.ASCII_PINYIN} - {entity.TheCharacter}",
             cancellationToken);
+
+        Alternative = entity;
         StateHasChanged();
     }
 
     public override async Task CloseAsync(CancellationToken cancellationToken)
     {
-        Alternative = null;
         await ModalWithBackdropCommons.CloseAsyncCommon(
             this,
             EventOnClose,
             cancellationToken);
+
+        Alternative = null;
         StateHasChanged();
     }
 }

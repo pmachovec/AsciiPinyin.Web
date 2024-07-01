@@ -1,11 +1,12 @@
+using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Shared.Constants;
 using Microsoft.AspNetCore.Components;
 
-namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
+namespace AsciiPinyin.Web.Client.Components;
 
-public class SaveFailedBase : ModalBaseGeneral
+public class SaveSuccessBase : ModalBaseGeneral
 {
-    public override string RootId { get; } = IDs.SAVE_FAILED_ROOT;
+    public override string RootId { get; } = IDs.SAVE_SUCCESS_ROOT;
 
     public override event EventHandler EventOnClose = default!;
 
@@ -16,7 +17,7 @@ public class SaveFailedBase : ModalBaseGeneral
     {
         await ModalWithBackdropCommons.OpenAsyncCommon(
             this,
-            "Failed",
+            "Success",
             cancellationToken);
     }
 

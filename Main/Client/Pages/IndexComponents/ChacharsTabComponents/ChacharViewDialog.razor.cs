@@ -22,21 +22,23 @@ public class ChacharViewDialogBase : ModalBaseEntitySpecific<Chachar>
 
     public override async Task OpenAsync(Chachar entity, CancellationToken cancellationToken)
     {
-        Chachar = entity;
         await ModalWithBackdropCommons.OpenAsyncCommon(
             this,
             $"{StringConstants.ASCII_PINYIN} - {entity.TheCharacter}",
             cancellationToken);
+
+        Chachar = entity;
         StateHasChanged();
     }
 
     public override async Task CloseAsync(CancellationToken cancellationToken)
     {
-        Chachar = null;
         await ModalWithBackdropCommons.CloseAsyncCommon(
             this,
             EventOnClose,
             cancellationToken);
+
+        Chachar = null;
         StateHasChanged();
     }
 }
