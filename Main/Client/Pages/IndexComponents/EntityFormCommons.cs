@@ -1,3 +1,4 @@
+using AsciiPinyin.Web.Client.AbstractComponentBases;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Utils;
