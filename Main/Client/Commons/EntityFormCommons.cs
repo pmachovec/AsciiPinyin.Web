@@ -4,9 +4,9 @@ using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 
-namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
+namespace AsciiPinyin.Web.Client.Commons;
 
-public class EntityFormCommons(IJSInteropDOM _jSInteropDOM) : IEntityFormCommons
+public sealed class EntityFormCommons(IJSInteropDOM _jSInteropDOM) : IEntityFormCommons
 {
     public async Task PreventMultipleCharactersAsync(
         EntityFormBase entityForm,

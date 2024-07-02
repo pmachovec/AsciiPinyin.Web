@@ -1,6 +1,6 @@
+using AsciiPinyin.Web.Client.Commons;
 using AsciiPinyin.Web.Client.EntityClient;
 using AsciiPinyin.Web.Client.JSInterop;
-using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);

@@ -1,7 +1,7 @@
 using AsciiPinyin.Web.Client.AbstractComponentBases;
 using Microsoft.AspNetCore.Components;
 
-namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
+namespace AsciiPinyin.Web.Client.Commons;
 
 public interface IEntityFormCommons
 {

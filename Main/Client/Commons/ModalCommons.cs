@@ -2,9 +2,9 @@ using AsciiPinyin.Web.Client.AbstractComponentBases;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Shared.Constants;
 
-namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
+namespace AsciiPinyin.Web.Client.Commons;
 
-public class ModalCommons(IJSInteropDOM _jSInteropDOM) : IModalCommons
+public sealed class ModalCommons(IJSInteropDOM _jSInteropDOM) : IModalCommons
 {
     public async Task OpenAsyncCommon(
         ModalBase modalComponent,

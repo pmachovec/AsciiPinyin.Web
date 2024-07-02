@@ -1,5 +1,5 @@
 using AsciiPinyin.Web.Client.AbstractComponentBases;
-using AsciiPinyin.Web.Client.Pages.IndexComponents;
+using AsciiPinyin.Web.Client.Commons;
 using AsciiPinyin.Web.Shared.Constants;
 using Microsoft.AspNetCore.Components;
 

@@ -1,6 +1,6 @@
 using AsciiPinyin.Web.Client.AbstractComponentBases;
 
-namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
+namespace AsciiPinyin.Web.Client.Commons;
 
 public interface IModalCommons
 {
