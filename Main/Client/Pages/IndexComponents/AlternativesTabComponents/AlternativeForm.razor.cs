@@ -1,5 +1,5 @@
-using AsciiPinyin.Web.Client.AbstractComponentBases;
 using AsciiPinyin.Web.Client.Commons;
+using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Shared.Constants;
@@ -11,7 +11,7 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
-public class AlternativeFormBase : EntityFormBase
+public class AlternativeFormBase : ComponentBase, IEntityForm
 {
     protected EntitySelector<Chachar> OriginalSelector { get; set; } = default!;
 
@@ -21,13 +21,13 @@ public class AlternativeFormBase : EntityFormBase
 
     protected byte? OriginalTone { get; set; }
 
-    public override byte? Strokes { get; set; }
+    public byte? Strokes { get; set; }
 
-    public override string? TheCharacter { get; set; }
+    public string? TheCharacter { get; set; }
 
-    public override string RootId { get; } = IDs.ALTERNATIVE_FORM_ROOT;
+    public string RootId { get; } = IDs.ALTERNATIVE_FORM_ROOT;
 
-    public override event EventHandler EventOnClose = default!;
+    public event EventHandler EventOnClose = default!;
 
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
@@ -57,7 +57,7 @@ public class AlternativeFormBase : EntityFormBase
         }
     }
 
-    public override async Task OpenAsync(CancellationToken cancellationToken)
+    public async Task OpenAsync(CancellationToken cancellationToken)
     {
         await ModalWithBackdropCommons.OpenAsyncCommon(
             this,
@@ -65,7 +65,7 @@ public class AlternativeFormBase : EntityFormBase
             cancellationToken);
     }
 
-    public override async Task CloseAsync(CancellationToken cancellationToken)
+    public async Task CloseAsync(CancellationToken cancellationToken)
     {
         await ModalWithBackdropCommons.CloseAsyncCommon(
             this,

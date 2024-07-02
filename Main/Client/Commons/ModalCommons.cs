@@ -1,4 +1,4 @@
-using AsciiPinyin.Web.Client.AbstractComponentBases;
+using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Shared.Constants;
 
@@ -7,7 +7,7 @@ namespace AsciiPinyin.Web.Client.Commons;
 public sealed class ModalCommons(IJSInteropDOM _jSInteropDOM) : IModalCommons
 {
     public async Task OpenAsyncCommon(
-        ModalBase modalComponent,
+        IModal modalComponent,
         string htmlTitle,
         CancellationToken cancellationToken)
     {
@@ -26,7 +26,7 @@ public sealed class ModalCommons(IJSInteropDOM _jSInteropDOM) : IModalCommons
     }
 
     public async Task CloseAsyncCommon(
-        ModalBase modalComponent,
+        IModal modalComponent,
         EventHandler? EventOnClose,
         CancellationToken cancellationToken)
     {

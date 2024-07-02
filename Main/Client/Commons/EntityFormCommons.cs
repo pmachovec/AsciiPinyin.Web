@@ -1,4 +1,4 @@
-using AsciiPinyin.Web.Client.AbstractComponentBases;
+using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Utils;
@@ -9,7 +9,7 @@ namespace AsciiPinyin.Web.Client.Commons;
 public sealed class EntityFormCommons(IJSInteropDOM _jSInteropDOM) : IEntityFormCommons
 {
     public async Task PreventMultipleCharactersAsync(
-        EntityFormBase entityForm,
+        IEntityForm entityForm,
         string inputId,
         ChangeEventArgs changeEventArgs,
         CancellationToken cancellationToken)
@@ -30,7 +30,7 @@ public sealed class EntityFormCommons(IJSInteropDOM _jSInteropDOM) : IEntityForm
     }
 
     public async Task PreventStrokesInvalidAsync(
-        EntityFormBase entityForm,
+        IEntityForm entityForm,
         string inputId,
         ChangeEventArgs changeEventArgs,
         CancellationToken cancellationToken)

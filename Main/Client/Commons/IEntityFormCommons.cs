@@ -1,4 +1,4 @@
-using AsciiPinyin.Web.Client.AbstractComponentBases;
+using AsciiPinyin.Web.Client.ComponentInterfaces;
 using Microsoft.AspNetCore.Components;
 
 namespace AsciiPinyin.Web.Client.Commons;
@@ -6,13 +6,13 @@ namespace AsciiPinyin.Web.Client.Commons;
 public interface IEntityFormCommons
 {
     Task PreventMultipleCharactersAsync(
-        EntityFormBase entityForm,
+        IEntityForm entityForm,
         string inputId,
         ChangeEventArgs changeEventArgs,
         CancellationToken cancellationToken);
 
     Task PreventStrokesInvalidAsync(
-        EntityFormBase entityForm,
+        IEntityForm entityForm,
         string inputId,
         ChangeEventArgs changeEventArgs,
         CancellationToken cancellationToken);

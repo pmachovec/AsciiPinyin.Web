@@ -1,16 +1,16 @@
-using AsciiPinyin.Web.Client.AbstractComponentBases;
+using AsciiPinyin.Web.Client.ComponentInterfaces;
 
 namespace AsciiPinyin.Web.Client.Commons;
 
 public interface IModalCommons
 {
     Task OpenAsyncCommon(
-        ModalBase modalComponent,
+        IModal modalComponent,
         string htmlTitle,
         CancellationToken cancellationToken);
 
     Task CloseAsyncCommon(
-        ModalBase modalComponent,
+        IModal modalComponent,
         EventHandler? EventOnClose,
         CancellationToken cancellationToken);
 }

@@ -1,5 +1,5 @@
-using AsciiPinyin.Web.Client.AbstractComponentBases;
 using AsciiPinyin.Web.Client.Commons;
+using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
@@ -8,13 +8,13 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
-public class AlternativeViewDialogBase : ModalBaseEntitySpecific<Alternative>
+public class AlternativeViewDialogBase : ComponentBase, IModalEntitySpecific<Alternative>
 {
     protected Alternative? Alternative { get; set; }
 
-    public override string RootId { get; } = IDs.ALTERNATIVE_VIEW_DIALOG_ROOT;
+    public string RootId { get; } = IDs.ALTERNATIVE_VIEW_DIALOG_ROOT;
 
-    public override event EventHandler EventOnClose = default!;
+    public event EventHandler EventOnClose = default!;
 
     [Inject]
     private IModalCommons ModalWithBackdropCommons { get; set; } = default!;
@@ -22,7 +22,7 @@ public class AlternativeViewDialogBase : ModalBaseEntitySpecific<Alternative>
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    public override async Task OpenAsync(Alternative entity, CancellationToken cancellationToken)
+    public async Task OpenAsync(Alternative entity, CancellationToken cancellationToken)
     {
         await ModalWithBackdropCommons.OpenAsyncCommon(
             this,
@@ -33,7 +33,7 @@ public class AlternativeViewDialogBase : ModalBaseEntitySpecific<Alternative>
         StateHasChanged();
     }
 
-    public override async Task CloseAsync(CancellationToken cancellationToken)
+    public async Task CloseAsync(CancellationToken cancellationToken)
     {
         await ModalWithBackdropCommons.CloseAsyncCommon(
             this,

@@ -1,5 +1,5 @@
-using AsciiPinyin.Web.Client.AbstractComponentBases;
 using AsciiPinyin.Web.Client.Commons;
+using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.EntityClient;
 using AsciiPinyin.Web.Client.JSInterop;
@@ -14,7 +14,7 @@ using System.Text.RegularExpressions;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
-public partial class ChacharFormBase : EntityFormBase
+public partial class ChacharFormBase : ComponentBase, IEntityForm
 {
     [GeneratedRegex("^[a-zA-Z]+$")]
     private static partial Regex AsciiLettersRegex();
@@ -41,13 +41,13 @@ public partial class ChacharFormBase : EntityFormBase
 
     protected byte? Tone { get; set; }
 
-    public override byte? Strokes { get; set; }
+    public byte? Strokes { get; set; }
 
-    public override string? TheCharacter { get; set; }
+    public string? TheCharacter { get; set; }
 
-    public override string RootId { get; } = IDs.CHACHAR_FORM_ROOT;
+    public string RootId { get; } = IDs.CHACHAR_FORM_ROOT;
 
-    public override event EventHandler EventOnClose = default!;
+    public event EventHandler EventOnClose = default!;
 
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
@@ -109,7 +109,7 @@ public partial class ChacharFormBase : EntityFormBase
         }
     }
 
-    public override async Task OpenAsync(CancellationToken cancellationToken)
+    public async Task OpenAsync(CancellationToken cancellationToken)
     {
         await ModalWithBackdropCommons.OpenAsyncCommon(
             this,
@@ -117,7 +117,7 @@ public partial class ChacharFormBase : EntityFormBase
             cancellationToken);
     }
 
-    public override async Task CloseAsync(CancellationToken cancellationToken)
+    public async Task CloseAsync(CancellationToken cancellationToken)
     {
         await ModalWithBackdropCommons.CloseAsyncCommon(
             this,

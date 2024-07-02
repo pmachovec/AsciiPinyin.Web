@@ -1,5 +1,5 @@
-using AsciiPinyin.Web.Client.AbstractComponentBases;
 using AsciiPinyin.Web.Client.Commons;
+using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
@@ -8,13 +8,13 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
-public class ChacharViewDialogBase : ModalBaseEntitySpecific<Chachar>
+public class ChacharViewDialogBase : ComponentBase, IModalEntitySpecific<Chachar>
 {
     protected Chachar? Chachar { get; set; }
 
-    public override string RootId { get; } = IDs.CHACHAR_VIEW_DIALOG_ROOT;
+    public string RootId { get; } = IDs.CHACHAR_VIEW_DIALOG_ROOT;
 
-    public override event EventHandler EventOnClose = default!;
+    public event EventHandler EventOnClose = default!;
 
     [Inject]
     private IModalCommons ModalWithBackdropCommons { get; set; } = default!;
@@ -22,7 +22,7 @@ public class ChacharViewDialogBase : ModalBaseEntitySpecific<Chachar>
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    public override async Task OpenAsync(Chachar entity, CancellationToken cancellationToken)
+    public async Task OpenAsync(Chachar entity, CancellationToken cancellationToken)
     {
         await ModalWithBackdropCommons.OpenAsyncCommon(
             this,
@@ -33,7 +33,7 @@ public class ChacharViewDialogBase : ModalBaseEntitySpecific<Chachar>
         StateHasChanged();
     }
 
-    public override async Task CloseAsync(CancellationToken cancellationToken)
+    public async Task CloseAsync(CancellationToken cancellationToken)
     {
         await ModalWithBackdropCommons.CloseAsyncCommon(
             this,
