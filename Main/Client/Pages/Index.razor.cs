@@ -1,6 +1,7 @@
 using AsciiPinyin.Web.Client.EntityClient;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
+using AsciiPinyin.Web.Shared.ComponentInterfaces;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
@@ -13,8 +14,8 @@ public class IndexBase : ComponentBase
 {
     private IEntityTab? _selectedTab;
 
-    protected AlternativesTab alternativesTab = default!;
-    protected ChacharsTab chacharsTab = default!;
+    protected AlternativesTab AlternativesTab { get; set; } = default!;
+    protected ChacharsTab ChacharsTab { get; set; } = default!;
 
     public IEnumerable<Alternative> Alternatives { get; private set; } = [];
 
@@ -45,20 +46,27 @@ public class IndexBase : ComponentBase
             Chachars = await EntityClient.LoadEntitiesAsync<Chachar>(ApiNames.CHARACTERS, CancellationToken.None);
 
             await Task.WhenAll(
-                SelectTabAsync(chacharsTab, CancellationToken.None),
+                SelectTabAsync(ChacharsTab, CancellationToken.None),
                 JSInteropDOM.HideElementAsync(IDs.ENTITIES_TABS_LOADING, CancellationToken.None));
         }
     }
 
-    protected async Task SelectTabAsync(IEntityTab tab, CancellationToken cancellationToken)
+    protected async Task SelectTabAsync(
+        IEntityTab tab,
+        CancellationToken cancellationToken)
     {
         if (_selectedTab is { } selectedTab)
         {
-            await selectedTab.HideAsync(cancellationToken);
+            await Task.WhenAll(
+                selectedTab.HideAsync(cancellationToken),
+                JSInteropDOM.RemoveClassAsync(selectedTab.ButtonId, CssClasses.ACTIVE, cancellationToken));
         }
 
+        await Task.WhenAll(
+            JSInteropDOM.AddClassAsync(tab.ButtonId, CssClasses.ACTIVE, cancellationToken),
+            tab.ShowAsync(cancellationToken));
+
         _selectedTab = tab;
-        await tab.ShowAsync(cancellationToken);
         StateHasChanged();
     }
 

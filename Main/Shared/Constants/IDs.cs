@@ -10,6 +10,7 @@ public static class IDs
     public const string ALTERNATIVE_FORM_THE_CHARACTER_ERROR = "alternative-form-the-character-error";
     public const string ALTERNATIVE_FORM_THE_CHARACTER_INPUT = "alternative-form-the-character-input";
     public const string ALTERNATIVE_VIEW_DIALOG_ROOT = "alternative-view-dialog-root";
+    public const string ALTERNATIVES_TAB_BUTTON = "alternatives-tab-button";
     public const string ALTERNATIVES_TAB_ROOT = "alternatives-tab-root";
     public const string CHACHAR_FORM_ALTERNATIVE = "chachar-form-alternative";
     public const string CHACHAR_FORM_ALTERNATIVE_LABEL = "chachar-form-alternative-label";
@@ -29,6 +30,7 @@ public static class IDs
     public const string CHACHAR_FORM_TONE_ERROR = "chachar-form-tone-error";
     public const string CHACHAR_FORM_TONE_INPUT = "chachar-form-tone-input";
     public const string CHACHAR_VIEW_DIALOG_ROOT = "chachar-view-dialog-root";
+    public const string CHACHARS_TAB_BUTTON = "chachars-tab-button";
     public const string CHACHARS_TAB_ROOT = "chachars-tab-root";
     public const string ENTITIES_TABS_LOADING = "entities-tabs-loading";
     public const string INDEX_BACKDROP = "index-backdrop";

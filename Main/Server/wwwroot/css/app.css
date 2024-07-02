@@ -93,6 +93,11 @@ a, .btn-link {
     min-width: 9rem;
 }
 
+/* Not having the class 'active' and not being pressed */
+.tab-button:not(.active):not(:active) {
+    border: transparent !important;
+}
+
 .tab-root {
     display: none;
 }

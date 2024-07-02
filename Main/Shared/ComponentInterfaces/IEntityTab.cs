@@ -1,7 +1,9 @@
-namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
+namespace AsciiPinyin.Web.Shared.ComponentInterfaces;
 
 public interface IEntityTab
 {
+    string ButtonId { get; }
+
     bool IsVisible { get; }
 
     Task HideAsync(CancellationToken cancellationToken);

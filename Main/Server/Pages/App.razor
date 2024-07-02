@@ -1,6 +1,7 @@
 @using AsciiPinyin.Web.Client
 @using AsciiPinyin.Web.Shared.Components
 @using AsciiPinyin.Web.Shared.Constants
+@using AsciiPinyin.Web.Shared.Resources
 @using Microsoft.AspNetCore.Components.Web
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 
@@ -28,7 +29,14 @@
         <script src="/asciipinyin/_framework/blazor.web.js"></script>
         <div id="@IDs.LOADING_SPLASH">
             <Header />
-            <Loading />
+
+            <div class="container">
+                <NavBar />
+                <div>
+                    <Loading />
+                </div>
+            </div>
+
             <Footer />
         </div>
     </body>

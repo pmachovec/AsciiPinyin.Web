@@ -1,5 +1,6 @@
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
+using AsciiPinyin.Web.Shared.ComponentInterfaces;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
@@ -16,6 +17,7 @@ public class ChacharsTabBase : ComponentBase, IEntityTab
 
     protected ChacharViewDialog ChacharViewDialog { get; set; } = default!;
 
+    public string ButtonId { get; } = IDs.CHACHARS_TAB_BUTTON;
     public bool IsVisible { get; private set; }
 
     [Inject]

@@ -1,5 +1,6 @@
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
+using AsciiPinyin.Web.Shared.ComponentInterfaces;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
@@ -16,6 +17,7 @@ public class AlternativesTabBase : ComponentBase, IEntityTab
 
     protected AlternativeViewDialog AlternativeViewDialog { get; set; } = default!;
 
+    public string ButtonId { get; } = IDs.ALTERNATIVES_TAB_BUTTON;
     public bool IsVisible { get; private set; }
 
     [Inject]
