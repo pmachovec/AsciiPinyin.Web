@@ -23,6 +23,10 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
     protected EntitySelector<Chachar> RadicalSelector { get; set; } = default!;
 
+    protected SaveFailed SaveFailed { get; set; } = default!;
+
+    protected SaveSuccess SaveSuccess { get; set; } = default!;
+
     protected IEnumerable<Alternative> AvailableAlternatives = [];
 
     protected string? AlternativeError { get; set; }
@@ -59,7 +63,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
     [Inject]
-    private IModalCommons ModalWithBackdropCommons { get; set; } = default!;
+    private IModalCommons ModalCommons { get; set; } = default!;
 
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
@@ -71,19 +75,8 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
     {
         if (firstRender)
         {
-            AlternativeSelector.EventOnClose += async (_, _) =>
-            {
-                await Task.WhenAll(
-                    JSInteropDOM.SetTitleAsync(Localizer[Resource.CreateNewCharacter], CancellationToken.None),
-                    JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z + 1, CancellationToken.None));
-            };
-
-            RadicalSelector.EventOnClose += async (_, _) =>
-            {
-                await Task.WhenAll(
-                    JSInteropDOM.SetTitleAsync(Localizer[Resource.CreateNewCharacter], CancellationToken.None),
-                    JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z + 1, CancellationToken.None));
-            };
+            AlternativeSelector.EventOnClose += EntityFormCommons.GetModalToFrontEvent(this, Localizer[Resource.CreateNewCharacter]);
+            RadicalSelector.EventOnClose += EntityFormCommons.GetModalToFrontEvent(this, Localizer[Resource.CreateNewCharacter]);
         }
 
         // No need to set these properties for these elements explicitly in the HTML part.
@@ -111,7 +104,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
     public async Task OpenAsync(CancellationToken cancellationToken)
     {
-        await ModalWithBackdropCommons.OpenAsyncCommon(
+        await ModalCommons.OpenAsyncCommon(
             this,
             Localizer[Resource.CreateNewCharacter],
             cancellationToken);
@@ -119,7 +112,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
     public async Task CloseAsync(CancellationToken cancellationToken)
     {
-        await ModalWithBackdropCommons.CloseAsyncCommon(
+        await ModalCommons.CloseAsyncCommon(
             this,
             EventOnClose,
             cancellationToken);

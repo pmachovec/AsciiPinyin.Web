@@ -18,6 +18,7 @@ public class ChacharsTabBase : ComponentBase, IEntityTab
     protected ChacharViewDialog ChacharViewDialog { get; set; } = default!;
 
     public string ButtonId { get; } = IDs.CHACHARS_TAB_BUTTON;
+
     public bool IsVisible { get; private set; }
 
     [Inject]
@@ -49,14 +50,14 @@ public class ChacharsTabBase : ComponentBase, IEntityTab
     public async Task HideAsync(CancellationToken cancellationToken)
     {
         IsVisible = false;
-        await JSInteropDOM.HideElementAsync(IDs.CHACHARS_TAB_ROOT, cancellationToken);
+        await JSInteropDOM.HideElementAsync(IDs.NAVBAR_CHACHARS_TAB_ROOT, cancellationToken);
     }
 
     public async Task ShowAsync(CancellationToken cancellationToken)
     {
         IsVisible = true;
         await JSInteropDOM.SetTitleAsync(_htmlTitle, cancellationToken);
-        await JSInteropDOM.ShowElementAsync(IDs.CHACHARS_TAB_ROOT, cancellationToken);
+        await JSInteropDOM.ShowElementAsync(IDs.NAVBAR_CHACHARS_TAB_ROOT, cancellationToken);
     }
 
     protected async Task ShowChacharFormAsync(CancellationToken cancellationToken) =>

@@ -49,14 +49,14 @@ public class AlternativesTabBase : ComponentBase, IEntityTab
     public async Task HideAsync(CancellationToken cancellationToken)
     {
         IsVisible = false;
-        await JSInteropDOM.HideElementAsync(IDs.ALTERNATIVES_TAB_ROOT, cancellationToken);
+        await JSInteropDOM.HideElementAsync(IDs.NAVBAR_ALTERNATIVES_TAB_ROOT, cancellationToken);
     }
 
     public async Task ShowAsync(CancellationToken cancellationToken)
     {
         IsVisible = true;
         await JSInteropDOM.SetTitleAsync(_htmlTitle, cancellationToken);
-        await JSInteropDOM.ShowElementAsync(IDs.ALTERNATIVES_TAB_ROOT, cancellationToken);
+        await JSInteropDOM.ShowElementAsync(IDs.NAVBAR_ALTERNATIVES_TAB_ROOT, cancellationToken);
     }
 
     protected async Task ShowAlternativeFormAsync(CancellationToken cancellationToken) =>

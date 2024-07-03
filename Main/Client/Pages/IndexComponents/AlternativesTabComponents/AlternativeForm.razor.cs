@@ -36,7 +36,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     private IEntityFormCommons EntityFormCommons { get; set; } = default!;
 
     [Inject]
-    private IModalCommons ModalWithBackdropCommons { get; set; } = default!;
+    private IModalCommons ModalCommons { get; set; } = default!;
 
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
@@ -48,18 +48,13 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     {
         if (firstRender)
         {
-            OriginalSelector.EventOnClose += async (_, _) =>
-            {
-                await Task.WhenAll(
-                    JSInteropDOM.SetTitleAsync(Localizer[Resource.CreateNewAlternative], CancellationToken.None),
-                    JSInteropDOM.SetZIndexAsync(IDs.ALTERNATIVE_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z + 1, CancellationToken.None));
-            };
+            OriginalSelector.EventOnClose += EntityFormCommons.GetModalToFrontEvent(this, Localizer[Resource.CreateNewAlternative]);
         }
     }
 
     public async Task OpenAsync(CancellationToken cancellationToken)
     {
-        await ModalWithBackdropCommons.OpenAsyncCommon(
+        await ModalCommons.OpenAsyncCommon(
             this,
             Localizer[Resource.CreateNewAlternative],
             cancellationToken);
@@ -67,7 +62,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
     public async Task CloseAsync(CancellationToken cancellationToken)
     {
-        await ModalWithBackdropCommons.CloseAsyncCommon(
+        await ModalCommons.CloseAsyncCommon(
             this,
             EventOnClose,
             cancellationToken);

@@ -5,6 +5,8 @@ namespace AsciiPinyin.Web.Client.Commons;
 
 public interface IEntityFormCommons
 {
+    EventHandler GetModalToFrontEvent(IModal modal, string titleToSet);
+
     Task PreventMultipleCharactersAsync(
         IEntityForm entityForm,
         string inputId,

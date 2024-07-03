@@ -12,11 +12,11 @@ public class SaveFailedBase : ComponentBase, IModalGeneral
     public event EventHandler EventOnClose = default!;
 
     [Inject]
-    private IModalCommons ModalWithBackdropCommons { get; set; } = default!;
+    private IModalCommons ModalCommons { get; set; } = default!;
 
     public async Task OpenAsync(CancellationToken cancellationToken)
     {
-        await ModalWithBackdropCommons.OpenAsyncCommon(
+        await ModalCommons.OpenAsyncCommon(
             this,
             "Failed",
             cancellationToken);
@@ -24,7 +24,7 @@ public class SaveFailedBase : ComponentBase, IModalGeneral
 
     public async Task CloseAsync(CancellationToken cancellationToken)
     {
-        await ModalWithBackdropCommons.CloseAsyncCommon(
+        await ModalCommons.CloseAsyncCommon(
             this,
             EventOnClose,
             cancellationToken);

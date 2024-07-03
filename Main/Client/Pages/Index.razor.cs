@@ -15,6 +15,7 @@ public class IndexBase : ComponentBase
     private IEntityTab? _selectedTab;
 
     protected AlternativesTab AlternativesTab { get; set; } = default!;
+
     protected ChacharsTab ChacharsTab { get; set; } = default!;
 
     public IEnumerable<Alternative> Alternatives { get; private set; } = [];
@@ -47,7 +48,7 @@ public class IndexBase : ComponentBase
 
             await Task.WhenAll(
                 SelectTabAsync(ChacharsTab, CancellationToken.None),
-                JSInteropDOM.HideElementAsync(IDs.ENTITIES_TABS_LOADING, CancellationToken.None));
+                JSInteropDOM.HideElementAsync(IDs.INDEX_ENTITIES_TABS_LOADING, CancellationToken.None));
         }
     }
 

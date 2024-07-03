@@ -8,6 +8,16 @@ namespace AsciiPinyin.Web.Client.Commons;
 
 public sealed class EntityFormCommons(IJSInteropDOM _jSInteropDOM) : IEntityFormCommons
 {
+    public EventHandler GetModalToFrontEvent(IModal modal, string titleToSet)
+    {
+        return async (_, _) =>
+        {
+            await Task.WhenAll(
+                _jSInteropDOM.SetZIndexAsync(modal.RootId, ByteConstants.INDEX_BACKDROP_Z + 1, CancellationToken.None),
+                _jSInteropDOM.SetTitleAsync(titleToSet, CancellationToken.None));
+        };
+    }
+
     public async Task PreventMultipleCharactersAsync(
         IEntityForm entityForm,
         string inputId,
@@ -71,7 +81,10 @@ public sealed class EntityFormCommons(IJSInteropDOM _jSInteropDOM) : IEntityForm
         }
     }
 
-    public async Task ClearWrongInputAsync(string inputId, string errorDivId, CancellationToken cancellationToken)
+    public async Task ClearWrongInputAsync(
+        string inputId,
+        string errorDivId,
+        CancellationToken cancellationToken)
     {
         await Task.WhenAll(
             _jSInteropDOM.RemoveClassAsync(inputId, CssClasses.BORDER_DANGER, cancellationToken),

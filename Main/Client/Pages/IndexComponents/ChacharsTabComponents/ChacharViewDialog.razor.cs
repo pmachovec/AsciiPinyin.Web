@@ -17,14 +17,14 @@ public class ChacharViewDialogBase : ComponentBase, IModalEntitySpecific<Chachar
     public event EventHandler EventOnClose = default!;
 
     [Inject]
-    private IModalCommons ModalWithBackdropCommons { get; set; } = default!;
+    private IModalCommons ModalCommons { get; set; } = default!;
 
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
     public async Task OpenAsync(Chachar entity, CancellationToken cancellationToken)
     {
-        await ModalWithBackdropCommons.OpenAsyncCommon(
+        await ModalCommons.OpenAsyncCommon(
             this,
             $"{StringConstants.ASCII_PINYIN} - {entity.TheCharacter}",
             cancellationToken);
@@ -35,7 +35,7 @@ public class ChacharViewDialogBase : ComponentBase, IModalEntitySpecific<Chachar
 
     public async Task CloseAsync(CancellationToken cancellationToken)
     {
-        await ModalWithBackdropCommons.CloseAsyncCommon(
+        await ModalCommons.CloseAsyncCommon(
             this,
             EventOnClose,
             cancellationToken);
