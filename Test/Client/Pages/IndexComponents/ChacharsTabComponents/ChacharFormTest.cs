@@ -1,12 +1,11 @@
-using AngleSharp.Dom;
+using Asciipinyin.Web.Client.Test.Commons;
 using AsciiPinyin.Web.Client.Commons;
-using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.EntityClient;
 using AsciiPinyin.Web.Client.JSInterop;
+using AsciiPinyin.Web.Client.Pages;
 using AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Constants.JSInterop;
-using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
 using AsciiPinyin.Web.Shared.Utils;
 using Bunit;
@@ -14,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Moq;
 using NUnit.Framework;
-using Index = AsciiPinyin.Web.Client.Pages.Index;
 using TestContext = Bunit.TestContext;
 
 namespace Asciipinyin.Web.Client.Test.Pages.IndexComponents.ChacharsTabComponents;
@@ -36,29 +34,38 @@ internal sealed class ChacharFormTest : IDisposable
         IDs.CHACHAR_FORM_TONE_INPUT,
     ];
 
-    private readonly Index _indexMock = Mock.Of<Index>();
+    private readonly IIndex _indexMock = Mock.Of<IIndex>();
     private readonly IStringLocalizer<Resource> _localizerMock = Mock.Of<IStringLocalizer<Resource>>();
 
     private TestContext _testContext = default!;
+    private IRenderedComponent<ChacharForm> _chacharFormComponent = default!;
+    private EntityFormTestCommons _entityFormTestCommons = default!;
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        _ = Mock.Get(_localizerMock).Setup(localizer => localizer[Resource.CompulsoryValue]).Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE));
-        _ = Mock.Get(_localizerMock).Setup(localizer => localizer[Resource.MustBeChineseCharacter]).Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER));
-        _ = Mock.Get(_localizerMock).Setup(localizer => localizer[Resource.OnlyAsciiAllowed]).Returns(new LocalizedString(ONLY_ASCII_ALLOWED, ONLY_ASCII_ALLOWED));
-        _ = Mock.Get(_localizerMock).Setup(localizer => localizer[Resource.OnlyIpaAllowed]).Returns(new LocalizedString(ONLY_IPA_ALLOWED, ONLY_IPA_ALLOWED));
+        _ = Mock.Get(_localizerMock)
+            .Setup(localizer => localizer[Resource.CompulsoryValue])
+            .Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE));
+
+        _ = Mock.Get(_localizerMock)
+            .Setup(localizer => localizer[Resource.MustBeChineseCharacter])
+            .Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER));
+
+        _ = Mock.Get(_localizerMock)
+            .Setup(localizer => localizer[Resource.OnlyAsciiAllowed])
+            .Returns(new LocalizedString(ONLY_ASCII_ALLOWED, ONLY_ASCII_ALLOWED));
+
+        _ = Mock.Get(_localizerMock)
+            .Setup(localizer => localizer[Resource.OnlyIpaAllowed])
+            .Returns(new LocalizedString(ONLY_IPA_ALLOWED, ONLY_IPA_ALLOWED));
     }
 
     [SetUp]
     public void SetUp()
     {
-        var alternativeSelectorMock = Mock.Of<EntitySelector<Alternative>>();
-        var radicalSelectorMock = Mock.Of<EntitySelector<Chachar>>();
-
         _testContext = new TestContext();
-        _ = _testContext.ComponentFactories.Add(alternativeSelectorMock);
-        _ = _testContext.ComponentFactories.Add(radicalSelectorMock);
+
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.DISABLE, IDs.CHACHAR_FORM_ALTERNATIVE);
         _ = _testContext.Services.AddSingleton(_localizerMock);
         _ = _testContext.Services.AddSingleton<IEntityClient, EntityClient>();
@@ -66,6 +73,9 @@ internal sealed class ChacharFormTest : IDisposable
         _ = _testContext.Services.AddSingleton<IJSInteropConsole, JSInteropConsole>();
         _ = _testContext.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
         _ = _testContext.Services.AddSingleton<IModalCommons, ModalCommons>();
+
+        _chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
+        _entityFormTestCommons = new(_testContext, _chacharFormComponent, _inputIds);
     }
 
     [TearDown]
@@ -135,11 +145,8 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("𫇂\t𫟖\t𬩽", "𫇂", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
     [TestCase("𫇂\n𫟖\t𬩽 ", "𫇂", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
     [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", "0", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - crazy combination of 40 characters, symbols and whitespaces")]
-    public void TheCharacterOnInputAdjustedTest(string theInput, string expectedContent)
-    {
-        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        VerifyInputValueSet(chacharFormComponent, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, theInput, expectedContent);
-    }
+    public void TheCharacterOnInputAdjustedTest(string theInput, string expectedContent) =>
+        _entityFormTestCommons.VerifyInputValueSet(theInput, expectedContent, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT);
 
     [TestCase("", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterOnInputUnchangedTest)} - empty string")]
     [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterOnInputUnchangedTest)} - zero")]
@@ -183,16 +190,8 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("𬩽", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterOnInputUnchangedTest)} - single Chinese character - CJK extension E")]
     [TestCase("𭕄", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterOnInputUnchangedTest)} - single Chinese character - CJK extension F")]
     [TestCase("\U000310f9", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterOnInputUnchangedTest)} - single Chinese character - CJK extension G")]
-    public void TheCharacterOnInputUnchangedTest(string theInput)
-    {
-        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        var setValueInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, theInput);
-        var chacharFormTheCharacterInput = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_THE_CHARACTER_INPUT}");
-        chacharFormTheCharacterInput.Input(theInput);
-
-        setValueInvocationHandler.VerifyNotInvoke(DOMFunctions.SET_VALUE);
-        _ = setValueInvocationHandler.SetVoidResult();
-    }
+    public void TheCharacterOnInputUnchangedTest(string theInput) =>
+        _entityFormTestCommons.StringInputUnchangedTest(theInput, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT);
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - empty string")]
     [TestCase("0", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - zero")]
@@ -228,10 +227,11 @@ internal sealed class ChacharFormTest : IDisposable
     {
         // Multi-character inputs are unreachable thanks to PreventMultipleCharacters, no need to test this case.
 
-        WrongSubmitOnInputTest(
+        _entityFormTestCommons.WrongSubmitOnInputTest(
             theInput,
             expectedError,
             IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
+            IDs.CHACHAR_FORM_SUBMIT_BUTTON,
             IDs.CHACHAR_FORM_THE_CHARACTER_ERROR);
     }
 
@@ -252,9 +252,11 @@ internal sealed class ChacharFormTest : IDisposable
         // Multi-character inputs are unreachable thanks to PreventMultipleCharacters, no need to test this case.
 
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, TextUtils.GetStringFirstCharacterAsString(theInput));
-        CorrectSubmitOnInputTest(
+
+        _entityFormTestCommons.CorrectSubmitOnInputTest(
             theInput,
             IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
+            IDs.CHACHAR_FORM_SUBMIT_BUTTON,
             IDs.CHACHAR_FORM_THE_CHARACTER_ERROR);
     }
 
@@ -360,10 +362,11 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("𫇂\n𫟖\t𬩽 ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
     [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - crazy combination of 40 characters, symbols and whitespaces")]
     public void PinyinWrongSubmitTest(string theInput, string expectedError) =>
-        WrongSubmitOnChangeTest(
+        _entityFormTestCommons.WrongSubmitOnChangeTest(
             theInput,
             expectedError,
             IDs.CHACHAR_FORM_PINYIN_INPUT,
+            IDs.CHACHAR_FORM_SUBMIT_BUTTON,
             IDs.CHACHAR_FORM_PINYIN_ERROR);
 
     [TestCase("a", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - single ASCII character lowercase")]
@@ -372,9 +375,10 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("ABC", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - multiple ASCII characters uppercase")]
     [TestCase("AbCdE", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - multiple ASCII characters case combination")]
     public void PinyinCorrectSubmitTest(string theInput) =>
-        CorrectSubmitOnChangeTest(
+        _entityFormTestCommons.CorrectSubmitOnChangeTest(
             theInput,
             IDs.CHACHAR_FORM_PINYIN_INPUT,
+            IDs.CHACHAR_FORM_SUBMIT_BUTTON,
             IDs.CHACHAR_FORM_PINYIN_ERROR);
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - empty string")]
@@ -473,10 +477,11 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("𫇂\n𫟖\t𬩽 ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
     [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - crazy combination of 40 characters, symbols and whitespaces")]
     public void IpaWrongSubmitTest(string theInput, string expectedError) =>
-        WrongSubmitOnChangeTest(
+        _entityFormTestCommons.WrongSubmitOnChangeTest(
             theInput,
             expectedError,
             IDs.CHACHAR_FORM_IPA_INPUT,
+            IDs.CHACHAR_FORM_SUBMIT_BUTTON,
             IDs.CHACHAR_FORM_IPA_ERROR);
 
     [TestCase("\'", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - apostrophe")]
@@ -491,9 +496,10 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("ʈʂʊŋ", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - '中' in IPA")]
     [TestCase("pr̝i:liʃʒlucɔutʃki:ku:ɲu:pjɛlɟa:bɛlskɛ:ɔ:di", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - Czech text in IPA")]
     public void IpaCorrectSubmitTest(string theInput) =>
-        CorrectSubmitOnChangeTest(
+        _entityFormTestCommons.CorrectSubmitOnChangeTest(
             theInput,
             IDs.CHACHAR_FORM_IPA_INPUT,
+            IDs.CHACHAR_FORM_SUBMIT_BUTTON,
             IDs.CHACHAR_FORM_IPA_ERROR);
 
     [TestCase("", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputAdjustedTest)} - previous value empty string")]
@@ -501,14 +507,14 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("1", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputAdjustedTest)} - previous value one")]
     [TestCase("4", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputAdjustedTest)} - previous value four")]
     public void ToneOnInputAdjustedTest(string previousValidInput) =>
-        NumberInputAdjustedTest(IDs.CHACHAR_FORM_TONE_INPUT, previousValidInput);
+        _entityFormTestCommons.NumberInputAdjustedTest(previousValidInput, IDs.CHACHAR_FORM_TONE_INPUT);
 
     [TestCase("", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputUnchangedTest)} - empty string")]
     [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputUnchangedTest)} - zero")]
     [TestCase("1", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputUnchangedTest)} - one")]
     [TestCase("4", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputUnchangedTest)} - four")]
     public void ToneOnInputUnchangedTest(string theInput) =>
-        NumberInputUnchangedTest(IDs.CHACHAR_FORM_TONE_INPUT, theInput);
+        _entityFormTestCommons.NumberInputUnchangedTest(theInput, IDs.CHACHAR_FORM_TONE_INPUT);
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneWrongSubmitTest)} - empty string")]
     public void ToneWrongSubmitTest(string theInput, string expectedError)
@@ -518,10 +524,11 @@ internal sealed class ChacharFormTest : IDisposable
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_TONE_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_TONE_INPUT, theInput);
 
-        WrongSubmitOnInputTest(
+        _entityFormTestCommons.WrongSubmitOnInputTest(
             theInput,
             expectedError,
             IDs.CHACHAR_FORM_TONE_INPUT,
+            IDs.CHACHAR_FORM_SUBMIT_BUTTON,
             IDs.CHACHAR_FORM_TONE_ERROR);
     }
 
@@ -533,9 +540,10 @@ internal sealed class ChacharFormTest : IDisposable
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_TONE_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_TONE_INPUT, theInput);
 
-        CorrectSubmitOnInputTest(
+        _entityFormTestCommons.CorrectSubmitOnInputTest(
             theInput,
             IDs.CHACHAR_FORM_TONE_INPUT,
+            IDs.CHACHAR_FORM_SUBMIT_BUTTON,
             IDs.CHACHAR_FORM_TONE_ERROR);
     }
 
@@ -547,7 +555,7 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("66", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value sixty-six")]
     [TestCase("99", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value ninety-nine")]
     public void StrokesOnInputAdjustedTest(string previousValidInput) =>
-        NumberInputAdjustedTest(IDs.CHACHAR_FORM_STROKES_INPUT, previousValidInput);
+        _entityFormTestCommons.NumberInputAdjustedTest(previousValidInput, IDs.CHACHAR_FORM_STROKES_INPUT);
 
     [TestCase("", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - empty string")]
     [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - zero")]
@@ -557,7 +565,7 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("66", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - sixty-six")]
     [TestCase("99", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - ninety-nine")]
     public void StrokesOnInputUnchangedTest(string theInput) =>
-        NumberInputUnchangedTest(IDs.CHACHAR_FORM_STROKES_INPUT, theInput);
+        _entityFormTestCommons.NumberInputUnchangedTest(theInput, IDs.CHACHAR_FORM_STROKES_INPUT);
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesWrongSubmitTest)} - empty string")]
     public void StrokesWrongSubmitTest(string theInput, string expectedError)
@@ -567,10 +575,11 @@ internal sealed class ChacharFormTest : IDisposable
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_STROKES_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_STROKES_INPUT, theInput);
 
-        WrongSubmitOnInputTest(
+        _entityFormTestCommons.WrongSubmitOnInputTest(
             theInput,
             expectedError,
             IDs.CHACHAR_FORM_STROKES_INPUT,
+            IDs.CHACHAR_FORM_SUBMIT_BUTTON,
             IDs.CHACHAR_FORM_STROKES_ERROR);
     }
 
@@ -585,158 +594,11 @@ internal sealed class ChacharFormTest : IDisposable
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_STROKES_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_STROKES_INPUT, theInput);
 
-        CorrectSubmitOnInputTest(
+        _entityFormTestCommons.CorrectSubmitOnInputTest(
             theInput,
             IDs.CHACHAR_FORM_STROKES_INPUT,
+            IDs.CHACHAR_FORM_SUBMIT_BUTTON,
             IDs.CHACHAR_FORM_STROKES_ERROR);
-    }
-
-    private void NumberInputAdjustedTest(
-        string inputId,
-        string previousValidInput)
-    {
-        // Mock the input to be valid first.
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, previousValidInput);
-        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, inputId).SetResult(true);
-        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        var chacharFormNumberInput = chacharFormComponent.Find($"#{inputId}");
-        chacharFormNumberInput.Input(previousValidInput);
-
-        // Now mock invalid input and verify that it was changed to the previous valid one.
-        // Substitutes all invalid inputs, no need to run the test for each one separately.
-        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, inputId).SetResult(false);
-        VerifyInputValueSet(chacharFormComponent, inputId, It.IsAny<string>(), previousValidInput);
-    }
-
-    private void NumberInputUnchangedTest(
-        string inputId,
-        string theInput)
-    {
-        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, inputId).SetResult(true);
-        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        VerifyInputValueSet(chacharFormComponent, inputId, theInput, theInput);
-    }
-
-    private void VerifyInputValueSet(
-        IRenderedComponent<ChacharForm> chacharFormComponent,
-        string inputId,
-        string valueToSet,
-        string expectedContent)
-    {
-        var setValueInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, expectedContent);
-        var chacharFormInput = chacharFormComponent.Find($"#{inputId}");
-        chacharFormInput.Input(valueToSet);
-
-        var setValueInvocation = setValueInvocationHandler.VerifyInvoke(DOMFunctions.SET_VALUE);
-        Assert.That(setValueInvocation.Arguments.Count, Is.EqualTo(2));
-        Assert.That(setValueInvocation.Arguments[0], Is.EqualTo(inputId));
-        Assert.That(setValueInvocation.Arguments[1], Is.EqualTo(expectedContent));
-        _ = setValueInvocationHandler.SetVoidResult();
-    }
-
-    private void WrongSubmitOnInputTest(
-        string theInput,
-        string expectedError,
-        string inputId,
-        string errorDivId)
-    {
-        var (addClassInvocationHandler, setTextInvocationHandler, chacharFormInput, chacharFormSubmitButton) = MockFormElements(inputId, errorDivId, expectedError);
-        chacharFormInput.Input(theInput);
-        chacharFormSubmitButton.Click();
-        WrongSubmitTest(expectedError, inputId, errorDivId, addClassInvocationHandler, setTextInvocationHandler);
-    }
-
-    private void WrongSubmitOnChangeTest(
-        string theInput,
-        string expectedError,
-        string inputId,
-        string errorDivId)
-    {
-        var (addClassInvocationHandler, setTextInvocationHandler, chacharFormInput, chacharFormSubmitButton) = MockFormElements(inputId, errorDivId, expectedError);
-        chacharFormInput.Change(theInput);
-        chacharFormSubmitButton.Click();
-        WrongSubmitTest(expectedError, inputId, errorDivId, addClassInvocationHandler, setTextInvocationHandler);
-    }
-
-    private void CorrectSubmitOnInputTest(
-        string theInput,
-        string inputId,
-        string errorDivId)
-    {
-        var (addClassInvocationHandler, setTextInvocationHandler, chacharFormInput, chacharFormSubmitButton) = MockFormElementsForCorrectSubmit(inputId, errorDivId);
-        chacharFormInput.Input(theInput);
-        chacharFormSubmitButton.Click();
-        CorrectSubmitTest(addClassInvocationHandler, setTextInvocationHandler);
-    }
-
-    private void CorrectSubmitOnChangeTest(
-        string theInput,
-        string inputId,
-        string errorDivId)
-    {
-        var (addClassInvocationHandler, setTextInvocationHandler, chacharFormInput, chacharFormSubmitButton) = MockFormElementsForCorrectSubmit(inputId, errorDivId);
-        chacharFormInput.Change(theInput);
-        chacharFormSubmitButton.Click();
-        CorrectSubmitTest(addClassInvocationHandler, setTextInvocationHandler);
-    }
-
-    private (JSRuntimeInvocationHandler, JSRuntimeInvocationHandler, IElement, IElement) MockFormElementsForCorrectSubmit(
-        string inputId,
-        string errorDivId)
-    {
-        foreach (var otherInputId in _inputIds)
-        {
-            if (otherInputId != inputId)
-            {
-                _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, otherInputId, CssClasses.BORDER_DANGER);
-            }
-        }
-
-        return MockFormElements(inputId, errorDivId);
-    }
-
-    private (JSRuntimeInvocationHandler, JSRuntimeInvocationHandler, IElement, IElement) MockFormElements(
-        string inputId,
-        string errorDivId,
-        string expectedError = "")
-    {
-        var chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        var addClassInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, inputId, CssClasses.BORDER_DANGER);
-        var setTextInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TEXT, errorDivId, expectedError);
-        var chacharFormInput = chacharFormComponent.Find($"#{inputId}");
-        var chacharFormSubmitButton = chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_SUBMIT_BUTTON}");
-
-        return (addClassInvocationHandler, setTextInvocationHandler, chacharFormInput, chacharFormSubmitButton);
-    }
-
-    private static void WrongSubmitTest(
-        string expectedError,
-        string inputId,
-        string errorDivId,
-        JSRuntimeInvocationHandler addClassInvocationHandler,
-        JSRuntimeInvocationHandler setTextInvocationHandler)
-    {
-        var addClassInvocation = addClassInvocationHandler.VerifyInvoke(DOMFunctions.ADD_CLASS);
-        Assert.That(addClassInvocation.Arguments.Count, Is.EqualTo(2));
-        Assert.That(addClassInvocation.Arguments[0], Is.EqualTo(inputId));
-        Assert.That(addClassInvocation.Arguments[1], Is.EqualTo(CssClasses.BORDER_DANGER));
-
-        var setTextInvocation = setTextInvocationHandler.VerifyInvoke(DOMFunctions.SET_TEXT);
-        Assert.That(setTextInvocation.Arguments.Count, Is.EqualTo(2));
-        Assert.That(setTextInvocation.Arguments[0], Is.EqualTo(errorDivId));
-        Assert.That(setTextInvocation.Arguments[1], Is.EqualTo(expectedError));
-        _ = addClassInvocationHandler.SetVoidResult();
-        _ = setTextInvocationHandler.SetVoidResult();
-    }
-
-    private static void CorrectSubmitTest(
-        JSRuntimeInvocationHandler addClassInvocationHandler,
-        JSRuntimeInvocationHandler setTextInvocationHandler)
-    {
-        addClassInvocationHandler.VerifyNotInvoke(DOMFunctions.ADD_CLASS);
-        setTextInvocationHandler.VerifyNotInvoke(DOMFunctions.SET_TEXT);
-        _ = addClassInvocationHandler.SetVoidResult();
-        _ = setTextInvocationHandler.SetVoidResult();
     }
 
     public void Dispose() => _testContext?.Dispose();

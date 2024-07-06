@@ -2,6 +2,8 @@ namespace AsciiPinyin.Web.Shared.Constants;
 
 public static class IDs
 {
+    public const string ALTERNATIVE_FORM_ORIGINAL_ERROR = "alternative-form-original-error";
+    public const string ALTERNATIVE_FORM_ORIGINAL_INPUT = "alternative-form-original-input";
     public const string ALTERNATIVE_FORM_ORIGINAL_SELECTOR = "alternative-form-original-selector";
     public const string ALTERNATIVE_FORM_ROOT = "alternative-form-root";
     public const string ALTERNATIVE_FORM_STROKES_ERROR = "alternative-form-strokes-error";

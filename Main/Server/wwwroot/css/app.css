@@ -74,6 +74,10 @@ a, .btn-link {
     display: inline;
 }
 
+.form-input {
+    min-height: 85px;
+}
+
 .invalid {
     outline: 1px solid red;
 }

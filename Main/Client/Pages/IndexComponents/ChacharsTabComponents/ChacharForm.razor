@@ -20,7 +20,7 @@
             </div>
             <div class="modal-body m-3">
                 <form>
-                    <div class="mb-3">
+                    <div class="form-input">
                         <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.ChineseCharacter]</div>
                         <div class="input-group">
                             <input
@@ -38,7 +38,7 @@
                             id="@IDs.CHACHAR_FORM_THE_CHARACTER_ERROR">
                         </div>
                     </div>
-                    <div class="mb-3">
+                    <div class="form-input">
                         <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Pinyin]</div>
                         <div class="input-group">
                             <input
@@ -56,7 +56,7 @@
                             id="@IDs.CHACHAR_FORM_PINYIN_ERROR">
                         </div>
                     </div>
-                    <div class="mb-3">
+                    <div class="form-input">
                         <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Ipa]</div>
                         <div class="input-group">
                             <input
@@ -74,7 +74,7 @@
                             id="@IDs.CHACHAR_FORM_IPA_ERROR">
                         </div>
                     </div>
-                    <div class="mb-3">
+                    <div class="form-input">
                         <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Tone]</div>
                         <div class="input-group">
                             <input
@@ -94,7 +94,7 @@
                             id="@IDs.CHACHAR_FORM_TONE_ERROR">
                         </div>
                     </div>
-                    <div class="mb-3">
+                    <div class="form-input">
                         <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.NumberOfStrokes]</div>
                         <div class="input-group">
                             <input
@@ -113,7 +113,7 @@
                             class="error-label form-text mx-1 mt-0 text-danger"
                             id="@IDs.CHACHAR_FORM_STROKES_ERROR"></div>
                     </div>
-                    <div class="mb-3">
+                    <div class="form-input">
                         <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Radical]</div>
                         <div class="input-group">
                             <button
@@ -129,9 +129,8 @@
                                 &#x2715;
                             </button>
                         </div>
-                        <div class="error-label form-text mx-1 mt-0 text-danger"></div>
                     </div>
-                    <div class="mb-3">
+                    <div class="form-input">
                         <div
                             class="form-text mx-1"
                             id="@IDs.CHACHAR_FORM_ALTERNATIVE_LABEL">
@@ -152,9 +151,6 @@
                                 @onclick="ClearAlternative">
                                 &#x2715;
                             </button>
-                        </div>
-                        <div class="error-label form-text mx-1 mt-0 text-danger">
-                            @AlternativeError
                         </div>
                     </div>
                 </form>

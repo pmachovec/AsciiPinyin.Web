@@ -10,7 +10,7 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Pages;
 
-public class IndexBase : ComponentBase
+public class IndexBase : ComponentBase, IIndex
 {
     private IEntityTab? _selectedTab;
 

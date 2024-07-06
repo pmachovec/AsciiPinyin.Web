@@ -29,8 +29,6 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
     protected IEnumerable<Alternative> AvailableAlternatives = [];
 
-    protected string? AlternativeError { get; set; }
-
     protected string? Ipa { get; set; }
 
     protected string? Pinyin { get; set; }
@@ -69,7 +67,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
     [Parameter]
-    public required Index Index { get; set; } = default!;
+    public required IIndex Index { get; set; } = default!;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -283,29 +281,13 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         return null;
     }
 
-    private string? GetToneErrorText()
-    {
-        if (Tone is null)
-        {
-            return Localizer[Resource.CompulsoryValue];
-        }
+    // Null tone is the only reachable wrong input.
+    // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to handle this case.
+    private string? GetToneErrorText() =>
+        EntityFormCommons.GetNullInputErrorText(Tone);
 
-        // Null tone is the only reachable wrong input.
-        // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to handle this case.
-
-        return null;
-    }
-
-    private string? GetStrokesErrorText()
-    {
-        if (Strokes is null)
-        {
-            return Localizer[Resource.CompulsoryValue];
-        }
-
-        // Null strokes is the only reachable wrong input.
-        // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to handle this case.
-
-        return null;
-    }
+    // Null strokes is the only reachable wrong input.
+    // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to handle this case.
+    private string? GetStrokesErrorText() =>
+        EntityFormCommons.GetNullInputErrorText(Strokes);
 }

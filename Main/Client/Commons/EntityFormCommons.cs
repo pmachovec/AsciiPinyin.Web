@@ -1,12 +1,16 @@
 using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Shared.Constants;
+using AsciiPinyin.Web.Shared.Resources;
 using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Commons;
 
-public sealed class EntityFormCommons(IJSInteropDOM _jSInteropDOM) : IEntityFormCommons
+public sealed class EntityFormCommons(
+    IJSInteropDOM _jSInteropDOM,
+    IStringLocalizer<Resource> _localizer) : IEntityFormCommons
 {
     public EventHandler GetModalToFrontEvent(IModal modal, string titleToSet)
     {
@@ -100,6 +104,9 @@ public sealed class EntityFormCommons(IJSInteropDOM _jSInteropDOM) : IEntityForm
 
         return separateCheckSuccesses.All(success => success);
     }
+
+    public string? GetNullInputErrorText(object? theInput) =>
+        theInput is null ? (string)_localizer[Resource.CompulsoryValue] : null;
 
     private async Task<bool> CheckInputAsync(
         string inputId,

@@ -1,7 +1,7 @@
-using AngleSharp.Dom;
+using Asciipinyin.Web.Client.Test.Commons;
 using AsciiPinyin.Web.Client.Commons;
-using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.JSInterop;
+using AsciiPinyin.Web.Client.Pages;
 using AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Constants.JSInterop;
@@ -13,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Moq;
 using NUnit.Framework;
-using Index = AsciiPinyin.Web.Client.Pages.Index;
 using TestContext = Bunit.TestContext;
 
 namespace Asciipinyin.Web.Client.Test.Pages.IndexComponents.AlternativesTabComponents;
@@ -25,34 +24,78 @@ internal sealed class AlternativeFormTest : IDisposable
 
     private readonly IEnumerable<string> _inputIds =
     [
+        IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
         IDs.ALTERNATIVE_FORM_STROKES_INPUT,
         IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT
     ];
 
-    private readonly Index _indexMock = Mock.Of<Index>();
+    private readonly IEnumerable<Chachar> _radicalChachars =
+    [
+        new Chachar()
+        {
+            TheCharacter = "雨",
+            Pinyin = "yu",
+            Ipa = "y:",
+            Tone = 3,
+            Strokes = 8
+        }
+    ];
+
+    private readonly IEnumerable<Chachar> _nonRadicalChachars =
+    [
+        new Chachar()
+        {
+            TheCharacter = "零",
+            Pinyin = "ling",
+            Ipa = "liŋ",
+            Tone = 2,
+            Strokes = 13,
+            RadicalCharacter = "雨",
+            RadicalPinyin = "yu",
+            RadicalTone = 3,
+            RadicalAlternativeCharacter = "⻗"
+        }
+    ];
+
+    private readonly IIndex _indexMock = Mock.Of<IIndex>();
     private readonly IStringLocalizer<Resource> _localizerMock = Mock.Of<IStringLocalizer<Resource>>();
 
     private TestContext _testContext = default!;
+    private IRenderedComponent<AlternativeForm> _alternativeFormComponent = default!;
+    private EntityFormTestCommons _entityFormTestCommons = default!;
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        _ = Mock.Get(_localizerMock).Setup(localizer => localizer[Resource.CompulsoryValue]).Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE));
-        _ = Mock.Get(_localizerMock).Setup(localizer => localizer[Resource.MustBeChineseCharacter]).Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER));
+        _ = Mock.Get(_indexMock)
+            .Setup(index => index.Chachars)
+            .Returns(_radicalChachars.Concat(_nonRadicalChachars));
+
+        _ = Mock.Get(_localizerMock)
+            .Setup(localizer => localizer[Resource.CompulsoryValue])
+            .Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE));
+
+        _ = Mock.Get(_localizerMock)
+            .Setup(localizer => localizer[Resource.MustBeChineseCharacter])
+            .Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER));
     }
 
     [SetUp]
     public void SetUp()
     {
-        var originalSelectorMock = Mock.Of<EntitySelector<Chachar>>();
-
         _testContext = new TestContext();
-        _ = _testContext.ComponentFactories.Add(originalSelectorMock);
+
         _ = _testContext.Services.AddSingleton(_localizerMock);
         _ = _testContext.Services.AddSingleton<IEntityFormCommons, EntityFormCommons>();
         _ = _testContext.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
         _ = _testContext.Services.AddSingleton<IModalCommons, ModalCommons>();
+
+        _alternativeFormComponent = _testContext.RenderComponent<AlternativeForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
+        _entityFormTestCommons = new(_testContext, _alternativeFormComponent, _inputIds);
     }
+
+    [TearDown]
+    public void TearDown() => Dispose();
 
     [TestCase("-1", "-", TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - single digit negative integer")]
     [TestCase("123", "1", TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - multiple digits positive integer")]
@@ -118,11 +161,8 @@ internal sealed class AlternativeFormTest : IDisposable
     [TestCase("𫇂\t𫟖\t𬩽", "𫇂", TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
     [TestCase("𫇂\n𫟖\t𬩽 ", "𫇂", TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
     [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", "0", TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - crazy combination of 40 characters, symbols and whitespaces")]
-    public void TheCharacterOnInputAdjustedTest(string theInput, string expectedContent)
-    {
-        var alternativeFormComponent = _testContext.RenderComponent<AlternativeForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        VerifyInputValueSet(alternativeFormComponent, IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, theInput, expectedContent);
-    }
+    public void TheCharacterOnInputAdjustedTest(string theInput, string expectedContent) =>
+        _entityFormTestCommons.VerifyInputValueSet(theInput, expectedContent, IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT);
 
     [TestCase("", TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterOnInputUnchangedTest)} - empty string")]
     [TestCase("0", TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterOnInputUnchangedTest)} - zero")]
@@ -166,16 +206,8 @@ internal sealed class AlternativeFormTest : IDisposable
     [TestCase("𬩽", TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterOnInputUnchangedTest)} - single Chinese character - CJK extension E")]
     [TestCase("𭕄", TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterOnInputUnchangedTest)} - single Chinese character - CJK extension F")]
     [TestCase("\U000310f9", TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterOnInputUnchangedTest)} - single Chinese character - CJK extension G")]
-    public void TheCharacterOnInputUnchangedTest(string theInput)
-    {
-        var alternativeFormComponent = _testContext.RenderComponent<AlternativeForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        var setValueInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, theInput);
-        var alternativeFormTheCharacterInput = alternativeFormComponent.Find($"#{IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT}");
-        alternativeFormTheCharacterInput.Input(theInput);
-
-        setValueInvocationHandler.VerifyNotInvoke(DOMFunctions.SET_VALUE);
-        _ = setValueInvocationHandler.SetVoidResult();
-    }
+    public void TheCharacterOnInputUnchangedTest(string theInput) =>
+        _entityFormTestCommons.StringInputUnchangedTest(theInput, IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT);
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - empty string")]
     [TestCase("0", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - zero")]
@@ -211,10 +243,11 @@ internal sealed class AlternativeFormTest : IDisposable
     {
         // Multi-character inputs are unreachable thanks to PreventMultipleCharacters, no need to test this case.
 
-        WrongSubmitTest(
+        _entityFormTestCommons.WrongSubmitOnInputTest(
             theInput,
             expectedError,
             IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT,
+            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
             IDs.ALTERNATIVE_FORM_THE_CHARACTER_ERROR);
     }
 
@@ -235,9 +268,11 @@ internal sealed class AlternativeFormTest : IDisposable
         // Multi-character inputs are unreachable thanks to PreventMultipleCharacters, no need to test this case.
 
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, TextUtils.GetStringFirstCharacterAsString(theInput));
-        CorrectSubmitTest(
+
+        _entityFormTestCommons.CorrectSubmitOnInputTest(
             theInput,
             IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT,
+            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
             IDs.ALTERNATIVE_FORM_THE_CHARACTER_ERROR);
     }
 
@@ -248,20 +283,8 @@ internal sealed class AlternativeFormTest : IDisposable
     [TestCase("13", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value thirteen")]
     [TestCase("66", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value sixty-six")]
     [TestCase("99", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value ninety-nine")]
-    public void StrokesOnInputAdjustedTest(string previousValidInput)
-    {
-        // Mock the input to be valid first.
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.ALTERNATIVE_FORM_STROKES_INPUT, previousValidInput);
-        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.ALTERNATIVE_FORM_STROKES_INPUT).SetResult(true);
-        var alternativeFormComponent = _testContext.RenderComponent<AlternativeForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        var alternativeFormNumberInput = alternativeFormComponent.Find($"#{IDs.ALTERNATIVE_FORM_STROKES_INPUT}");
-        alternativeFormNumberInput.Input(previousValidInput);
-
-        // Now mock invalid input and verify that it was changed to the previous valid one.
-        // Substitutes all invalid inputs, no need to run the test for each one separately.
-        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.ALTERNATIVE_FORM_STROKES_INPUT).SetResult(false);
-        VerifyInputValueSet(alternativeFormComponent, IDs.ALTERNATIVE_FORM_STROKES_INPUT, It.IsAny<string>(), previousValidInput);
-    }
+    public void StrokesOnInputAdjustedTest(string previousValidInput) =>
+        _entityFormTestCommons.NumberInputAdjustedTest(previousValidInput, IDs.ALTERNATIVE_FORM_STROKES_INPUT);
 
     [TestCase("", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - empty string")]
     [TestCase("0", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - zero")]
@@ -270,12 +293,8 @@ internal sealed class AlternativeFormTest : IDisposable
     [TestCase("13", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - thirteen")]
     [TestCase("66", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - sixty-six")]
     [TestCase("99", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - ninety-nine")]
-    public void StrokesOnInputUnchangedTest(string theInput)
-    {
-        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.ALTERNATIVE_FORM_STROKES_INPUT).SetResult(true);
-        var alternativeFormComponent = _testContext.RenderComponent<AlternativeForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        VerifyInputValueSet(alternativeFormComponent, IDs.ALTERNATIVE_FORM_STROKES_INPUT, theInput, theInput);
-    }
+    public void StrokesOnInputUnchangedTest(string theInput) =>
+        _entityFormTestCommons.NumberInputUnchangedTest(theInput, IDs.ALTERNATIVE_FORM_STROKES_INPUT);
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesWrongSubmitTest)} - empty string")]
     public void StrokesWrongSubmitTest(string theInput, string expectedError)
@@ -285,10 +304,11 @@ internal sealed class AlternativeFormTest : IDisposable
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.ALTERNATIVE_FORM_STROKES_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.ALTERNATIVE_FORM_STROKES_INPUT, theInput);
 
-        WrongSubmitTest(
+        _entityFormTestCommons.WrongSubmitOnInputTest(
             theInput,
             expectedError,
             IDs.ALTERNATIVE_FORM_STROKES_INPUT,
+            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
             IDs.ALTERNATIVE_FORM_STROKES_ERROR);
     }
 
@@ -303,10 +323,51 @@ internal sealed class AlternativeFormTest : IDisposable
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.ALTERNATIVE_FORM_STROKES_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.ALTERNATIVE_FORM_STROKES_INPUT, theInput);
 
-        CorrectSubmitTest(
+        _entityFormTestCommons.CorrectSubmitOnInputTest(
             theInput,
             IDs.ALTERNATIVE_FORM_STROKES_INPUT,
+            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
             IDs.ALTERNATIVE_FORM_STROKES_ERROR);
+    }
+
+    [TestCase(TestName = $"{nameof(AlternativeFormTest)}.{nameof(OriginalWrongSubmitTest)} - original not selected")]
+    public void OriginalWrongSubmitTest()
+    {
+        var (addBorderDangerClassHandler, setErrorTextInvocationHandler, _, alternativeFormSubmitButton) = _entityFormTestCommons.MockFormElements(
+            IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
+            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
+            IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR,
+            COMPULSORY_VALUE);
+
+        alternativeFormSubmitButton.Click();
+
+        EntityFormTestCommons.WrongSubmitTest(
+            COMPULSORY_VALUE,
+            IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
+            IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR,
+            addBorderDangerClassHandler,
+            setErrorTextInvocationHandler);
+    }
+
+    [TestCase(TestName = $"{nameof(AlternativeFormTest)}.{nameof(OriginalCorrectSubmitTest)} - original selected")]
+    public void OriginalCorrectSubmitTest()
+    {
+        _entityFormTestCommons.MockOtherInputsBorderDanger(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT);
+
+        var buttonDivs = _alternativeFormComponent.FindAll("div").Where(div => div.ClassList.Contains("stretched-link"));
+        Assert.That(buttonDivs.Count(), Is.EqualTo(_radicalChachars.Count()));
+        var originalButtonDiv = buttonDivs.First();
+
+        var (addBorderDangerClassHandler, setErrorTextInvocationHandler, _, alternativeFormSubmitButton) = _entityFormTestCommons.MockFormElements(
+            IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
+            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
+            IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR);
+
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.ALTERNATIVE_FORM_ORIGINAL_SELECTOR, CssClasses.SHOW);
+        originalButtonDiv.Click();
+        alternativeFormSubmitButton.Click();
+
+        EntityFormTestCommons.CorrectSubmitTest(addBorderDangerClassHandler, setErrorTextInvocationHandler);
     }
 
     private void VerifyInputValueSet(
@@ -324,66 +385,6 @@ internal sealed class AlternativeFormTest : IDisposable
         Assert.That(setValueInvocation.Arguments[0], Is.EqualTo(inputId));
         Assert.That(setValueInvocation.Arguments[1], Is.EqualTo(expectedContent));
         _ = setValueInvocationHandler.SetVoidResult();
-    }
-
-    private void WrongSubmitTest(
-        string theInput,
-        string expectedError,
-        string inputId,
-        string errorDivId)
-    {
-        var (addClassInvocationHandler, setTextInvocationHandler, alternativeFormInput, alternativeFormSubmitButton) = MockFormElements(inputId, errorDivId, expectedError);
-        alternativeFormInput.Input(theInput);
-        alternativeFormSubmitButton.Click();
-
-        var addClassInvocation = addClassInvocationHandler.VerifyInvoke(DOMFunctions.ADD_CLASS);
-        Assert.That(addClassInvocation.Arguments.Count, Is.EqualTo(2));
-        Assert.That(addClassInvocation.Arguments[0], Is.EqualTo(inputId));
-        Assert.That(addClassInvocation.Arguments[1], Is.EqualTo(CssClasses.BORDER_DANGER));
-
-        var setTextInvocation = setTextInvocationHandler.VerifyInvoke(DOMFunctions.SET_TEXT);
-        Assert.That(setTextInvocation.Arguments.Count, Is.EqualTo(2));
-        Assert.That(setTextInvocation.Arguments[0], Is.EqualTo(errorDivId));
-        Assert.That(setTextInvocation.Arguments[1], Is.EqualTo(expectedError));
-        _ = addClassInvocationHandler.SetVoidResult();
-        _ = setTextInvocationHandler.SetVoidResult();
-    }
-
-    private void CorrectSubmitTest(
-        string theInput,
-        string inputId,
-        string errorDivId)
-    {
-        foreach (var otherInputId in _inputIds)
-        {
-            if (otherInputId != inputId)
-            {
-                _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, otherInputId, CssClasses.BORDER_DANGER);
-            }
-        }
-
-        var (addClassInvocationHandler, setTextInvocationHandler, alternativeFormInput, alternativeFormSubmitButton) = MockFormElements(inputId, errorDivId);
-        alternativeFormInput.Input(theInput);
-        alternativeFormSubmitButton.Click();
-
-        addClassInvocationHandler.VerifyNotInvoke(DOMFunctions.ADD_CLASS);
-        setTextInvocationHandler.VerifyNotInvoke(DOMFunctions.SET_TEXT);
-        _ = addClassInvocationHandler.SetVoidResult();
-        _ = setTextInvocationHandler.SetVoidResult();
-    }
-
-    private (JSRuntimeInvocationHandler, JSRuntimeInvocationHandler, IElement, IElement) MockFormElements(
-        string inputId,
-        string errorDivId,
-        string expectedError = "")
-    {
-        var alternativeFormComponent = _testContext.RenderComponent<AlternativeForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
-        var addClassInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, inputId, CssClasses.BORDER_DANGER);
-        var setTextInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TEXT, errorDivId, expectedError);
-        var alternativeFormInput = alternativeFormComponent.Find($"#{inputId}");
-        var alternativeFormSubmitButton = alternativeFormComponent.Find($"#{IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON}");
-
-        return (addClassInvocationHandler, setTextInvocationHandler, alternativeFormInput, alternativeFormSubmitButton);
     }
 
     public void Dispose() => _testContext?.Dispose();

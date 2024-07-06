@@ -42,7 +42,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
     [Parameter]
-    public required Index Index { get; set; } = default!;
+    public required IIndex Index { get; set; } = default!;
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -71,6 +71,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     protected async Task OpenOriginalSelectorAsync(CancellationToken cancellationToken)
     {
         await Task.WhenAll(
+            ClearWrongInputAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR, cancellationToken),
             JSInteropDOM.SetZIndexAsync(IDs.ALTERNATIVE_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
             OriginalSelector.OpenAsync(cancellationToken));
     }
@@ -112,7 +113,8 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         var areAllInputsValid = await EntityFormCommons.CheckInputsAsync(
             cancellationToken,
             (IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, IDs.ALTERNATIVE_FORM_THE_CHARACTER_ERROR, GetTheCharacterErrorText),
-            (IDs.ALTERNATIVE_FORM_STROKES_INPUT, IDs.ALTERNATIVE_FORM_STROKES_ERROR, GetStrokesErrorText));
+            (IDs.ALTERNATIVE_FORM_STROKES_INPUT, IDs.ALTERNATIVE_FORM_STROKES_ERROR, GetStrokesErrorText),
+            (IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR, GetOriginalErrorText));
 
         if (areAllInputsValid)
         {
@@ -136,16 +138,11 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         return null;
     }
 
-    private string? GetStrokesErrorText()
-    {
-        if (Strokes is null)
-        {
-            return Localizer[Resource.CompulsoryValue];
-        }
+    // Null strokes is the only reachable wrong input.
+    // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to handle this case.
+    private string? GetStrokesErrorText() =>
+        EntityFormCommons.GetNullInputErrorText(Strokes);
 
-        // Null strokes is the only reachable wrong input.
-        // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to handle this case.
-
-        return null;
-    }
+    private string? GetOriginalErrorText() =>
+        EntityFormCommons.GetNullInputErrorText(OriginalCharacter);
 }
