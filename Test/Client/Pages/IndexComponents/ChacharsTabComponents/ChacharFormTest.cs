@@ -46,19 +46,20 @@ internal sealed class ChacharFormTest : IDisposable
     {
         _ = Mock.Get(_localizerMock)
             .Setup(localizer => localizer[Resource.CompulsoryValue])
-            .Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE));
-
+            .Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE)
+        );
         _ = Mock.Get(_localizerMock)
             .Setup(localizer => localizer[Resource.MustBeChineseCharacter])
-            .Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER));
-
+            .Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER)
+        );
         _ = Mock.Get(_localizerMock)
             .Setup(localizer => localizer[Resource.OnlyAsciiAllowed])
-            .Returns(new LocalizedString(ONLY_ASCII_ALLOWED, ONLY_ASCII_ALLOWED));
-
+            .Returns(new LocalizedString(ONLY_ASCII_ALLOWED, ONLY_ASCII_ALLOWED)
+        );
         _ = Mock.Get(_localizerMock)
             .Setup(localizer => localizer[Resource.OnlyIpaAllowed])
-            .Returns(new LocalizedString(ONLY_IPA_ALLOWED, ONLY_IPA_ALLOWED));
+            .Returns(new LocalizedString(ONLY_IPA_ALLOWED, ONLY_IPA_ALLOWED)
+        );
     }
 
     [SetUp]
@@ -232,7 +233,8 @@ internal sealed class ChacharFormTest : IDisposable
             expectedError,
             IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
             IDs.CHACHAR_FORM_SUBMIT_BUTTON,
-            IDs.CHACHAR_FORM_THE_CHARACTER_ERROR);
+            IDs.CHACHAR_FORM_THE_CHARACTER_ERROR
+        );
     }
 
     [TestCase("中", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - CJK unified ideographs")]
@@ -257,7 +259,8 @@ internal sealed class ChacharFormTest : IDisposable
             theInput,
             IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
             IDs.CHACHAR_FORM_SUBMIT_BUTTON,
-            IDs.CHACHAR_FORM_THE_CHARACTER_ERROR);
+            IDs.CHACHAR_FORM_THE_CHARACTER_ERROR
+        );
     }
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - empty string")]
@@ -367,7 +370,8 @@ internal sealed class ChacharFormTest : IDisposable
             expectedError,
             IDs.CHACHAR_FORM_PINYIN_INPUT,
             IDs.CHACHAR_FORM_SUBMIT_BUTTON,
-            IDs.CHACHAR_FORM_PINYIN_ERROR);
+            IDs.CHACHAR_FORM_PINYIN_ERROR
+        );
 
     [TestCase("a", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - single ASCII character lowercase")]
     [TestCase("A", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - single ASCII character uppercase")]
@@ -379,7 +383,8 @@ internal sealed class ChacharFormTest : IDisposable
             theInput,
             IDs.CHACHAR_FORM_PINYIN_INPUT,
             IDs.CHACHAR_FORM_SUBMIT_BUTTON,
-            IDs.CHACHAR_FORM_PINYIN_ERROR);
+            IDs.CHACHAR_FORM_PINYIN_ERROR
+        );
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - empty string")]
     [TestCase("0", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - zero")]
@@ -482,7 +487,8 @@ internal sealed class ChacharFormTest : IDisposable
             expectedError,
             IDs.CHACHAR_FORM_IPA_INPUT,
             IDs.CHACHAR_FORM_SUBMIT_BUTTON,
-            IDs.CHACHAR_FORM_IPA_ERROR);
+            IDs.CHACHAR_FORM_IPA_ERROR
+        );
 
     [TestCase("\'", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - apostrophe")]
     [TestCase(".", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - dot")]
@@ -500,7 +506,8 @@ internal sealed class ChacharFormTest : IDisposable
             theInput,
             IDs.CHACHAR_FORM_IPA_INPUT,
             IDs.CHACHAR_FORM_SUBMIT_BUTTON,
-            IDs.CHACHAR_FORM_IPA_ERROR);
+            IDs.CHACHAR_FORM_IPA_ERROR
+        );
 
     [TestCase("", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputAdjustedTest)} - previous value empty string")]
     [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneOnInputAdjustedTest)} - previous value zero")]
@@ -529,7 +536,8 @@ internal sealed class ChacharFormTest : IDisposable
             expectedError,
             IDs.CHACHAR_FORM_TONE_INPUT,
             IDs.CHACHAR_FORM_SUBMIT_BUTTON,
-            IDs.CHACHAR_FORM_TONE_ERROR);
+            IDs.CHACHAR_FORM_TONE_ERROR
+        );
     }
 
     [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneCorrectSubmitTest)} - zero")]
@@ -544,7 +552,8 @@ internal sealed class ChacharFormTest : IDisposable
             theInput,
             IDs.CHACHAR_FORM_TONE_INPUT,
             IDs.CHACHAR_FORM_SUBMIT_BUTTON,
-            IDs.CHACHAR_FORM_TONE_ERROR);
+            IDs.CHACHAR_FORM_TONE_ERROR
+        );
     }
 
     [TestCase("", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value empty string")]
@@ -580,7 +589,8 @@ internal sealed class ChacharFormTest : IDisposable
             expectedError,
             IDs.CHACHAR_FORM_STROKES_INPUT,
             IDs.CHACHAR_FORM_SUBMIT_BUTTON,
-            IDs.CHACHAR_FORM_STROKES_ERROR);
+            IDs.CHACHAR_FORM_STROKES_ERROR
+        );
     }
 
     [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesCorrectSubmitTest)} - zero")]
@@ -598,7 +608,8 @@ internal sealed class ChacharFormTest : IDisposable
             theInput,
             IDs.CHACHAR_FORM_STROKES_INPUT,
             IDs.CHACHAR_FORM_SUBMIT_BUTTON,
-            IDs.CHACHAR_FORM_STROKES_ERROR);
+            IDs.CHACHAR_FORM_STROKES_ERROR
+        );
     }
 
     public void Dispose() => _testContext?.Dispose();

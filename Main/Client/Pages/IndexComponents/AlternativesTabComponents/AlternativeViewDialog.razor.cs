@@ -27,8 +27,8 @@ public class AlternativeViewDialogBase : ComponentBase, IModalEntitySpecific<Alt
         await ModalCommons.OpenAsyncCommon(
             this,
             $"{StringConstants.ASCII_PINYIN} - {entity.TheCharacter}",
-            cancellationToken);
-
+            cancellationToken
+        );
         Alternative = entity;
         StateHasChanged();
     }
@@ -38,8 +38,8 @@ public class AlternativeViewDialogBase : ComponentBase, IModalEntitySpecific<Alt
         await ModalCommons.CloseAsyncCommon(
             this,
             EventOnClose,
-            cancellationToken);
-
+            cancellationToken
+        );
         Alternative = null;
         StateHasChanged();
     }

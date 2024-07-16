@@ -7,14 +7,16 @@ namespace AsciiPinyin.Web.Client.EntityClient;
 
 public sealed class EntityClient(
     HttpClient httpClient,
-    IJSInteropConsole jsInteropConsole) : IEntityClient
+    IJSInteropConsole jsInteropConsole
+) : IEntityClient
 {
     private readonly HttpClient _httpClient = httpClient;
     private readonly IJSInteropConsole _jsInteropConsole = jsInteropConsole;
 
     public async Task<IEnumerable<TEntity>> LoadEntitiesAsync<TEntity>(
         string entitiesApiName,
-        CancellationToken cancellationToken) where TEntity : IEntity
+        CancellationToken cancellationToken
+    ) where TEntity : IEntity
     {
         try
         {
@@ -45,7 +47,8 @@ public sealed class EntityClient(
     public async Task<HttpStatusCode> CreateEntityAsync<TEntity>(
         string entitiesApiName,
         TEntity entity,
-        CancellationToken cancellationToken) where TEntity : IEntity
+        CancellationToken cancellationToken
+    ) where TEntity : IEntity
     {
         _jsInteropConsole.ConsoleInfo($"CREATE {entity.GetType()}: {entity}");
         var result = await _httpClient.PostAsJsonAsync(entitiesApiName, entity, cancellationToken);

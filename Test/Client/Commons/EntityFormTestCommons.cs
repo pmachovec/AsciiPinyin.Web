@@ -12,11 +12,13 @@ namespace Asciipinyin.Web.Client.Test.Commons;
 internal sealed class EntityFormTestCommons(
     TestContext _testContext,
     IRenderedComponent<IComponent> _formComponent,
-    IEnumerable<string> _inputIds)
+    IEnumerable<string> _inputIds
+)
 {
     public void StringInputUnchangedTest(
         string theInput,
-        string inputId)
+        string inputId
+    )
     {
         var setValueInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, theInput);
         var formInput = _formComponent.Find($"#{inputId}");
@@ -28,7 +30,8 @@ internal sealed class EntityFormTestCommons(
 
     public void NumberInputAdjustedTest(
         string previousValidInput,
-        string inputId)
+        string inputId
+    )
     {
         // Mock the input to be valid first.
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, previousValidInput);
@@ -44,7 +47,8 @@ internal sealed class EntityFormTestCommons(
 
     public void NumberInputUnchangedTest(
         string theInput,
-        string inputId)
+        string inputId
+    )
     {
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, inputId).SetResult(true);
         VerifyInputValueSet(theInput, theInput, inputId);
@@ -53,7 +57,8 @@ internal sealed class EntityFormTestCommons(
     public void VerifyInputValueSet(
         string valueToSet,
         string expectedContent,
-        string inputId)
+        string inputId
+    )
     {
         var setValueInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, expectedContent);
         var chacharFormInput = _formComponent.Find($"#{inputId}");
@@ -71,13 +76,15 @@ internal sealed class EntityFormTestCommons(
         string expectedError,
         string inputId,
         string submitButtonId,
-        string errorDivId)
+        string errorDivId
+    )
     {
         var (addBorderDangerClassHandler, setErrorTextInvocationHandler, formInput, formSubmitButton) = MockFormElements(
             inputId,
             submitButtonId,
             errorDivId,
-            expectedError);
+            expectedError
+         );
 
         formInput.Input(theInput);
         formSubmitButton.Click();
@@ -87,7 +94,8 @@ internal sealed class EntityFormTestCommons(
             inputId,
             errorDivId,
             addBorderDangerClassHandler,
-            setErrorTextInvocationHandler);
+            setErrorTextInvocationHandler
+        );
     }
 
     public void WrongSubmitOnChangeTest(
@@ -95,13 +103,15 @@ internal sealed class EntityFormTestCommons(
         string expectedError,
         string inputId,
         string submitButtonId,
-        string errorDivId)
+        string errorDivId
+    )
     {
         var (addBorderDangerClassHandler, setErrorTextInvocationHandler, formInput, formSubmitButton) = MockFormElements(
             inputId,
             submitButtonId,
             errorDivId,
-            expectedError);
+            expectedError
+        );
 
         formInput.Change(theInput);
         formSubmitButton.Click();
@@ -111,21 +121,24 @@ internal sealed class EntityFormTestCommons(
             inputId,
             errorDivId,
             addBorderDangerClassHandler,
-            setErrorTextInvocationHandler);
+            setErrorTextInvocationHandler
+        );
     }
 
     public void CorrectSubmitOnInputTest(
         string theInput,
         string inputId,
         string submitButtonId,
-        string errorDivId)
+        string errorDivId
+    )
     {
         MockOtherInputsBorderDanger(inputId);
 
         var (addBorderDangerClassHandler, setTextInvocationHandler, formInput, chacharFormSubmitButton) = MockFormElements(
             inputId,
             submitButtonId,
-            errorDivId);
+            errorDivId
+        );
 
         formInput.Input(theInput);
         chacharFormSubmitButton.Click();
@@ -137,14 +150,16 @@ internal sealed class EntityFormTestCommons(
        string theInput,
        string inputId,
        string submitButtonId,
-       string errorDivId)
+       string errorDivId
+    )
     {
         MockOtherInputsBorderDanger(inputId);
 
         var (addBorderDangerClassHandler, setErrorTextInvocationHandler, formInput, chacharFormSubmitButton) = MockFormElements(
             inputId,
             submitButtonId,
-            errorDivId);
+            errorDivId
+        );
 
         formInput.Change(theInput);
         chacharFormSubmitButton.Click();
@@ -161,7 +176,8 @@ internal sealed class EntityFormTestCommons(
                 _ = _testContext.JSInterop.SetupVoid(
                     DOMFunctions.ADD_CLASS,
                     otherInputId,
-                    CssClasses.BORDER_DANGER);
+                    CssClasses.BORDER_DANGER
+                );
             }
         }
     }
@@ -170,16 +186,19 @@ internal sealed class EntityFormTestCommons(
         string inputId,
         string submitButtonId,
         string errorDivId,
-        string expectedError = "")
+        string expectedError = ""
+    )
     {
         var addBorderDangerClassHandler = _testContext.JSInterop.SetupVoid(
             DOMFunctions.ADD_CLASS,
             inputId,
-            CssClasses.BORDER_DANGER);
+            CssClasses.BORDER_DANGER
+        );
         var setErrorTextHandler = _testContext.JSInterop.SetupVoid(
             DOMFunctions.SET_TEXT,
             errorDivId,
-            expectedError);
+            expectedError
+        );
         var formInput = _formComponent.Find($"#{inputId}");
         var formSubmitButton = _formComponent.Find($"#{submitButtonId}");
 
@@ -187,7 +206,8 @@ internal sealed class EntityFormTestCommons(
             addBorderDangerClassHandler,
             setErrorTextHandler,
             formInput,
-            formSubmitButton);
+            formSubmitButton
+        );
     }
 
     public static void WrongSubmitTest(
@@ -195,7 +215,8 @@ internal sealed class EntityFormTestCommons(
         string inputId,
         string errorDivId,
         JSRuntimeInvocationHandler addBorderDangerClassHandler,
-        JSRuntimeInvocationHandler setErrorTextHandler)
+        JSRuntimeInvocationHandler setErrorTextHandler
+    )
     {
         var addClassInvocation = addBorderDangerClassHandler.VerifyInvoke(DOMFunctions.ADD_CLASS);
         Assert.That(addClassInvocation.Arguments.Count, Is.EqualTo(2));
@@ -212,7 +233,8 @@ internal sealed class EntityFormTestCommons(
 
     public static void CorrectSubmitTest(
         JSRuntimeInvocationHandler addBorderDangerClassHandler,
-        JSRuntimeInvocationHandler setErrorTextInvocationHandler)
+        JSRuntimeInvocationHandler setErrorTextInvocationHandler
+    )
     {
         addBorderDangerClassHandler.VerifyNotInvoke(DOMFunctions.ADD_CLASS);
         setErrorTextInvocationHandler.VerifyNotInvoke(DOMFunctions.SET_TEXT);

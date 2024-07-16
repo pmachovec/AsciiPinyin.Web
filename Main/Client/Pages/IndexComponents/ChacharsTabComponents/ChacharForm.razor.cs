@@ -86,7 +86,8 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
                 JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50, CancellationToken.None),
                 JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY, CancellationToken.None),
                 JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK, CancellationToken.None),
-                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY, CancellationToken.None));
+                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY, CancellationToken.None)
+            );
         }
         else
         {
@@ -96,7 +97,8 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
                 JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK, CancellationToken.None),
                 JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY, CancellationToken.None),
                 JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50, CancellationToken.None),
-                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY, CancellationToken.None));
+                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY, CancellationToken.None)
+            );
         }
     }
 
@@ -105,7 +107,8 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         await ModalCommons.OpenAsyncCommon(
             this,
             Localizer[Resource.CreateNewCharacter],
-            cancellationToken);
+            cancellationToken
+        );
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken)
@@ -113,21 +116,24 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         await ModalCommons.CloseAsyncCommon(
             this,
             EventOnClose,
-            cancellationToken);
+            cancellationToken
+        );
     }
 
     protected async Task OpenRadicalSelectorAsync(CancellationToken cancellationToken)
     {
         await Task.WhenAll(
             JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
-            RadicalSelector.OpenAsync(cancellationToken));
+            RadicalSelector.OpenAsync(cancellationToken)
+        );
     }
 
     protected async Task OpenAlternativeSelectorAsync(CancellationToken cancellationToken)
     {
         await Task.WhenAll(
             JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
-            AlternativeSelector.OpenAsync(cancellationToken));
+            AlternativeSelector.OpenAsync(cancellationToken)
+        );
     }
 
     protected async Task SelectRadicalAsync(Chachar radicalChachar, CancellationToken cancellationToken)
@@ -135,7 +141,8 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         if (
             RadicalCharacter != radicalChachar.TheCharacter
             && RadicalPinyin != radicalChachar.Pinyin
-            && RadicalTone != radicalChachar.Tone)
+            && RadicalTone != radicalChachar.Tone
+        )
         {
             RadicalCharacter = radicalChachar.TheCharacter;
             RadicalPinyin = radicalChachar.Pinyin;
@@ -145,7 +152,8 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
             AvailableAlternatives = Index.Alternatives.Where(alternative =>
                 alternative.OriginalCharacter == radicalChachar.TheCharacter
                 && alternative.OriginalPinyin == radicalChachar.Pinyin
-                && alternative.OriginalTone == radicalChachar.Tone);
+                && alternative.OriginalTone == radicalChachar.Tone
+            );
 
             StateHasChanged();
         }
@@ -182,7 +190,8 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
             this,
             IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
             changeEventArgs,
-            cancellationToken);
+            cancellationToken
+        );
     }
 
     protected async Task PreventToneInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
@@ -205,7 +214,8 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
             (IDs.CHACHAR_FORM_PINYIN_INPUT, IDs.CHACHAR_FORM_PINYIN_ERROR, GetPinyinErrorText),
             (IDs.CHACHAR_FORM_IPA_INPUT, IDs.CHACHAR_FORM_IPA_ERROR, GetIpaErrorText),
             (IDs.CHACHAR_FORM_TONE_INPUT, IDs.CHACHAR_FORM_TONE_ERROR, GetToneErrorText),
-            (IDs.CHACHAR_FORM_STROKES_INPUT, IDs.CHACHAR_FORM_STROKES_ERROR, GetStrokesErrorText));
+            (IDs.CHACHAR_FORM_STROKES_INPUT, IDs.CHACHAR_FORM_STROKES_ERROR, GetStrokesErrorText)
+        );
 
         if (areAllInputsValid)
         {

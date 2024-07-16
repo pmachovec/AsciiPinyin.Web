@@ -37,8 +37,8 @@ public class EntitySelectorBase<TEntity> : ComponentBase where TEntity : IEntity
         await Task.WhenAll(
             JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken),
             JSInteropDOM.RemoveClassAsync(RootId, CssClasses.D_NONE, cancellationToken),
-            JSInteropDOM.AddClassAsync(RootId, CssClasses.D_BLOCK, cancellationToken));
-
+            JSInteropDOM.AddClassAsync(RootId, CssClasses.D_BLOCK, cancellationToken)
+        );
         await Task.Delay(IntConstants.MODAL_SHOW_DELAY, cancellationToken);
         await JSInteropDOM.AddClassAsync(RootId, CssClasses.SHOW, cancellationToken);
     }
@@ -47,10 +47,10 @@ public class EntitySelectorBase<TEntity> : ComponentBase where TEntity : IEntity
     {
         EventOnClose?.Invoke(this, EventArgs.Empty);
         await JSInteropDOM.RemoveClassAsync(RootId, CssClasses.SHOW, cancellationToken);
-
         await Task.Delay(IntConstants.MODAL_HIDE_DELAY, cancellationToken);
         await Task.WhenAll(
             JSInteropDOM.RemoveClassAsync(RootId, CssClasses.D_BLOCK, cancellationToken),
-            JSInteropDOM.AddClassAsync(RootId, CssClasses.D_NONE, cancellationToken));
+            JSInteropDOM.AddClassAsync(RootId, CssClasses.D_NONE, cancellationToken)
+        );
     }
 }

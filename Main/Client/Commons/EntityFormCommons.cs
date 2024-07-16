@@ -10,7 +10,8 @@ namespace AsciiPinyin.Web.Client.Commons;
 
 public sealed class EntityFormCommons(
     IJSInteropDOM _jSInteropDOM,
-    IStringLocalizer<Resource> _localizer) : IEntityFormCommons
+    IStringLocalizer<Resource> _localizer
+) : IEntityFormCommons
 {
     public EventHandler GetModalToFrontEvent(IModal modal, string titleToSet)
     {
@@ -18,7 +19,8 @@ public sealed class EntityFormCommons(
         {
             await Task.WhenAll(
                 _jSInteropDOM.SetZIndexAsync(modal.RootId, ByteConstants.INDEX_BACKDROP_Z + 1, CancellationToken.None),
-                _jSInteropDOM.SetTitleAsync(titleToSet, CancellationToken.None));
+                _jSInteropDOM.SetTitleAsync(titleToSet, CancellationToken.None)
+            );
         };
     }
 
@@ -26,7 +28,8 @@ public sealed class EntityFormCommons(
         IEntityForm entityForm,
         string inputId,
         ChangeEventArgs changeEventArgs,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         if (changeEventArgs.Value is string theCharacter)
         {
@@ -47,13 +50,15 @@ public sealed class EntityFormCommons(
         IEntityForm entityForm,
         string inputId,
         ChangeEventArgs changeEventArgs,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         entityForm.Strokes = await GetCorrectNumberInputValueAsync(
             inputId,
             changeEventArgs.Value,
             entityForm.Strokes,
-            cancellationToken);
+            cancellationToken
+        );
         await _jSInteropDOM.SetValueAsync(inputId, entityForm.Strokes.ToString()!, cancellationToken);
     }
 
@@ -61,46 +66,54 @@ public sealed class EntityFormCommons(
         string inputId,
         object? changeEventArgsValue,
         byte? originalValue,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         // When the user types dot in an environment, where the dot is not decimal delimiter, the ChangeEventArgs value is empty string.
         // This is the only way how to distinguish typing the dot and having really empty number input in such situation.
         // If the dot is typed, the result is false, but with really empty input, it's true.
         var isInputValid = await _jSInteropDOM.IsValidInputAsync(inputId, cancellationToken);
 
-        if (changeEventArgsValue is string emptyInputNumberAsStringEmpty
+        if (
+            changeEventArgsValue is string emptyInputNumberAsStringEmpty
             && emptyInputNumberAsStringEmpty.Length == 0
-            && isInputValid)
+            && isInputValid
+        )
         {
             // At this point, the input is really empty.
             return null;
         }
         else
         {
-            return isInputValid
+            return (
+                isInputValid
                 && changeEventArgsValue is string inputNumberAsString
                 && byte.TryParse(inputNumberAsString.AsSpan(0, Math.Max(1, inputNumberAsString.Length)), out var inputNumber)
-                ? inputNumber
-                : originalValue;
+            )
+            ? inputNumber : originalValue;
         }
     }
 
     public async Task ClearWrongInputAsync(
         string inputId,
         string errorDivId,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         await Task.WhenAll(
             _jSInteropDOM.RemoveClassAsync(inputId, CssClasses.BORDER_DANGER, cancellationToken),
-            _jSInteropDOM.RemoveTextAsync(errorDivId, cancellationToken));
+            _jSInteropDOM.RemoveTextAsync(errorDivId, cancellationToken)
+        );
     }
 
     public async Task<bool> CheckInputsAsync(
         CancellationToken cancellationToken,
-        params (string inputId, string errorDivId, Func<string?> getErrorText)[] inputs)
+        params (string inputId, string errorDivId, Func<string?> getErrorText)[] inputs
+    )
     {
         var separateCheckSuccesses = await Task.WhenAll(
-            inputs.Select(input => CheckInputAsync(input.inputId, input.errorDivId, input.getErrorText, cancellationToken)));
+            inputs.Select(input => CheckInputAsync(input.inputId, input.errorDivId, input.getErrorText, cancellationToken))
+        );
 
         return separateCheckSuccesses.All(success => success);
     }
@@ -112,13 +125,15 @@ public sealed class EntityFormCommons(
         string inputId,
         string errorDivId,
         Func<string?> getErrorText,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         if (getErrorText() is { } errorText)
         {
             await Task.WhenAll(
                 _jSInteropDOM.AddClassAsync(inputId, CssClasses.BORDER_DANGER, cancellationToken),
-                _jSInteropDOM.SetTextAsync(errorDivId, errorText, cancellationToken));
+                _jSInteropDOM.SetTextAsync(errorDivId, errorText, cancellationToken)
+            );
 
             return false;
         }

@@ -27,8 +27,8 @@ public class ChacharViewDialogBase : ComponentBase, IModalEntitySpecific<Chachar
         await ModalCommons.OpenAsyncCommon(
             this,
             $"{StringConstants.ASCII_PINYIN} - {entity.TheCharacter}",
-            cancellationToken);
-
+            cancellationToken
+        );
         Chachar = entity;
         StateHasChanged();
     }
@@ -38,8 +38,8 @@ public class ChacharViewDialogBase : ComponentBase, IModalEntitySpecific<Chachar
         await ModalCommons.CloseAsyncCommon(
             this,
             EventOnClose,
-            cancellationToken);
-
+            cancellationToken
+        );
         Chachar = null;
         StateHasChanged();
     }

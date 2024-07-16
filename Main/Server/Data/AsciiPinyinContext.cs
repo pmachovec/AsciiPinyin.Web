@@ -15,21 +15,27 @@ public sealed class AsciiPinyinContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        _ = modelBuilder.Entity<Chachar>()
-            .HasKey(chachar => new
-            {
-                chachar.TheCharacter,
-                chachar.Pinyin,
-                chachar.Tone
-            });
+        _ = modelBuilder
+            .Entity<Chachar>()
+            .HasKey(chachar =>
+                new
+                {
+                    chachar.TheCharacter,
+                    chachar.Pinyin,
+                    chachar.Tone
+                }
+            );
 
-        _ = modelBuilder.Entity<Alternative>()
-            .HasKey(alternative => new
-            {
-                alternative.TheCharacter,
-                alternative.OriginalCharacter,
-                alternative.OriginalPinyin,
-                alternative.OriginalTone
-            });
+        _ = modelBuilder
+            .Entity<Alternative>()
+            .HasKey(alternative =>
+                new
+                {
+                    alternative.TheCharacter,
+                    alternative.OriginalCharacter,
+                    alternative.OriginalPinyin,
+                    alternative.OriginalTone
+                }
+            );
     }
 }

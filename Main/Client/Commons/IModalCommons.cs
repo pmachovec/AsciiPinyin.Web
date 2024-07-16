@@ -7,10 +7,12 @@ public interface IModalCommons
     Task OpenAsyncCommon(
         IModal modalComponent,
         string htmlTitle,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken
+    );
 
     Task CloseAsyncCommon(
         IModal modalComponent,
         EventHandler? EventOnClose,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken
+    );
 }

@@ -43,7 +43,8 @@ public static class TextUtils
         (0x30000, 0x3134F)
     ];
 
-    private static readonly IEnumerable<uint> _ipaSymbolCodes = [
+    private static readonly IEnumerable<uint> _ipaSymbolCodes =
+    [
         0x21,
         0x27,
         0x2E,

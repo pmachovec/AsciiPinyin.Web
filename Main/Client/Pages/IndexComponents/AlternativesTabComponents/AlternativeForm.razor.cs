@@ -57,7 +57,8 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         await ModalCommons.OpenAsyncCommon(
             this,
             Localizer[Resource.CreateNewAlternative],
-            cancellationToken);
+            cancellationToken
+        );
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken)
@@ -65,7 +66,8 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         await ModalCommons.CloseAsyncCommon(
             this,
             EventOnClose,
-            cancellationToken);
+            cancellationToken
+        );
     }
 
     protected async Task OpenOriginalSelectorAsync(CancellationToken cancellationToken)
@@ -73,7 +75,8 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         await Task.WhenAll(
             ClearWrongInputAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR, cancellationToken),
             JSInteropDOM.SetZIndexAsync(IDs.ALTERNATIVE_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
-            OriginalSelector.OpenAsync(cancellationToken));
+            OriginalSelector.OpenAsync(cancellationToken)
+        );
     }
 
     protected async Task SelectOriginalAsync(Chachar originalChachar, CancellationToken cancellationToken)
@@ -89,7 +92,8 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     {
         await Task.WhenAll(
             JSInteropDOM.RemoveClassAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.BORDER_DANGER, cancellationToken),
-            JSInteropDOM.RemoveTextAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR, cancellationToken));
+            JSInteropDOM.RemoveTextAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR, cancellationToken)
+        );
 
         OriginalCharacter = null;
         OriginalPinyin = null;
@@ -103,7 +107,8 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
             this,
             IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT,
             changeEventArgs,
-            cancellationToken);
+            cancellationToken
+        );
     }
 
     protected async Task PreventStrokesInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken) =>
@@ -118,7 +123,8 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
             cancellationToken,
             (IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, IDs.ALTERNATIVE_FORM_THE_CHARACTER_ERROR, GetTheCharacterErrorText),
             (IDs.ALTERNATIVE_FORM_STROKES_INPUT, IDs.ALTERNATIVE_FORM_STROKES_ERROR, GetStrokesErrorText),
-            (IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR, GetOriginalErrorText));
+            (IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR, GetOriginalErrorText)
+        );
 
         if (areAllInputsValid)
         {

@@ -19,7 +19,8 @@ public class SaveFailedBase : ComponentBase, IModalGeneral
         await ModalCommons.OpenAsyncCommon(
             this,
             "Failed",
-            cancellationToken);
+            cancellationToken
+        );
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken)
@@ -27,6 +28,7 @@ public class SaveFailedBase : ComponentBase, IModalGeneral
         await ModalCommons.CloseAsyncCommon(
             this,
             EventOnClose,
-            cancellationToken);
+            cancellationToken
+        );
     }
 }

@@ -27,36 +27,39 @@ else
 }
 
 app.UseRequestLocalization(options =>
-{
-    const string EN_US = "en-US";
-    const string CS_CZ = "cs-CZ";
-
-    var supportedCultures = new List<CultureInfo>
     {
-        new(EN_US),
-        new(CS_CZ),
-    };
+        const string EN_US = "en-US";
+        const string CS_CZ = "cs-CZ";
 
-    options.SupportedCultures = supportedCultures;
-    options.SupportedUICultures = supportedCultures;
-    options.RequestCultureProviders.Clear();
-
-    options.RequestCultureProviders.Insert(
-        0,
-        new CustomRequestCultureProvider(async context =>
+        var supportedCultures = new List<CultureInfo>
         {
-            var userLanguages = context.Request.Headers.AcceptLanguage.ToString();
-            var primaryLanguage = userLanguages.Split(',').FirstOrDefault() ?? EN_US;
+            new(EN_US),
+            new(CS_CZ),
+        };
 
-            if (primaryLanguage == "cs")
-            {
-                primaryLanguage = CS_CZ;
-            }
+        options.SupportedCultures = supportedCultures;
+        options.SupportedUICultures = supportedCultures;
+        options.RequestCultureProviders.Clear();
 
-            var userCulture = new CultureInfo(primaryLanguage);
-            return await Task.FromResult(new ProviderCultureResult(userCulture?.Name ?? supportedCultures[0].Name));
-        }));
-});
+        options.RequestCultureProviders.Insert(
+            0,
+            new CustomRequestCultureProvider(async context =>
+                {
+                    var userLanguages = context.Request.Headers.AcceptLanguage.ToString();
+                    var primaryLanguage = userLanguages.Split(',').FirstOrDefault() ?? EN_US;
+
+                    if (primaryLanguage == "cs")
+                    {
+                        primaryLanguage = CS_CZ;
+                    }
+
+                    var userCulture = new CultureInfo(primaryLanguage);
+                    return await Task.FromResult(new ProviderCultureResult(userCulture?.Name ?? supportedCultures[0].Name));
+                }
+            )
+        );
+    }
+);
 
 _ = app.UseHttpsRedirection();
 _ = app.UseStaticFiles();

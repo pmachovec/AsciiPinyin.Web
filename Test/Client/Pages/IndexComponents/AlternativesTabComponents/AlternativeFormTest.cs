@@ -69,15 +69,16 @@ internal sealed class AlternativeFormTest : IDisposable
     {
         _ = Mock.Get(_indexMock)
             .Setup(index => index.Chachars)
-            .Returns(_radicalChachars.Concat(_nonRadicalChachars));
-
+            .Returns(_radicalChachars.Concat(_nonRadicalChachars)
+        );
         _ = Mock.Get(_localizerMock)
             .Setup(localizer => localizer[Resource.CompulsoryValue])
-            .Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE));
-
+            .Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE)
+        );
         _ = Mock.Get(_localizerMock)
             .Setup(localizer => localizer[Resource.MustBeChineseCharacter])
-            .Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER));
+            .Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER)
+        );
     }
 
     [SetUp]
@@ -248,7 +249,8 @@ internal sealed class AlternativeFormTest : IDisposable
             expectedError,
             IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT,
             IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
-            IDs.ALTERNATIVE_FORM_THE_CHARACTER_ERROR);
+            IDs.ALTERNATIVE_FORM_THE_CHARACTER_ERROR
+        );
     }
 
     [TestCase("中", TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - CJK unified ideographs")]
@@ -267,13 +269,18 @@ internal sealed class AlternativeFormTest : IDisposable
     {
         // Multi-character inputs are unreachable thanks to PreventMultipleCharacters, no need to test this case.
 
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, TextUtils.GetStringFirstCharacterAsString(theInput));
+        _ = _testContext.JSInterop.SetupVoid(
+            DOMFunctions.SET_VALUE,
+            IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT,
+            TextUtils.GetStringFirstCharacterAsString(theInput)
+         );
 
         _entityFormTestCommons.CorrectSubmitOnInputTest(
             theInput,
             IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT,
             IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
-            IDs.ALTERNATIVE_FORM_THE_CHARACTER_ERROR);
+            IDs.ALTERNATIVE_FORM_THE_CHARACTER_ERROR
+        );
     }
 
     [TestCase("", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value empty string")]
@@ -309,7 +316,8 @@ internal sealed class AlternativeFormTest : IDisposable
             expectedError,
             IDs.ALTERNATIVE_FORM_STROKES_INPUT,
             IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
-            IDs.ALTERNATIVE_FORM_STROKES_ERROR);
+            IDs.ALTERNATIVE_FORM_STROKES_ERROR
+        );
     }
 
     [TestCase("0", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesCorrectSubmitTest)} - zero")]
@@ -327,7 +335,8 @@ internal sealed class AlternativeFormTest : IDisposable
             theInput,
             IDs.ALTERNATIVE_FORM_STROKES_INPUT,
             IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
-            IDs.ALTERNATIVE_FORM_STROKES_ERROR);
+            IDs.ALTERNATIVE_FORM_STROKES_ERROR
+        );
     }
 
     [TestCase(TestName = $"{nameof(AlternativeFormTest)}.{nameof(OriginalWrongSubmitTest)} - original not selected")]
@@ -337,7 +346,8 @@ internal sealed class AlternativeFormTest : IDisposable
             IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
             IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
             IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR,
-            COMPULSORY_VALUE);
+            COMPULSORY_VALUE
+        );
 
         alternativeFormSubmitButton.Click();
 
@@ -346,7 +356,8 @@ internal sealed class AlternativeFormTest : IDisposable
             IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
             IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR,
             addBorderDangerClassHandler,
-            setErrorTextInvocationHandler);
+            setErrorTextInvocationHandler
+        );
     }
 
     [TestCase(TestName = $"{nameof(AlternativeFormTest)}.{nameof(OriginalCorrectSubmitTest)} - original selected")]
@@ -361,7 +372,8 @@ internal sealed class AlternativeFormTest : IDisposable
         var (addBorderDangerClassHandler, setErrorTextInvocationHandler, _, alternativeFormSubmitButton) = _entityFormTestCommons.MockFormElements(
             IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
             IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
-            IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR);
+            IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR
+        );
 
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.ALTERNATIVE_FORM_ORIGINAL_SELECTOR, CssClasses.SHOW);
         originalButtonDiv.Click();
@@ -374,7 +386,8 @@ internal sealed class AlternativeFormTest : IDisposable
         IRenderedComponent<AlternativeForm> alternativeFormComponent,
         string inputId,
         string valueToSet,
-        string expectedContent)
+        string expectedContent
+    )
     {
         var setValueInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, expectedContent);
         var alternativeFormInput = alternativeFormComponent.Find($"#{inputId}");

@@ -45,28 +45,30 @@ public class IndexBase : ComponentBase, IIndex
         {
             Alternatives = await EntityClient.LoadEntitiesAsync<Alternative>(ApiNames.ALTERNATIVES, CancellationToken.None);
             Chachars = await EntityClient.LoadEntitiesAsync<Chachar>(ApiNames.CHARACTERS, CancellationToken.None);
-
             await Task.WhenAll(
                 SelectTabAsync(ChacharsTab, CancellationToken.None),
-                JSInteropDOM.HideElementAsync(IDs.INDEX_ENTITIES_TABS_LOADING, CancellationToken.None));
+                JSInteropDOM.HideElementAsync(IDs.INDEX_ENTITIES_TABS_LOADING, CancellationToken.None)
+            );
         }
     }
 
     protected async Task SelectTabAsync(
         IEntityTab tab,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         if (_selectedTab is { } selectedTab)
         {
             await Task.WhenAll(
                 selectedTab.HideAsync(cancellationToken),
-                JSInteropDOM.RemoveClassAsync(selectedTab.ButtonId, CssClasses.ACTIVE, cancellationToken));
+                JSInteropDOM.RemoveClassAsync(selectedTab.ButtonId, CssClasses.ACTIVE, cancellationToken)
+            );
         }
 
         await Task.WhenAll(
             JSInteropDOM.AddClassAsync(tab.ButtonId, CssClasses.ACTIVE, cancellationToken),
-            tab.ShowAsync(cancellationToken));
-
+            tab.ShowAsync(cancellationToken)
+        );
         _selectedTab = tab;
         StateHasChanged();
     }

@@ -18,6 +18,7 @@ public class AlternativesTabBase : ComponentBase, IEntityTab
     protected AlternativeViewDialog AlternativeViewDialog { get; set; } = default!;
 
     public string ButtonId { get; } = IDs.ALTERNATIVES_TAB_BUTTON;
+
     public bool IsVisible { get; private set; }
 
     [Inject]
