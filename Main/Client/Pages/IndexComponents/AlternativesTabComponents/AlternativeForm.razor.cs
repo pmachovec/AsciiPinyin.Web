@@ -85,8 +85,12 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         await OriginalSelector.CloseAsync(cancellationToken);
     }
 
-    protected void ClearOriginal()
+    protected async Task ClearOriginalAsync(CancellationToken cancellationToken)
     {
+        await Task.WhenAll(
+            JSInteropDOM.RemoveClassAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.BORDER_DANGER, cancellationToken),
+            JSInteropDOM.RemoveTextAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR, cancellationToken));
+
         OriginalCharacter = null;
         OriginalPinyin = null;
         OriginalTone = null;

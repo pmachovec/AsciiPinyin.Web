@@ -70,7 +70,7 @@
                             <button
                                 type="button"
                                 class="btn @CssClasses.BTN_OUTLINE_PRIMARY"
-                                @onclick="ClearOriginal">
+                                @onclick="async _ => await ClearOriginalAsync(CancellationToken.None)">
                                 &#x2715;
                             </button>
                         </div>
