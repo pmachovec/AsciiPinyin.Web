@@ -27,7 +27,11 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
     public string RootId { get; } = IDs.ALTERNATIVE_FORM_ROOT;
 
-    public event EventHandler EventOnClose = default!;
+    public string BackdropId { get; } = IDs.INDEX_BACKDROP;
+
+    public string HtmlTitleOnClose { get; set; } = default!;
+
+    public IModal? LowerLevelModal { get; set; }
 
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
@@ -44,40 +48,23 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     [Parameter]
     public required IIndex Index { get; set; } = default!;
 
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            OriginalSelector.EventOnClose += EntityFormCommons.GetModalToFrontEvent(this, Localizer[Resource.CreateNewAlternative]);
-        }
-    }
-
-    public async Task OpenAsync(CancellationToken cancellationToken)
-    {
+    public async Task OpenAsync(string htmlTitleOnClose, CancellationToken cancellationToken) =>
         await ModalCommons.OpenAsyncCommon(
             this,
             Localizer[Resource.CreateNewAlternative],
+            htmlTitleOnClose,
             cancellationToken
         );
-    }
 
-    public async Task CloseAsync(CancellationToken cancellationToken)
-    {
-        await ModalCommons.CloseAsyncCommon(
-            this,
-            EventOnClose,
-            cancellationToken
-        );
-    }
+    public async Task CloseAsync(CancellationToken cancellationToken) =>
+        await ModalCommons.CloseAsyncCommon(this, cancellationToken);
 
-    protected async Task OpenOriginalSelectorAsync(CancellationToken cancellationToken)
-    {
+    protected async Task OpenOriginalSelectorAsync(CancellationToken cancellationToken) =>
         await Task.WhenAll(
             ClearWrongInputAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR, cancellationToken),
             JSInteropDOM.SetZIndexAsync(IDs.ALTERNATIVE_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
-            OriginalSelector.OpenAsync(cancellationToken)
+            OriginalSelector.OpenAsync(this, Localizer[Resource.CreateNewAlternative], cancellationToken)
         );
-    }
 
     protected async Task SelectOriginalAsync(Chachar originalChachar, CancellationToken cancellationToken)
     {
@@ -101,18 +88,21 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         StateHasChanged();
     }
 
-    protected async Task PreventMultipleCharactersAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
-    {
+    protected async Task PreventMultipleCharactersAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken) =>
         await EntityFormCommons.PreventMultipleCharactersAsync(
             this,
             IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT,
             changeEventArgs,
             cancellationToken
         );
-    }
 
     protected async Task PreventStrokesInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken) =>
-        await EntityFormCommons.PreventStrokesInvalidAsync(this, IDs.ALTERNATIVE_FORM_STROKES_INPUT, changeEventArgs, cancellationToken);
+        await EntityFormCommons.PreventStrokesInvalidAsync(
+            this,
+            IDs.ALTERNATIVE_FORM_STROKES_INPUT,
+            changeEventArgs,
+            cancellationToken
+        );
 
     protected async Task ClearWrongInputAsync(string inputId, string errorId, CancellationToken cancellationToken) =>
         await EntityFormCommons.ClearWrongInputAsync(inputId, errorId, cancellationToken);

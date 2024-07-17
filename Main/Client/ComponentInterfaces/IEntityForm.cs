@@ -1,6 +1,6 @@
 namespace AsciiPinyin.Web.Client.ComponentInterfaces;
 
-public interface IEntityForm : IModalGeneral
+public interface IEntityForm : IModalFirstLevel
 {
     byte? Strokes { get; set; }
 

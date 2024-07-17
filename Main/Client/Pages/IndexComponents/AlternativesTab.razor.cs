@@ -31,21 +31,10 @@ public class AlternativesTabBase : ComponentBase, IEntityTab
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
     [Parameter]
-    public required Index Index { get; set; } = default!;
+    public required IIndex Index { get; set; } = default!;
 
     protected override void OnInitialized() =>
         _htmlTitle = $"{StringConstants.ASCII_PINYIN} - {Localizer[Resource.Alternatives]}";
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            AlternativeForm.EventOnClose +=
-                async (_, _) => await JSInteropDOM.SetTitleAsync(_htmlTitle, CancellationToken.None);
-            AlternativeViewDialog.EventOnClose +=
-                async (_, _) => await JSInteropDOM.SetTitleAsync(_htmlTitle, CancellationToken.None);
-        }
-    }
 
     public async Task HideAsync(CancellationToken cancellationToken)
     {
@@ -61,8 +50,8 @@ public class AlternativesTabBase : ComponentBase, IEntityTab
     }
 
     protected async Task ShowAlternativeFormAsync(CancellationToken cancellationToken) =>
-        await AlternativeForm.OpenAsync(cancellationToken);
+        await AlternativeForm.OpenAsync(_htmlTitle, cancellationToken);
 
-    public async Task SelectAlternativeAsync(Alternative alternative, CancellationToken cancellationToken) =>
-        await AlternativeViewDialog.OpenAsync(alternative, cancellationToken);
+    public async Task ShowAlternativeViewDialogAsync(Alternative alternative, CancellationToken cancellationToken) =>
+        await AlternativeViewDialog.OpenAsync(alternative, _htmlTitle, cancellationToken);
 }

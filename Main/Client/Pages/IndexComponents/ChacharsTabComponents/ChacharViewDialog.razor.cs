@@ -8,13 +8,17 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
-public class ChacharViewDialogBase : ComponentBase, IModalEntitySpecific<Chachar>
+public class ChacharViewDialogBase : ComponentBase, IModalFirstLevel
 {
     protected Chachar? Chachar { get; set; }
 
     public string RootId { get; } = IDs.CHACHAR_VIEW_DIALOG_ROOT;
 
-    public event EventHandler EventOnClose = default!;
+    public string BackdropId { get; } = IDs.INDEX_BACKDROP;
+
+    public string HtmlTitleOnClose { get; set; } = default!;
+
+    public IModal? LowerLevelModal { get; set; }
 
     [Inject]
     private IModalCommons ModalCommons { get; set; } = default!;
@@ -22,24 +26,26 @@ public class ChacharViewDialogBase : ComponentBase, IModalEntitySpecific<Chachar
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    public async Task OpenAsync(Chachar entity, CancellationToken cancellationToken)
+    public async Task OpenAsync(
+        Chachar entity,
+        string htmlTitleOnClose,
+        CancellationToken cancellationToken
+    )
     {
         await ModalCommons.OpenAsyncCommon(
             this,
             $"{StringConstants.ASCII_PINYIN} - {entity.TheCharacter}",
+            htmlTitleOnClose,
             cancellationToken
         );
+
         Chachar = entity;
         StateHasChanged();
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken)
     {
-        await ModalCommons.CloseAsyncCommon(
-            this,
-            EventOnClose,
-            cancellationToken
-        );
+        await ModalCommons.CloseAsyncCommon(this, cancellationToken);
         Chachar = null;
         StateHasChanged();
     }

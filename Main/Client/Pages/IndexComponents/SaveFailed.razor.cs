@@ -1,15 +1,14 @@
 using AsciiPinyin.Web.Client.Commons;
 using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Shared.Constants;
-using AsciiPinyin.Web.Shared.Models;
-using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Localization;
 
-namespace AsciiPinyin.Web.Client.Components;
+namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
-public class EntitySelectorBase<TEntity> : ComponentBase, IModalSecondLevel where TEntity : IEntity
+public class SaveFailedBase : ComponentBase, IModalSecondLevel
 {
+    public string RootId { get; } = IDs.SAVE_FAILED_ROOT;
+
     public string BackdropId { get; } = IDs.INDEX_BACKDROP;
 
     public string HtmlTitleOnClose { get; set; } = default!;
@@ -18,24 +17,6 @@ public class EntitySelectorBase<TEntity> : ComponentBase, IModalSecondLevel wher
 
     [Inject]
     private IModalCommons ModalCommons { get; set; } = default!;
-
-    [Inject]
-    protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
-
-    [Parameter]
-    public string RootId { get; set; } = default!;
-
-    [Parameter]
-    public IEnumerable<TEntity> Entities { get; set; } = default!;
-
-    [Parameter]
-    public string HtmlTitle { get; set; } = default!;
-
-    [Parameter]
-    public string Title { get; set; } = default!;
-
-    [Parameter]
-    public Func<TEntity, CancellationToken, Task> SelectEntityAsync { get; set; } = default!;
 
     public async Task OpenAsync(
         IModalFirstLevel formModal,
@@ -46,7 +27,7 @@ public class EntitySelectorBase<TEntity> : ComponentBase, IModalSecondLevel wher
         await ModalCommons.OpenAsyncCommon(
             this,
             formModal,
-            HtmlTitle,
+            "Failed",
             htmlTitleOnClose,
             cancellationToken
         );

@@ -31,21 +31,10 @@ public class ChacharsTabBase : ComponentBase, IEntityTab
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
     [Parameter]
-    public required Index Index { get; set; } = default!;
+    public required IIndex Index { get; set; } = default!;
 
     protected override void OnInitialized() =>
         _htmlTitle = $"{StringConstants.ASCII_PINYIN} - {Localizer[Resource.Characters]}";
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            ChacharForm.EventOnClose +=
-                async (_, _) => await JSInteropDOM.SetTitleAsync(_htmlTitle, CancellationToken.None);
-            ChacharViewDialog.EventOnClose +=
-                async (_, _) => await JSInteropDOM.SetTitleAsync(_htmlTitle, CancellationToken.None);
-        }
-    }
 
     public async Task HideAsync(CancellationToken cancellationToken)
     {
@@ -61,8 +50,8 @@ public class ChacharsTabBase : ComponentBase, IEntityTab
     }
 
     protected async Task ShowChacharFormAsync(CancellationToken cancellationToken) =>
-        await ChacharForm.OpenAsync(cancellationToken);
+        await ChacharForm.OpenAsync(_htmlTitle, cancellationToken);
 
-    protected async Task SelectChacharAsync(Chachar chachar, CancellationToken cancellationToken) =>
-        await ChacharViewDialog.OpenAsync(chachar, cancellationToken);
+    protected async Task ShowChacharViewDialogAsync(Chachar chachar, CancellationToken cancellationToken) =>
+        await ChacharViewDialog.OpenAsync(chachar, _htmlTitle, cancellationToken);
 }

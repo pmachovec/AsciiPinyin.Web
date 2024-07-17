@@ -8,13 +8,17 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
-public class AlternativeViewDialogBase : ComponentBase, IModalEntitySpecific<Alternative>
+public class AlternativeViewDialogBase : ComponentBase, IModalFirstLevel
 {
     protected Alternative? Alternative { get; set; }
 
     public string RootId { get; } = IDs.ALTERNATIVE_VIEW_DIALOG_ROOT;
 
-    public event EventHandler EventOnClose = default!;
+    public string BackdropId { get; } = IDs.INDEX_BACKDROP;
+
+    public string HtmlTitleOnClose { get; set; } = default!;
+
+    public IModal? LowerLevelModal { get; set; }
 
     [Inject]
     private IModalCommons ModalCommons { get; set; } = default!;
@@ -22,24 +26,26 @@ public class AlternativeViewDialogBase : ComponentBase, IModalEntitySpecific<Alt
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    public async Task OpenAsync(Alternative entity, CancellationToken cancellationToken)
+    public async Task OpenAsync(
+        Alternative entity,
+        string htmlTitleOnClose,
+        CancellationToken cancellationToken
+    )
     {
         await ModalCommons.OpenAsyncCommon(
             this,
             $"{StringConstants.ASCII_PINYIN} - {entity.TheCharacter}",
+            htmlTitleOnClose,
             cancellationToken
         );
+
         Alternative = entity;
         StateHasChanged();
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken)
     {
-        await ModalCommons.CloseAsyncCommon(
-            this,
-            EventOnClose,
-            cancellationToken
-        );
+        await ModalCommons.CloseAsyncCommon(this, cancellationToken);
         Alternative = null;
         StateHasChanged();
     }

@@ -13,7 +13,7 @@ public sealed class EntityClient(
     private readonly HttpClient _httpClient = httpClient;
     private readonly IJSInteropConsole _jsInteropConsole = jsInteropConsole;
 
-    public async Task<IEnumerable<TEntity>> LoadEntitiesAsync<TEntity>(
+    public async Task<IEnumerable<TEntity>> GetEntitiesAsync<TEntity>(
         string entitiesApiName,
         CancellationToken cancellationToken
     ) where TEntity : IEntity
@@ -24,27 +24,27 @@ public sealed class EntityClient(
 
             if (result is null)
             {
-                _jsInteropConsole.ConsoleError($"{nameof(EntityClient)}.{nameof(LoadEntitiesAsync)}: Result of retrieving '{entitiesApiName}' is null.");
+                _jsInteropConsole.ConsoleError($"{nameof(EntityClient)}.{nameof(GetEntitiesAsync)}: Result of retrieving '{entitiesApiName}' is null.");
                 return [];
             }
 
             if (!result.Any())
             {
-                _jsInteropConsole.ConsoleError($"{nameof(EntityClient)}.{nameof(LoadEntitiesAsync)}: Result of retrieving '{entitiesApiName}' is empty.");
+                _jsInteropConsole.ConsoleError($"{nameof(EntityClient)}.{nameof(GetEntitiesAsync)}: Result of retrieving '{entitiesApiName}' is empty.");
             }
 
             return result;
         }
         catch (Exception ex)
         {
-            _jsInteropConsole.ConsoleError($"{nameof(EntityClient)}.{nameof(LoadEntitiesAsync)}: Error occured on the server side when retrieving '{entitiesApiName}'.");
+            _jsInteropConsole.ConsoleError($"{nameof(EntityClient)}.{nameof(GetEntitiesAsync)}: Error occured on the server side when retrieving '{entitiesApiName}'.");
             _jsInteropConsole.ConsoleError(ex);
         }
 
         return [];
     }
 
-    public async Task<HttpStatusCode> CreateEntityAsync<TEntity>(
+    public async Task<HttpStatusCode> PostEntityAsync<TEntity>(
         string entitiesApiName,
         TEntity entity,
         CancellationToken cancellationToken

@@ -49,7 +49,11 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
     public string RootId { get; } = IDs.CHACHAR_FORM_ROOT;
 
-    public event EventHandler EventOnClose = default!;
+    public string BackdropId { get; } = IDs.INDEX_BACKDROP;
+
+    public string HtmlTitleOnClose { get; set; } = default!;
+
+    public IModal? LowerLevelModal { get; set; }
 
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
@@ -71,12 +75,6 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            AlternativeSelector.EventOnClose += EntityFormCommons.GetModalToFrontEvent(this, Localizer[Resource.CreateNewCharacter]);
-            RadicalSelector.EventOnClose += EntityFormCommons.GetModalToFrontEvent(this, Localizer[Resource.CreateNewCharacter]);
-        }
-
         // No need to set these properties for these elements explicitly in the HTML part.
         if (AvailableAlternatives.Any())
         {
@@ -102,29 +100,22 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         }
     }
 
-    public async Task OpenAsync(CancellationToken cancellationToken)
-    {
+    public async Task OpenAsync(string htmlTitleOnClose, CancellationToken cancellationToken) =>
         await ModalCommons.OpenAsyncCommon(
             this,
             Localizer[Resource.CreateNewCharacter],
+            htmlTitleOnClose,
             cancellationToken
         );
-    }
 
-    public async Task CloseAsync(CancellationToken cancellationToken)
-    {
-        await ModalCommons.CloseAsyncCommon(
-            this,
-            EventOnClose,
-            cancellationToken
-        );
-    }
+    public async Task CloseAsync(CancellationToken cancellationToken) =>
+        await ModalCommons.CloseAsyncCommon(this, cancellationToken);
 
     protected async Task OpenRadicalSelectorAsync(CancellationToken cancellationToken)
     {
         await Task.WhenAll(
             JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
-            RadicalSelector.OpenAsync(cancellationToken)
+            RadicalSelector.OpenAsync(this, Localizer[Resource.CreateNewCharacter], cancellationToken)
         );
     }
 
@@ -132,7 +123,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
     {
         await Task.WhenAll(
             JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
-            AlternativeSelector.OpenAsync(cancellationToken)
+            AlternativeSelector.OpenAsync(this, Localizer[Resource.CreateNewCharacter], cancellationToken)
         );
     }
 
@@ -232,7 +223,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
                 TheCharacter = TheCharacter!
             };
 
-            var statusCode = await EntityClient.CreateEntityAsync(ApiNames.CHARACTERS, chachar, cancellationToken);
+            var statusCode = await EntityClient.PostEntityAsync(ApiNames.CHARACTERS, chachar, cancellationToken);
 
             if (statusCode == HttpStatusCode.OK)
             {

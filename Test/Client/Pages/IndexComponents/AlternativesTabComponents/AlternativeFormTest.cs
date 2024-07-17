@@ -364,7 +364,14 @@ internal sealed class AlternativeFormTest : IDisposable
     public void OriginalCorrectSubmitTest()
     {
         _entityFormTestCommons.MockOtherInputsBorderDanger(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT);
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.BORDER_DANGER);
 
+        // Open original selector
+        var openOriginalSelectorButton = _alternativeFormComponent.Find($"#{IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT}");
+        Assert.That(openOriginalSelectorButton, Is.Not.Null);
+        openOriginalSelectorButton.Click();
+
+        // Click on the first button in the selector
         var buttonDivs = _alternativeFormComponent.FindAll("div").Where(div => div.ClassList.Contains("stretched-link"));
         Assert.That(buttonDivs.Count(), Is.EqualTo(_radicalChachars.Count()));
         var originalButtonDiv = buttonDivs.First();

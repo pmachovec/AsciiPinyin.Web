@@ -7,12 +7,8 @@
 @page "/"
 @inherits IndexBase
 
-<div
-    class="modal-backdrop fade @CssClasses.D_NONE"
-    style="z-index: @ByteConstants.INDEX_BACKDROP_Z"
-    id="@IDs.INDEX_BACKDROP">
-</div>
-<Header />
+<IndexBackdrop />
+
 <div
     class="container"
     id="@IDs.INDEX_ROOT">
@@ -30,4 +26,4 @@
         <ChacharsTab @ref="ChacharsTab" Index="this" />
     </main>
 </div>
-<Footer />
+

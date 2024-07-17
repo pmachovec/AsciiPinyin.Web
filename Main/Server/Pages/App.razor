@@ -22,22 +22,29 @@
         <HeadOutlet @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
     </head>
     <body>
+        @* Must be at the very beginning of the body. Otherwise, Index is appended before it. *@
+        <div class="mt-3 text-center">
+            <h1 class="display-1 fw-bolder">@(StringConstants.ASCII)&nbsp;@(StringConstants.PINYIN_CHINESE)</h1>
+        </div>
+
         <Routes @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
         <script src="/asciipinyin/js/JSInteropConsole.js"></script>
         <script src="/asciipinyin/js/JSInteropDOM.js"></script>
         <script src="/asciipinyin/js/lib/jquery-3.6.0.min.js"></script>
         <script src="/asciipinyin/_framework/blazor.web.js"></script>
-        <div id="@IDs.LOADING_SPLASH">
-            <Header />
 
+        <div id="@IDs.LOADING_SPLASH">
             <div class="container">
                 <NavBar />
                 <div>
                     <Loading />
                 </div>
             </div>
-
-            <Footer />
         </div>
+        @* Index is appended here. *@
+
+        <footer class="border-top footer text-muted">
+            <div class="container">&copy;&nbsp;2024&nbsp;&ndash;&nbsp;@(StringConstants.ASCII)&nbsp;@(StringConstants.PINYIN)</div>
+        </footer>
     </body>
 </html>

@@ -13,17 +13,6 @@ public sealed class EntityFormCommons(
     IStringLocalizer<Resource> _localizer
 ) : IEntityFormCommons
 {
-    public EventHandler GetModalToFrontEvent(IModal modal, string titleToSet)
-    {
-        return async (_, _) =>
-        {
-            await Task.WhenAll(
-                _jSInteropDOM.SetZIndexAsync(modal.RootId, ByteConstants.INDEX_BACKDROP_Z + 1, CancellationToken.None),
-                _jSInteropDOM.SetTitleAsync(titleToSet, CancellationToken.None)
-            );
-        };
-    }
-
     public async Task PreventMultipleCharactersAsync(
         IEntityForm entityForm,
         string inputId,

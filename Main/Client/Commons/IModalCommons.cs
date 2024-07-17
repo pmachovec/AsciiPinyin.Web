@@ -5,14 +5,27 @@ namespace AsciiPinyin.Web.Client.Commons;
 public interface IModalCommons
 {
     Task OpenAsyncCommon(
-        IModal modalComponent,
+        IModalFirstLevel modalFirstLevel,
         string htmlTitle,
+        string htmlTitleOnClose,
+        CancellationToken cancellationToken
+    );
+
+    Task OpenAsyncCommon(
+        IModalSecondLevel modalSecondLevel,
+        IModalFirstLevel modalFirstLevel,
+        string htmlTitle,
+        string htmlTitleOnClose,
         CancellationToken cancellationToken
     );
 
     Task CloseAsyncCommon(
-        IModal modalComponent,
-        EventHandler? EventOnClose,
+        IModalFirstLevel modalFirstLevel,
+        CancellationToken cancellationToken
+    );
+
+    Task CloseAsyncCommon(
+        IModalSecondLevel modalSecondLevel,
         CancellationToken cancellationToken
     );
 }

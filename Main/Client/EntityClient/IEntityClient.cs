@@ -5,12 +5,12 @@ namespace AsciiPinyin.Web.Client.EntityClient;
 
 public interface IEntityClient
 {
-    Task<IEnumerable<TEntity>> LoadEntitiesAsync<TEntity>(
+    Task<IEnumerable<TEntity>> GetEntitiesAsync<TEntity>(
         string entitiesApiName,
         CancellationToken cancellationToken
     ) where TEntity : IEntity;
 
-    Task<HttpStatusCode> CreateEntityAsync<TEntity>(
+    Task<HttpStatusCode> PostEntityAsync<TEntity>(
         string entitiesApiName,
         TEntity entity,
         CancellationToken cancellationToken
