@@ -1,6 +1,7 @@
 using AsciiPinyin.Web.Client.Commons;
 using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.Components;
+using AsciiPinyin.Web.Client.EntityClient;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
@@ -8,6 +9,7 @@ using AsciiPinyin.Web.Shared.Resources;
 using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
+using System.Net;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
@@ -32,6 +34,9 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     public string HtmlTitleOnClose { get; set; } = default!;
 
     public IModal? LowerLevelModal { get; set; }
+
+    [Inject]
+    private IEntityClient EntityClient { get; set; } = default!;
 
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
@@ -118,7 +123,25 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
         if (areAllInputsValid)
         {
-            // TODO submit
+            var alternative = new Alternative()
+            {
+                OriginalCharacter = OriginalCharacter!,
+                OriginalPinyin = OriginalPinyin!,
+                OriginalTone = (byte)OriginalTone!,
+                Strokes = (byte)Strokes!,
+                TheCharacter = TheCharacter!
+            };
+
+            var statusCode = await EntityClient.PostEntityAsync(ApiNames.ALTERNATIVES, alternative, cancellationToken);
+
+            if (statusCode == HttpStatusCode.OK)
+            {
+                await Index.SaveSuccess.OpenAsync(this, Localizer[Resource.CreateNewAlternative], cancellationToken);
+            }
+            else
+            {
+                await Index.SaveFailed.OpenAsync(this, Localizer[Resource.CreateNewAlternative], cancellationToken);
+            }
         }
     }
 

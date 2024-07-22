@@ -19,7 +19,8 @@
                 <button
                     type="button"
                     class="btn btn-modal btn-primary"
-                    aria-label="OK">
+                    aria-label="OK"
+                    @onclick="async _ => await CloseAsync(CancellationToken.None)">
                     <span>OK</span>
                 </button>
             </div>

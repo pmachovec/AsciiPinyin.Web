@@ -18,6 +18,10 @@ public class IndexBase : ComponentBase, IIndex
 
     protected ChacharsTab ChacharsTab { get; set; } = default!;
 
+    public SaveSuccess SaveSuccess { get; set; } = default!;
+
+    public SaveFailed SaveFailed { get; set; } = default!;
+
     public IEnumerable<Alternative> Alternatives { get; private set; } = [];
 
     public IEnumerable<Chachar> Chachars { get; private set; } = [];

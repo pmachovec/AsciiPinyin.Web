@@ -13,11 +13,11 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <base href="/asciipinyin/" />
+        <base href="/@(ApiNames.BASE)/" />
         <link rel="shortcut icon" href="#" /> <!-- Icon in the page tab. When no icon, without this a favicon.ico missing 404 error is logged. -->
-        <link rel="stylesheet" href="/asciipinyin/css/app.css" />
-        <link rel="stylesheet" href="/asciipinyin/css/bootstrap/bootstrap.min.css" />
-        <link rel="stylesheet" href="/asciipinyin/AsciiPinyin.Web.Server.styles.css" />
+        <link rel="stylesheet" href="/@(ApiNames.BASE)/css/app.css" />
+        <link rel="stylesheet" href="/@(ApiNames.BASE)/css/bootstrap/bootstrap.min.css" />
+        <link rel="stylesheet" href="/@(ApiNames.BASE)/AsciiPinyin.Web.Server.styles.css" />
         <title>@StringConstants.ASCII_PINYIN</title>
         <HeadOutlet @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
     </head>
@@ -28,10 +28,10 @@
         </div>
 
         <Routes @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
-        <script src="/asciipinyin/js/JSInteropConsole.js"></script>
-        <script src="/asciipinyin/js/JSInteropDOM.js"></script>
-        <script src="/asciipinyin/js/lib/jquery-3.6.0.min.js"></script>
-        <script src="/asciipinyin/_framework/blazor.web.js"></script>
+        <script src="/@(ApiNames.BASE)/js/JSInteropConsole.js"></script>
+        <script src="/@(ApiNames.BASE)/js/JSInteropDOM.js"></script>
+        <script src="/@(ApiNames.BASE)/js/lib/jquery-3.6.0.min.js"></script>
+        <script src="/@(ApiNames.BASE)/_framework/blazor.web.js"></script>
 
         <div id="@IDs.LOADING_SPLASH">
             <div class="container">

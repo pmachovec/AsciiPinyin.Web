@@ -227,13 +227,11 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
             if (statusCode == HttpStatusCode.OK)
             {
-                // Alert OK
-                // Close form
+                await Index.SaveSuccess.OpenAsync(this, Localizer[Resource.CreateNewCharacter], cancellationToken);
             }
             else
             {
-                // Alert ERROR
-                // Keep form opened
+                await Index.SaveFailed.OpenAsync(this, Localizer[Resource.CreateNewCharacter], cancellationToken);
             }
         }
     }

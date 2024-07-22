@@ -1,5 +1,6 @@
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Server.Pages;
+using AsciiPinyin.Web.Shared.Constants;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
 using Index = AsciiPinyin.Web.Client.Pages.Index;
@@ -14,7 +15,7 @@ _ = builder.Services.AddEntityFrameworkSqlite().AddDbContext<AsciiPinyinContext>
 _ = builder.Services.AddLocalization();
 
 var app = builder.Build();
-_ = app.UsePathBase("/asciipinyin");
+_ = app.UsePathBase($"/{ApiNames.BASE}");
 
 if (app.Environment.IsDevelopment())
 {
