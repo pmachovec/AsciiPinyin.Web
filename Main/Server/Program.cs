@@ -3,6 +3,7 @@ using AsciiPinyin.Web.Server.Pages;
 using AsciiPinyin.Web.Shared.Constants;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
+using System.Text;
 using Index = AsciiPinyin.Web.Client.Pages.Index;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -71,4 +72,5 @@ _ = app.MapRazorComponents<App>()
     .AddAdditionalAssemblies(typeof(Index).Assembly);
 _ = app.MapControllers();
 
+Console.OutputEncoding = Encoding.UTF8;
 app.Run();

@@ -10,5 +10,5 @@ internal static class JsonCreator
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    public static string ToJson(IEntity entity) => JsonSerializer.Serialize(entity, _options);
+    public static string ToJson(IEntity entity) => JsonSerializer.Serialize(entity, entity.GetType(), _options);
 }
