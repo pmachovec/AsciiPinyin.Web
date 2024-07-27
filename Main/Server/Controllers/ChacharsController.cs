@@ -7,12 +7,10 @@ namespace AsciiPinyin.Web.Server.Controllers;
 
 [ApiController]
 [Route($"/{ApiNames.BASE}/{ApiNames.CHARACTERS}")]
-public sealed class ChacharsController(AsciiPinyinContext asciiPinyinContext) : ControllerBase
+public sealed class ChacharsController(AsciiPinyinContext _asciiPinyinContext) : ControllerBase
 {
-    private AsciiPinyinContext AsciiPinyinContext { get; } = asciiPinyinContext;
-
     [HttpGet]
-    public IEnumerable<Chachar> Get() => [.. AsciiPinyinContext.Chachars];
+    public IEnumerable<Chachar> Get() => [.. _asciiPinyinContext.Chachars];
 
     [HttpPost]
     public ActionResult<Chachar> Post(Chachar chachar)

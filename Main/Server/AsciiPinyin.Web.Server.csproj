@@ -18,12 +18,23 @@
     </ItemGroup>
 
     <ItemGroup>
+        <None Remove="nlog.config" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="nlog.config">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.2" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.2" />
+        <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.11" />
     </ItemGroup>
 
     <ItemGroup>

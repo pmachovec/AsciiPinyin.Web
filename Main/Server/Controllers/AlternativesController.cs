@@ -7,12 +7,10 @@ namespace AsciiPinyin.Web.Server.Controllers;
 
 [ApiController]
 [Route($"/{ApiNames.BASE}/{ApiNames.ALTERNATIVES}")]
-public sealed class AlternativesController(AsciiPinyinContext asciiPinyinContext) : ControllerBase
+public sealed class AlternativesController(AsciiPinyinContext _asciiPinyinContext) : ControllerBase
 {
-    private AsciiPinyinContext AsciiPinyinContext { get; } = asciiPinyinContext;
-
     [HttpGet]
-    public IEnumerable<Alternative> Get() => [.. AsciiPinyinContext.Alternatives];
+    public IEnumerable<Alternative> Get() => [.. _asciiPinyinContext.Alternatives];
 
     [HttpPost]
     public ActionResult<Alternative> Post(Alternative alternative)

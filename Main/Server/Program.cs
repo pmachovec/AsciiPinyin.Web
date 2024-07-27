@@ -2,11 +2,16 @@ using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Server.Pages;
 using AsciiPinyin.Web.Shared.Constants;
 using Microsoft.AspNetCore.Localization;
+using NLog.Web;
 using System.Globalization;
 using System.Text;
 using Index = AsciiPinyin.Web.Client.Pages.Index;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Console.OutputEncoding = Encoding.UTF8;
+_ = builder.Logging.ClearProviders(); // Disables the default console output.
+_ = builder.Host.UseNLog();
 _ = builder.Services
     .AddRazorComponents()
     .AddInteractiveServerComponents()
@@ -72,5 +77,4 @@ _ = app.MapRazorComponents<App>()
     .AddAdditionalAssemblies(typeof(Index).Assembly);
 _ = app.MapControllers();
 
-Console.OutputEncoding = Encoding.UTF8;
 app.Run();
