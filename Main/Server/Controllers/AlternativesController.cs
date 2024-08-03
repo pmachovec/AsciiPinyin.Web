@@ -7,15 +7,28 @@ namespace AsciiPinyin.Web.Server.Controllers;
 
 [ApiController]
 [Route($"/{ApiNames.BASE}/{ApiNames.ALTERNATIVES}")]
-public sealed class AlternativesController(AsciiPinyinContext _asciiPinyinContext) : ControllerBase
+public sealed partial class AlternativesController(
+    AsciiPinyinContext _asciiPinyinContext,
+    ILogger<AlternativesController> _logger
+) : ControllerBase
 {
     [HttpGet]
-    public IEnumerable<Alternative> Get() => [.. _asciiPinyinContext.Alternatives];
+    public IEnumerable<Alternative> Get()
+    {
+        LogGet(_logger);
+        return [.. _asciiPinyinContext.Alternatives];
+    }
 
     [HttpPost]
     public ActionResult<Alternative> Post(Alternative alternative)
     {
-        Console.WriteLine($"Got alternative: {alternative}");
+        LogPost(_logger, alternative);
         return StatusCode(StatusCodes.Status501NotImplemented, "POST handling not implemented");
     }
+
+    [LoggerMessage(1, LogLevel.Information, "GET all alternatives")]
+    private static partial void LogGet(ILogger logger);
+
+    [LoggerMessage(1, LogLevel.Information, "POST: {alternative}")]
+    private static partial void LogPost(ILogger logger, Alternative alternative);
 }

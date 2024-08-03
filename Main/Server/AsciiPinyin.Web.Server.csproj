@@ -9,21 +9,15 @@
 
     <ItemGroup>
         <None Remove="Data\asciipinyin.sqlite" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <EmbeddedResource Include="Data\asciipinyin.sqlite">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </EmbeddedResource>
-    </ItemGroup>
-
-    <ItemGroup>
         <None Remove="nlog.config" />
     </ItemGroup>
 
     <ItemGroup>
+        <EmbeddedResource Include="Data\asciipinyin.sqlite">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </EmbeddedResource>
         <EmbeddedResource Include="nlog.config">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </EmbeddedResource>
     </ItemGroup>
 
