@@ -12,10 +12,12 @@ var builder = WebApplication.CreateBuilder(args);
 Console.OutputEncoding = Encoding.UTF8;
 _ = builder.Logging.ClearProviders(); // Disables the default console output.
 _ = builder.Host.UseNLog();
+
 _ = builder.Services
     .AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
 _ = builder.Services.AddControllers();
 _ = builder.Services.AddEntityFrameworkSqlite().AddDbContext<AsciiPinyinContext>();
 _ = builder.Services.AddLocalization();
@@ -68,13 +70,15 @@ app.UseRequestLocalization(options =>
     }
 );
 
-_ = app.UseHttpsRedirection();
-_ = app.UseStaticFiles();
-_ = app.UseAntiforgery();
+_ = app.UseHttpsRedirection()
+    .UseStaticFiles()
+    .UseAntiforgery();
+
 _ = app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Index).Assembly);
+
 _ = app.MapControllers();
 
 app.Run();

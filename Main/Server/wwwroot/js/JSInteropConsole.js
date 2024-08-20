@@ -1,4 +1,4 @@
-consoleInfo = (warningText) => { console.warn(warningText); };
+consoleInfo = (infoText) => { console.info(infoText); };
 
 consoleWarning = (warningText) => { console.warn(warningText); };
 

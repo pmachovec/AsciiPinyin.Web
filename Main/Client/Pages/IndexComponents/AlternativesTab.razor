@@ -12,7 +12,7 @@
     {
         @if (!Index.Alternatives.Any())
         {
-            JSInteropConsole.ConsoleWarning("AlternativesTab: No alternatives retrieved from the server.");
+            Logger.LogWarning("AlternativesTab: No alternatives retrieved from the server.");
         }
         else
         {

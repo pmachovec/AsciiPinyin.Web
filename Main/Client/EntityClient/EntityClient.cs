@@ -1,18 +1,14 @@
-using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Shared.Models;
 using System.Net;
 using System.Net.Http.Json;
 
 namespace AsciiPinyin.Web.Client.EntityClient;
 
-public sealed class EntityClient(
-    HttpClient httpClient,
-    IJSInteropConsole jsInteropConsole
+public sealed partial class EntityClient(
+    HttpClient _httpClient,
+    ILogger<EntityClient> _logger
 ) : IEntityClient
 {
-    private readonly HttpClient _httpClient = httpClient;
-    private readonly IJSInteropConsole _jsInteropConsole = jsInteropConsole;
-
     public async Task<IEnumerable<TEntity>> GetEntitiesAsync<TEntity>(
         string entitiesApiName,
         CancellationToken cancellationToken
@@ -24,21 +20,21 @@ public sealed class EntityClient(
 
             if (result is null)
             {
-                _jsInteropConsole.ConsoleError($"{nameof(EntityClient)}.{nameof(GetEntitiesAsync)}: Result of retrieving '{entitiesApiName}' is null.");
+                LogApiNull(_logger, entitiesApiName);
                 return [];
             }
 
             if (!result.Any())
             {
-                _jsInteropConsole.ConsoleError($"{nameof(EntityClient)}.{nameof(GetEntitiesAsync)}: Result of retrieving '{entitiesApiName}' is empty.");
+                LogApiEmpty(_logger, entitiesApiName);
             }
 
             return result;
         }
         catch (Exception ex)
         {
-            _jsInteropConsole.ConsoleError($"{nameof(EntityClient)}.{nameof(GetEntitiesAsync)}: Error occured on the server side when retrieving '{entitiesApiName}'.");
-            _jsInteropConsole.ConsoleError(ex);
+            LogApiServerSideError(_logger, entitiesApiName);
+            LogException(_logger, ex);
         }
 
         return [];
@@ -50,20 +46,40 @@ public sealed class EntityClient(
         CancellationToken cancellationToken
     ) where TEntity : IEntity
     {
-        _jsInteropConsole.ConsoleInfo($"CREATE {entity.GetType()}: {entity}");
+        LogCreate(_logger, entity.GetType(), entity);
         var result = await _httpClient.PostAsJsonAsync(entitiesApiName, entity, cancellationToken);
 
         if (result.StatusCode == HttpStatusCode.OK)
         {
-            _jsInteropConsole.ConsoleInfo("Success");
+            LogSuccess(_logger);
         }
         else
         {
             var content = await result.Content.ReadAsStringAsync(cancellationToken);
-            _jsInteropConsole.ConsoleError("Failure");
-            _jsInteropConsole.ConsoleError($"Status code: {result.StatusCode}, message: {content}");
+            LogFailure(_logger, result.StatusCode, content);
         }
 
         return result.StatusCode;
     }
+
+    [LoggerMessage(LogLevel.Error, "Result of retrieving '{entitiesApiName}' is null.")]
+    private static partial void LogApiNull(ILogger logger, string entitiesApiName);
+
+    [LoggerMessage(LogLevel.Error, "Result of retrieving '{entitiesApiName}' is empty.")]
+    private static partial void LogApiEmpty(ILogger logger, string entitiesApiName);
+
+    [LoggerMessage(LogLevel.Error, "Error occured on the server side when retrieving '{entitiesApiName}'.")]
+    private static partial void LogApiServerSideError(ILogger logger, string entitiesApiName);
+
+    [LoggerMessage(LogLevel.Error)]
+    private static partial void LogException(ILogger logger, Exception ex);
+
+    [LoggerMessage(LogLevel.Information, "CREATE {entityClassName}: {entity}")]
+    private static partial void LogCreate(ILogger logger, Type entityClassName, IEntity entity);
+
+    [LoggerMessage(LogLevel.Information, "Success")]
+    private static partial void LogSuccess(ILogger logger);
+
+    [LoggerMessage(LogLevel.Error, "Failure; status code: {statusCode}, message: {message}")]
+    private static partial void LogFailure(ILogger logger, HttpStatusCode statusCode, string message);
 }

@@ -26,9 +26,9 @@ public sealed partial class ChacharsController(
         return StatusCode(StatusCodes.Status501NotImplemented, "POST handling not implemented");
     }
 
-    [LoggerMessage(1, LogLevel.Information, "GET all chachars")]
+    [LoggerMessage(LogLevel.Information, "GET all chachars")]
     private static partial void LogGet(ILogger logger);
 
-    [LoggerMessage(1, LogLevel.Information, "POST: {chachar}")]
+    [LoggerMessage(LogLevel.Information, "POST: {chachar}")]
     private static partial void LogPost(ILogger logger, Chachar chachar);
 }

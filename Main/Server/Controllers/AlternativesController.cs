@@ -26,9 +26,9 @@ public sealed partial class AlternativesController(
         return StatusCode(StatusCodes.Status501NotImplemented, "POST handling not implemented");
     }
 
-    [LoggerMessage(1, LogLevel.Information, "GET all alternatives")]
+    [LoggerMessage(LogLevel.Information, "GET all alternatives")]
     private static partial void LogGet(ILogger logger);
 
-    [LoggerMessage(1, LogLevel.Information, "POST: {alternative}")]
+    [LoggerMessage(LogLevel.Information, "POST: {alternative}")]
     private static partial void LogPost(ILogger logger, Alternative alternative);
 }

@@ -71,7 +71,6 @@ internal sealed class ChacharFormTest : IDisposable
         _ = _testContext.Services.AddSingleton(_localizerMock);
         _ = _testContext.Services.AddSingleton<IEntityClient, EntityClient>();
         _ = _testContext.Services.AddSingleton<IEntityFormCommons, EntityFormCommons>();
-        _ = _testContext.Services.AddSingleton<IJSInteropConsole, JSInteropConsole>();
         _ = _testContext.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
         _ = _testContext.Services.AddSingleton<IModalCommons, ModalCommons>();
 
