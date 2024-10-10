@@ -1,4 +1,4 @@
-using AsciiPinyin.Web.Client.EntityClient;
+using AsciiPinyin.Web.Client.HttpClients;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Shared.ComponentInterfaces;

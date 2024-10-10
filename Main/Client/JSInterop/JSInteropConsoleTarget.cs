@@ -7,8 +7,6 @@ namespace AsciiPinyin.Web.Client.JSInterop;
 [Target(nameof(JSInteropConsoleTarget))]
 public class JSInteropConsoleTarget : TargetWithLayout
 {
-    public JSInteropConsoleTarget(string name) => Name = name;
-
     public IJSInteropConsole? JSInteropConsole { private get; set; }
 
     protected override void Write(LogEventInfo logEvent)

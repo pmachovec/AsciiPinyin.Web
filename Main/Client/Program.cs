@@ -1,27 +1,18 @@
 using AsciiPinyin.Web.Client.Commons;
-using AsciiPinyin.Web.Client.EntityClient;
+using AsciiPinyin.Web.Client.HttpClients;
 using AsciiPinyin.Web.Client.JSInterop;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using NLog.Config;
 using NLog.Extensions.Logging;
+using LoggingConfiguration = NLog.Config.LoggingConfiguration;
 
-var jsInteropConsoleTarget = new JSInteropConsoleTarget("AsciiPinyin.Web.Client.*");
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
-_ = builder.Logging.ClearProviders();
+
+_ = builder.Logging
+    .ClearProviders()
+    .AddNLog();
 
 _ = builder.Services
     .AddLocalization()
-    .AddLogging(loggingBulder =>
-        {
-            var config = new LoggingConfiguration();
-            config.AddRule(
-                minLevel: NLog.LogLevel.Info,
-                maxLevel: NLog.LogLevel.Fatal,
-                target: jsInteropConsoleTarget
-            );
-            _ = loggingBulder.AddNLog(config);
-        }
-    )
     .AddSingleton(_ =>
         new HttpClient
         {
@@ -32,10 +23,39 @@ _ = builder.Services
     .AddSingleton<IEntityClient, EntityClient>()
     .AddSingleton<IJSInteropConsole, JSInteropConsole>()
     .AddSingleton<IJSInteropDOM, JSInteropDOM>()
+    .AddSingleton<INLogConfigClient, NLogConfigClient>()
     .AddSingleton<IModalCommons, ModalCommons>();
 
 var host = builder.Build();
-var jsInteropConsole = host.Services.GetRequiredService<IJSInteropConsole>();
-jsInteropConsoleTarget.JSInteropConsole = jsInteropConsole;
 
+var nlogConfig = await host.Services.GetRequiredService<INLogConfigClient>().GetNLogConfigAsync(CancellationToken.None);
+var jsInteropConsole = host.Services.GetRequiredService<IJSInteropConsole>();
+
+if (nlogConfig is not null)
+{
+    foreach (var jsInteropConsoleTarget in nlogConfig.AllTargets.OfType<JSInteropConsoleTarget>())
+    {
+        jsInteropConsoleTarget.JSInteropConsole = jsInteropConsole;
+    };
+}
+else
+{
+    jsInteropConsole.ConsoleWarning("Loading NLog configuration from the server failed, using built-in configuration.");
+    nlogConfig = new LoggingConfiguration();
+
+    var jsInteropConsoleTarget = new JSInteropConsoleTarget
+    {
+        Name = "AsciiPinyin.Web.Client.*"
+    };
+
+    nlogConfig.AddRule(
+        minLevel: NLog.LogLevel.Info,
+        maxLevel: NLog.LogLevel.Fatal,
+        target: jsInteropConsoleTarget
+    );
+
+    jsInteropConsoleTarget.JSInteropConsole = jsInteropConsole;
+}
+
+NLog.LogManager.Configuration = nlogConfig;
 await host.RunAsync();

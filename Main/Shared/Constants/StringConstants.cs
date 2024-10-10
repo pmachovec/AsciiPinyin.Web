@@ -7,6 +7,7 @@ public static class StringConstants
     public const string CHARACTERS = "Characters";
     public const string PINYIN = "Pinyin";
     public const string PINYIN_CHINESE = "拼音";
+    public const string USER_AGENT_MISSING = "User-Agent missing in the request header";
 
     public const string ASCII_PINYIN = $"{ASCII} {PINYIN}";
 }

@@ -2,7 +2,7 @@ using AsciiPinyin.Web.Shared.Models;
 using System.Net;
 using System.Net.Http.Json;
 
-namespace AsciiPinyin.Web.Client.EntityClient;
+namespace AsciiPinyin.Web.Client.HttpClients;
 
 public sealed partial class EntityClient(
     HttpClient _httpClient,
