@@ -1,47 +1,60 @@
 using AsciiPinyin.Web.Client.Commons;
 using AsciiPinyin.Web.Client.HttpClients;
 using AsciiPinyin.Web.Client.JSInterop;
+using AsciiPinyin.Web.Shared.Constants;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using NLog.Config;
 using NLog.Extensions.Logging;
-using LoggingConfiguration = NLog.Config.LoggingConfiguration;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-_ = builder.Logging
-    .ClearProviders()
-    .AddNLog();
+var httpClient = new HttpClient
+{
+    BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+};
+
+Exception? loadNlogConfigException = null;
+
+try
+{
+    using var stream = await httpClient.GetStreamAsync(ApiNames.NLOGCONFIG);
+    using var fileStream = new FileStream(StringConstants.NLOG_CONFIG_YAML, FileMode.CreateNew);
+    await stream.CopyToAsync(fileStream);
+}
+catch (Exception ex)
+{
+    loadNlogConfigException = ex;
+}
+
+_ = builder.Logging.ClearProviders().AddNLog();
+
+_ = builder.Configuration.AddYamlFile(
+    StringConstants.NLOG_CONFIG_YAML,
+    optional: false,
+    reloadOnChange: true
+);
 
 _ = builder.Services
     .AddLocalization()
-    .AddSingleton(_ =>
-        new HttpClient
-        {
-            BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
-        }
-    )
+    .AddSingleton(_ => httpClient)
     .AddSingleton<IEntityFormCommons, EntityFormCommons>()
     .AddSingleton<IEntityClient, EntityClient>()
     .AddSingleton<IJSInteropConsole, JSInteropConsole>()
     .AddSingleton<IJSInteropDOM, JSInteropDOM>()
-    .AddSingleton<INLogConfigClient, NLogConfigClient>()
     .AddSingleton<IModalCommons, ModalCommons>();
 
 var host = builder.Build();
-
-var nlogConfig = await host.Services.GetRequiredService<INLogConfigClient>().GetNLogConfigAsync(CancellationToken.None);
 var jsInteropConsole = host.Services.GetRequiredService<IJSInteropConsole>();
 
-if (nlogConfig is not null)
+if (loadNlogConfigException is not null)
 {
-    foreach (var jsInteropConsoleTarget in nlogConfig.AllTargets.OfType<JSInteropConsoleTarget>())
-    {
-        jsInteropConsoleTarget.JSInteropConsole = jsInteropConsole;
-    };
+    jsInteropConsole.ConsoleError(loadNlogConfigException);
 }
-else
+
+if (loadNlogConfigException is not null || !File.Exists(StringConstants.NLOG_CONFIG_YAML))
 {
-    jsInteropConsole.ConsoleWarning("Loading NLog configuration from the server failed, using built-in configuration.");
-    nlogConfig = new LoggingConfiguration();
+    jsInteropConsole.ConsoleWarning($"Failed to load the NLog configuration file {StringConstants.NLOG_CONFIG_YAML} from the server, using built-in configuration.");
+    var nlogConfig = new LoggingConfiguration();
 
     var jsInteropConsoleTarget = new JSInteropConsoleTarget
     {
@@ -55,7 +68,7 @@ else
     );
 
     jsInteropConsoleTarget.JSInteropConsole = jsInteropConsole;
+    NLog.LogManager.Configuration = nlogConfig;
 }
 
-NLog.LogManager.Configuration = nlogConfig;
 await host.RunAsync();

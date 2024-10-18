@@ -1,26 +1,38 @@
 using AsciiPinyin.Web.Server.Data;
+using AsciiPinyin.Web.Server.Locals;
 using AsciiPinyin.Web.Server.Pages;
 using AsciiPinyin.Web.Shared.Constants;
 using Microsoft.AspNetCore.Localization;
+using NLog.Extensions.Logging;
 using NLog.Web;
 using System.Globalization;
+using System.Reflection;
 using System.Text;
 using Index = AsciiPinyin.Web.Client.Pages.Index;
 
-var builder = WebApplication.CreateBuilder(args);
-
 Console.OutputEncoding = Encoding.UTF8;
-_ = builder.Logging.ClearProviders(); // Disables the default console output.
-_ = builder.Host.UseNLog();
+var builder = WebApplication.CreateBuilder(args);
+var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+var nLogConfigYamlPath = $@"{assemblyLocation}/{StringConstants.NLOG_CONFIG_YAML_IN_FOLDER}";
+
+_ = builder.Logging.ClearProviders().AddNLog();
+_ = builder.Configuration.AddYamlFile(
+    nLogConfigYamlPath,
+    optional: false,
+    reloadOnChange: true
+);
 
 _ = builder.Services
+    .AddSingleton<ILocals>(_ => new Locals(nLogConfigYamlPath))
     .AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
-_ = builder.Services.AddControllers();
-_ = builder.Services.AddEntityFrameworkSqlite().AddDbContext<AsciiPinyinContext>();
-_ = builder.Services.AddLocalization();
+_ = builder.Services
+    .AddLocalization()
+    .AddEntityFrameworkSqlite()
+    .AddDbContext<AsciiPinyinContext>()
+    .AddControllers();
 
 var app = builder.Build();
 _ = app.UsePathBase($"/{ApiNames.BASE}");

@@ -1,0 +1,28 @@
+NLog:
+  throwConfigExceptions: true
+  extensions:
+  - assembly: "AsciiPinyin.Web.Client"
+  targets:
+    jsinteropconsole:
+      type: JSInteropConsoleTarget
+    logconsole:
+      type: Console
+  rules:
+  - logger: "AsciiPinyin.Web.Client.*"
+    minLevel: Info
+    writeTo: jsinteropconsole
+    final: true
+  - logger: "AsciiPinyin.Web.Server.*"
+    minLevel: Info
+    writeTo: logconsole
+    final: true
+  - logger: "Microsoft.*"
+    minLevel: Warn
+    writeTo: logconsole
+    final: true
+  - logger: "*"
+    minLevel: Warn
+    writeTo: logconsole
+
+# Without "final: true", general loggers also apply to same specific namespaces. When multiple loggers use common target, logs would be written multiple times.
+# More general loggers can have only higher levels than specific levels. Otherwise, the lower level of the general logger always overrides the higher level of the specific logger.
