@@ -1,7 +1,7 @@
 using AsciiPinyin.Web.Shared.Models;
 using System.Net;
 
-namespace AsciiPinyin.Web.Client.EntityClient;
+namespace AsciiPinyin.Web.Client.HttpClients;
 
 public interface IEntityClient
 {

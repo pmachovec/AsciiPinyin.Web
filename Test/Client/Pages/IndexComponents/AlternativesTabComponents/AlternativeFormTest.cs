@@ -1,6 +1,6 @@
 using Asciipinyin.Web.Client.Test.Commons;
 using AsciiPinyin.Web.Client.Commons;
-using AsciiPinyin.Web.Client.EntityClient;
+using AsciiPinyin.Web.Client.HttpClients;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages;
 using AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
@@ -90,7 +90,6 @@ internal sealed class AlternativeFormTest : IDisposable
         _ = _testContext.Services.AddSingleton(_localizerMock);
         _ = _testContext.Services.AddSingleton<IEntityFormCommons, EntityFormCommons>();
         _ = _testContext.Services.AddSingleton<IEntityClient, EntityClient>();
-        _ = _testContext.Services.AddSingleton<IJSInteropConsole, JSInteropConsole>();
         _ = _testContext.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
         _ = _testContext.Services.AddSingleton<IModalCommons, ModalCommons>();
 

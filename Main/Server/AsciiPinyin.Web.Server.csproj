@@ -9,11 +9,15 @@
 
     <ItemGroup>
         <None Remove="Data\asciipinyin.sqlite" />
+        <None Remove="..\..\nlog.config.yaml" />
     </ItemGroup>
 
     <ItemGroup>
         <EmbeddedResource Include="Data\asciipinyin.sqlite">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <EmbeddedResource Include="..\..\nlog.config.yaml" Link="NLog\nlog.config.yaml">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </EmbeddedResource>
     </ItemGroup>
 
@@ -24,11 +28,17 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.2" />
+        <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
+        <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.11" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Client\AsciiPinyin.Web.Client.csproj" />
         <ProjectReference Include="..\Shared\AsciiPinyin.Web.Shared.csproj" />
     </ItemGroup>
+
+    <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+        <Copy SourceFiles="..\..\nlog.config.yaml" DestinationFolder="$(OutDir)\NLog" />
+    </Target>
 
 </Project>

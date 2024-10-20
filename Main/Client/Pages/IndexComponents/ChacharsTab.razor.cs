@@ -25,7 +25,7 @@ public class ChacharsTabBase : ComponentBase, IEntityTab
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
     [Inject]
-    protected IJSInteropConsole JSInteropConsole { get; set; } = default!;
+    protected ILogger<ChacharsTab> Logger { get; set; } = default!;
 
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;

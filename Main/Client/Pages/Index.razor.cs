@@ -1,4 +1,4 @@
-using AsciiPinyin.Web.Client.EntityClient;
+using AsciiPinyin.Web.Client.HttpClients;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Shared.ComponentInterfaces;
@@ -7,6 +7,7 @@ using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
+using NLog;
 
 namespace AsciiPinyin.Web.Client.Pages;
 
@@ -30,6 +31,9 @@ public class IndexBase : ComponentBase, IIndex
     private IEntityClient EntityClient { get; set; } = default!;
 
     [Inject]
+    private IJSInteropConsole JSInteropConsole { get; set; } = default!;
+
+    [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
     [Inject]
@@ -37,6 +41,9 @@ public class IndexBase : ComponentBase, IIndex
 
     protected override async Task OnInitializedAsync()
     {
+        // Must be here, NLog.Configuration is null before starting the app with "RunAsync()".
+        InjectJSInteropConsoleToTargets();
+
         await Task.WhenAll(
             JSInteropDOM.SetTitleAsync(StringConstants.ASCII_PINYIN, CancellationToken.None),
             JSInteropDOM.HideElementAsync(IDs.LOADING_SPLASH, CancellationToken.None)
@@ -79,4 +86,14 @@ public class IndexBase : ComponentBase, IIndex
 
     protected static string GetActiveIfVisible(IEntityTab? tab)
         => tab != null && tab.IsVisible ? "active" : string.Empty;
+
+    private void InjectJSInteropConsoleToTargets()
+    {
+        var jsInteropConsoleTargets = LogManager.Configuration.AllTargets.OfType<JSInteropConsoleTarget>();
+
+        foreach (var jsInteropConsoleTarget in jsInteropConsoleTargets)
+        {
+            jsInteropConsoleTarget.JSInteropConsole = JSInteropConsole;
+        }
+    }
 }

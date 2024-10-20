@@ -12,7 +12,7 @@
     {
         @if (!Index.Chachars.Any())
         {
-            JSInteropConsole.ConsoleWarning("ChacharsTab: No chachars retrieved from the server.");
+            Logger.LogWarning("ChacharsTab: No chachars retrieved from the server.");
         }
         else
         {
