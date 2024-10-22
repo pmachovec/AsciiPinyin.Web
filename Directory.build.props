@@ -1,0 +1,16 @@
+<Project>
+
+    <PropertyGroup>
+        <CentralPackageVersionsFileImported>True</CentralPackageVersionsFileImported>
+        <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <ManagePackageVersionsCentrally>True</ManagePackageVersionsCentrally>
+        <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+        <Nullable>enable</Nullable>
+        <PackageId>$(MSBuildProjectName)</PackageId>
+        <RootNamespace>$(MSBuildProjectName)</RootNamespace>
+        <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
+
+</Project>
