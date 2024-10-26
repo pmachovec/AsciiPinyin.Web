@@ -1,4 +1,5 @@
 using AsciiPinyin.Web.Server.Commons;
+using AsciiPinyin.Web.Server.Constants.Http;
 using AsciiPinyin.Web.Server.Locals;
 using AsciiPinyin.Web.Shared.Constants;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ public partial class NLogConfigController(
         else
         {
             LogCommons.LogUserAgentMissing(_logger);
-            return StatusCode(StatusCodes.Status400BadRequest, StringConstants.USER_AGENT_MISSING);
+            return StatusCode(StatusCodes.Status400BadRequest, Errors.USER_AGENT_MISSING);
         }
 
         return StatusCode(

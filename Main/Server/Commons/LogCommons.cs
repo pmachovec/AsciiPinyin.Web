@@ -1,4 +1,4 @@
-using AsciiPinyin.Web.Shared.Constants;
+using AsciiPinyin.Web.Server.Constants.Http;
 using AsciiPinyin.Web.Shared.Models;
 
 namespace AsciiPinyin.Web.Server.Commons;
@@ -11,6 +11,6 @@ internal static partial class LogCommons
     [LoggerMessage(LogLevel.Information, "POST: {entity}; User-Agent: {userAgent}")]
     public static partial void LogPostEntity(ILogger logger, IEntity entity, string userAgent);
 
-    [LoggerMessage(LogLevel.Error, StringConstants.USER_AGENT_MISSING)]
+    [LoggerMessage(LogLevel.Error, Errors.USER_AGENT_MISSING)]
     public static partial void LogUserAgentMissing(ILogger logger);
 }

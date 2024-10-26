@@ -1,4 +1,5 @@
 using AsciiPinyin.Web.Server.Commons;
+using AsciiPinyin.Web.Server.Constants.Http;
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
@@ -23,14 +24,14 @@ public sealed class AlternativesController(
         else
         {
             LogCommons.LogUserAgentMissing(_logger);
-            return StatusCode(StatusCodes.Status400BadRequest, StringConstants.USER_AGENT_MISSING);
+            return StatusCode(StatusCodes.Status400BadRequest, Errors.USER_AGENT_MISSING);
         }
 
         return StatusCode(StatusCodes.Status200OK, _asciiPinyinContext.Alternatives);
     }
 
     [HttpPost]
-    public ActionResult<Alternative> Post(Alternative alternative)
+    public ActionResult Post(Alternative alternative)
     {
         if (Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
         {
@@ -39,7 +40,7 @@ public sealed class AlternativesController(
         else
         {
             LogCommons.LogUserAgentMissing(_logger);
-            return StatusCode(StatusCodes.Status400BadRequest, StringConstants.USER_AGENT_MISSING);
+            return StatusCode(StatusCodes.Status400BadRequest, Errors.USER_AGENT_MISSING);
         }
 
         return StatusCode(StatusCodes.Status501NotImplemented, "POST handling not implemented");
