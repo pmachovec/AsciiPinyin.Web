@@ -28,9 +28,55 @@ internal sealed partial class AlternativeTest
     )]
     private static partial Regex AlternativeStringRegex();
 
+    [GeneratedRegex(
+        @"^\{"
+            + @"(?=.*""the_character"":null)"
+            + @"(?=.*""original_character"":null)"
+            + @"(?=.*""original_pinyin"":null)"
+            + @"(?=.*""original_tone"":null)"
+            + @"(?=.*""strokes"":null)"
+            + @".*\}$",
+        RegexOptions.Compiled
+    )]
+    private static partial Regex AllNullAlternativeStringRegex();
+
+    [Test]
+    public void OriginalRealPinyinTest() =>
+        Assert.That(_alternative.OriginalRealPinyin, Is.EqualTo("yu3"));
+
+    [Test]
+    public void OriginalRealPinyinPinyinNullTest()
+    {
+        var alternativeClone = new Alternative
+        {
+            TheCharacter = _alternative.TheCharacter,
+            OriginalCharacter = _alternative.OriginalCharacter,
+            OriginalTone = _alternative.OriginalTone
+        };
+
+        Assert.That(alternativeClone.OriginalRealPinyin, Is.Null);
+    }
+
+    [Test]
+    public void OriginalRealPinyinToneNullTest()
+    {
+        var alternativeClone = new Alternative
+        {
+            TheCharacter = _alternative.TheCharacter,
+            OriginalCharacter = _alternative.OriginalCharacter,
+            OriginalPinyin = _alternative.OriginalPinyin
+        };
+
+        Assert.That(alternativeClone.OriginalRealPinyin, Is.Null);
+    }
+
     [Test]
     public void AlternativeToStringTest() =>
         Assert.That(_alternative.ToString(), Does.Match(AlternativeStringRegex()));
+
+    [Test]
+    public void NewAlternativeToStringTest() =>
+        Assert.That(new Alternative().ToString(), Does.Match(AllNullAlternativeStringRegex()));
 
     [Test]
     public void AlternativeEqualsFullCloneTest()
@@ -45,6 +91,7 @@ internal sealed partial class AlternativeTest
         };
 
         Assert.That(alternativeClone, Is.EqualTo(_alternative));
+        Assert.That(alternativeClone == _alternative, Is.True);
     }
 
     [Test]
@@ -59,6 +106,7 @@ internal sealed partial class AlternativeTest
         };
 
         Assert.That(alternativeClone, Is.EqualTo(_alternative));
+        Assert.That(alternativeClone == _alternative, Is.True);
     }
 
     [Test]
@@ -70,10 +118,11 @@ internal sealed partial class AlternativeTest
             OriginalCharacter = _alternative.OriginalCharacter,
             OriginalPinyin = _alternative.OriginalPinyin,
             OriginalTone = _alternative.OriginalTone,
-            Strokes = (byte)(_alternative.Strokes + 1)
+            Strokes = (byte)(_alternative.Strokes! + 1)
         };
 
         Assert.That(alternativeClone, Is.EqualTo(_alternative));
+        Assert.That(alternativeClone == _alternative, Is.True);
     }
 
     [Test]
@@ -84,10 +133,11 @@ internal sealed partial class AlternativeTest
             TheCharacter = _alternative.TheCharacter,
             OriginalCharacter = _alternative.OriginalCharacter,
             OriginalPinyin = _alternative.OriginalPinyin,
-            OriginalTone = (byte)(_alternative.OriginalTone + 1),
+            OriginalTone = (byte)(_alternative.OriginalTone! + 1),
             Strokes = _alternative.Strokes
         };
 
         Assert.That(alternativeClone, Is.Not.EqualTo(_alternative));
+        Assert.That(alternativeClone != _alternative, Is.True);
     }
 }

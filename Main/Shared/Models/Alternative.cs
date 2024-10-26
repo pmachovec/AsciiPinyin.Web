@@ -1,45 +1,42 @@
+using AsciiPinyin.Web.Shared.Constants;
+using AsciiPinyin.Web.Shared.Constants.JSInterop;
 using AsciiPinyin.Web.Shared.Models.Tools;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace AsciiPinyin.Web.Shared.Models;
 
-[Table("alternative")]
+[Table(TableNames.ALTERNATIVE)]
 public sealed class Alternative : IEntity
 {
     /*
      * The string type must be used even for single characters.
      * The char type tends to malfunction when sent over HTTP requests.
      */
-    [JsonPropertyName("the_character")]
-    [Column("the_character")]
-    [Required]
-    public string TheCharacter { get; set; } = string.Empty;
+    [JsonPropertyName(ColumnNames.THE_CHARACTER)]
+    [Column(ColumnNames.THE_CHARACTER)]
+    public string? TheCharacter { get; set; }
 
-    [JsonPropertyName("original_character")]
-    [Column("original_character")]
-    [Required]
-    public string OriginalCharacter { get; set; } = string.Empty;
+    [JsonPropertyName(ColumnNames.ORIGINAL_CHARACTER)]
+    [Column(ColumnNames.ORIGINAL_CHARACTER)]
+    public string? OriginalCharacter { get; set; }
 
-    [JsonPropertyName("original_pinyin")]
-    [Column("original_pinyin")]
-    [Required]
-    public string OriginalPinyin { get; set; } = string.Empty;
+    [JsonPropertyName(ColumnNames.ORIGINAL_PINYIN)]
+    [Column(ColumnNames.ORIGINAL_PINYIN)]
+    public string? OriginalPinyin { get; set; }
 
-    [JsonPropertyName("original_tone")]
-    [Column("original_tone")]
-    [Required]
-    public byte OriginalTone { get; set; }
+    [JsonPropertyName(ColumnNames.ORIGINAL_TONE)]
+    [Column(ColumnNames.ORIGINAL_TONE)]
+    public byte? OriginalTone { get; set; }
 
-    [JsonPropertyName("strokes")]
-    [Column("strokes")]
-    [Required]
-    public byte Strokes { get; set; }
+    [JsonPropertyName(ColumnNames.STROKES)]
+    [Column(ColumnNames.STROKES)]
+    public byte? Strokes { get; set; }
 
     // To be replaced by conversion to showing tones by diacritics.
     [JsonIgnore]
-    public string OriginalRealPinyin => OriginalPinyin + OriginalTone;
+    public string? OriginalRealPinyin =>
+        OriginalPinyin is null || OriginalTone is null ? null : OriginalPinyin + OriginalTone;
 
     public static bool operator ==(Alternative left, Alternative right) => Comparator.EqualsForOperator(left, right);
 

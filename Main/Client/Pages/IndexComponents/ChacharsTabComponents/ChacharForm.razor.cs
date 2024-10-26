@@ -212,15 +212,15 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         {
             var chachar = new Chachar()
             {
-                Ipa = Ipa!,
-                Pinyin = Pinyin!,
-                RadicalAlternativeCharacter = RadicalAlternativeCharacter!,
-                RadicalCharacter = RadicalCharacter!,
-                RadicalPinyin = RadicalPinyin!,
-                RadicalTone = RadicalTone!,
-                Strokes = (byte)Strokes!,
-                Tone = (byte)Tone!,
-                TheCharacter = TheCharacter!
+                Ipa = Ipa,
+                Pinyin = Pinyin,
+                RadicalAlternativeCharacter = RadicalAlternativeCharacter,
+                RadicalCharacter = RadicalCharacter,
+                RadicalPinyin = RadicalPinyin,
+                RadicalTone = RadicalTone,
+                Strokes = Strokes,
+                Tone = Tone,
+                TheCharacter = TheCharacter
             };
 
             var statusCode = await EntityClient.PostEntityAsync(ApiNames.CHARACTERS, chachar, cancellationToken);

@@ -89,6 +89,54 @@ internal sealed partial class ChacharTest
     )]
     private static partial Regex NonRadicalChacharWithoutAlternativeStringRegex();
 
+    [GeneratedRegex(
+        @"^\{"
+            + @"(?=.*""the_character"":null)"
+            + @"(?=.*""pinyin"":null)"
+            + @"(?=.*""ipa"":null)"
+            + @"(?=.*""tone"":null)"
+            + @"(?=.*""strokes"":null)"
+            + @"(?=.*""radical_character"":null)"
+            + @"(?=.*""radical_pinyin"":null)"
+            + @"(?=.*""radical_tone"":null)"
+            + @"(?=.*""radical_alternative_character"":null)"
+            + @".*\}$",
+        RegexOptions.Compiled
+    )]
+    private static partial Regex AllNullChacharStringRegex();
+
+    [Test]
+    public void RealPinyinTest() =>
+        Assert.That(_radicalChachar.RealPinyin, Is.EqualTo("yu3"));
+
+    [Test]
+    public void RealPinyinPinyinNullTest()
+    {
+        var chacharClone = new Chachar
+        {
+            TheCharacter = _nonRadicalChacharWithAlternative.TheCharacter,
+            Tone = _nonRadicalChacharWithAlternative.Tone
+        };
+
+        Assert.That(chacharClone.RealPinyin, Is.Null);
+    }
+
+    [Test]
+    public void RealPinyinToneNullTest()
+    {
+        var chacharClone = new Chachar
+        {
+            TheCharacter = _nonRadicalChacharWithAlternative.TheCharacter,
+            Pinyin = _nonRadicalChacharWithAlternative.Pinyin
+        };
+
+        Assert.That(chacharClone.RealPinyin, Is.Null);
+    }
+
+    [Test]
+    public void RealPinyinNewChacharTest() =>
+        Assert.That(new Chachar().RealPinyin, Is.Null);
+
     [Test]
     public void RadicalChacharToStringTest() =>
         Assert.That(_radicalChachar.ToString(), Does.Match(RadicalChacharStringRegex()));
@@ -100,6 +148,10 @@ internal sealed partial class ChacharTest
     [Test]
     public void NonRadicalChacharWithoutAlternativeToStringTest() =>
         Assert.That(_nonRadicalChacharWithoutAlternative.ToString(), Does.Match(NonRadicalChacharWithoutAlternativeStringRegex()));
+
+    [Test]
+    public void NewChacharToStringTest() =>
+        Assert.That(new Chachar().ToString(), Does.Match(AllNullChacharStringRegex()));
 
     [Test]
     public void ChacharEqualsFullCloneTest()
@@ -118,6 +170,7 @@ internal sealed partial class ChacharTest
         };
 
         Assert.That(chacharClone, Is.EqualTo(_nonRadicalChacharWithAlternative));
+        Assert.That(chacharClone == _nonRadicalChacharWithAlternative, Is.True);
     }
 
     [Test]
@@ -131,6 +184,7 @@ internal sealed partial class ChacharTest
         };
 
         Assert.That(chacharClone, Is.EqualTo(_nonRadicalChacharWithAlternative));
+        Assert.That(chacharClone == _nonRadicalChacharWithAlternative, Is.True);
     }
 
     [Test]
@@ -150,6 +204,7 @@ internal sealed partial class ChacharTest
         };
 
         Assert.That(chacharClone, Is.EqualTo(_nonRadicalChacharWithAlternative));
+        Assert.That(chacharClone == _nonRadicalChacharWithAlternative, Is.True);
     }
 
     [Test]
@@ -159,7 +214,7 @@ internal sealed partial class ChacharTest
         {
             TheCharacter = _nonRadicalChacharWithAlternative.TheCharacter,
             Pinyin = _nonRadicalChacharWithAlternative.Pinyin,
-            Tone = (byte)(_nonRadicalChacharWithAlternative.Tone + 1),
+            Tone = (byte)(_nonRadicalChacharWithAlternative.Tone! + 1),
             Ipa = _nonRadicalChacharWithAlternative.Ipa,
             Strokes = _nonRadicalChacharWithAlternative.Strokes,
             RadicalCharacter = _nonRadicalChacharWithAlternative.RadicalCharacter,
@@ -169,5 +224,6 @@ internal sealed partial class ChacharTest
         };
 
         Assert.That(chacharClone, Is.Not.EqualTo(_nonRadicalChacharWithAlternative));
+        Assert.That(chacharClone != _nonRadicalChacharWithAlternative, Is.True);
     }
 }

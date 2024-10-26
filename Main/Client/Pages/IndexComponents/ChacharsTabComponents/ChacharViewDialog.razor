@@ -14,18 +14,18 @@
         <div class="modal-content">
             <div class="modal-header justify-content-between">
                 <div></div>
-                <h2 class="modal-title fw-bold" id="theCharacter">@Chachar?.TheCharacter</h2>
+                <h2 class="modal-title fw-bold" id="theCharacter">@(Chachar?.TheCharacter ?? string.Empty)</h2>
                 <CloseButton CloseAsync="CloseAsync" CancellationToken="CancellationToken.None" />
             </div>
             <div class="modal-body">
                 <p class="card-text">
-                    @($"{Localizer[Resource.Pinyin]}: {Chachar?.RealPinyin}")
+                    @($"{Localizer[Resource.Pinyin]}: {Chachar?.RealPinyin ?? string.Empty}")
                 </p>
                 <p class="card-text">
-                    @($"{Localizer[Resource.Ipa]}: {Chachar?.Ipa}")
+                    @($"{Localizer[Resource.Ipa]}: {Chachar?.Ipa ?? string.Empty}")
                 </p>
                 <p class="card-text">
-                    @($"{Localizer[Resource.NumberOfStrokes]}: {Chachar?.Strokes}")
+                    @($"{Localizer[Resource.NumberOfStrokes]}: {Chachar?.Strokes?.ToString() ?? string.Empty}")
                 </p>
             </div>
             <div class="modal-footer">

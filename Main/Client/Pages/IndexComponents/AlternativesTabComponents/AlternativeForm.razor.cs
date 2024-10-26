@@ -125,11 +125,11 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         {
             var alternative = new Alternative()
             {
-                OriginalCharacter = OriginalCharacter!,
-                OriginalPinyin = OriginalPinyin!,
-                OriginalTone = (byte)OriginalTone!,
-                Strokes = (byte)Strokes!,
-                TheCharacter = TheCharacter!
+                OriginalCharacter = OriginalCharacter,
+                OriginalPinyin = OriginalPinyin,
+                OriginalTone = OriginalTone,
+                Strokes = Strokes,
+                TheCharacter = TheCharacter
             };
 
             var statusCode = await EntityClient.PostEntityAsync(ApiNames.ALTERNATIVES, alternative, cancellationToken);

@@ -8,16 +8,16 @@
 {
     <div class="card card-entity text-center">
         <div class="card-body">
-            <h2 class="card-title fw-bold">@entity.TheCharacter</h2>
+            <h2 class="card-title fw-bold">@(entity.TheCharacter ?? string.Empty)</h2>
         </div>
         <div class="card-footer bg-transparent fw-bold">
             @if (entity is Chachar chachar)
             {
-                @chachar.RealPinyin
+                @(chachar.RealPinyin ?? string.Empty)
             }
             else if (entity is Alternative alternative)
             {
-                @alternative.OriginalCharacter
+                @(alternative.OriginalCharacter ?? string.Empty)
             }
         </div>
         <div
