@@ -3,6 +3,7 @@ using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.HttpClients;
 using AsciiPinyin.Web.Client.JSInterop;
+using AsciiPinyin.Web.Shared.Commons;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
@@ -10,15 +11,11 @@ using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System.Net;
-using System.Text.RegularExpressions;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
 public partial class ChacharFormBase : ComponentBase, IEntityForm
 {
-    [GeneratedRegex("^[a-zA-Z]+$")]
-    private static partial Regex AsciiLettersRegex();
-
     protected EntitySelector<Alternative> AlternativeSelector { get; set; } = default!;
 
     protected EntitySelector<Chachar> RadicalSelector { get; set; } = default!;
@@ -258,7 +255,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         {
             return Localizer[Resource.CompulsoryValue];
         }
-        else if (!AsciiLettersRegex().IsMatch(Pinyin))
+        else if (!Regexes.AsciiLettersRegex().IsMatch(Pinyin))
         {
             return Localizer[Resource.OnlyAsciiAllowed];
         }

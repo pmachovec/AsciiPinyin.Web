@@ -41,6 +41,8 @@ internal sealed partial class ChacharTest
         RadicalTone = 2
     };
 
+    private static readonly Chachar _newChachar = new();
+
     [GeneratedRegex(
         @"^\{"
             + @"(?=.*""the_character"":""雨"")"
@@ -112,30 +114,30 @@ internal sealed partial class ChacharTest
     [Test]
     public void RealPinyinPinyinNullTest()
     {
-        var chacharClone = new Chachar
+        var chachar = new Chachar
         {
             TheCharacter = _nonRadicalChacharWithAlternative.TheCharacter,
             Tone = _nonRadicalChacharWithAlternative.Tone
         };
 
-        Assert.That(chacharClone.RealPinyin, Is.Null);
+        Assert.That(chachar.RealPinyin, Is.Null);
     }
 
     [Test]
     public void RealPinyinToneNullTest()
     {
-        var chacharClone = new Chachar
+        var chachar = new Chachar
         {
             TheCharacter = _nonRadicalChacharWithAlternative.TheCharacter,
             Pinyin = _nonRadicalChacharWithAlternative.Pinyin
         };
 
-        Assert.That(chacharClone.RealPinyin, Is.Null);
+        Assert.That(chachar.RealPinyin, Is.Null);
     }
 
     [Test]
     public void RealPinyinNewChacharTest() =>
-        Assert.That(new Chachar().RealPinyin, Is.Null);
+        Assert.That(_newChachar.RealPinyin, Is.Null);
 
     [Test]
     public void RadicalChacharToStringTest() =>
@@ -151,7 +153,7 @@ internal sealed partial class ChacharTest
 
     [Test]
     public void NewChacharToStringTest() =>
-        Assert.That(new Chachar().ToString(), Does.Match(AllNullChacharStringRegex()));
+        Assert.That(_newChachar.ToString(), Does.Match(AllNullChacharStringRegex()));
 
     [Test]
     public void ChacharEqualsFullCloneTest()

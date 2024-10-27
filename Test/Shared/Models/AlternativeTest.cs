@@ -16,6 +16,8 @@ internal sealed partial class AlternativeTest
         Strokes = 8
     };
 
+    private static readonly Alternative _newAlternative = new();
+
     [GeneratedRegex(
         @"^\{"
             + @"(?=.*""the_character"":""⻗"")"
@@ -47,28 +49,32 @@ internal sealed partial class AlternativeTest
     [Test]
     public void OriginalRealPinyinPinyinNullTest()
     {
-        var alternativeClone = new Alternative
+        var alternative = new Alternative
         {
             TheCharacter = _alternative.TheCharacter,
             OriginalCharacter = _alternative.OriginalCharacter,
             OriginalTone = _alternative.OriginalTone
         };
 
-        Assert.That(alternativeClone.OriginalRealPinyin, Is.Null);
+        Assert.That(alternative.OriginalRealPinyin, Is.Null);
     }
 
     [Test]
     public void OriginalRealPinyinToneNullTest()
     {
-        var alternativeClone = new Alternative
+        var alternative = new Alternative
         {
             TheCharacter = _alternative.TheCharacter,
             OriginalCharacter = _alternative.OriginalCharacter,
             OriginalPinyin = _alternative.OriginalPinyin
         };
 
-        Assert.That(alternativeClone.OriginalRealPinyin, Is.Null);
+        Assert.That(alternative.OriginalRealPinyin, Is.Null);
     }
+
+    [Test]
+    public void OriginalRealPinyinNewAlternativeTest() =>
+        Assert.That(_newAlternative.OriginalRealPinyin, Is.Null);
 
     [Test]
     public void AlternativeToStringTest() =>
@@ -76,7 +82,7 @@ internal sealed partial class AlternativeTest
 
     [Test]
     public void NewAlternativeToStringTest() =>
-        Assert.That(new Alternative().ToString(), Does.Match(AllNullAlternativeStringRegex()));
+        Assert.That(_newAlternative.ToString(), Does.Match(AllNullAlternativeStringRegex()));
 
     [Test]
     public void AlternativeEqualsFullCloneTest()

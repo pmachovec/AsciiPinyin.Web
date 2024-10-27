@@ -2,7 +2,6 @@
 
     <ItemGroup>
         <None Remove="Data\asciipinyin.sqlite" />
-        <None Remove="..\..\nlog.config.yaml" />
     </ItemGroup>
 
     <ItemGroup>

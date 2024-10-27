@@ -6,11 +6,18 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <ManagePackageVersionsCentrally>True</ManagePackageVersionsCentrally>
         <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+        <NeutralLanguage>en-US</NeutralLanguage>
         <Nullable>enable</Nullable>
         <PackageId>$(MSBuildProjectName)</PackageId>
         <RootNamespace>$(MSBuildProjectName)</RootNamespace>
         <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
         <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>$(MSBuildProjectName).Test</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
 
 </Project>

@@ -1,5 +1,5 @@
 using AsciiPinyin.Web.Server.Commons;
-using AsciiPinyin.Web.Server.Constants.Http;
+using AsciiPinyin.Web.Server.Constants;
 using AsciiPinyin.Web.Server.Locals;
 using AsciiPinyin.Web.Shared.Constants;
 using Microsoft.AspNetCore.Mvc;
@@ -18,11 +18,11 @@ public partial class NLogConfigController(
     {
         if (Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
         {
-            LogGet(_logger, userAgent!);
+            LogGetInfo(_logger, userAgent!);
         }
         else
         {
-            LogCommons.LogUserAgentMissing(_logger);
+            LogCommons.LogUserAgentMissingError(_logger);
             return StatusCode(StatusCodes.Status400BadRequest, Errors.USER_AGENT_MISSING);
         }
 
@@ -33,5 +33,5 @@ public partial class NLogConfigController(
     }
 
     [LoggerMessage(LogLevel.Information, "GET nlog.config; User-Agent: {userAgent}")]
-    public static partial void LogGet(ILogger logger, string userAgent);
+    private static partial void LogGetInfo(ILogger logger, string userAgent);
 }

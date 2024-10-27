@@ -7,4 +7,6 @@ public interface IEntity
      * The char type tends to malfunction when sent over HTTP requests.
      */
     string? TheCharacter { get; set; }
+
+    byte? Strokes { get; set; }
 }

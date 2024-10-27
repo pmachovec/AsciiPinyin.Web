@@ -20,13 +20,13 @@ public sealed partial class EntityClient(
 
             if (result is null)
             {
-                LogApiNull(_logger, entitiesApiName);
+                LogApiNullError(_logger, entitiesApiName);
                 return [];
             }
 
             if (!result.Any())
             {
-                LogApiEmpty(_logger, entitiesApiName);
+                LogApiEmptyError(_logger, entitiesApiName);
             }
 
             return result;
@@ -34,7 +34,7 @@ public sealed partial class EntityClient(
         catch (Exception ex)
         {
             LogApiServerSideError(_logger, entitiesApiName);
-            LogException(_logger, ex);
+            LogExceptionError(_logger, ex);
         }
 
         return [];
@@ -46,40 +46,40 @@ public sealed partial class EntityClient(
         CancellationToken cancellationToken
     ) where TEntity : IEntity
     {
-        LogCreate(_logger, entity.GetType(), entity);
+        LogCreateInfo(_logger, entity.GetType(), entity);
         var result = await _httpClient.PostAsJsonAsync(entitiesApiName, entity, cancellationToken);
 
         if (result.StatusCode == HttpStatusCode.OK)
         {
-            LogSuccess(_logger);
+            LogSuccessInfo(_logger);
         }
         else
         {
             var content = await result.Content.ReadAsStringAsync(cancellationToken);
-            LogFailure(_logger, result.StatusCode, content);
+            LogFailureError(_logger, result.StatusCode, content);
         }
 
         return result.StatusCode;
     }
 
     [LoggerMessage(LogLevel.Error, "Result of retrieving '{entitiesApiName}' is null.")]
-    private static partial void LogApiNull(ILogger logger, string entitiesApiName);
+    private static partial void LogApiNullError(ILogger logger, string entitiesApiName);
 
     [LoggerMessage(LogLevel.Error, "Result of retrieving '{entitiesApiName}' is empty.")]
-    private static partial void LogApiEmpty(ILogger logger, string entitiesApiName);
+    private static partial void LogApiEmptyError(ILogger logger, string entitiesApiName);
 
     [LoggerMessage(LogLevel.Error, "Error occured on the server side when retrieving '{entitiesApiName}'.")]
     private static partial void LogApiServerSideError(ILogger logger, string entitiesApiName);
 
     [LoggerMessage(LogLevel.Error)]
-    private static partial void LogException(ILogger logger, Exception ex);
+    private static partial void LogExceptionError(ILogger logger, Exception ex);
 
     [LoggerMessage(LogLevel.Information, "CREATE {entityClassName}: {entity}")]
-    private static partial void LogCreate(ILogger logger, Type entityClassName, IEntity entity);
+    private static partial void LogCreateInfo(ILogger logger, Type entityClassName, IEntity entity);
 
     [LoggerMessage(LogLevel.Information, "Success")]
-    private static partial void LogSuccess(ILogger logger);
+    private static partial void LogSuccessInfo(ILogger logger);
 
     [LoggerMessage(LogLevel.Error, "Failure; status code: {statusCode}, message: {message}")]
-    private static partial void LogFailure(ILogger logger, HttpStatusCode statusCode, string message);
+    private static partial void LogFailureError(ILogger logger, HttpStatusCode statusCode, string message);
 }
