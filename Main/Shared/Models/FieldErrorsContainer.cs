@@ -16,5 +16,13 @@ public class FieldErrorsContainer
         }
     }
 
+    public FieldErrorsContainer(params FieldError[] fieldErrors)
+    {
+        foreach (var fieldError in fieldErrors)
+        {
+            Errors[fieldError.FieldJsonPropertyName] = fieldError;
+        }
+    }
+
     public override string ToString() => JsonCreator.ToJson(this);
 }

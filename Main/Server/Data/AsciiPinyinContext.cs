@@ -6,9 +6,9 @@ namespace AsciiPinyin.Web.Server.Data;
 // Represents a DB session
 public class AsciiPinyinContext : DbContext
 {
-    public DbSet<Chachar> Chachars => Set<Chachar>();
+    public virtual DbSet<Chachar> Chachars => Set<Chachar>();
 
-    public DbSet<Alternative> Alternatives => Set<Alternative>();
+    public virtual DbSet<Alternative> Alternatives => Set<Alternative>();
 
     // Configures EF to load an Sqlite database file from the specified path.
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => _ = optionsBuilder.UseSqlite("Data Source=Data/asciipinyin.sqlite");

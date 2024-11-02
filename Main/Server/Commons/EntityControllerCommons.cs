@@ -8,56 +8,17 @@ namespace AsciiPinyin.Web.Server.Commons;
 
 internal static partial class EntityControllerCommons
 {
-    public static object? GetGetErrorWithLogging(
-        string apiName,
-        IHeaderDictionary requestHeaders,
-        ILogger logger
-    )
-    {
-        if (requestHeaders.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
-        {
-            LogGetAllEntitiesInfo(logger, apiName, userAgent!);
-        }
-        else
-        {
-            LogCommons.LogUserAgentMissingError(logger);
-            return Errors.USER_AGENT_MISSING;
-        }
-
-        return null;
-    }
-
-    public static object? GetPostErrorWithLogging<T>(
+    public static FieldErrorsContainer? GetPostInitialDataErrorsContainer<T>(
         T entity,
-        IHeaderDictionary requestHeaders,
-        ILogger logger,
         params Func<T, FieldError?>[] getFieldErrorMethods
     ) where T : IEntity
     {
-        if (requestHeaders.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
-        {
-            LogPostEntityInfo(logger, entity, userAgent!);
-        }
-        else
-        {
-            LogCommons.LogUserAgentMissingError(logger);
-            return Errors.USER_AGENT_MISSING;
-        }
-
-        LogIntegrityVerificationDebug(logger);
         var fieldErrors = GetFieldErrors(
             entity,
             getFieldErrorMethods
         );
 
-        if (fieldErrors.Count > 0)
-        {
-            var fieldErrorsContainer = new FieldErrorsContainer(fieldErrors);
-            LogCommons.LogError(logger, fieldErrorsContainer.ToString());
-            return fieldErrorsContainer;
-        }
-
-        return null;
+        return fieldErrors.Count > 0 ? new FieldErrorsContainer(fieldErrors) : null;
     }
 
     public static FieldError? GetTheCharacterError(IEntity entity)
@@ -161,13 +122,4 @@ internal static partial class EntityControllerCommons
 
         return fieldErrors;
     }
-
-    [LoggerMessage(LogLevel.Information, "GET all {entitiesName}; User-Agent: {userAgent}")]
-    private static partial void LogGetAllEntitiesInfo(ILogger logger, string entitiesName, string userAgent);
-
-    [LoggerMessage(LogLevel.Information, "POST: {entity}; User-Agent: {userAgent}")]
-    private static partial void LogPostEntityInfo(ILogger logger, IEntity entity, string userAgent);
-
-    [LoggerMessage(LogLevel.Debug, "Integrity verification")]
-    private static partial void LogIntegrityVerificationDebug(ILogger logger);
 }

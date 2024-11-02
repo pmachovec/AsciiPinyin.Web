@@ -1,11 +1,13 @@
 using AsciiPinyin.Web.Server.Commons;
 using AsciiPinyin.Web.Server.Constants;
 using AsciiPinyin.Web.Server.Data;
+using AsciiPinyin.Web.Server.Exceptions;
 using AsciiPinyin.Web.Shared.Commons;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AsciiPinyin.Web.Server.Controllers;
 
@@ -19,16 +21,13 @@ public sealed class ChacharsController(
     [HttpGet]
     public ActionResult<IEnumerable<Chachar>> Get()
     {
-        var possibleGetError = EntityControllerCommons.GetGetErrorWithLogging(
-            ApiNames.CHARACTERS,
-            Request.Headers,
-            _logger
-        );
-
-        if (possibleGetError is { } getError)
+        if (!Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
         {
-            return StatusCode(StatusCodes.Status400BadRequest, getError);
+            LogCommons.LogUserAgentMissingError(_logger);
+            return BadRequest(Errors.USER_AGENT_MISSING);
         }
+
+        LogCommons.LogGetAllEntitiesInfo(_logger, ApiNames.CHARACTERS, userAgent!);
 
         try
         {
@@ -44,10 +43,16 @@ public sealed class ChacharsController(
     [HttpPost]
     public ObjectResult Post(Chachar chachar)
     {
-        var possiblePostError = EntityControllerCommons.GetPostErrorWithLogging(
+        if (!Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
+        {
+            LogCommons.LogUserAgentMissingError(_logger);
+            return BadRequest(Errors.USER_AGENT_MISSING);
+        }
+
+        LogCommons.LogPostEntityInfo(_logger, chachar, userAgent!);
+        LogCommons.LogInitialIntegrityVerificationDebug(_logger);
+        var postInitialDataErrorsContainer = EntityControllerCommons.GetPostInitialDataErrorsContainer(
             chachar,
-            Request.Headers,
-            _logger,
             EntityControllerCommons.GetTheCharacterError,
             EntityControllerCommons.GetStrokesError,
             GetPinyinError,
@@ -59,9 +64,29 @@ public sealed class ChacharsController(
             GetRadicalAlternativeCharacterError
         );
 
-        if (possiblePostError is { } postError)
+        if (postInitialDataErrorsContainer is not null)
         {
-            return StatusCode(StatusCodes.Status400BadRequest, postError);
+            LogCommons.LogError(_logger, postInitialDataErrorsContainer.ToString());
+            return BadRequest(postInitialDataErrorsContainer);
+        }
+
+        LogCommons.LogDatabaseRadicalIntegrityVerificationDebug(_logger);
+        FieldErrorsContainer? postDatabaseRadicalIntegrityErrorsContainer = null;
+
+        try
+        {
+            postDatabaseRadicalIntegrityErrorsContainer = GetPostDatabaseRadicalIntegrityErrorContainer(chachar);
+        }
+        catch (DbGetException dge)
+        {
+            LogCommons.LogError(_logger, dge.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError, null);
+        }
+
+        if (postDatabaseRadicalIntegrityErrorsContainer is not null)
+        {
+            LogCommons.LogError(_logger, postDatabaseRadicalIntegrityErrorsContainer.ToString());
+            return BadRequest(postDatabaseRadicalIntegrityErrorsContainer);
         }
 
         return StatusCode(StatusCodes.Status501NotImplemented, "POST handling not implemented");
@@ -208,5 +233,82 @@ public sealed class ChacharsController(
         }
 
         return null;
+    }
+
+    private FieldErrorsContainer? GetPostDatabaseRadicalIntegrityErrorContainer(Chachar chachar)
+    {
+        if (chachar.RadicalCharacter is null)
+        {
+            // At this point, the chachar doesn't have any radical-related field for 100%.
+            // There can't be any integrity error against existing radicals.
+            return null;
+        }
+
+        DbSet<Chachar>? knownChachars = null;
+
+        try
+        {
+            knownChachars = _asciiPinyinContext.Chachars;
+        }
+        catch (Exception e)
+        {
+            throw new DbGetException(e);
+        }
+
+        var radicalChachar = knownChachars!.FirstOrDefault(knownChachar =>
+            knownChachar.TheCharacter == chachar.RadicalCharacter
+            && knownChachar.Pinyin == chachar.RadicalPinyin
+            && knownChachar.Tone == chachar.RadicalTone
+        );
+
+        if (radicalChachar is null)
+        {
+            return new FieldErrorsContainer(
+                new(chachar.RadicalCharacter, Errors.UNKNOWN_CHACHAR, ColumnNames.RADICAL_CHARACTER),
+                new(chachar.RadicalPinyin, Errors.UNKNOWN_CHACHAR, ColumnNames.RADICAL_PINYIN),
+                new(chachar.RadicalTone, Errors.UNKNOWN_CHACHAR, ColumnNames.RADICAL_TONE)
+            );
+        }
+
+        if (!radicalChachar!.IsRadical)
+        {
+            return new FieldErrorsContainer(
+                new(chachar.RadicalCharacter, Errors.NO_RADICAL, ColumnNames.RADICAL_CHARACTER),
+                new(chachar.RadicalPinyin, Errors.NO_RADICAL, ColumnNames.RADICAL_PINYIN),
+                new(chachar.RadicalTone, Errors.NO_RADICAL, ColumnNames.RADICAL_TONE)
+            );
+        }
+
+        if (chachar.RadicalAlternativeCharacter is null)
+        {
+            return null;
+        }
+
+        DbSet<Alternative>? knownAlternatives = null;
+
+        try
+        {
+            knownAlternatives = _asciiPinyinContext.Alternatives;
+        }
+        catch (Exception e)
+        {
+            throw new DbGetException(e);
+        }
+
+        var radicalAlternative = knownAlternatives!.FirstOrDefault(knownAlternative =>
+            knownAlternative.TheCharacter == chachar.RadicalAlternativeCharacter
+            && knownAlternative.OriginalCharacter == radicalChachar.TheCharacter
+            && knownAlternative.OriginalPinyin == radicalChachar.Pinyin
+            && knownAlternative.OriginalTone == radicalChachar.Tone
+        );
+
+        return radicalAlternative is null
+            ? new FieldErrorsContainer(
+                new(chachar.RadicalAlternativeCharacter, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_ALTERNATIVE_CHARACTER),
+                new(chachar.RadicalCharacter, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_CHARACTER),
+                new(chachar.RadicalPinyin, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_PINYIN),
+                new(chachar.RadicalTone, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_TONE)
+            )
+            : null;
     }
 }
