@@ -34,8 +34,8 @@ internal sealed class ChacharFormTest : IDisposable
         IDs.CHACHAR_FORM_TONE_INPUT,
     ];
 
-    private readonly IIndex _indexMock = Mock.Of<IIndex>();
-    private readonly IStringLocalizer<Resource> _localizerMock = Mock.Of<IStringLocalizer<Resource>>();
+    private readonly Mock<IIndex> _indexMock = new();
+    private readonly Mock<IStringLocalizer<Resource>> _localizerMock = new();
 
     private TestContext _testContext = default!;
     private IRenderedComponent<ChacharForm> _chacharFormComponent = default!;
@@ -44,19 +44,19 @@ internal sealed class ChacharFormTest : IDisposable
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        _ = Mock.Get(_localizerMock)
+        _ = _localizerMock
             .Setup(localizer => localizer[Resource.CompulsoryValue])
             .Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE)
         );
-        _ = Mock.Get(_localizerMock)
+        _ = _localizerMock
             .Setup(localizer => localizer[Resource.MustBeChineseCharacter])
             .Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER)
         );
-        _ = Mock.Get(_localizerMock)
+        _ = _localizerMock
             .Setup(localizer => localizer[Resource.OnlyAsciiAllowed])
             .Returns(new LocalizedString(ONLY_ASCII_ALLOWED, ONLY_ASCII_ALLOWED)
         );
-        _ = Mock.Get(_localizerMock)
+        _ = _localizerMock
             .Setup(localizer => localizer[Resource.OnlyIpaAllowed])
             .Returns(new LocalizedString(ONLY_IPA_ALLOWED, ONLY_IPA_ALLOWED)
         );
@@ -68,13 +68,13 @@ internal sealed class ChacharFormTest : IDisposable
         _testContext = new TestContext();
 
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.DISABLE, IDs.CHACHAR_FORM_ALTERNATIVE);
-        _ = _testContext.Services.AddSingleton(_localizerMock);
+        _ = _testContext.Services.AddSingleton(_localizerMock.Object);
         _ = _testContext.Services.AddSingleton<IEntityClient, EntityClient>();
         _ = _testContext.Services.AddSingleton<IEntityFormCommons, EntityFormCommons>();
         _ = _testContext.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
         _ = _testContext.Services.AddSingleton<IModalCommons, ModalCommons>();
 
-        _chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
+        _chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock.Object));
         _entityFormTestCommons = new(_testContext, _chacharFormComponent, _inputIds);
     }
 

@@ -58,8 +58,8 @@ internal sealed class AlternativeFormTest : IDisposable
         }
     ];
 
-    private readonly IIndex _indexMock = Mock.Of<IIndex>();
-    private readonly IStringLocalizer<Resource> _localizerMock = Mock.Of<IStringLocalizer<Resource>>();
+    private readonly Mock<IIndex> _indexMock = new();
+    private readonly Mock<IStringLocalizer<Resource>> _localizerMock = new();
 
     private TestContext _testContext = default!;
     private IRenderedComponent<AlternativeForm> _alternativeFormComponent = default!;
@@ -68,15 +68,15 @@ internal sealed class AlternativeFormTest : IDisposable
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        _ = Mock.Get(_indexMock)
+        _ = _indexMock
             .Setup(index => index.Chachars)
             .Returns(_radicalChachars.Concat(_nonRadicalChachars)
         );
-        _ = Mock.Get(_localizerMock)
+        _ = _localizerMock
             .Setup(localizer => localizer[Resource.CompulsoryValue])
             .Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE)
         );
-        _ = Mock.Get(_localizerMock)
+        _ = _localizerMock
             .Setup(localizer => localizer[Resource.MustBeChineseCharacter])
             .Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER)
         );
@@ -87,13 +87,13 @@ internal sealed class AlternativeFormTest : IDisposable
     {
         _testContext = new TestContext();
 
-        _ = _testContext.Services.AddSingleton(_localizerMock);
+        _ = _testContext.Services.AddSingleton(_localizerMock.Object);
         _ = _testContext.Services.AddSingleton<IEntityFormCommons, EntityFormCommons>();
         _ = _testContext.Services.AddSingleton<IEntityClient, EntityClient>();
         _ = _testContext.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
         _ = _testContext.Services.AddSingleton<IModalCommons, ModalCommons>();
 
-        _alternativeFormComponent = _testContext.RenderComponent<AlternativeForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock));
+        _alternativeFormComponent = _testContext.RenderComponent<AlternativeForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock.Object));
         _entityFormTestCommons = new(_testContext, _alternativeFormComponent, _inputIds);
     }
 
