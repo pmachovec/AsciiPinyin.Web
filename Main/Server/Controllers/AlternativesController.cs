@@ -90,7 +90,14 @@ public sealed class AlternativesController(
             return BadRequest(postDatabaseIntegrityErrorsContainer);
         }
 
-        return StatusCode(StatusCodes.Status501NotImplemented, "POST handling not implemented");
+        using (var dbContextTransaction = _asciiPinyinContext.Database.BeginTransaction())
+        {
+            _ = _asciiPinyinContext.Alternatives.Add(alternative);
+            _ = _asciiPinyinContext.SaveChanges();
+            dbContextTransaction.Commit();
+        }
+
+        return Ok(null);
     }
 
     private static FieldError? GetOriginalCharacterError(Alternative alternative)

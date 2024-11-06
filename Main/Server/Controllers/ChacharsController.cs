@@ -96,7 +96,14 @@ public sealed class ChacharsController(
             return BadRequest(postDatabaseIntegrityErrorsContainer);
         }
 
-        return StatusCode(StatusCodes.Status501NotImplemented, "POST handling not implemented");
+        using (var dbContextTransaction = _asciiPinyinContext.Database.BeginTransaction())
+        {
+            _ = _asciiPinyinContext.Chachars.Add(chachar);
+            _ = _asciiPinyinContext.SaveChanges();
+            dbContextTransaction.Commit();
+        }
+
+        return Ok(null);
     }
 
     private static FieldError? GetPinyinError(Chachar chachar)
