@@ -868,4 +868,18 @@ internal sealed partial class ChacharsControllerTest
         EntityControllerTestCommons.PostFieldWrongTest(result, _nonRadicalChacharWithAlternative.RadicalPinyin, Errors.UNKNOWN_ALTERNATIVE, "radical_pinyin");
         EntityControllerTestCommons.PostFieldWrongTest(result, _nonRadicalChacharWithAlternative.RadicalTone, Errors.UNKNOWN_ALTERNATIVE, "radical_tone");
     }
+
+    [Test]
+    public void PostChacharAlreadyExistsTest()
+    {
+        var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock(_radicalChachar);
+        var alternativesDbSetMock = EntityControllerTestCommons.GetDbSetMock<Alternative>();
+        _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
+        _httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
+
+        var result = _chacharsController.Post(_radicalChachar);
+        EntityControllerTestCommons.PostFieldWrongTest(result, _radicalChachar.TheCharacter, Errors.CHACHAR_ALREADY_EXISTS, "the_character");
+        EntityControllerTestCommons.PostFieldWrongTest(result, _radicalChachar.Pinyin, Errors.CHACHAR_ALREADY_EXISTS, "pinyin");
+        EntityControllerTestCommons.PostFieldWrongTest(result, _radicalChachar.Tone, Errors.CHACHAR_ALREADY_EXISTS, "tone");
+    }
 }

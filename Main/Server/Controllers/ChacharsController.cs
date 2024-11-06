@@ -84,16 +84,16 @@ public sealed class ChacharsController(
             return StatusCode(StatusCodes.Status500InternalServerError, null);
         }
 
-        var postDatabaseRadicalIntegrityErrorsContainer = GetPostDatabaseRadicalIntegrityErrorContainer(
+        var postDatabaseIntegrityErrorsContainer = GetPostDatabaseIntegrityErrorContainer(
             chachar,
             knownChachars,
             knownAlternatives
         );
 
-        if (postDatabaseRadicalIntegrityErrorsContainer is not null)
+        if (postDatabaseIntegrityErrorsContainer is not null)
         {
-            LogCommons.LogError(_logger, postDatabaseRadicalIntegrityErrorsContainer.ToString());
-            return BadRequest(postDatabaseRadicalIntegrityErrorsContainer);
+            LogCommons.LogError(_logger, postDatabaseIntegrityErrorsContainer.ToString());
+            return BadRequest(postDatabaseIntegrityErrorsContainer);
         }
 
         return StatusCode(StatusCodes.Status501NotImplemented, "POST handling not implemented");
@@ -242,62 +242,73 @@ public sealed class ChacharsController(
         return null;
     }
 
-    private static FieldErrorsContainer? GetPostDatabaseRadicalIntegrityErrorContainer(
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Style",
+        "IDE0046:Convert to conditional expression",
+        Justification = "Conditional return just looks terrible here."
+    )]
+    private static FieldErrorsContainer? GetPostDatabaseIntegrityErrorContainer(
         Chachar chachar,
         DbSet<Chachar> knownChachars,
         DbSet<Alternative> knownAlternatives
     )
     {
-        if (chachar.RadicalCharacter is null)
+        if (chachar.RadicalCharacter is { } radicalCharacter)
         {
-            // At this point, the chachar doesn't have any radical-related field for 100%.
-            // There can't be any integrity error against existing radicals.
-            return null;
+            var radicalChachar = knownChachars!.Find(
+                radicalCharacter,
+                chachar.RadicalPinyin,
+                chachar.RadicalTone
+            );
+
+            if (radicalChachar is null)
+            {
+                return new FieldErrorsContainer(
+                    new(radicalCharacter, Errors.UNKNOWN_CHACHAR, ColumnNames.RADICAL_CHARACTER),
+                    new(chachar.RadicalPinyin, Errors.UNKNOWN_CHACHAR, ColumnNames.RADICAL_PINYIN),
+                    new(chachar.RadicalTone, Errors.UNKNOWN_CHACHAR, ColumnNames.RADICAL_TONE)
+                );
+            }
+
+            if (!radicalChachar!.IsRadical)
+            {
+                return new FieldErrorsContainer(
+                    new(radicalCharacter, Errors.NO_RADICAL, ColumnNames.RADICAL_CHARACTER),
+                    new(chachar.RadicalPinyin, Errors.NO_RADICAL, ColumnNames.RADICAL_PINYIN),
+                    new(chachar.RadicalTone, Errors.NO_RADICAL, ColumnNames.RADICAL_TONE)
+                );
+            }
+
+            if (chachar.RadicalAlternativeCharacter is { } radicalAlternativeCharacter)
+            {
+                var radicalAlternative = knownAlternatives!.Find(
+                   radicalAlternativeCharacter,
+                   radicalChachar.TheCharacter,
+                   radicalChachar.Pinyin,
+                   radicalChachar.Tone
+                );
+
+                if (radicalAlternative is null)
+                {
+                    return new FieldErrorsContainer(
+                        new(radicalAlternativeCharacter, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_ALTERNATIVE_CHARACTER),
+                        new(chachar.RadicalCharacter, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_CHARACTER),
+                        new(chachar.RadicalPinyin, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_PINYIN),
+                        new(chachar.RadicalTone, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_TONE)
+                    );
+                }
+            }
         }
 
-        var radicalChachar = knownChachars!.Find(
-            chachar.RadicalCharacter,
-            chachar.RadicalPinyin,
-            chachar.RadicalTone
-        );
-
-        if (radicalChachar is null)
+        if (knownChachars.Contains(chachar))
         {
             return new FieldErrorsContainer(
-                new(chachar.RadicalCharacter, Errors.UNKNOWN_CHACHAR, ColumnNames.RADICAL_CHARACTER),
-                new(chachar.RadicalPinyin, Errors.UNKNOWN_CHACHAR, ColumnNames.RADICAL_PINYIN),
-                new(chachar.RadicalTone, Errors.UNKNOWN_CHACHAR, ColumnNames.RADICAL_TONE)
+                new(chachar.TheCharacter, Errors.CHACHAR_ALREADY_EXISTS, ColumnNames.THE_CHARACTER),
+                new(chachar.Pinyin, Errors.CHACHAR_ALREADY_EXISTS, ColumnNames.PINYIN),
+                new(chachar.Tone, Errors.CHACHAR_ALREADY_EXISTS, ColumnNames.TONE)
             );
         }
 
-        if (!radicalChachar!.IsRadical)
-        {
-            return new FieldErrorsContainer(
-                new(chachar.RadicalCharacter, Errors.NO_RADICAL, ColumnNames.RADICAL_CHARACTER),
-                new(chachar.RadicalPinyin, Errors.NO_RADICAL, ColumnNames.RADICAL_PINYIN),
-                new(chachar.RadicalTone, Errors.NO_RADICAL, ColumnNames.RADICAL_TONE)
-            );
-        }
-
-        if (chachar.RadicalAlternativeCharacter is null)
-        {
-            return null;
-        }
-
-        var radicalAlternative = knownAlternatives!.Find(
-           chachar.RadicalAlternativeCharacter,
-           radicalChachar.TheCharacter,
-           radicalChachar.Pinyin,
-           radicalChachar.Tone
-        );
-
-        return radicalAlternative is null
-            ? new FieldErrorsContainer(
-                new(chachar.RadicalAlternativeCharacter, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_ALTERNATIVE_CHARACTER),
-                new(chachar.RadicalCharacter, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_CHARACTER),
-                new(chachar.RadicalPinyin, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_PINYIN),
-                new(chachar.RadicalTone, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_TONE)
-            )
-            : null;
+        return null;
     }
 }

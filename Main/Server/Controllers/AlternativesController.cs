@@ -65,10 +65,12 @@ public sealed class AlternativesController(
 
         LogCommons.LogDatabaseRadicalIntegrityVerificationDebug(_logger);
         DbSet<Chachar>? knownChachars;
+        DbSet<Alternative> knownAlternatives;
 
         try
         {
             knownChachars = _asciiPinyinContext.Chachars;
+            knownAlternatives = _asciiPinyinContext.Alternatives;
         }
         catch (Exception e)
         {
@@ -76,15 +78,16 @@ public sealed class AlternativesController(
             return StatusCode(StatusCodes.Status500InternalServerError, null);
         }
 
-        var postDatabaseRadicalIntegrityErrorsContainer = GetPostDatabaseRadicalIntegrityErrorContainer(
+        var postDatabaseIntegrityErrorsContainer = GetPostDatabaseIntegrityErrorContainer(
             alternative,
-            knownChachars
+            knownChachars,
+            knownAlternatives
         );
 
-        if (postDatabaseRadicalIntegrityErrorsContainer is not null)
+        if (postDatabaseIntegrityErrorsContainer is not null)
         {
-            LogCommons.LogError(_logger, postDatabaseRadicalIntegrityErrorsContainer.ToString());
-            return BadRequest(postDatabaseRadicalIntegrityErrorsContainer);
+            LogCommons.LogError(_logger, postDatabaseIntegrityErrorsContainer.ToString());
+            return BadRequest(postDatabaseIntegrityErrorsContainer);
         }
 
         return StatusCode(StatusCodes.Status501NotImplemented, "POST handling not implemented");
@@ -108,9 +111,15 @@ public sealed class AlternativesController(
         return errorMessage is not null ? new FieldError(alternative.OriginalTone, errorMessage, ColumnNames.ORIGINAL_TONE) : null;
     }
 
-    private static FieldErrorsContainer? GetPostDatabaseRadicalIntegrityErrorContainer(
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Style",
+        "IDE0046:Convert to conditional expression",
+        Justification = "Conditional return just looks terrible here."
+    )]
+    private static FieldErrorsContainer? GetPostDatabaseIntegrityErrorContainer(
         Alternative alternative,
-        DbSet<Chachar> knownChachars
+        DbSet<Chachar> knownChachars,
+        DbSet<Alternative> knownAlternatives
     )
     {
         var originalChachar = knownChachars!.Find(
@@ -119,18 +128,34 @@ public sealed class AlternativesController(
             alternative.OriginalTone
         );
 
-        return originalChachar is null
-            ? new FieldErrorsContainer(
+        if (originalChachar is null)
+        {
+            return new FieldErrorsContainer(
                 new(alternative.OriginalCharacter, Errors.UNKNOWN_CHACHAR, ColumnNames.ORIGINAL_CHARACTER),
                 new(alternative.OriginalPinyin, Errors.UNKNOWN_CHACHAR, ColumnNames.ORIGINAL_PINYIN),
                 new(alternative.OriginalTone, Errors.UNKNOWN_CHACHAR, ColumnNames.ORIGINAL_TONE)
-            )
-            : !originalChachar.IsRadical
-            ? new FieldErrorsContainer(
+            );
+        }
+
+        if (!originalChachar.IsRadical)
+        {
+            return new FieldErrorsContainer(
                 new(alternative.OriginalCharacter, Errors.NO_RADICAL, ColumnNames.ORIGINAL_CHARACTER),
                 new(alternative.OriginalPinyin, Errors.NO_RADICAL, ColumnNames.ORIGINAL_PINYIN),
                 new(alternative.OriginalTone, Errors.NO_RADICAL, ColumnNames.ORIGINAL_TONE)
-            )
-            : null;
+            );
+        }
+
+        if (knownAlternatives.Contains(alternative))
+        {
+            return new FieldErrorsContainer(
+                new(alternative.TheCharacter, Errors.ALTERNATIVE_ALREADY_EXISTS, ColumnNames.THE_CHARACTER),
+                new(alternative.OriginalCharacter, Errors.ALTERNATIVE_ALREADY_EXISTS, ColumnNames.ORIGINAL_CHARACTER),
+                new(alternative.OriginalPinyin, Errors.ALTERNATIVE_ALREADY_EXISTS, ColumnNames.ORIGINAL_PINYIN),
+                new(alternative.OriginalTone, Errors.ALTERNATIVE_ALREADY_EXISTS, ColumnNames.ORIGINAL_TONE)
+            );
+        }
+
+        return null;
     }
 }

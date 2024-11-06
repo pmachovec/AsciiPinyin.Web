@@ -2,6 +2,8 @@ namespace AsciiPinyin.Web.Server.Constants;
 
 internal static class Errors
 {
+    public const string ALTERNATIVE_ALREADY_EXISTS = "combination 'alternative character + character + pinyin + tone' already exists";
+    public const string CHACHAR_ALREADY_EXISTS = "combination 'character + pinyin + tone' already exists";
     public const string EMPTY = "value is empty";
     public const string MISSING = "value is missing";
     public const string NO_ASCII = "contains non-ASCII characters";

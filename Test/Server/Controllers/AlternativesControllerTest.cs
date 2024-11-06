@@ -480,4 +480,20 @@ internal sealed class AlternativesControllerTest
         EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.OriginalPinyin, Errors.NO_RADICAL, "original_pinyin");
         EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.OriginalTone, Errors.NO_RADICAL, "original_tone");
     }
+
+    [Test]
+    public void PostAlternativeAlreadyExistsTest()
+    {
+        var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock(_radicalChachar);
+        var alternativesDbSetMock = EntityControllerTestCommons.GetDbSetMock(_alternative);
+        _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
+        _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
+        _httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
+
+        var result = _alternativesController.Post(_alternative);
+        EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.TheCharacter, Errors.ALTERNATIVE_ALREADY_EXISTS, "the_character");
+        EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.OriginalCharacter, Errors.ALTERNATIVE_ALREADY_EXISTS, "original_character");
+        EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.OriginalPinyin, Errors.ALTERNATIVE_ALREADY_EXISTS, "original_pinyin");
+        EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.OriginalTone, Errors.ALTERNATIVE_ALREADY_EXISTS, "original_tone");
+    }
 }
