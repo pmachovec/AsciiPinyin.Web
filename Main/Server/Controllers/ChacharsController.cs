@@ -1,7 +1,6 @@
 using AsciiPinyin.Web.Server.Commons;
 using AsciiPinyin.Web.Server.Constants;
 using AsciiPinyin.Web.Server.Data;
-using AsciiPinyin.Web.Server.Exceptions;
 using AsciiPinyin.Web.Shared.Commons;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
@@ -71,17 +70,25 @@ public sealed class ChacharsController(
         }
 
         LogCommons.LogDatabaseRadicalIntegrityVerificationDebug(_logger);
-        FieldErrorsContainer? postDatabaseRadicalIntegrityErrorsContainer = null;
+        DbSet<Chachar>? knownChachars;
+        DbSet<Alternative>? knownAlternatives;
 
         try
         {
-            postDatabaseRadicalIntegrityErrorsContainer = GetPostDatabaseRadicalIntegrityErrorContainer(chachar);
+            knownChachars = _asciiPinyinContext.Chachars;
+            knownAlternatives = _asciiPinyinContext.Alternatives;
         }
-        catch (DbGetException dge)
+        catch (Exception e)
         {
-            LogCommons.LogError(_logger, dge.ToString());
+            LogCommons.LogError(_logger, e.ToString());
             return StatusCode(StatusCodes.Status500InternalServerError, null);
         }
+
+        var postDatabaseRadicalIntegrityErrorsContainer = GetPostDatabaseRadicalIntegrityErrorContainer(
+            chachar,
+            knownChachars,
+            knownAlternatives
+        );
 
         if (postDatabaseRadicalIntegrityErrorsContainer is not null)
         {
@@ -235,7 +242,11 @@ public sealed class ChacharsController(
         return null;
     }
 
-    private FieldErrorsContainer? GetPostDatabaseRadicalIntegrityErrorContainer(Chachar chachar)
+    private static FieldErrorsContainer? GetPostDatabaseRadicalIntegrityErrorContainer(
+        Chachar chachar,
+        DbSet<Chachar> knownChachars,
+        DbSet<Alternative> knownAlternatives
+    )
     {
         if (chachar.RadicalCharacter is null)
         {
@@ -244,21 +255,10 @@ public sealed class ChacharsController(
             return null;
         }
 
-        DbSet<Chachar>? knownChachars = null;
-
-        try
-        {
-            knownChachars = _asciiPinyinContext.Chachars;
-        }
-        catch (Exception e)
-        {
-            throw new DbGetException(e);
-        }
-
-        var radicalChachar = knownChachars!.FirstOrDefault(knownChachar =>
-            knownChachar.TheCharacter == chachar.RadicalCharacter
-            && knownChachar.Pinyin == chachar.RadicalPinyin
-            && knownChachar.Tone == chachar.RadicalTone
+        var radicalChachar = knownChachars!.Find(
+            chachar.RadicalCharacter,
+            chachar.RadicalPinyin,
+            chachar.RadicalTone
         );
 
         if (radicalChachar is null)
@@ -284,22 +284,11 @@ public sealed class ChacharsController(
             return null;
         }
 
-        DbSet<Alternative>? knownAlternatives = null;
-
-        try
-        {
-            knownAlternatives = _asciiPinyinContext.Alternatives;
-        }
-        catch (Exception e)
-        {
-            throw new DbGetException(e);
-        }
-
-        var radicalAlternative = knownAlternatives!.FirstOrDefault(knownAlternative =>
-            knownAlternative.TheCharacter == chachar.RadicalAlternativeCharacter
-            && knownAlternative.OriginalCharacter == radicalChachar.TheCharacter
-            && knownAlternative.OriginalPinyin == radicalChachar.Pinyin
-            && knownAlternative.OriginalTone == radicalChachar.Tone
+        var radicalAlternative = knownAlternatives!.Find(
+           chachar.RadicalAlternativeCharacter,
+           radicalChachar.TheCharacter,
+           radicalChachar.Pinyin,
+           radicalChachar.Tone
         );
 
         return radicalAlternative is null

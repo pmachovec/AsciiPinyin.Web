@@ -1,7 +1,6 @@
 using AsciiPinyin.Web.Server.Commons;
 using AsciiPinyin.Web.Server.Constants;
 using AsciiPinyin.Web.Server.Data;
-using AsciiPinyin.Web.Server.Exceptions;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -65,17 +64,22 @@ public sealed class AlternativesController(
         }
 
         LogCommons.LogDatabaseRadicalIntegrityVerificationDebug(_logger);
-        FieldErrorsContainer? postDatabaseRadicalIntegrityErrorsContainer = null;
+        DbSet<Chachar>? knownChachars;
 
         try
         {
-            postDatabaseRadicalIntegrityErrorsContainer = GetPostDatabaseRadicalIntegrityErrorContainer(alternative);
+            knownChachars = _asciiPinyinContext.Chachars;
         }
-        catch (DbGetException dge)
+        catch (Exception e)
         {
-            LogCommons.LogError(_logger, dge.ToString());
+            LogCommons.LogError(_logger, e.ToString());
             return StatusCode(StatusCodes.Status500InternalServerError, null);
         }
+
+        var postDatabaseRadicalIntegrityErrorsContainer = GetPostDatabaseRadicalIntegrityErrorContainer(
+            alternative,
+            knownChachars
+        );
 
         if (postDatabaseRadicalIntegrityErrorsContainer is not null)
         {
@@ -104,23 +108,15 @@ public sealed class AlternativesController(
         return errorMessage is not null ? new FieldError(alternative.OriginalTone, errorMessage, ColumnNames.ORIGINAL_TONE) : null;
     }
 
-    private FieldErrorsContainer? GetPostDatabaseRadicalIntegrityErrorContainer(Alternative alternative)
+    private static FieldErrorsContainer? GetPostDatabaseRadicalIntegrityErrorContainer(
+        Alternative alternative,
+        DbSet<Chachar> knownChachars
+    )
     {
-        DbSet<Chachar>? knownChachars = null;
-
-        try
-        {
-            knownChachars = _asciiPinyinContext.Chachars;
-        }
-        catch (Exception e)
-        {
-            throw new DbGetException(e);
-        }
-
-        var originalChachar = knownChachars!.FirstOrDefault(knownChachar =>
-            knownChachar.TheCharacter == alternative.OriginalCharacter
-            && knownChachar.Pinyin == alternative.OriginalPinyin
-            && knownChachar.Tone == alternative.OriginalTone
+        var originalChachar = knownChachars!.Find(
+            alternative.OriginalCharacter,
+            alternative.OriginalPinyin,
+            alternative.OriginalTone
         );
 
         return originalChachar is null

@@ -32,6 +32,7 @@ internal static class EntityControllerTestCommons
     {
         var dataQueryable = data.AsQueryable();
         var dbSetMock = new Mock<DbSet<T>>();
+        _ = dbSetMock.Setup(m => m.Find(It.IsAny<object[]>())).Returns(data.FirstOrDefault);
         _ = dbSetMock.As<IQueryable<T>>().Setup(m => m.Provider).Returns(dataQueryable.Provider);
         _ = dbSetMock.As<IQueryable<T>>().Setup(m => m.Expression).Returns(dataQueryable.Expression);
         _ = dbSetMock.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(dataQueryable.ElementType);
