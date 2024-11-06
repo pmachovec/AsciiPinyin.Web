@@ -1,4 +1,5 @@
 using AsciiPinyin.Web.Shared.Models;
+using AsciiPinyin.Web.Shared.Test.Constants;
 using NUnit.Framework;
 using System.Text.RegularExpressions;
 
@@ -45,15 +46,15 @@ internal sealed partial class ChacharTest
 
     [GeneratedRegex(
         @"^\{"
-            + @"(?=.*""the_character"":""雨"")"
-            + @"(?=.*""pinyin"":""yu"")"
-            + @"(?=.*""ipa"":""y:"")"
-            + @"(?=.*""tone"":3)"
-            + @"(?=.*""strokes"":8)"
-            + @"(?=.*""radical_character"":null)"
-            + @"(?=.*""radical_pinyin"":null)"
-            + @"(?=.*""radical_tone"":null)"
-            + @"(?=.*""radical_alternative_character"":null)"
+            + $@"(?=.*""{ColumnNames.THE_CHARACTER}"":""雨"")"
+            + $@"(?=.*""{ColumnNames.PINYIN}"":""yu"")"
+            + $@"(?=.*""{ColumnNames.IPA}"":""y:"")"
+            + $@"(?=.*""{ColumnNames.TONE}"":3)"
+            + $@"(?=.*""{ColumnNames.STROKES}"":8)"
+            + $@"(?=.*""{ColumnNames.RADICAL_CHARACTER}"":null)"
+            + $@"(?=.*""{ColumnNames.RADICAL_PINYIN}"":null)"
+            + $@"(?=.*""{ColumnNames.RADICAL_TONE}"":null)"
+            + $@"(?=.*""{ColumnNames.RADICAL_ALTERNATIVE_CHARACTER}"":null)"
             + @".*\}$",
         RegexOptions.Compiled
     )]
@@ -61,15 +62,15 @@ internal sealed partial class ChacharTest
 
     [GeneratedRegex(
         @"^\{"
-            + @"(?=.*""the_character"":""零"")"
-            + @"(?=.*""pinyin"":""ling"")"
-            + @"(?=.*""ipa"":""liŋ"")"
-            + @"(?=.*""tone"":2)"
-            + @"(?=.*""strokes"":13)"
-            + @"(?=.*""radical_character"":""雨"")"
-            + @"(?=.*""radical_pinyin"":""yu"")"
-            + @"(?=.*""radical_tone"":3)"
-            + @"(?=.*""radical_alternative_character"":""⻗"")"
+            + $@"(?=.*""{ColumnNames.THE_CHARACTER}"":""零"")"
+            + $@"(?=.*""{ColumnNames.PINYIN}"":""ling"")"
+            + $@"(?=.*""{ColumnNames.IPA}"":""liŋ"")"
+            + $@"(?=.*""{ColumnNames.TONE}"":2)"
+            + $@"(?=.*""{ColumnNames.STROKES}"":13)"
+            + $@"(?=.*""{ColumnNames.RADICAL_CHARACTER}"":""雨"")"
+            + $@"(?=.*""{ColumnNames.RADICAL_PINYIN}"":""yu"")"
+            + $@"(?=.*""{ColumnNames.RADICAL_TONE}"":3)"
+            + $@"(?=.*""{ColumnNames.RADICAL_ALTERNATIVE_CHARACTER}"":""⻗"")"
             + @".*\}$",
         RegexOptions.Compiled
     )]
@@ -77,15 +78,15 @@ internal sealed partial class ChacharTest
 
     [GeneratedRegex(
         @"^\{"
-            + @"(?=.*""the_character"":""四"")"
-            + @"(?=.*""pinyin"":""si"")"
-            + @"(?=.*""ipa"":""sɹ̩"")"
-            + @"(?=.*""tone"":4)"
-            + @"(?=.*""strokes"":5)"
-            + @"(?=.*""radical_character"":""儿"")"
-            + @"(?=.*""radical_pinyin"":""er"")"
-            + @"(?=.*""radical_tone"":2)"
-            + @"(?=.*""radical_alternative_character"":null)"
+            + $@"(?=.*""{ColumnNames.THE_CHARACTER}"":""四"")"
+            + $@"(?=.*""{ColumnNames.PINYIN}"":""si"")"
+            + $@"(?=.*""{ColumnNames.IPA}"":""sɹ̩"")"
+            + $@"(?=.*""{ColumnNames.TONE}"":4)"
+            + $@"(?=.*""{ColumnNames.STROKES}"":5)"
+            + $@"(?=.*""{ColumnNames.RADICAL_CHARACTER}"":""儿"")"
+            + $@"(?=.*""{ColumnNames.RADICAL_PINYIN}"":""er"")"
+            + $@"(?=.*""{ColumnNames.RADICAL_TONE}"":2)"
+            + $@"(?=.*""{ColumnNames.RADICAL_ALTERNATIVE_CHARACTER}"":null)"
             + @".*\}$",
         RegexOptions.Compiled
     )]
@@ -93,15 +94,15 @@ internal sealed partial class ChacharTest
 
     [GeneratedRegex(
         @"^\{"
-            + @"(?=.*""the_character"":null)"
-            + @"(?=.*""pinyin"":null)"
-            + @"(?=.*""ipa"":null)"
-            + @"(?=.*""tone"":null)"
-            + @"(?=.*""strokes"":null)"
-            + @"(?=.*""radical_character"":null)"
-            + @"(?=.*""radical_pinyin"":null)"
-            + @"(?=.*""radical_tone"":null)"
-            + @"(?=.*""radical_alternative_character"":null)"
+            + $@"(?=.*""{ColumnNames.THE_CHARACTER}"":null)"
+            + $@"(?=.*""{ColumnNames.PINYIN}"":null)"
+            + $@"(?=.*""{ColumnNames.IPA}"":null)"
+            + $@"(?=.*""{ColumnNames.TONE}"":null)"
+            + $@"(?=.*""{ColumnNames.STROKES}"":null)"
+            + $@"(?=.*""{ColumnNames.RADICAL_CHARACTER}"":null)"
+            + $@"(?=.*""{ColumnNames.RADICAL_PINYIN}"":null)"
+            + $@"(?=.*""{ColumnNames.RADICAL_TONE}"":null)"
+            + $@"(?=.*""{ColumnNames.RADICAL_ALTERNATIVE_CHARACTER}"":null)"
             + @".*\}$",
         RegexOptions.Compiled
     )]

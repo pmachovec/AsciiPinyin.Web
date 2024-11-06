@@ -1,4 +1,5 @@
 using AsciiPinyin.Web.Shared.Models;
+using AsciiPinyin.Web.Shared.Test.Constants;
 using NUnit.Framework;
 using System.Text.RegularExpressions;
 
@@ -20,11 +21,11 @@ internal sealed partial class AlternativeTest
 
     [GeneratedRegex(
         @"^\{"
-            + @"(?=.*""the_character"":""⻗"")"
-            + @"(?=.*""original_character"":""雨"")"
-            + @"(?=.*""original_pinyin"":""yu"")"
-            + @"(?=.*""original_tone"":3)"
-            + @"(?=.*""strokes"":8)"
+            + $@"(?=.*""{ColumnNames.THE_CHARACTER}"":""⻗"")"
+            + $@"(?=.*""{ColumnNames.ORIGINAL_CHARACTER}"":""雨"")"
+            + $@"(?=.*""{ColumnNames.ORIGINAL_PINYIN}"":""yu"")"
+            + $@"(?=.*""{ColumnNames.ORIGINAL_TONE}"":3)"
+            + $@"(?=.*""{ColumnNames.STROKES}"":8)"
             + @".*\}$",
         RegexOptions.Compiled
     )]
@@ -32,11 +33,11 @@ internal sealed partial class AlternativeTest
 
     [GeneratedRegex(
         @"^\{"
-            + @"(?=.*""the_character"":null)"
-            + @"(?=.*""original_character"":null)"
-            + @"(?=.*""original_pinyin"":null)"
-            + @"(?=.*""original_tone"":null)"
-            + @"(?=.*""strokes"":null)"
+            + $@"(?=.*""{ColumnNames.THE_CHARACTER}"":null)"
+            + $@"(?=.*""{ColumnNames.ORIGINAL_CHARACTER}"":null)"
+            + $@"(?=.*""{ColumnNames.ORIGINAL_PINYIN}"":null)"
+            + $@"(?=.*""{ColumnNames.ORIGINAL_TONE}"":null)"
+            + $@"(?=.*""{ColumnNames.STROKES}"":null)"
             + @".*\}$",
         RegexOptions.Compiled
     )]
