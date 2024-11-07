@@ -28,7 +28,7 @@ public sealed class AlternativesController(
 
         try
         {
-            return StatusCode(StatusCodes.Status200OK, _asciiPinyinContext.Alternatives);
+            return Ok(_asciiPinyinContext.Alternatives);
         }
         catch (Exception ex)
         {
@@ -38,7 +38,7 @@ public sealed class AlternativesController(
     }
 
     [HttpPost]
-    public ObjectResult Post(Alternative alternative)
+    public ActionResult<FieldErrorsContainer> Post(Alternative alternative)
     {
         if (!Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
         {
@@ -75,7 +75,7 @@ public sealed class AlternativesController(
         catch (Exception e)
         {
             LogCommons.LogError(_logger, e.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError, null);
+            return StatusCode(StatusCodes.Status500InternalServerError);
         }
 
         var postDatabaseIntegrityErrorsContainer = GetPostDatabaseIntegrityErrorContainer(
@@ -97,7 +97,7 @@ public sealed class AlternativesController(
             dbContextTransaction.Commit();
         }
 
-        return Ok(null);
+        return Ok();
     }
 
     private static FieldError? GetOriginalCharacterError(Alternative alternative)

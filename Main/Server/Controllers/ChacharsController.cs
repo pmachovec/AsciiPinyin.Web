@@ -30,7 +30,7 @@ public sealed class ChacharsController(
 
         try
         {
-            return StatusCode(StatusCodes.Status200OK, _asciiPinyinContext.Chachars);
+            return Ok(_asciiPinyinContext.Chachars);
         }
         catch (Exception ex)
         {
@@ -40,7 +40,7 @@ public sealed class ChacharsController(
     }
 
     [HttpPost]
-    public ObjectResult Post(Chachar chachar)
+    public ActionResult<FieldErrorsContainer> Post(Chachar chachar)
     {
         if (!Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
         {
@@ -81,7 +81,7 @@ public sealed class ChacharsController(
         catch (Exception e)
         {
             LogCommons.LogError(_logger, e.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError, null);
+            return StatusCode(StatusCodes.Status500InternalServerError);
         }
 
         var postDatabaseIntegrityErrorsContainer = GetPostDatabaseIntegrityErrorContainer(
@@ -103,7 +103,7 @@ public sealed class ChacharsController(
             dbContextTransaction.Commit();
         }
 
-        return Ok(null);
+        return Ok();
     }
 
     private static FieldError? GetPinyinError(Chachar chachar)

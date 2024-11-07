@@ -44,6 +44,7 @@ internal sealed class AlternativesControllerTest
     public void SetUp()
     {
         _httpContext = new DefaultHttpContext();
+        _httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
 
         _alternativesController = new(_asciiPinyinContextMock.Object, _loggerMock.Object)
         {
@@ -60,12 +61,10 @@ internal sealed class AlternativesControllerTest
     [Test]
     public void PostNoUserAgentHeaderTest()
     {
-        var alternative = new Alternative();
+        _httpContext.Request.Headers.Clear();
 
-        var result = _alternativesController.Post(alternative);
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result.StatusCode, Is.EqualTo(400));
-        Assert.That(result.Value, Is.EqualTo(Errors.USER_AGENT_MISSING));
+        var result = _alternativesController.Post(new Alternative());
+        EntityControllerTestCommons.NoUserAgentHeaderTest(result);
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostTheCharacterWrongTest)} - null")]
@@ -165,15 +164,13 @@ internal sealed class AlternativesControllerTest
     [TestCase("ɼ", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostTheCharacterWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
     public void PostTheCharacterWrongTest(string? theCharacter, string expectedErrorMessage)
     {
-        _httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
-
         var alternative = new Alternative()
         {
             TheCharacter = theCharacter
         };
 
         var result = _alternativesController.Post(alternative);
-        EntityControllerTestCommons.PostFieldWrongTest(result, theCharacter, expectedErrorMessage, ColumnNames.THE_CHARACTER);
+        EntityControllerTestCommons.PostFieldWrongTest(result, expectedErrorMessage, theCharacter, ColumnNames.THE_CHARACTER);
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalCharacterWrongTest)} - null")]
@@ -273,15 +270,13 @@ internal sealed class AlternativesControllerTest
     [TestCase("ɼ", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalCharacterWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
     public void PostOriginalCharacterWrongTest(string? originalCharacter, string expectedErrorMessage)
     {
-        _httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
-
         var alternative = new Alternative()
         {
             OriginalCharacter = originalCharacter
         };
 
         var result = _alternativesController.Post(alternative);
-        EntityControllerTestCommons.PostFieldWrongTest(result, originalCharacter, expectedErrorMessage, ColumnNames.ORIGINAL_CHARACTER);
+        EntityControllerTestCommons.PostFieldWrongTest(result, expectedErrorMessage, originalCharacter, ColumnNames.ORIGINAL_CHARACTER);
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalPinyinWrongTest)} - null")]
@@ -388,15 +383,13 @@ internal sealed class AlternativesControllerTest
     [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", Errors.NO_ASCII, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalPinyinWrongTest)} - crazy combination of 40 characters, symbols and whitespaces")]
     public void PostOriginalPinyinWrongTest(string? originalPinyin, string expectedErrorMessage)
     {
-        _httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
-
         var alternative = new Alternative()
         {
             OriginalPinyin = originalPinyin
         };
 
         var result = _alternativesController.Post(alternative);
-        EntityControllerTestCommons.PostFieldWrongTest(result, originalPinyin, expectedErrorMessage, ColumnNames.ORIGINAL_PINYIN);
+        EntityControllerTestCommons.PostFieldWrongTest(result, expectedErrorMessage, originalPinyin, ColumnNames.ORIGINAL_PINYIN);
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalToneWrongTest)} - null")]
@@ -406,15 +399,13 @@ internal sealed class AlternativesControllerTest
     public void PostOriginalToneWrongTest(byte? originalTone, string expectedErrorMessage)
     {
         // Unsigned byte numbers are only reachable inputs.
-        _httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
-
         var alternative = new Alternative()
         {
             OriginalTone = originalTone
         };
 
         var result = _alternativesController.Post(alternative);
-        EntityControllerTestCommons.PostFieldWrongTest(result, originalTone, expectedErrorMessage, ColumnNames.ORIGINAL_TONE);
+        EntityControllerTestCommons.PostFieldWrongTest(result, expectedErrorMessage, originalTone, ColumnNames.ORIGINAL_TONE);
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostStrokesWrongTest)} - null")]
@@ -424,26 +415,33 @@ internal sealed class AlternativesControllerTest
     public void PostStrokesWrongTest(byte? strokes, string expectedErrorMessage)
     {
         // Unsigned byte numbers are only reachable inputs.
-        _httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
-
         var alternative = new Alternative()
         {
             Strokes = strokes
         };
 
         var result = _alternativesController.Post(alternative);
-        EntityControllerTestCommons.PostFieldWrongTest(result, strokes, expectedErrorMessage, "strokes");
+        EntityControllerTestCommons.PostFieldWrongTest(result, expectedErrorMessage, strokes, "strokes");
     }
 
     [Test]
     public void PostGetAllChacharsErrorTest()
     {
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
-        _httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
 
         var result = _alternativesController.Post(_alternative);
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result!.StatusCode, Is.EqualTo(500));
+        EntityControllerTestCommons.InternalServerErrorTest(result);
+    }
+
+    [Test]
+    public void PostGetAllAlternativesErrorTest()
+    {
+        var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock(_radicalChachar);
+        _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
+        _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Throws(new InvalidOperationException());
+
+        var result = _alternativesController.Post(_alternative);
+        EntityControllerTestCommons.InternalServerErrorTest(result);
     }
 
     [Test]
@@ -451,12 +449,15 @@ internal sealed class AlternativesControllerTest
     {
         var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock<Chachar>();
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
-        _httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
 
         var result = _alternativesController.Post(_alternative);
-        EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.OriginalCharacter, Errors.UNKNOWN_CHACHAR, ColumnNames.ORIGINAL_CHARACTER);
-        EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.OriginalPinyin, Errors.UNKNOWN_CHACHAR, ColumnNames.ORIGINAL_PINYIN);
-        EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.OriginalTone, Errors.UNKNOWN_CHACHAR, ColumnNames.ORIGINAL_TONE);
+        EntityControllerTestCommons.PostFieldsWrongTest(
+            result,
+            Errors.UNKNOWN_CHACHAR,
+            (_alternative.OriginalCharacter, ColumnNames.ORIGINAL_CHARACTER),
+            (_alternative.OriginalPinyin, ColumnNames.ORIGINAL_PINYIN),
+            (_alternative.OriginalTone, ColumnNames.ORIGINAL_TONE)
+        );
     }
 
     [Test]
@@ -474,12 +475,15 @@ internal sealed class AlternativesControllerTest
 
         var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock(malformedRadicalChachar);
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
-        _httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
 
         var result = _alternativesController.Post(_alternative);
-        EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.OriginalCharacter, Errors.NO_RADICAL, ColumnNames.ORIGINAL_CHARACTER);
-        EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.OriginalPinyin, Errors.NO_RADICAL, ColumnNames.ORIGINAL_PINYIN);
-        EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.OriginalTone, Errors.NO_RADICAL, ColumnNames.ORIGINAL_TONE);
+        EntityControllerTestCommons.PostFieldsWrongTest(
+            result,
+            Errors.NO_RADICAL,
+            (_alternative.OriginalCharacter, ColumnNames.ORIGINAL_CHARACTER),
+            (_alternative.OriginalPinyin, ColumnNames.ORIGINAL_PINYIN),
+            (_alternative.OriginalTone, ColumnNames.ORIGINAL_TONE)
+        );
     }
 
     [Test]
@@ -489,12 +493,15 @@ internal sealed class AlternativesControllerTest
         var alternativesDbSetMock = EntityControllerTestCommons.GetDbSetMock(_alternative);
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
         _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
-        _httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
 
         var result = _alternativesController.Post(_alternative);
-        EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.TheCharacter, Errors.ALTERNATIVE_ALREADY_EXISTS, ColumnNames.THE_CHARACTER);
-        EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.OriginalCharacter, Errors.ALTERNATIVE_ALREADY_EXISTS, ColumnNames.ORIGINAL_CHARACTER);
-        EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.OriginalPinyin, Errors.ALTERNATIVE_ALREADY_EXISTS, ColumnNames.ORIGINAL_PINYIN);
-        EntityControllerTestCommons.PostFieldWrongTest(result, _alternative.OriginalTone, Errors.ALTERNATIVE_ALREADY_EXISTS, ColumnNames.ORIGINAL_TONE);
+        EntityControllerTestCommons.PostFieldsWrongTest(
+            result,
+            Errors.ALTERNATIVE_ALREADY_EXISTS,
+            (_alternative.TheCharacter, ColumnNames.THE_CHARACTER),
+            (_alternative.OriginalCharacter, ColumnNames.ORIGINAL_CHARACTER),
+            (_alternative.OriginalPinyin, ColumnNames.ORIGINAL_PINYIN),
+            (_alternative.OriginalTone, ColumnNames.ORIGINAL_TONE)
+        );
     }
 }

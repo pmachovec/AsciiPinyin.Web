@@ -1,3 +1,4 @@
+using AsciiPinyin.Web.Server.Test.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,24 +9,56 @@ namespace Asciipinyin.Web.Server.Test.Commons;
 
 internal static class EntityControllerTestCommons
 {
+    public static void NoUserAgentHeaderTest(ActionResult<FieldErrorsContainer>? result)
+    {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Result, Is.Not.Null);
+        Assert.That(result.Result, Is.InstanceOf<BadRequestObjectResult>());
+        Assert.That((result.Result as BadRequestObjectResult)!.Value, Is.EqualTo(Errors.USER_AGENT_MISSING));
+    }
+
+    public static void InternalServerErrorTest(ActionResult<FieldErrorsContainer>? result)
+    {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Result, Is.Not.Null);
+        Assert.That(result.Result!, Is.InstanceOf<StatusCodeResult>());
+
+        var statusCodeResult = result.Result as StatusCodeResult;
+        Assert.That(statusCodeResult!.StatusCode, Is.EqualTo(500));
+    }
+
     public static void PostFieldWrongTest(
-        ObjectResult? result,
-        object? value,
+        ActionResult<FieldErrorsContainer>? result,
         string expectedErrorMessage,
+        object? value,
         string fieldJsonPropertyName
+    ) => PostFieldsWrongTest(result, expectedErrorMessage, (value, fieldJsonPropertyName));
+
+    public static void PostFieldsWrongTest(
+        ActionResult<FieldErrorsContainer>? result,
+        string expectedErrorMessage,
+        params (object? value, string fieldJsonPropertyName)[] fieldData
     )
     {
         Assert.That(result, Is.Not.Null);
-        Assert.That(result!.StatusCode, Is.EqualTo(400));
-        Assert.That(result!.Value, Is.InstanceOf<FieldErrorsContainer>());
+        Assert.That(result!.Result, Is.Not.Null);
+        Assert.That(result.Result!, Is.InstanceOf<BadRequestObjectResult>());
 
-        var fieldErrorsContainer = result.Value! as FieldErrorsContainer;
-        var error = fieldErrorsContainer!.Errors[fieldJsonPropertyName];
+        var badRequestObjectResult = result.Result as BadRequestObjectResult;
+        Assert.That(badRequestObjectResult!.Value, Is.Not.Null);
+        Assert.That(badRequestObjectResult.Value, Is.InstanceOf<FieldErrorsContainer>());
 
-        Assert.That(error, Is.Not.Null);
-        Assert.That(error!.ErrorValue, Is.EqualTo(value));
-        Assert.That(error!.ErrorMessage, Is.EqualTo(expectedErrorMessage));
-        Assert.That(error!.FieldJsonPropertyName, Is.EqualTo(fieldJsonPropertyName));
+        var fieldErrorsContainer = badRequestObjectResult.Value as FieldErrorsContainer;
+
+        foreach ((var value, var fieldJsonPropertyName) in fieldData)
+        {
+            var error = fieldErrorsContainer!.Errors[fieldJsonPropertyName];
+
+            Assert.That(error, Is.Not.Null);
+            Assert.That(error!.ErrorValue, Is.EqualTo(value));
+            Assert.That(error!.ErrorMessage, Is.EqualTo(expectedErrorMessage));
+            Assert.That(error!.FieldJsonPropertyName, Is.EqualTo(fieldJsonPropertyName));
+        }
     }
 
     public static Mock<DbSet<T>> GetDbSetMock<T>(params T[] data) where T : class
