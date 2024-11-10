@@ -1,7 +1,10 @@
+using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Server.Test.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
 using NUnit.Framework;
 
@@ -61,6 +64,13 @@ internal static class EntityControllerTestCommons
         }
     }
 
+    public static void PostOkTest(ActionResult<FieldErrorsContainer>? result)
+    {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Result, Is.Not.Null);
+        Assert.That(result.Result!, Is.InstanceOf<OkResult>());
+    }
+
     public static Mock<DbSet<T>> GetDbSetMock<T>(params T[] data) where T : class
     {
         var dataQueryable = data.AsQueryable();
@@ -72,5 +82,13 @@ internal static class EntityControllerTestCommons
         _ = dbSetMock.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(dataQueryable.GetEnumerator);
 
         return dbSetMock;
+    }
+
+    public static void MockDatabaseFacadeTransaction(Mock<AsciiPinyinContext> asciiPinyinContextMock)
+    {
+        var databaseFacadeMock = new Mock<DatabaseFacade>(asciiPinyinContextMock.Object);
+        var dbContextTransactionMock = new Mock<IDbContextTransaction>();
+        _ = databaseFacadeMock.Setup(m => m.BeginTransaction()).Returns(dbContextTransactionMock.Object);
+        _ = asciiPinyinContextMock.Setup(context => context.Database).Returns(databaseFacadeMock.Object);
     }
 }

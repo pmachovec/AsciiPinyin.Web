@@ -504,4 +504,17 @@ internal sealed class AlternativesControllerTest
             (_alternative.OriginalTone, ColumnNames.ORIGINAL_TONE)
         );
     }
+
+    [Test]
+    public void PostAlternativeOkTest()
+    {
+        EntityControllerTestCommons.MockDatabaseFacadeTransaction(_asciiPinyinContextMock);
+        var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock(_radicalChachar);
+        var alternativesDbSetMock = EntityControllerTestCommons.GetDbSetMock<Alternative>();
+        _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
+        _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
+
+        var result = _alternativesController.Post(_alternative);
+        EntityControllerTestCommons.PostOkTest(result);
+    }
 }

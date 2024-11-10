@@ -38,6 +38,15 @@ internal sealed partial class ChacharsControllerTest
         RadicalAlternativeCharacter = "⻗"
     };
 
+    private static readonly Alternative _alternative = new()
+    {
+        TheCharacter = "⻗",
+        OriginalCharacter = "雨",
+        OriginalPinyin = "yu",
+        OriginalTone = 3,
+        Strokes = 8
+    };
+
     private static readonly Mock<AsciiPinyinContext> _asciiPinyinContextMock = new();
     private static readonly Mock<ILogger<ChacharsController>> _loggerMock = new();
 
@@ -887,5 +896,31 @@ internal sealed partial class ChacharsControllerTest
             (_radicalChachar.Pinyin, ColumnNames.PINYIN),
             (_radicalChachar.Tone, ColumnNames.TONE)
         );
+    }
+
+    [Test]
+    public void PostRadicalChacharOkTest()
+    {
+        EntityControllerTestCommons.MockDatabaseFacadeTransaction(_asciiPinyinContextMock);
+        var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock<Chachar>();
+        var alternativesDbSetMock = EntityControllerTestCommons.GetDbSetMock<Alternative>();
+        _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
+        _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
+
+        var result = _chacharsController.Post(_radicalChachar);
+        EntityControllerTestCommons.PostOkTest(result);
+    }
+
+    [Test]
+    public void PostNonRadicalChacharOkTest()
+    {
+        EntityControllerTestCommons.MockDatabaseFacadeTransaction(_asciiPinyinContextMock);
+        var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock(_radicalChachar);
+        var alternativesDbSetMock = EntityControllerTestCommons.GetDbSetMock(_alternative);
+        _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
+        _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
+
+        var result = _chacharsController.Post(_nonRadicalChacharWithAlternative);
+        EntityControllerTestCommons.PostOkTest(result);
     }
 }
