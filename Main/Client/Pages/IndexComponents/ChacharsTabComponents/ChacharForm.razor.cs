@@ -10,7 +10,7 @@ using AsciiPinyin.Web.Shared.Resources;
 using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
-using System.Net;
+using System.Globalization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
@@ -19,10 +19,6 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
     protected EntitySelector<Alternative> AlternativeSelector { get; set; } = default!;
 
     protected EntitySelector<Chachar> RadicalSelector { get; set; } = default!;
-
-    protected SaveFailed SaveFailed { get; set; } = default!;
-
-    protected SaveSuccess SaveSuccess { get; set; } = default!;
 
     protected IEnumerable<Alternative> AvailableAlternatives = [];
 
@@ -46,11 +42,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
     public string RootId { get; } = IDs.CHACHAR_FORM_ROOT;
 
-    public string BackdropId { get; } = IDs.INDEX_BACKDROP;
-
-    public string HtmlTitleOnClose { get; set; } = default!;
-
-    public IModal? LowerLevelModal { get; set; }
+    public string HtmlTitle { get; private set; } = string.Empty;
 
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
@@ -69,6 +61,9 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
     [Parameter]
     public required IIndex Index { get; set; } = default!;
+
+    protected override void OnInitialized() =>
+        HtmlTitle = Localizer[Resource.CreateNewCharacter];
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -97,11 +92,10 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         }
     }
 
-    public async Task OpenAsync(string htmlTitleOnClose, CancellationToken cancellationToken) =>
+    public async Task OpenAsync(CancellationToken cancellationToken) =>
         await ModalCommons.OpenAsyncCommon(
             this,
-            Localizer[Resource.CreateNewCharacter],
-            htmlTitleOnClose,
+            HtmlTitle,
             cancellationToken
         );
 
@@ -112,7 +106,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
     {
         await Task.WhenAll(
             JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
-            RadicalSelector.OpenAsync(this, Localizer[Resource.CreateNewCharacter], cancellationToken)
+            RadicalSelector.OpenAsync(this, cancellationToken)
         );
     }
 
@@ -120,7 +114,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
     {
         await Task.WhenAll(
             JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
-            AlternativeSelector.OpenAsync(this, Localizer[Resource.CreateNewCharacter], cancellationToken)
+            AlternativeSelector.OpenAsync(this, cancellationToken)
         );
     }
 
@@ -220,15 +214,35 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
                 TheCharacter = TheCharacter
             };
 
-            var statusCode = await EntityClient.PostEntityAsync(ApiNames.CHARACTERS, chachar, cancellationToken);
-
-            if (statusCode == HttpStatusCode.OK)
+            if (Index.Chachars.Contains(chachar))
             {
-                await Index.SaveSuccess.OpenAsync(this, Localizer[Resource.CreateNewCharacter], cancellationToken);
+                await Index.FormSubmit.SetErrorAsync(
+                    this,
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        Localizer[Resource.CharacterAlreadyInDb],
+                        chachar.TheCharacter,
+                        chachar.RealPinyin
+                    ),
+                    cancellationToken
+                );
             }
             else
             {
-                await Index.SaveFailed.OpenAsync(this, Localizer[Resource.CreateNewCharacter], cancellationToken);
+                var postTask = EntityClient.PostEntityAsync(ApiNames.CHARACTERS, chachar, cancellationToken);
+
+                await Index.FormSubmit.SetProcessingAsync(
+                    this,
+                    postTask,
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        Localizer[Resource.CharacterCreated],
+                        chachar.TheCharacter,
+                        chachar.RealPinyin
+                    ),
+                    Localizer[Resource.ProcessingError],
+                    cancellationToken
+                );
             }
         }
     }

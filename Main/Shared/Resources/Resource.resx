@@ -201,4 +201,35 @@
   <data name="Tone" xml:space="preserve">
     <value>Tone</value>
   </data>
+  <data name="Processing" xml:space="preserve">
+    <value>Processing</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Back
+</value>
+  </data>
+  <data name="CharacterAlreadyInDb" xml:space="preserve">
+    <value>The character "{0} - {1}" already exists in the database.</value>
+  </data>
+  <data name="CharacterCreated" xml:space="preserve">
+    <value>The character "{0} - {1}" was successfully created.</value>
+  </data>
+  <data name="ProcessingError" xml:space="preserve">
+    <value>An error occured during processing. Contact force majeure.</value>
+  </data>
+  <data name="AlternativeAlreadyInDb" xml:space="preserve">
+    <value>The alternative "{0}" for the character "{1} - {2}" already exists in the database.</value>
+  </data>
+  <data name="AlternativeCreated" xml:space="preserve">
+    <value>The alternative '{0}' for the character "{1} - {2}" was successfully created.</value>
+  </data>
 </root>

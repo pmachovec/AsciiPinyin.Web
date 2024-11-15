@@ -21,6 +21,7 @@ namespace Asciipinyin.Web.Client.Test.Pages.IndexComponents.AlternativesTabCompo
 internal sealed class AlternativeFormTest : IDisposable
 {
     private const string COMPULSORY_VALUE = nameof(COMPULSORY_VALUE);
+    private const string CREATE_NEW_ALTERNATIVE = nameof(CREATE_NEW_ALTERNATIVE);
     private const string MUST_BE_CHINESE_CHARACTER = nameof(MUST_BE_CHINESE_CHARACTER);
 
     private readonly IEnumerable<string> _inputIds =
@@ -71,6 +72,10 @@ internal sealed class AlternativeFormTest : IDisposable
         _ = _indexMock
             .Setup(index => index.Chachars)
             .Returns(_radicalChachars.Concat(_nonRadicalChachars)
+        );
+        _ = _localizerMock
+            .Setup(localizer => localizer[Resource.CreateNewAlternative])
+            .Returns(new LocalizedString(CREATE_NEW_ALTERNATIVE, CREATE_NEW_ALTERNATIVE)
         );
         _ = _localizerMock
             .Setup(localizer => localizer[Resource.CompulsoryValue])
@@ -367,6 +372,7 @@ internal sealed class AlternativeFormTest : IDisposable
     {
         _entityFormTestCommons.MockOtherInputsBorderDanger(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.BORDER_DANGER);
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_ALTERNATIVE);
 
         // Open original selector
         var openOriginalSelectorButton = _alternativeFormComponent.Find($"#{IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT}");

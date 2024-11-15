@@ -133,6 +133,10 @@ a, .btn-link {
     top: 0.5rem;
 }
 
+#form-submit-modal-content {
+    height: 200px
+}
+
 #index {
     max-width: var(--index-max-width);
 }

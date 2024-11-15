@@ -19,7 +19,9 @@
             SelectTabAsync="SelectTabAsync" />
 
         <div id="@IDs.INDEX_ENTITIES_TABS_LOADING">
-            <Loading />
+            <Loading
+                Id="@IDs.INDEX_LOADING"
+                TextResource="@Resource.Loading" />
         </div>
 
         <AlternativesTab @ref="AlternativesTab" Index="this" />
@@ -27,5 +29,6 @@
     </main>
 </div>
 
-<SaveSuccess @ref="SaveSuccess" />
-<SaveFailed @ref="SaveFailed" />
+@* <SaveSuccess @ref="SaveSuccess" />
+<SaveFailed @ref="SaveFailed" /> *@
+<FormSubmit @ref="FormSubmit" />

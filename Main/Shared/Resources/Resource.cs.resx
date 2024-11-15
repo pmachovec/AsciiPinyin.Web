@@ -201,4 +201,34 @@
   <data name="Tone" xml:space="preserve">
     <value>Tón</value>
   </data>
+  <data name="Processing" xml:space="preserve">
+    <value>Zpracovávání</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Úspěch</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Chyba</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Zpět</value>
+  </data>
+  <data name="CharacterAlreadyInDb" xml:space="preserve">
+    <value>Znak "{0} - {1}" již v databázi existuje.</value>
+  </data>
+  <data name="CharacterCreated" xml:space="preserve">
+    <value>Znak "{0} - {1}" byl úspěšně vytvořen.</value>
+  </data>
+  <data name="ProcessingError" xml:space="preserve">
+    <value>Při zpracování došlo k chybě. Kontaktujte vyšší moc.</value>
+  </data>
+  <data name="AlternativeAlreadyInDb" xml:space="preserve">
+    <value>Alternativa "{0}" pro znak "{1} - {2}" již v databázi existuje.</value>
+  </data>
+  <data name="AlternativeCreated" xml:space="preserve">
+    <value>Alternativa "{0}" pro znak "{1} - {2}" byla úspěšně vytvořena.</value>
+  </data>
 </root>

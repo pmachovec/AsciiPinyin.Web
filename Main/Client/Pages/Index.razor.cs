@@ -13,15 +13,17 @@ namespace AsciiPinyin.Web.Client.Pages;
 
 public class IndexBase : ComponentBase, IIndex
 {
-    private IEntityTab? _selectedTab;
+    private static IEntityTab? _selectedTab;
 
     protected AlternativesTab AlternativesTab { get; set; } = default!;
 
     protected ChacharsTab ChacharsTab { get; set; } = default!;
 
-    public SaveSuccess SaveSuccess { get; set; } = default!;
+    public string BackdropId => IDs.INDEX_BACKDROP;
 
-    public SaveFailed SaveFailed { get; set; } = default!;
+    public FormSubmit FormSubmit { get; set; } = default!;
+
+    public IEntityTab SelectedTab => _selectedTab!;
 
     public IEnumerable<Alternative> Alternatives { get; private set; } = [];
 
@@ -83,9 +85,6 @@ public class IndexBase : ComponentBase, IIndex
         _selectedTab = tab;
         StateHasChanged();
     }
-
-    protected static string GetActiveIfVisible(IEntityTab? tab)
-        => tab != null && tab.IsVisible ? "active" : string.Empty;
 
     private void InjectJSInteropConsoleToTargets()
     {

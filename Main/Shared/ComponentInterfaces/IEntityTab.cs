@@ -4,6 +4,8 @@ public interface IEntityTab
 {
     string ButtonId { get; }
 
+    string HtmlTitle { get; }
+
     bool IsVisible { get; }
 
     Task HideAsync(CancellationToken cancellationToken);

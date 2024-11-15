@@ -14,32 +14,27 @@ public class AlternativeViewDialogBase : ComponentBase, IModalFirstLevel
 
     public string RootId { get; } = IDs.ALTERNATIVE_VIEW_DIALOG_ROOT;
 
-    public string BackdropId { get; } = IDs.INDEX_BACKDROP;
-
-    public string HtmlTitleOnClose { get; set; } = default!;
-
-    public IModal? LowerLevelModal { get; set; }
-
     [Inject]
     private IModalCommons ModalCommons { get; set; } = default!;
 
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
+    [Parameter]
+    public required IIndex Index { get; set; } = default!;
+
     public async Task OpenAsync(
-        Alternative entity,
-        string htmlTitleOnClose,
+        Alternative alternative,
         CancellationToken cancellationToken
     )
     {
         await ModalCommons.OpenAsyncCommon(
             this,
-            $"{StringConstants.ASCII_PINYIN} - {entity.TheCharacter}",
-            htmlTitleOnClose,
+            $"{StringConstants.ASCII_PINYIN} - {alternative.TheCharacter}",
             cancellationToken
         );
 
-        Alternative = entity;
+        Alternative = alternative;
         StateHasChanged();
     }
 

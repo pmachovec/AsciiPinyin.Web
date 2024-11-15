@@ -11,13 +11,13 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public class AlternativesTabBase : ComponentBase, IEntityTab
 {
-    private string _htmlTitle = $"{StringConstants.ASCII_PINYIN} - {StringConstants.ALTERNATIVES}";
-
     protected AlternativeForm AlternativeForm { get; set; } = default!;
 
     protected AlternativeViewDialog AlternativeViewDialog { get; set; } = default!;
 
     public string ButtonId { get; } = IDs.ALTERNATIVES_TAB_BUTTON;
+
+    public string HtmlTitle { get; private set; } = string.Empty;
 
     public bool IsVisible { get; private set; }
 
@@ -34,7 +34,7 @@ public class AlternativesTabBase : ComponentBase, IEntityTab
     public required IIndex Index { get; set; } = default!;
 
     protected override void OnInitialized() =>
-        _htmlTitle = $"{StringConstants.ASCII_PINYIN} - {Localizer[Resource.Alternatives]}";
+        HtmlTitle = $"{StringConstants.ASCII_PINYIN} - {Localizer[Resource.Alternatives]}";
 
     public async Task HideAsync(CancellationToken cancellationToken)
     {
@@ -44,14 +44,14 @@ public class AlternativesTabBase : ComponentBase, IEntityTab
 
     public async Task ShowAsync(CancellationToken cancellationToken)
     {
+        await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
         IsVisible = true;
-        await JSInteropDOM.SetTitleAsync(_htmlTitle, cancellationToken);
         await JSInteropDOM.ShowElementAsync(IDs.NAVBAR_ALTERNATIVES_TAB_ROOT, cancellationToken);
     }
 
     protected async Task ShowAlternativeFormAsync(CancellationToken cancellationToken) =>
-        await AlternativeForm.OpenAsync(_htmlTitle, cancellationToken);
+        await AlternativeForm.OpenAsync(cancellationToken);
 
     public async Task ShowAlternativeViewDialogAsync(Alternative alternative, CancellationToken cancellationToken) =>
-        await AlternativeViewDialog.OpenAsync(alternative, _htmlTitle, cancellationToken);
+        await AlternativeViewDialog.OpenAsync(alternative, cancellationToken);
 }

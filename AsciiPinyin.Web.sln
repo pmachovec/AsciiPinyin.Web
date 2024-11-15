@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsciiPinyin.Web.Shared.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Asciipinyin.Web.Client.Test", "Test\Client\Asciipinyin.Web.Client.Test.csproj", "{78443D4E-554A-48C4-A439-C7CF3C80AE35}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asciipinyin.Web.Server.Test", "Test\Server\Asciipinyin.Web.Server.Test.csproj", "{C046B031-ED04-42FD-A00D-F35CCCCD340A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Asciipinyin.Web.Server.Test", "Test\Server\Asciipinyin.Web.Server.Test.csproj", "{C046B031-ED04-42FD-A00D-F35CCCCD340A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

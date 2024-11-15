@@ -1,13 +1,16 @@
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
+using AsciiPinyin.Web.Shared.ComponentInterfaces;
 using AsciiPinyin.Web.Shared.Models;
 
 namespace AsciiPinyin.Web.Client.Pages;
 
 public interface IIndex
 {
-    SaveSuccess SaveSuccess { get; }
+    string BackdropId { get; }
 
-    SaveFailed SaveFailed { get; }
+    FormSubmit FormSubmit { get; }
+
+    IEntityTab SelectedTab { get; }
 
     IEnumerable<Alternative> Alternatives { get; }
 

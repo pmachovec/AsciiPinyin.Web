@@ -1,3 +1,4 @@
+using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Constants.JSInterop;
 using Microsoft.JSInterop;
 
@@ -42,4 +43,16 @@ public sealed class JSInteropDOM(IJSRuntime jsRuntime) : IJSInteropDOM
 
     public async Task SetZIndexAsync(string elementId, int value, CancellationToken cancellationToken) =>
         await _jsRuntime.InvokeVoidAsync(DOMFunctions.SET_Z_INDEX, cancellationToken, elementId, value);
+
+    public async Task Block2NoneAsync(string elementId, CancellationToken cancellationToken) =>
+        await Task.WhenAll(
+            RemoveClassAsync(elementId, CssClasses.D_BLOCK, cancellationToken),
+            AddClassAsync(elementId, CssClasses.D_NONE, cancellationToken)
+        );
+
+    public async Task None2BlockAsync(string elementId, CancellationToken cancellationToken) =>
+        await Task.WhenAll(
+            RemoveClassAsync(elementId, CssClasses.D_NONE, cancellationToken),
+            AddClassAsync(elementId, CssClasses.D_BLOCK, cancellationToken)
+        );
 }

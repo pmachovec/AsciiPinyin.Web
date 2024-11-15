@@ -61,6 +61,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The alternative &quot;{0}&quot; for the character &quot;{1} - {2}&quot; already exists in the database..
+        /// </summary>
+        public static string AlternativeAlreadyInDb {
+            get {
+                return ResourceManager.GetString("AlternativeAlreadyInDb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Alternative character.
         /// </summary>
         public static string AlternativeCharacter {
@@ -70,11 +79,30 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The alternative &apos;{0}&apos; for the character &quot;{1} - {2}&quot; was successfully created..
+        /// </summary>
+        public static string AlternativeCreated {
+            get {
+                return ResourceManager.GetString("AlternativeCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Alternatives.
         /// </summary>
         public static string Alternatives {
             get {
                 return ResourceManager.GetString("Alternatives", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Back
+        ///.
+        /// </summary>
+        public static string Back {
+            get {
+                return ResourceManager.GetString("Back", resourceCulture);
             }
         }
         
@@ -93,6 +121,24 @@ namespace AsciiPinyin.Web.Shared.Resources {
         public static string BaseCharacterPinyin {
             get {
                 return ResourceManager.GetString("BaseCharacterPinyin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The character &quot;{0} - {1}&quot; already exists in the database..
+        /// </summary>
+        public static string CharacterAlreadyInDb {
+            get {
+                return ResourceManager.GetString("CharacterAlreadyInDb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The character &quot;{0} - {1}&quot; was successfully created..
+        /// </summary>
+        public static string CharacterCreated {
+            get {
+                return ResourceManager.GetString("CharacterCreated", resourceCulture);
             }
         }
         
@@ -169,6 +215,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string Error {
+            get {
+                return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to IPA.
         /// </summary>
         public static string Ipa {
@@ -223,6 +278,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to OK.
+        /// </summary>
+        public static string OK {
+            get {
+                return ResourceManager.GetString("OK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Must contain only basic letters A-Z.
         /// </summary>
         public static string OnlyAsciiAllowed {
@@ -246,6 +310,24 @@ namespace AsciiPinyin.Web.Shared.Resources {
         public static string Pinyin {
             get {
                 return ResourceManager.GetString("Pinyin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Processing.
+        /// </summary>
+        public static string Processing {
+            get {
+                return ResourceManager.GetString("Processing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An error occured during processing. Contact force majeure..
+        /// </summary>
+        public static string ProcessingError {
+            get {
+                return ResourceManager.GetString("ProcessingError", resourceCulture);
             }
         }
         
@@ -300,6 +382,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         public static string SelectRadicalAlternative {
             get {
                 return ResourceManager.GetString("SelectRadicalAlternative", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Success.
+        /// </summary>
+        public static string Success {
+            get {
+                return ResourceManager.GetString("Success", resourceCulture);
             }
         }
         

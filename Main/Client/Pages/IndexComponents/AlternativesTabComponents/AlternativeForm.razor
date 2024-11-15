@@ -81,11 +81,10 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
+            <div class="border-0 modal-footer">
                 <button
                     type="button"
                     class="btn btn-modal btn-primary"
-                    aria-label="@Localizer[Resource.Save]"
                     id="@IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON"
                     @onclick="async _ => await CheckAndSubmitAsync(CancellationToken.None)">
                     <span>@Localizer[Resource.Save]</span>

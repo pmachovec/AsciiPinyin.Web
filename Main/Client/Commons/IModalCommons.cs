@@ -7,15 +7,17 @@ public interface IModalCommons
     Task OpenAsyncCommon(
         IModalFirstLevel modalFirstLevel,
         string htmlTitle,
-        string htmlTitleOnClose,
         CancellationToken cancellationToken
     );
 
     Task OpenAsyncCommon(
-        IModalSecondLevel modalSecondLevel,
-        IModalFirstLevel modalFirstLevel,
+        IEntityFormModal entityFormModal,
         string htmlTitle,
-        string htmlTitleOnClose,
+        CancellationToken cancellationToken
+    );
+
+    Task OpenAsyncCommon(
+        IEntityFormModal entityFormModal,
         CancellationToken cancellationToken
     );
 
@@ -25,7 +27,12 @@ public interface IModalCommons
     );
 
     Task CloseAsyncCommon(
-        IModalSecondLevel modalSecondLevel,
+        IEntityFormModal entityFormModal,
+        CancellationToken cancellationToken
+    );
+
+    Task CloseAllAsyncCommon(
+        IEntityFormModal entityFormModal,
         CancellationToken cancellationToken
     );
 }

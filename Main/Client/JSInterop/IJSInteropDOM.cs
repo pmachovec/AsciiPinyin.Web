@@ -104,4 +104,22 @@ public interface IJSInteropDOM
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
     /// <returns></returns>
     Task SetZIndexAsync(string elementId, int value, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Removes "d-block" css class from the given element, if the element has the class.
+    /// Adds "d-none" css class to the given element.
+    /// </summary>
+    /// <param name="elementId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task Block2NoneAsync(string elementId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Removes "d-none" css class from the given element, if the element has the class.
+    /// Adds "d-block" css class to the given element.
+    /// </summary>
+    /// <param name="elementId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task None2BlockAsync(string elementId, CancellationToken cancellationToken);
 }

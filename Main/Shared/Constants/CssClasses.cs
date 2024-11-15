@@ -3,6 +3,8 @@ namespace AsciiPinyin.Web.Shared.Constants;
 public static class CssClasses
 {
     public const string ACTIVE = "active";
+    public const string BG_DANGER = "bg-danger";
+    public const string BG_PRIMARY = "bg-primary";
     public const string BORDER_DANGER = "border-danger";
     public const string BTN_OUTLINE_PRIMARY = "btn-outline-primary";
     public const string BTN_OUTLINE_SECONDARY = "btn-outline-secondary";

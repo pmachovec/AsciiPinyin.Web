@@ -1,0 +1,42 @@
+@using AsciiPinyin.Web.Shared.Components
+@using AsciiPinyin.Web.Shared.Constants
+@using AsciiPinyin.Web.Shared.Resources
+@using Microsoft.AspNetCore.Components.Web
+
+@inherits FormSubmitBase
+
+<div
+    class="modal fade @CssClasses.D_NONE"
+    tabindex="-1"
+    role="dialog"
+    id="@RootId">
+    <div
+        class="modal-dialog modal-dialog-centered"
+        role="document">
+        <div
+            class="modal-content"
+            id="@IDs.FORM_SUBMIT_MODAL_CONTENT">
+            <div
+                class="modal-header"
+                id="@IDs.FORM_SUBMIT_HEADER">
+                <div class="fw-bold text-center text-uppercase text-white w-100">@HeaderText</div>
+            </div>
+            <div class="modal-body">
+                <Loading
+                    Id="@IDs.FORM_SUBMIT_LOADING"
+                    TextResource="@Resource.Processing" />
+                <div id="@IDs.FORM_SUBMIT_BODY_TEXT">@BodyText</div>
+            </div>
+            <div
+                class="modal-footer border-0 bottom-0 end-0 position-absolute"
+                id="@IDs.FORM_SUBMIT_FOOTER">
+                <button
+                    type="button"
+                    class="btn btn-modal btn-primary"
+                    @onclick="async _ => await CloseAsync(CancellationToken.None)">
+                    <span id="@IDs.FORM_SUBMIT_BUTTON_TEXT">@ButtonText</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

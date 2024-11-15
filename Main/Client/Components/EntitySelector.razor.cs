@@ -1,6 +1,5 @@
 using AsciiPinyin.Web.Client.Commons;
 using AsciiPinyin.Web.Client.ComponentInterfaces;
-using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
@@ -8,13 +7,9 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Components;
 
-public class EntitySelectorBase<TEntity> : ComponentBase, IModalSecondLevel where TEntity : IEntity
+public class EntitySelectorBase<TEntity> : ComponentBase, IEntityFormModal where TEntity : IEntity
 {
-    public string BackdropId { get; } = IDs.INDEX_BACKDROP;
-
-    public string HtmlTitleOnClose { get; set; } = default!;
-
-    public IModalFirstLevel ModalFirstLevel { get; set; } = default!;
+    public IEntityForm EntityForm { get; private set; } = default!;
 
     [Inject]
     private IModalCommons ModalCommons { get; set; } = default!;
@@ -29,7 +24,7 @@ public class EntitySelectorBase<TEntity> : ComponentBase, IModalSecondLevel wher
     public IEnumerable<TEntity> Entities { get; set; } = default!;
 
     [Parameter]
-    public string HtmlTitle { get; set; } = default!;
+    public string HtmlTitle { private get; set; } = default!;
 
     [Parameter]
     public string Title { get; set; } = default!;
@@ -38,16 +33,15 @@ public class EntitySelectorBase<TEntity> : ComponentBase, IModalSecondLevel wher
     public Func<TEntity, CancellationToken, Task> SelectEntityAsync { get; set; } = default!;
 
     public async Task OpenAsync(
-        IModalFirstLevel formModal,
-        string htmlTitleOnClose,
+        IEntityForm entityForm,
         CancellationToken cancellationToken
     )
     {
+        EntityForm = entityForm;
+
         await ModalCommons.OpenAsyncCommon(
             this,
-            formModal,
             HtmlTitle,
-            htmlTitleOnClose,
             cancellationToken
         );
     }

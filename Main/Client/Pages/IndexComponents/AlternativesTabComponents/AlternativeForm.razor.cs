@@ -9,7 +9,7 @@ using AsciiPinyin.Web.Shared.Resources;
 using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
-using System.Net;
+using System.Globalization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
@@ -29,11 +29,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
     public string RootId { get; } = IDs.ALTERNATIVE_FORM_ROOT;
 
-    public string BackdropId { get; } = IDs.INDEX_BACKDROP;
-
-    public string HtmlTitleOnClose { get; set; } = default!;
-
-    public IModal? LowerLevelModal { get; set; }
+    public string HtmlTitle { get; private set; } = string.Empty;
 
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
@@ -53,11 +49,13 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     [Parameter]
     public required IIndex Index { get; set; } = default!;
 
-    public async Task OpenAsync(string htmlTitleOnClose, CancellationToken cancellationToken) =>
+    protected override void OnInitialized() =>
+        HtmlTitle = Localizer[Resource.CreateNewAlternative];
+
+    public async Task OpenAsync(CancellationToken cancellationToken) =>
         await ModalCommons.OpenAsyncCommon(
             this,
-            Localizer[Resource.CreateNewAlternative],
-            htmlTitleOnClose,
+            HtmlTitle,
             cancellationToken
         );
 
@@ -68,7 +66,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         await Task.WhenAll(
             ClearWrongInputAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR, cancellationToken),
             JSInteropDOM.SetZIndexAsync(IDs.ALTERNATIVE_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
-            OriginalSelector.OpenAsync(this, Localizer[Resource.CreateNewAlternative], cancellationToken)
+            OriginalSelector.OpenAsync(this, cancellationToken)
         );
 
     protected async Task SelectOriginalAsync(Chachar originalChachar, CancellationToken cancellationToken)
@@ -132,15 +130,37 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
                 TheCharacter = TheCharacter
             };
 
-            var statusCode = await EntityClient.PostEntityAsync(ApiNames.ALTERNATIVES, alternative, cancellationToken);
-
-            if (statusCode == HttpStatusCode.OK)
+            if (Index.Alternatives.Contains(alternative))
             {
-                await Index.SaveSuccess.OpenAsync(this, Localizer[Resource.CreateNewAlternative], cancellationToken);
+                await Index.FormSubmit.SetErrorAsync(
+                    this,
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        Localizer[Resource.AlternativeAlreadyInDb],
+                        alternative.TheCharacter,
+                        alternative.OriginalCharacter,
+                        alternative.OriginalPinyin
+                    ),
+                    cancellationToken
+                );
             }
             else
             {
-                await Index.SaveFailed.OpenAsync(this, Localizer[Resource.CreateNewAlternative], cancellationToken);
+                var postTask = EntityClient.PostEntityAsync(ApiNames.ALTERNATIVES, alternative, cancellationToken);
+
+                await Index.FormSubmit.SetProcessingAsync(
+                    this,
+                    postTask,
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        Localizer[Resource.AlternativeCreated],
+                        alternative.TheCharacter,
+                        alternative.OriginalCharacter,
+                        alternative.OriginalPinyin
+                    ),
+                    Localizer[Resource.ProcessingError],
+                    cancellationToken
+                );
             }
         }
     }
