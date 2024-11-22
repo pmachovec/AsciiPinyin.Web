@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace AsciiPinyin.Web.Shared.Models;
+namespace AsciiPinyin.Web.Shared.DTO;
 
 public class FieldError(
     object? _errorValue,

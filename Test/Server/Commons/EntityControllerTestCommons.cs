@@ -1,6 +1,6 @@
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Server.Test.Constants;
-using AsciiPinyin.Web.Shared.Models;
+using AsciiPinyin.Web.Shared.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;

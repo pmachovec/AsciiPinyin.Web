@@ -1,7 +1,7 @@
-using AsciiPinyin.Web.Shared.Models.Tools;
+using AsciiPinyin.Web.Shared.DTO.Tools;
 using System.Text.Json.Serialization;
 
-namespace AsciiPinyin.Web.Shared.Models;
+namespace AsciiPinyin.Web.Shared.DTO;
 
 public class FieldErrorsContainer
 {
