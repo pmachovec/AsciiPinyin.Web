@@ -1,4 +1,4 @@
-using AsciiPinyin.Web.Server.Constants;
+using AsciiPinyin.Web.Server.Controllers;
 using AsciiPinyin.Web.Shared.Commons;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.DTO;
@@ -22,29 +22,6 @@ internal static partial class EntityControllerCommons
         return fieldErrors.Count > 0 ? new FieldErrorsContainer(fieldErrors) : null;
     }
 
-    public static FieldError? GetTheCharacterError(IEntity entity)
-    {
-        var errorMessage = GetCharacterErrorMessage(entity.TheCharacter);
-        return errorMessage is not null ? new FieldError(entity.TheCharacter, errorMessage, ColumnNames.THE_CHARACTER) : null;
-    }
-
-    public static FieldError? GetStrokesError(IEntity entity)
-    {
-        string? errorMessage = null;
-
-        if (entity.Strokes is null)
-        {
-            errorMessage = Errors.MISSING;
-        }
-        else if (entity.Strokes is < 1 or > 99)
-        {
-            // As the type is unsigned byte, API doesn't allow to pass any invalid value like strings, negative numbers etc.
-            errorMessage = Errors.ONE_TO_NINETY_NINE;
-        }
-
-        return errorMessage is not null ? new FieldError(entity.Strokes, errorMessage, ColumnNames.STROKES) : null;
-    }
-
     public static string? GetCharacterErrorMessage(string? theCharacter)
     {
         string? errorMessage = null;
@@ -64,6 +41,23 @@ internal static partial class EntityControllerCommons
         else if (!TextUtils.IsOnlyChineseCharacters(theCharacter!))
         {
             errorMessage = Errors.NO_SINGLE_CHINESE;
+        }
+
+        return errorMessage;
+    }
+
+    public static string? GetStrokesErrorMessage(byte? strokes)
+    {
+        string? errorMessage = null;
+
+        if (strokes is null)
+        {
+            errorMessage = Errors.MISSING;
+        }
+        else if (strokes is < 1 or > 99)
+        {
+            // As the type is unsigned byte, API doesn't allow to pass any invalid value like strings, negative numbers etc.
+            errorMessage = Errors.ONE_TO_NINETY_NINE;
         }
 
         return errorMessage;
@@ -104,6 +98,46 @@ internal static partial class EntityControllerCommons
         }
 
         return errorMessage;
+    }
+
+    public static FieldError? GetInvalidValueFieldError<T1, T2>(
+        ILogger<T1> logger,
+        T2 value,
+        string columnName,
+        Func<T2, string?> getErrorMessage
+    ) where T1 : IEntityController
+    {
+        var errorMessage = getErrorMessage(value);
+
+        if (errorMessage is not null)
+        {
+            LogCommons.LogInvalidValueError(logger, value, columnName, errorMessage);
+            return new FieldError(value, errorMessage, columnName);
+        }
+
+        return null;
+    }
+
+    public static FieldErrorsContainer? GetInvalidValueFieldErrorsContainer<T>(
+        ILogger<T> logger,
+        string errorMessage,
+        params (object? errorValue, string fieldJsonPropertyName)[] valuesWithPropertyNames
+    ) where T : IEntityController
+    {
+        if (valuesWithPropertyNames.Length == 0)
+        {
+            return null;
+        }
+
+        var fieldErrors = valuesWithPropertyNames.Select(
+            pair =>
+            {
+                LogCommons.LogInvalidValueError(logger, pair.errorValue, pair.fieldJsonPropertyName, errorMessage);
+                return new FieldError(pair.errorValue, errorMessage, pair.fieldJsonPropertyName);
+            }
+        );
+
+        return new FieldErrorsContainer(fieldErrors);
     }
 
     private static List<FieldError> GetFieldErrors<T>(

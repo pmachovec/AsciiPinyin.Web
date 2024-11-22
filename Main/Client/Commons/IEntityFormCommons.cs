@@ -36,6 +36,4 @@ public interface IEntityFormCommons
         CancellationToken cancellationToken,
         params (string inputId, string errorDivId, Func<string?> getErrorText)[] inputs
     );
-
-    string? GetNullInputErrorText(object? theInput);
 }

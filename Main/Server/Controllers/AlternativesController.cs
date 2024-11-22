@@ -14,26 +14,32 @@ namespace AsciiPinyin.Web.Server.Controllers;
 public sealed class AlternativesController(
     AsciiPinyinContext _asciiPinyinContext,
     ILogger<AlternativesController> _logger
-) : ControllerBase
+) : ControllerBase, IEntityController
 {
     [HttpGet]
     public ActionResult<IEnumerable<Alternative>> Get()
     {
+        LogCommons.LogHttpMethodInfo(_logger, HttpMethod.Get, Actions.GET_ALL_ALTERNATIVES);
+
         if (!Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
         {
             LogCommons.LogUserAgentMissingError(_logger);
             return BadRequest(Errors.USER_AGENT_MISSING);
         }
 
-        LogCommons.LogGetAllEntitiesInfo(_logger, ApiNames.ALTERNATIVES, userAgent!);
+        LogCommons.LogUserAgentInfo(_logger, userAgent!);
+        LogCommons.LogActionInDbInfo(_logger, DbActions.SELECT, Actions.GET_ALL_ALTERNATIVES);
 
         try
         {
-            return Ok(_asciiPinyinContext.Alternatives);
+            var alternatives = _asciiPinyinContext.Alternatives;
+            LogCommons.LogActionInDbSuccessInfo(_logger, DbActions.SELECT);
+            return Ok(alternatives);
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            LogCommons.LogError(_logger, ex.ToString());
+            LogCommons.LogActionInDbFailedError(_logger, Actions.GET_ALL_ALTERNATIVES);
+            LogCommons.LogError(_logger, e.ToString());
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
@@ -41,18 +47,22 @@ public sealed class AlternativesController(
     [HttpPost]
     public ActionResult<FieldErrorsContainer> Post(Alternative alternative)
     {
+        LogCommons.LogHttpMethodInfo(_logger, HttpMethod.Post, Actions.CREATE_NEW_ALTERNATIVE);
+
         if (!Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
         {
             LogCommons.LogUserAgentMissingError(_logger);
             return BadRequest(Errors.USER_AGENT_MISSING);
         }
 
-        LogCommons.LogGetAllEntitiesInfo(_logger, ApiNames.ALTERNATIVES, userAgent!);
+        LogCommons.LogUserAgentInfo(_logger, userAgent!);
+        LogCommons.LogEntityInfo(_logger, nameof(Alternative), alternative);
         LogCommons.LogInitialIntegrityVerificationDebug(_logger);
+
         var postInitialDataErrorsContainer = EntityControllerCommons.GetPostInitialDataErrorsContainer(
             alternative,
-            EntityControllerCommons.GetTheCharacterError,
-            EntityControllerCommons.GetStrokesError,
+            GetTheCharacterError,
+            GetStrokesError,
             GetOriginalCharacterError,
             GetOriginalPinyinError,
             GetOriginalToneError
@@ -60,11 +70,11 @@ public sealed class AlternativesController(
 
         if (postInitialDataErrorsContainer is not null)
         {
-            LogCommons.LogError(_logger, postInitialDataErrorsContainer.ToString());
+            LogCommons.LogFieldErrorsContainerError(_logger, postInitialDataErrorsContainer);
             return BadRequest(postInitialDataErrorsContainer);
         }
 
-        LogCommons.LogDatabaseRadicalIntegrityVerificationDebug(_logger);
+        LogCommons.LogDatabaseIntegrityVerificationDebug(_logger);
         DbSet<Chachar>? knownChachars;
         DbSet<Alternative> knownAlternatives;
 
@@ -87,44 +97,77 @@ public sealed class AlternativesController(
 
         if (postDatabaseIntegrityErrorsContainer is not null)
         {
-            LogCommons.LogError(_logger, postDatabaseIntegrityErrorsContainer.ToString());
+            LogCommons.LogFieldErrorsContainerError(_logger, postDatabaseIntegrityErrorsContainer);
             return BadRequest(postDatabaseIntegrityErrorsContainer);
         }
 
-        using (var dbContextTransaction = _asciiPinyinContext.Database.BeginTransaction())
+        LogCommons.LogIntegrityVerificationSuccessDebug(_logger);
+        LogCommons.LogActionInDbInfo(_logger, DbActions.INSERT, Actions.CREATE_NEW_ALTERNATIVE);
+
+        try
         {
+            using var dbContextTransaction = _asciiPinyinContext.Database.BeginTransaction();
             _ = _asciiPinyinContext.Alternatives.Add(alternative);
             _ = _asciiPinyinContext.SaveChanges();
             dbContextTransaction.Commit();
         }
+        catch (Exception e)
+        {
+            LogCommons.LogActionInDbFailedError(_logger, Actions.CREATE_NEW_ALTERNATIVE);
+            LogCommons.LogError(_logger, e.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
 
+        LogCommons.LogActionInDbSuccessInfo(_logger, DbActions.INSERT);
         return Ok();
     }
 
-    private static FieldError? GetOriginalCharacterError(Alternative alternative)
-    {
-        var errorMessage = EntityControllerCommons.GetCharacterErrorMessage(alternative.OriginalCharacter);
-        return errorMessage is not null ? new FieldError(alternative.OriginalCharacter, errorMessage, ColumnNames.ORIGINAL_CHARACTER) : null;
-    }
+    private FieldError? GetTheCharacterError(Alternative alternative) =>
+        EntityControllerCommons.GetInvalidValueFieldError(
+            _logger,
+            alternative.TheCharacter,
+            ColumnNames.THE_CHARACTER,
+            EntityControllerCommons.GetCharacterErrorMessage
+        );
 
-    private static FieldError? GetOriginalPinyinError(Alternative alternative)
-    {
-        var errorMessage = EntityControllerCommons.GetPinyinErrorMessage(alternative.OriginalPinyin);
-        return errorMessage is not null ? new FieldError(alternative.OriginalPinyin, errorMessage, ColumnNames.ORIGINAL_PINYIN) : null;
-    }
+    private FieldError? GetStrokesError(Alternative alternative) =>
+        EntityControllerCommons.GetInvalidValueFieldError(
+            _logger,
+            alternative.Strokes,
+            ColumnNames.STROKES,
+            EntityControllerCommons.GetStrokesErrorMessage
+        );
 
-    private static FieldError? GetOriginalToneError(Alternative alternative)
-    {
-        var errorMessage = EntityControllerCommons.GetToneErrorMessage(alternative.OriginalTone);
-        return errorMessage is not null ? new FieldError(alternative.OriginalTone, errorMessage, ColumnNames.ORIGINAL_TONE) : null;
-    }
+    private FieldError? GetOriginalCharacterError(Alternative alternative) =>
+        EntityControllerCommons.GetInvalidValueFieldError(
+            _logger,
+            alternative.OriginalCharacter,
+            ColumnNames.ORIGINAL_CHARACTER,
+            EntityControllerCommons.GetCharacterErrorMessage
+        );
+
+    private FieldError? GetOriginalPinyinError(Alternative alternative) =>
+        EntityControllerCommons.GetInvalidValueFieldError(
+            _logger,
+            alternative.OriginalPinyin,
+            ColumnNames.ORIGINAL_PINYIN,
+            EntityControllerCommons.GetPinyinErrorMessage
+        );
+
+    private FieldError? GetOriginalToneError(Alternative alternative) =>
+        EntityControllerCommons.GetInvalidValueFieldError(
+            _logger,
+            alternative.OriginalTone,
+            ColumnNames.ORIGINAL_TONE,
+            EntityControllerCommons.GetToneErrorMessage
+        );
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Style",
         "IDE0046:Convert to conditional expression",
         Justification = "Conditional return just looks terrible here."
     )]
-    private static FieldErrorsContainer? GetPostDatabaseIntegrityErrorContainer(
+    private FieldErrorsContainer? GetPostDatabaseIntegrityErrorContainer(
         Alternative alternative,
         DbSet<Chachar> knownChachars,
         DbSet<Alternative> knownAlternatives
@@ -138,29 +181,35 @@ public sealed class AlternativesController(
 
         if (originalChachar is null)
         {
-            return new FieldErrorsContainer(
-                new(alternative.OriginalCharacter, Errors.UNKNOWN_CHACHAR, ColumnNames.ORIGINAL_CHARACTER),
-                new(alternative.OriginalPinyin, Errors.UNKNOWN_CHACHAR, ColumnNames.ORIGINAL_PINYIN),
-                new(alternative.OriginalTone, Errors.UNKNOWN_CHACHAR, ColumnNames.ORIGINAL_TONE)
+            return EntityControllerCommons.GetInvalidValueFieldErrorsContainer(
+                _logger,
+                Errors.UNKNOWN_CHACHAR,
+                (alternative.OriginalCharacter, ColumnNames.ORIGINAL_CHARACTER),
+                (alternative.OriginalPinyin, ColumnNames.ORIGINAL_PINYIN),
+                (alternative.OriginalTone, ColumnNames.ORIGINAL_TONE)
             );
         }
 
         if (!originalChachar.IsRadical)
         {
-            return new FieldErrorsContainer(
-                new(alternative.OriginalCharacter, Errors.NO_RADICAL, ColumnNames.ORIGINAL_CHARACTER),
-                new(alternative.OriginalPinyin, Errors.NO_RADICAL, ColumnNames.ORIGINAL_PINYIN),
-                new(alternative.OriginalTone, Errors.NO_RADICAL, ColumnNames.ORIGINAL_TONE)
+            return EntityControllerCommons.GetInvalidValueFieldErrorsContainer(
+                _logger,
+                Errors.NO_RADICAL,
+                (alternative.OriginalCharacter, ColumnNames.ORIGINAL_CHARACTER),
+                (alternative.OriginalPinyin, ColumnNames.ORIGINAL_PINYIN),
+                (alternative.OriginalTone, ColumnNames.ORIGINAL_TONE)
             );
         }
 
         if (knownAlternatives.Contains(alternative))
         {
-            return new FieldErrorsContainer(
-                new(alternative.TheCharacter, Errors.ALTERNATIVE_ALREADY_EXISTS, ColumnNames.THE_CHARACTER),
-                new(alternative.OriginalCharacter, Errors.ALTERNATIVE_ALREADY_EXISTS, ColumnNames.ORIGINAL_CHARACTER),
-                new(alternative.OriginalPinyin, Errors.ALTERNATIVE_ALREADY_EXISTS, ColumnNames.ORIGINAL_PINYIN),
-                new(alternative.OriginalTone, Errors.ALTERNATIVE_ALREADY_EXISTS, ColumnNames.ORIGINAL_TONE)
+            return EntityControllerCommons.GetInvalidValueFieldErrorsContainer(
+                _logger,
+                Errors.ALTERNATIVE_ALREADY_EXISTS,
+                (alternative.TheCharacter, ColumnNames.THE_CHARACTER),
+                (alternative.OriginalCharacter, ColumnNames.ORIGINAL_CHARACTER),
+                (alternative.OriginalPinyin, ColumnNames.ORIGINAL_PINYIN),
+                (alternative.OriginalTone, ColumnNames.ORIGINAL_TONE)
             );
         }
 

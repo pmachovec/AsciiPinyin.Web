@@ -11,6 +11,7 @@ using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System.Globalization;
+using System.Net;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
@@ -52,6 +53,9 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
+
+    [Inject]
+    private ILogger<ChacharForm> Logger { get; set; } = default!;
 
     [Inject]
     private IModalCommons ModalCommons { get; set; } = default!;
@@ -190,6 +194,9 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
     protected async Task CheckAndSubmitAsync(CancellationToken cancellationToken)
     {
+        LogCommons.LogHttpMethodInfo(Logger, HttpMethod.Post, Actions.CREATE_NEW_CHACHAR);
+        LogCommons.LogInitialIntegrityVerificationDebug(Logger);
+
         var areAllInputsValid = await EntityFormCommons.CheckInputsAsync(
             cancellationToken,
             (IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, IDs.CHACHAR_FORM_THE_CHARACTER_ERROR, GetTheCharacterErrorText),
@@ -214,35 +221,47 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
                 TheCharacter = TheCharacter
             };
 
-            if (Index.Chachars.Contains(chachar))
+            LogCommons.LogFormDataInfo(Logger, chachar);
+            LogCommons.LogDatabaseIntegrityVerificationDebug(Logger);
+            var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(chachar);
+
+            if (databseIntegrityErrorText is not null)
             {
                 await Index.FormSubmit.SetErrorAsync(
                     this,
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        Localizer[Resource.CharacterAlreadyInDb],
-                        chachar.TheCharacter,
-                        chachar.RealPinyin
-                    ),
+                    databseIntegrityErrorText,
                     cancellationToken
                 );
             }
             else
             {
                 var postTask = EntityClient.PostEntityAsync(ApiNames.CHARACTERS, chachar, cancellationToken);
+                await Index.FormSubmit.SetProcessingAsync(this, cancellationToken);
+                var postResult = await postTask;
 
-                await Index.FormSubmit.SetProcessingAsync(
-                    this,
-                    postTask,
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        Localizer[Resource.CharacterCreated],
-                        chachar.TheCharacter,
-                        chachar.RealPinyin
-                    ),
-                    Localizer[Resource.ProcessingError],
-                    cancellationToken
-                );
+                if (postResult == HttpStatusCode.OK)
+                {
+                    LogCommons.LogHttpMethodSuccessInfo(Logger, HttpMethod.Post);
+                    await Index.FormSubmit.SetSuccessAsync(
+                        this,
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            Localizer[Resource.CharacterCreated],
+                            chachar.TheCharacter,
+                            chachar.RealPinyin
+                        ),
+                        cancellationToken
+                    );
+                }
+                else
+                {
+                    LogCommons.LogHttpMethodFailedError(Logger, HttpMethod.Post);
+                    await Index.FormSubmit.SetErrorAsync(
+                        this,
+                        Localizer[Resource.ProcessingError],
+                        cancellationToken
+                    );
+                }
             }
         }
     }
@@ -251,10 +270,12 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
     {
         if (string.IsNullOrEmpty(TheCharacter))
         {
+            LogCommons.LogInvalidFormValueError(Logger, TheCharacter, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, Errors.EMPTY);
             return Localizer[Resource.CompulsoryValue];
         }
         else if (!TextUtils.IsOnlyChineseCharacters(TheCharacter))
         {
+            LogCommons.LogInvalidFormValueError(Logger, TheCharacter, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, Errors.NO_SINGLE_CHINESE);
             return Localizer[Resource.MustBeChineseCharacter];
         }
 
@@ -267,10 +288,12 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
     {
         if (string.IsNullOrEmpty(Pinyin))
         {
+            LogCommons.LogInvalidFormValueError(Logger, Pinyin, IDs.CHACHAR_FORM_PINYIN_INPUT, Errors.EMPTY);
             return Localizer[Resource.CompulsoryValue];
         }
         else if (!Regexes.AsciiLettersRegex().IsMatch(Pinyin))
         {
+            LogCommons.LogInvalidFormValueError(Logger, Pinyin, IDs.CHACHAR_FORM_PINYIN_INPUT, Errors.NO_ASCII);
             return Localizer[Resource.OnlyAsciiAllowed];
         }
 
@@ -281,10 +304,12 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
     {
         if (string.IsNullOrEmpty(Ipa))
         {
+            LogCommons.LogInvalidFormValueError(Logger, Ipa, IDs.CHACHAR_FORM_IPA_INPUT, Errors.EMPTY);
             return Localizer[Resource.CompulsoryValue];
         }
         else if (!TextUtils.IsOnlyIpaCharacters(Ipa))
         {
+            LogCommons.LogInvalidFormValueError(Logger, Ipa, IDs.CHACHAR_FORM_IPA_INPUT, Errors.NO_IPA);
             return Localizer[Resource.OnlyIpaAllowed];
         }
 
@@ -293,11 +318,44 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
     // Null tone is the only reachable wrong input.
     // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to handle this case.
-    private string? GetToneErrorText() =>
-        EntityFormCommons.GetNullInputErrorText(Tone);
+    private string? GetToneErrorText()
+    {
+        if (Tone is null)
+        {
+            LogCommons.LogInvalidFormValueError(Logger, Tone, IDs.CHACHAR_FORM_TONE_INPUT, Errors.EMPTY);
+            return Localizer[Resource.CompulsoryValue];
+        }
+
+        return null;
+    }
 
     // Null strokes is the only reachable wrong input.
     // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to handle this case.
-    private string? GetStrokesErrorText() =>
-        EntityFormCommons.GetNullInputErrorText(Strokes);
+    private string? GetStrokesErrorText()
+    {
+        if (Strokes is null)
+        {
+            LogCommons.LogInvalidFormValueError(Logger, Strokes, IDs.CHACHAR_FORM_STROKES_INPUT, Errors.EMPTY);
+            return Localizer[Resource.CompulsoryValue];
+        }
+
+        return null;
+    }
+
+    private string? GetDatabaseIntegrityErrorText(Chachar chachar)
+    {
+        if (Index.Chachars.Contains(chachar))
+        {
+            LogCommons.LogError(Logger, Errors.CHACHAR_ALREADY_EXISTS);
+
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                Localizer[Resource.CharacterAlreadyInDb],
+                chachar.TheCharacter,
+                chachar.RealPinyin
+            );
+        }
+
+        return null;
+    }
 }

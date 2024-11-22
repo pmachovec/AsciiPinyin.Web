@@ -1,6 +1,6 @@
-namespace AsciiPinyin.Web.Server.Constants;
+namespace AsciiPinyin.Web.Shared.Constants;
 
-internal static class Errors
+public static class Errors
 {
     public const string ALTERNATIVE_ALREADY_EXISTS = "combination 'alternative character + character + pinyin + tone' already exists";
     public const string CHACHAR_ALREADY_EXISTS = "combination 'character + pinyin + tone' already exists";

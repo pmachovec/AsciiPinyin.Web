@@ -5,7 +5,6 @@ using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
-using System.Net;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
@@ -32,13 +31,7 @@ public class FormSubmitBase : ComponentBase, IEntityFormModal
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    public async Task SetProcessingAsync(
-        IEntityForm entityForm,
-        Task<HttpStatusCode> formSubmitTask,
-        string messageOnSuccess,
-        string messageOnError,
-        CancellationToken cancellationToken
-    )
+    public async Task SetProcessingAsync(IEntityForm entityForm, CancellationToken cancellationToken)
     {
         await JSInteropDOM.SetTitleAsync($"{Localizer[Resource.Processing]}...", cancellationToken);
         EntityForm = entityForm;
@@ -52,21 +45,16 @@ public class FormSubmitBase : ComponentBase, IEntityFormModal
         );
 
         StateHasChanged();
-        var formSubmitResult = await formSubmitTask;
-
-        if (formSubmitResult == HttpStatusCode.OK)
-        {
-            await SetSuccessAsync(messageOnSuccess, cancellationToken);
-        }
-        else
-        {
-            await SetErrorAsync(entityForm, messageOnError, cancellationToken);
-        }
     }
 
-    private async Task SetSuccessAsync(string message, CancellationToken cancellationToken)
+    public async Task SetSuccessAsync(
+        IEntityForm entityForm,
+        string message,
+        CancellationToken cancellationToken
+    )
     {
         await JSInteropDOM.SetTitleAsync(Localizer[Resource.Success], cancellationToken);
+        EntityForm = entityForm;
         HeaderText = $"{Localizer[Resource.Success]}!";
         BodyText = message;
         ButtonText = Localizer[Resource.OK];

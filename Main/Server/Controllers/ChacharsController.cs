@@ -16,26 +16,32 @@ namespace AsciiPinyin.Web.Server.Controllers;
 public sealed class ChacharsController(
     AsciiPinyinContext _asciiPinyinContext,
     ILogger<ChacharsController> _logger
-) : ControllerBase
+) : ControllerBase, IEntityController
 {
     [HttpGet]
     public ActionResult<IEnumerable<Chachar>> Get()
     {
+        LogCommons.LogHttpMethodInfo(_logger, HttpMethod.Get, Actions.GET_ALL_CHACHARS);
+
         if (!Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
         {
             LogCommons.LogUserAgentMissingError(_logger);
             return BadRequest(Errors.USER_AGENT_MISSING);
         }
 
-        LogCommons.LogGetAllEntitiesInfo(_logger, ApiNames.CHARACTERS, userAgent!);
+        LogCommons.LogUserAgentInfo(_logger, userAgent!);
+        LogCommons.LogActionInDbInfo(_logger, DbActions.SELECT, Actions.GET_ALL_CHACHARS);
 
         try
         {
-            return Ok(_asciiPinyinContext.Chachars);
+            var chachars = _asciiPinyinContext.Chachars;
+            LogCommons.LogActionInDbSuccessInfo(_logger, DbActions.SELECT);
+            return Ok(chachars);
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            LogCommons.LogError(_logger, ex.ToString());
+            LogCommons.LogActionInDbFailedError(_logger, Actions.GET_ALL_CHACHARS);
+            LogCommons.LogError(_logger, e.ToString());
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
@@ -43,18 +49,22 @@ public sealed class ChacharsController(
     [HttpPost]
     public ActionResult<FieldErrorsContainer> Post(Chachar chachar)
     {
+        LogCommons.LogHttpMethodInfo(_logger, HttpMethod.Post, Actions.CREATE_NEW_CHACHAR);
+
         if (!Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
         {
             LogCommons.LogUserAgentMissingError(_logger);
             return BadRequest(Errors.USER_AGENT_MISSING);
         }
 
-        LogCommons.LogPostEntityInfo(_logger, chachar, userAgent!);
+        LogCommons.LogUserAgentInfo(_logger, userAgent!);
+        LogCommons.LogEntityInfo(_logger, nameof(Chachar), chachar);
         LogCommons.LogInitialIntegrityVerificationDebug(_logger);
+
         var postInitialDataErrorsContainer = EntityControllerCommons.GetPostInitialDataErrorsContainer(
             chachar,
-            EntityControllerCommons.GetTheCharacterError,
-            EntityControllerCommons.GetStrokesError,
+            GetTheCharacterError,
+            GetStrokesError,
             GetPinyinError,
             GetToneError,
             GetIpaError,
@@ -66,11 +76,11 @@ public sealed class ChacharsController(
 
         if (postInitialDataErrorsContainer is not null)
         {
-            LogCommons.LogError(_logger, postInitialDataErrorsContainer.ToString());
+            LogCommons.LogFieldErrorsContainerError(_logger, postInitialDataErrorsContainer);
             return BadRequest(postInitialDataErrorsContainer);
         }
 
-        LogCommons.LogDatabaseRadicalIntegrityVerificationDebug(_logger);
+        LogCommons.LogDatabaseIntegrityVerificationDebug(_logger);
         DbSet<Chachar>? knownChachars;
         DbSet<Alternative>? knownAlternatives;
 
@@ -85,7 +95,7 @@ public sealed class ChacharsController(
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
 
-        var postDatabaseIntegrityErrorsContainer = GetPostDatabaseIntegrityErrorContainer(
+        var postDatabaseIntegrityErrorsContainer = GetPostDatabaseIntegrityErrorsContainer(
             chachar,
             knownChachars,
             knownAlternatives
@@ -93,33 +103,64 @@ public sealed class ChacharsController(
 
         if (postDatabaseIntegrityErrorsContainer is not null)
         {
-            LogCommons.LogError(_logger, postDatabaseIntegrityErrorsContainer.ToString());
+            LogCommons.LogFieldErrorsContainerError(_logger, postDatabaseIntegrityErrorsContainer);
             return BadRequest(postDatabaseIntegrityErrorsContainer);
         }
 
-        using (var dbContextTransaction = _asciiPinyinContext.Database.BeginTransaction())
+        LogCommons.LogIntegrityVerificationSuccessDebug(_logger);
+        LogCommons.LogActionInDbInfo(_logger, DbActions.INSERT, Actions.CREATE_NEW_CHACHAR);
+
+        try
         {
+            using var dbContextTransaction = _asciiPinyinContext.Database.BeginTransaction();
             _ = _asciiPinyinContext.Chachars.Add(chachar);
             _ = _asciiPinyinContext.SaveChanges();
             dbContextTransaction.Commit();
         }
+        catch (Exception e)
+        {
+            LogCommons.LogActionInDbFailedError(_logger, Actions.CREATE_NEW_CHACHAR);
+            LogCommons.LogError(_logger, e.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
 
+        LogCommons.LogActionInDbSuccessInfo(_logger, DbActions.INSERT);
         return Ok();
     }
 
-    private static FieldError? GetPinyinError(Chachar chachar)
-    {
-        var errorMessage = EntityControllerCommons.GetPinyinErrorMessage(chachar.Pinyin);
-        return errorMessage is not null ? new FieldError(chachar.Pinyin, errorMessage, ColumnNames.PINYIN) : null;
-    }
+    private FieldError? GetTheCharacterError(Chachar chachar) =>
+        EntityControllerCommons.GetInvalidValueFieldError(
+            _logger,
+            chachar.TheCharacter,
+            ColumnNames.THE_CHARACTER,
+            EntityControllerCommons.GetCharacterErrorMessage
+        );
 
-    private static FieldError? GetToneError(Chachar chachar)
-    {
-        var errorMessage = EntityControllerCommons.GetToneErrorMessage(chachar.Tone);
-        return errorMessage is not null ? new FieldError(chachar.Tone, errorMessage, ColumnNames.TONE) : null;
-    }
+    private FieldError? GetStrokesError(Chachar chachar) =>
+        EntityControllerCommons.GetInvalidValueFieldError(
+            _logger,
+            chachar.Strokes,
+            ColumnNames.STROKES,
+            EntityControllerCommons.GetStrokesErrorMessage
+        );
 
-    private static FieldError? GetIpaError(Chachar chachar)
+    private FieldError? GetPinyinError(Chachar chachar) =>
+        EntityControllerCommons.GetInvalidValueFieldError(
+            _logger,
+            chachar.Pinyin,
+            ColumnNames.PINYIN,
+            EntityControllerCommons.GetPinyinErrorMessage
+        );
+
+    private FieldError? GetToneError(Chachar chachar) =>
+        EntityControllerCommons.GetInvalidValueFieldError(
+            _logger,
+            chachar.Tone,
+            ColumnNames.TONE,
+            EntityControllerCommons.GetToneErrorMessage
+        );
+
+    private FieldError? GetIpaError(Chachar chachar)
     {
         string? errorMessage = null;
 
@@ -136,10 +177,16 @@ public sealed class ChacharsController(
             errorMessage = Errors.NO_IPA;
         }
 
-        return errorMessage is not null ? new FieldError(chachar.Ipa, errorMessage, ColumnNames.IPA) : null;
+        if (errorMessage is not null)
+        {
+            LogCommons.LogInvalidValueError(_logger, chachar.Ipa, ColumnNames.IPA, errorMessage);
+            return new FieldError(chachar.Ipa, errorMessage, ColumnNames.IPA);
+        }
+
+        return null;
     }
 
-    private static FieldError? GetRadicalCharacterError(Chachar chachar)
+    private FieldError? GetRadicalCharacterError(Chachar chachar)
     {
         string? errorMessage = null;
 
@@ -167,10 +214,16 @@ public sealed class ChacharsController(
             }
         }
 
-        return errorMessage is not null ? new FieldError(chachar.RadicalCharacter, errorMessage, ColumnNames.RADICAL_CHARACTER) : null;
+        if (errorMessage is not null)
+        {
+            LogCommons.LogInvalidValueError(_logger, chachar.RadicalCharacter, ColumnNames.RADICAL_CHARACTER, errorMessage);
+            return new FieldError(chachar.RadicalCharacter, errorMessage, ColumnNames.RADICAL_CHARACTER);
+        }
+
+        return null;
     }
 
-    private static FieldError? GetRadicalPinyinError(Chachar chachar)
+    private FieldError? GetRadicalPinyinError(Chachar chachar)
     {
         string? errorMessage = null;
 
@@ -198,10 +251,16 @@ public sealed class ChacharsController(
             }
         }
 
-        return errorMessage is not null ? new FieldError(chachar.RadicalPinyin, errorMessage, ColumnNames.RADICAL_PINYIN) : null;
+        if (errorMessage is not null)
+        {
+            LogCommons.LogInvalidValueError(_logger, chachar.RadicalPinyin, ColumnNames.RADICAL_PINYIN, errorMessage);
+            return new FieldError(chachar.RadicalPinyin, errorMessage, ColumnNames.RADICAL_PINYIN);
+        }
+
+        return null;
     }
 
-    private static FieldError? GetRadicalToneError(Chachar chachar)
+    private FieldError? GetRadicalToneError(Chachar chachar)
     {
         string? errorMessage = null;
 
@@ -219,10 +278,16 @@ public sealed class ChacharsController(
             errorMessage = Errors.ZERO_TO_FOUR;
         }
 
-        return errorMessage is not null ? new FieldError(chachar.RadicalTone, errorMessage, ColumnNames.RADICAL_TONE) : null;
+        if (errorMessage is not null)
+        {
+            LogCommons.LogInvalidValueError(_logger, chachar.RadicalTone, ColumnNames.RADICAL_TONE, errorMessage);
+            return new FieldError(chachar.RadicalTone, errorMessage, ColumnNames.RADICAL_TONE);
+        }
+
+        return null;
     }
 
-    private static FieldError? GetRadicalAlternativeCharacterError(Chachar chachar)
+    private FieldError? GetRadicalAlternativeCharacterError(Chachar chachar)
     {
         if (chachar.RadicalAlternativeCharacter is { } radicalAlternativeCharacter)
         {
@@ -243,6 +308,7 @@ public sealed class ChacharsController(
 
             if (errorMessage is not null)
             {
+                LogCommons.LogInvalidValueError(_logger, chachar.RadicalAlternativeCharacter, ColumnNames.RADICAL_ALTERNATIVE_CHARACTER, errorMessage);
                 return new FieldError(chachar.RadicalAlternativeCharacter, errorMessage, ColumnNames.RADICAL_ALTERNATIVE_CHARACTER);
             }
         }
@@ -255,7 +321,7 @@ public sealed class ChacharsController(
         "IDE0046:Convert to conditional expression",
         Justification = "Conditional return just looks terrible here."
     )]
-    private static FieldErrorsContainer? GetPostDatabaseIntegrityErrorContainer(
+    private FieldErrorsContainer? GetPostDatabaseIntegrityErrorsContainer(
         Chachar chachar,
         DbSet<Chachar> knownChachars,
         DbSet<Alternative> knownAlternatives
@@ -271,19 +337,23 @@ public sealed class ChacharsController(
 
             if (radicalChachar is null)
             {
-                return new FieldErrorsContainer(
-                    new(radicalCharacter, Errors.UNKNOWN_CHACHAR, ColumnNames.RADICAL_CHARACTER),
-                    new(chachar.RadicalPinyin, Errors.UNKNOWN_CHACHAR, ColumnNames.RADICAL_PINYIN),
-                    new(chachar.RadicalTone, Errors.UNKNOWN_CHACHAR, ColumnNames.RADICAL_TONE)
+                return EntityControllerCommons.GetInvalidValueFieldErrorsContainer(
+                    _logger,
+                    Errors.UNKNOWN_CHACHAR,
+                    (radicalCharacter, ColumnNames.RADICAL_CHARACTER),
+                    (chachar.RadicalPinyin, ColumnNames.RADICAL_PINYIN),
+                    (chachar.RadicalTone, ColumnNames.RADICAL_TONE)
                 );
             }
 
             if (!radicalChachar!.IsRadical)
             {
-                return new FieldErrorsContainer(
-                    new(radicalCharacter, Errors.NO_RADICAL, ColumnNames.RADICAL_CHARACTER),
-                    new(chachar.RadicalPinyin, Errors.NO_RADICAL, ColumnNames.RADICAL_PINYIN),
-                    new(chachar.RadicalTone, Errors.NO_RADICAL, ColumnNames.RADICAL_TONE)
+                return EntityControllerCommons.GetInvalidValueFieldErrorsContainer(
+                    _logger,
+                    Errors.NO_RADICAL,
+                    (radicalCharacter, ColumnNames.RADICAL_CHARACTER),
+                    (chachar.RadicalPinyin, ColumnNames.RADICAL_PINYIN),
+                    (chachar.RadicalTone, ColumnNames.RADICAL_TONE)
                 );
             }
 
@@ -298,11 +368,13 @@ public sealed class ChacharsController(
 
                 if (radicalAlternative is null)
                 {
-                    return new FieldErrorsContainer(
-                        new(radicalAlternativeCharacter, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_ALTERNATIVE_CHARACTER),
-                        new(chachar.RadicalCharacter, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_CHARACTER),
-                        new(chachar.RadicalPinyin, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_PINYIN),
-                        new(chachar.RadicalTone, Errors.UNKNOWN_ALTERNATIVE, ColumnNames.RADICAL_TONE)
+                    return EntityControllerCommons.GetInvalidValueFieldErrorsContainer(
+                        _logger,
+                        Errors.UNKNOWN_ALTERNATIVE,
+                        (radicalAlternativeCharacter, ColumnNames.RADICAL_ALTERNATIVE_CHARACTER),
+                        (chachar.RadicalCharacter, ColumnNames.RADICAL_CHARACTER),
+                        (chachar.RadicalPinyin, ColumnNames.RADICAL_PINYIN),
+                        (chachar.RadicalTone, ColumnNames.RADICAL_TONE)
                     );
                 }
             }
@@ -310,10 +382,12 @@ public sealed class ChacharsController(
 
         if (knownChachars.Contains(chachar))
         {
-            return new FieldErrorsContainer(
-                new(chachar.TheCharacter, Errors.CHACHAR_ALREADY_EXISTS, ColumnNames.THE_CHARACTER),
-                new(chachar.Pinyin, Errors.CHACHAR_ALREADY_EXISTS, ColumnNames.PINYIN),
-                new(chachar.Tone, Errors.CHACHAR_ALREADY_EXISTS, ColumnNames.TONE)
+            return EntityControllerCommons.GetInvalidValueFieldErrorsContainer(
+                _logger,
+                Errors.CHACHAR_ALREADY_EXISTS,
+                (chachar.TheCharacter, ColumnNames.THE_CHARACTER),
+                (chachar.Pinyin, ColumnNames.PINYIN),
+                (chachar.Tone, ColumnNames.TONE)
             );
         }
 

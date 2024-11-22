@@ -3,6 +3,7 @@ using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.HttpClients;
 using AsciiPinyin.Web.Client.JSInterop;
+using AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
@@ -10,6 +11,7 @@ using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System.Globalization;
+using System.Net;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
@@ -35,10 +37,13 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     private IEntityClient EntityClient { get; set; } = default!;
 
     [Inject]
+    private IEntityFormCommons EntityFormCommons { get; set; } = default!;
+
+    [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
     [Inject]
-    private IEntityFormCommons EntityFormCommons { get; set; } = default!;
+    private ILogger<ChacharForm> Logger { get; set; } = default!;
 
     [Inject]
     private IModalCommons ModalCommons { get; set; } = default!;
@@ -112,6 +117,9 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
     protected async Task CheckAndSubmitAsync(CancellationToken cancellationToken)
     {
+        LogCommons.LogHttpMethodInfo(Logger, HttpMethod.Post, Actions.CREATE_NEW_ALTERNATIVE);
+        LogCommons.LogInitialIntegrityVerificationDebug(Logger);
+
         var areAllInputsValid = await EntityFormCommons.CheckInputsAsync(
             cancellationToken,
             (IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, IDs.ALTERNATIVE_FORM_THE_CHARACTER_ERROR, GetTheCharacterErrorText),
@@ -130,37 +138,48 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
                 TheCharacter = TheCharacter
             };
 
-            if (Index.Alternatives.Contains(alternative))
+            LogCommons.LogFormDataInfo(Logger, alternative);
+            LogCommons.LogDatabaseIntegrityVerificationDebug(Logger);
+            var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(alternative);
+
+            if (databseIntegrityErrorText is not null)
             {
                 await Index.FormSubmit.SetErrorAsync(
                     this,
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        Localizer[Resource.AlternativeAlreadyInDb],
-                        alternative.TheCharacter,
-                        alternative.OriginalCharacter,
-                        alternative.OriginalPinyin
-                    ),
+                    databseIntegrityErrorText,
                     cancellationToken
                 );
             }
             else
             {
                 var postTask = EntityClient.PostEntityAsync(ApiNames.ALTERNATIVES, alternative, cancellationToken);
+                await Index.FormSubmit.SetProcessingAsync(this, cancellationToken);
+                var postResult = await postTask;
 
-                await Index.FormSubmit.SetProcessingAsync(
-                    this,
-                    postTask,
-                    string.Format(
+                if (postResult == HttpStatusCode.OK)
+                {
+                    LogCommons.LogHttpMethodSuccessInfo(Logger, HttpMethod.Post);
+                    await Index.FormSubmit.SetSuccessAsync(
+                        this,
+                        string.Format(
                         CultureInfo.InvariantCulture,
-                        Localizer[Resource.AlternativeCreated],
-                        alternative.TheCharacter,
-                        alternative.OriginalCharacter,
-                        alternative.OriginalPinyin
-                    ),
-                    Localizer[Resource.ProcessingError],
-                    cancellationToken
-                );
+                            Localizer[Resource.AlternativeCreated],
+                            alternative.TheCharacter,
+                            alternative.OriginalCharacter,
+                            alternative.OriginalPinyin
+                        ),
+                        cancellationToken
+                    );
+                }
+                else
+                {
+                    LogCommons.LogHttpMethodFailedError(Logger, HttpMethod.Post);
+                    await Index.FormSubmit.SetErrorAsync(
+                        this,
+                        Localizer[Resource.ProcessingError],
+                        cancellationToken
+                    );
+                }
             }
         }
     }
@@ -169,10 +188,12 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     {
         if (string.IsNullOrEmpty(TheCharacter))
         {
+            LogCommons.LogInvalidFormValueError(Logger, TheCharacter, IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, Errors.EMPTY);
             return Localizer[Resource.CompulsoryValue];
         }
         else if (!TextUtils.IsOnlyChineseCharacters(TheCharacter))
         {
+            LogCommons.LogInvalidFormValueError(Logger, TheCharacter, IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, Errors.NO_SINGLE_CHINESE);
             return Localizer[Resource.MustBeChineseCharacter];
         }
 
@@ -183,9 +204,43 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
     // Null strokes is the only reachable wrong input.
     // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to handle this case.
-    private string? GetStrokesErrorText() =>
-        EntityFormCommons.GetNullInputErrorText(Strokes);
+    private string? GetStrokesErrorText()
+    {
+        if (Strokes is null)
+        {
+            LogCommons.LogInvalidFormValueError(Logger, Strokes, IDs.ALTERNATIVE_FORM_STROKES_INPUT, Errors.EMPTY);
+            return Localizer[Resource.CompulsoryValue];
+        }
 
-    private string? GetOriginalErrorText() =>
-        EntityFormCommons.GetNullInputErrorText(OriginalCharacter);
+        return null;
+    }
+
+    private string? GetOriginalErrorText()
+    {
+        if (OriginalCharacter is null)
+        {
+            LogCommons.LogInvalidFormValueError(Logger, OriginalCharacter, IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, Errors.EMPTY);
+            return Localizer[Resource.CompulsoryValue];
+        }
+
+        return null;
+    }
+
+    private string? GetDatabaseIntegrityErrorText(Alternative alternative)
+    {
+        if (Index.Alternatives.Contains(alternative))
+        {
+            LogCommons.LogError(Logger, Errors.ALTERNATIVE_ALREADY_EXISTS);
+
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                Localizer[Resource.AlternativeAlreadyInDb],
+                alternative.TheCharacter,
+                alternative.OriginalCharacter,
+                alternative.OriginalPinyin
+            );
+        }
+
+        return null;
+    }
 }

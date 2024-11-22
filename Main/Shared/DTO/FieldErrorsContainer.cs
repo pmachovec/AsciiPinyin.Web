@@ -8,21 +8,11 @@ public class FieldErrorsContainer
     [JsonPropertyName("errors")]
     public IDictionary<string, FieldError> Errors { get; } = new Dictionary<string, FieldError>();
 
-    public FieldErrorsContainer(IEnumerable<FieldError> fieldErrors)
-    {
-        foreach (var fieldError in fieldErrors)
-        {
-            Errors[fieldError.FieldJsonPropertyName] = fieldError;
-        }
-    }
+    public FieldErrorsContainer(IEnumerable<FieldError> fieldErrors) =>
+        Errors = fieldErrors.ToDictionary(f => f.FieldJsonPropertyName);
 
-    public FieldErrorsContainer(params FieldError[] fieldErrors)
-    {
-        foreach (var fieldError in fieldErrors)
-        {
-            Errors[fieldError.FieldJsonPropertyName] = fieldError;
-        }
-    }
+    public FieldErrorsContainer(params FieldError[] fieldErrors) =>
+        Errors = fieldErrors.ToDictionary(f => f.FieldJsonPropertyName);
 
     public override string ToString() => JsonCreator.ToJson(this);
 }

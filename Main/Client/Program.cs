@@ -21,9 +21,9 @@ try
     using var fileStream = new FileStream(StringConstants.NLOG_CONFIG_YAML, FileMode.CreateNew);
     await stream.CopyToAsync(fileStream);
 }
-catch (Exception ex)
+catch (Exception e)
 {
-    loadNlogConfigException = ex;
+    loadNlogConfigException = e;
 }
 
 _ = builder.Logging.ClearProviders().AddNLog();

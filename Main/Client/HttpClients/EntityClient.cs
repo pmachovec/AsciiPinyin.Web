@@ -31,10 +31,10 @@ public sealed partial class EntityClient(
 
             return result;
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
             LogApiServerSideError(_logger, entitiesApiName);
-            LogExceptionError(_logger, ex);
+            LogExceptionError(_logger, e);
         }
 
         return [];
@@ -72,7 +72,7 @@ public sealed partial class EntityClient(
     private static partial void LogApiServerSideError(ILogger logger, string entitiesApiName);
 
     [LoggerMessage(LogLevel.Error)]
-    private static partial void LogExceptionError(ILogger logger, Exception ex);
+    private static partial void LogExceptionError(ILogger logger, Exception exception);
 
     [LoggerMessage(LogLevel.Information, "CREATE {entityClassName}: {entity}")]
     private static partial void LogCreateInfo(ILogger logger, Type entityClassName, IEntity entity);
