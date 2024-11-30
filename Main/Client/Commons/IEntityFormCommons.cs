@@ -1,4 +1,4 @@
-using AsciiPinyin.Web.Client.ComponentInterfaces;
+using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using Microsoft.AspNetCore.Components;
 
 namespace AsciiPinyin.Web.Client.Commons;

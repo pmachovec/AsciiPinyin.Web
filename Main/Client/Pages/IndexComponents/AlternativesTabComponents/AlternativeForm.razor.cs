@@ -3,7 +3,6 @@ using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.HttpClients;
 using AsciiPinyin.Web.Client.JSInterop;
-using AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
@@ -25,13 +24,17 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
     protected byte? OriginalTone { get; set; }
 
+    public string RootId { get; } = IDs.ALTERNATIVE_FORM_ROOT;
+
+    public IPage? Page { get; private set; }
+
+    public IModal? ModalLowerLevel { get; private set; }
+
+    public string HtmlTitle { get; private set; } = string.Empty;
+
     public byte? Strokes { get; set; }
 
     public string? TheCharacter { get; set; }
-
-    public string RootId { get; } = IDs.ALTERNATIVE_FORM_ROOT;
-
-    public string HtmlTitle { get; private set; } = string.Empty;
 
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
@@ -43,7 +46,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
     [Inject]
-    private ILogger<ChacharForm> Logger { get; set; } = default!;
+    private ILogger<AlternativeForm> Logger { get; set; } = default!;
 
     [Inject]
     private IModalCommons ModalCommons { get; set; } = default!;
@@ -57,12 +60,12 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     protected override void OnInitialized() =>
         HtmlTitle = Localizer[Resource.CreateNewAlternative];
 
-    public async Task OpenAsync(CancellationToken cancellationToken) =>
-        await ModalCommons.OpenAsyncCommon(
-            this,
-            HtmlTitle,
-            cancellationToken
-        );
+    public async Task OpenAsync(IPage page, CancellationToken cancellationToken)
+    {
+        ModalLowerLevel = null;
+        Page = page;
+        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
+    }
 
     public async Task CloseAsync(CancellationToken cancellationToken) =>
         await ModalCommons.CloseAsyncCommon(this, cancellationToken);
@@ -170,6 +173,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
                         ),
                         cancellationToken
                     );
+                    StateHasChanged();
                 }
                 else
                 {

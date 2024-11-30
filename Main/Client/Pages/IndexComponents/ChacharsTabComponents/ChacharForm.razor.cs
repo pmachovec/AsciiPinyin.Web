@@ -37,13 +37,17 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
     protected byte? Tone { get; set; }
 
+    public string RootId { get; } = IDs.CHACHAR_FORM_ROOT;
+
+    public IPage? Page { get; private set; }
+
+    public IModal? ModalLowerLevel { get; private set; }
+
+    public string HtmlTitle { get; private set; } = string.Empty;
+
     public byte? Strokes { get; set; }
 
     public string? TheCharacter { get; set; }
-
-    public string RootId { get; } = IDs.CHACHAR_FORM_ROOT;
-
-    public string HtmlTitle { get; private set; } = string.Empty;
 
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
@@ -96,12 +100,12 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         }
     }
 
-    public async Task OpenAsync(CancellationToken cancellationToken) =>
-        await ModalCommons.OpenAsyncCommon(
-            this,
-            HtmlTitle,
-            cancellationToken
-        );
+    public async Task OpenAsync(IPage page, CancellationToken cancellationToken)
+    {
+        ModalLowerLevel = null;
+        Page = page;
+        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
+    }
 
     public async Task CloseAsync(CancellationToken cancellationToken) =>
         await ModalCommons.CloseAsyncCommon(this, cancellationToken);
@@ -252,6 +256,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
                         ),
                         cancellationToken
                     );
+                    StateHasChanged();
                 }
                 else
                 {

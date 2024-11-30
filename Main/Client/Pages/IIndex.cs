@@ -1,13 +1,12 @@
+using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Shared.ComponentInterfaces;
 using AsciiPinyin.Web.Shared.Models;
 
 namespace AsciiPinyin.Web.Client.Pages;
 
-public interface IIndex
+public interface IIndex : IPage
 {
-    string BackdropId { get; }
-
     FormSubmit FormSubmit { get; }
 
     IEntityTab SelectedTab { get; }

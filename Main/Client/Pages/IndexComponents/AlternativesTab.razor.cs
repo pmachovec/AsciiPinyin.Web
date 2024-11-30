@@ -50,8 +50,8 @@ public class AlternativesTabBase : ComponentBase, IEntityTab
     }
 
     protected async Task ShowAlternativeFormAsync(CancellationToken cancellationToken) =>
-        await AlternativeForm.OpenAsync(cancellationToken);
+        await AlternativeForm.OpenAsync(Index, cancellationToken);
 
     public async Task ShowAlternativeViewDialogAsync(Alternative alternative, CancellationToken cancellationToken) =>
-        await AlternativeViewDialog.OpenAsync(alternative, cancellationToken);
+        await AlternativeViewDialog.OpenAsync(Index, alternative, cancellationToken);
 }

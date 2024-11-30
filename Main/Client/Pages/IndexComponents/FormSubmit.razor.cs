@@ -8,12 +8,8 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
-public class FormSubmitBase : ComponentBase, IEntityFormModal
+public class FormSubmitBase : ComponentBase, IModal
 {
-    public string RootId { get; } = IDs.FORM_SUBMIT;
-
-    public IEntityForm EntityForm { get; private set; } = default!;
-
     protected string HeaderText { get; private set; } = string.Empty;
 
     protected string BodyText { get; private set; } = string.Empty;
@@ -21,6 +17,16 @@ public class FormSubmitBase : ComponentBase, IEntityFormModal
     protected string ButtonText { get; private set; } = string.Empty;
 
     protected Func<CancellationToken, Task> CloseAsync { get; private set; } = default!;
+
+    public string RootId { get; } = IDs.FORM_SUBMIT;
+
+    public IPage? Page { get; private set; }
+
+    public IModal? ModalLowerLevel { get; private set; }
+
+    public string HtmlTitle { get; private set; } = string.Empty;
+
+    public IEntityForm EntityForm { get; private set; } = default!;
 
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
@@ -33,7 +39,10 @@ public class FormSubmitBase : ComponentBase, IEntityFormModal
 
     public async Task SetProcessingAsync(IEntityForm entityForm, CancellationToken cancellationToken)
     {
-        await JSInteropDOM.SetTitleAsync($"{Localizer[Resource.Processing]}...", cancellationToken);
+        Page = null;
+        ModalLowerLevel = entityForm;
+        HtmlTitle = $"{Localizer[Resource.Processing]}...";
+        await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
         EntityForm = entityForm;
 
         await Task.WhenAll(
@@ -53,7 +62,10 @@ public class FormSubmitBase : ComponentBase, IEntityFormModal
         CancellationToken cancellationToken
     )
     {
-        await JSInteropDOM.SetTitleAsync(Localizer[Resource.Success], cancellationToken);
+        Page = null;
+        ModalLowerLevel = entityForm;
+        HtmlTitle = Localizer[Resource.Success];
+        await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
         EntityForm = entityForm;
         HeaderText = $"{Localizer[Resource.Success]}!";
         BodyText = message;
@@ -78,7 +90,10 @@ public class FormSubmitBase : ComponentBase, IEntityFormModal
         CancellationToken cancellationToken
     )
     {
-        await JSInteropDOM.SetTitleAsync(Localizer[Resource.Error], cancellationToken);
+        Page = null;
+        ModalLowerLevel = entityForm;
+        HtmlTitle = Localizer[Resource.Error];
+        await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
         EntityForm = entityForm;
         HeaderText = $"{Localizer[Resource.Error]}!";
         BodyText = message;

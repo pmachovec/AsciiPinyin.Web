@@ -21,6 +21,8 @@ public class IndexBase : ComponentBase, IIndex
 
     public string BackdropId => IDs.INDEX_BACKDROP;
 
+    public string HtmlTitle { get; private set; } = string.Empty;
+
     public FormSubmit FormSubmit { get; set; } = default!;
 
     public IEntityTab SelectedTab => _selectedTab!;
@@ -70,6 +72,8 @@ public class IndexBase : ComponentBase, IIndex
         CancellationToken cancellationToken
     )
     {
+        HtmlTitle = tab.HtmlTitle;
+
         if (_selectedTab is { } selectedTab)
         {
             await Task.WhenAll(

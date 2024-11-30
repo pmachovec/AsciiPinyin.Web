@@ -1,3 +1,4 @@
+
 using AsciiPinyin.Web.Client.ComponentInterfaces;
 
 namespace AsciiPinyin.Web.Client.Commons;
@@ -5,34 +6,23 @@ namespace AsciiPinyin.Web.Client.Commons;
 public interface IModalCommons
 {
     Task OpenAsyncCommon(
-        IModalFirstLevel modalFirstLevel,
+        IModal modal,
         string htmlTitle,
         CancellationToken cancellationToken
     );
 
     Task OpenAsyncCommon(
-        IEntityFormModal entityFormModal,
-        string htmlTitle,
-        CancellationToken cancellationToken
-    );
-
-    Task OpenAsyncCommon(
-        IEntityFormModal entityFormModal,
+        IModal modal,
         CancellationToken cancellationToken
     );
 
     Task CloseAsyncCommon(
-        IModalFirstLevel modalFirstLevel,
-        CancellationToken cancellationToken
-    );
-
-    Task CloseAsyncCommon(
-        IEntityFormModal entityFormModal,
+        IModal modal,
         CancellationToken cancellationToken
     );
 
     Task CloseAllAsyncCommon(
-        IEntityFormModal entityFormModal,
+        IModal modal,
         CancellationToken cancellationToken
     );
 }

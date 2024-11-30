@@ -1,4 +1,5 @@
 using AsciiPinyin.Web.Client.ComponentInterfaces;
+using AsciiPinyin.Web.Client.Exceptions;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Shared.Constants;
 
@@ -7,116 +8,133 @@ namespace AsciiPinyin.Web.Client.Commons;
 public sealed class ModalCommons(IJSInteropDOM _jSInteropDOM) : IModalCommons
 {
     public async Task OpenAsyncCommon(
-        IModalFirstLevel modalFirstLevel,
-        string htmlTitle,
-        CancellationToken cancellationToken
-    )
-    {
-        await _jSInteropDOM.SetTitleAsync(htmlTitle, cancellationToken);
-        await _jSInteropDOM.None2BlockAsync(modalFirstLevel.Index.BackdropId, cancellationToken);
-        await OpenAsyncCommonCommon(modalFirstLevel, cancellationToken);
-        await _jSInteropDOM.AddClassAsync(modalFirstLevel.Index.BackdropId, CssClasses.SHOW, cancellationToken);
-    }
-
-    public async Task OpenAsyncCommon(
-        IEntityFormModal entityFormModal,
-        string htmlTitle,
-        CancellationToken cancellationToken
-    )
-    {
-        await _jSInteropDOM.SetTitleAsync(htmlTitle, cancellationToken);
-        await OpenAsyncCommon(entityFormModal, cancellationToken);
-    }
-
-    public async Task OpenAsyncCommon(
-        IEntityFormModal entityFormModal,
-        CancellationToken cancellationToken
-    )
-    {
-        await Task.WhenAll(
-            _jSInteropDOM.SetZIndexAsync(
-                entityFormModal.EntityForm.RootId,
-                ByteConstants.INDEX_BACKDROP_Z - 1,
-                cancellationToken
-            ),
-            OpenAsyncCommonCommon(entityFormModal, cancellationToken)
-        );
-    }
-
-    public async Task CloseAsyncCommon(
-        IModalFirstLevel modalFirstLevel,
-        CancellationToken cancellationToken
-    )
-    {
-        await _jSInteropDOM.SetTitleAsync(modalFirstLevel.Index.SelectedTab.HtmlTitle, cancellationToken);
-        await _jSInteropDOM.RemoveClassAsync(modalFirstLevel.Index.BackdropId, CssClasses.SHOW, cancellationToken);
-        await CloseAsyncCommonCommon(modalFirstLevel, cancellationToken);
-        await _jSInteropDOM.Block2NoneAsync(modalFirstLevel.Index.BackdropId, cancellationToken);
-    }
-
-    public async Task CloseAsyncCommon(
-        IEntityFormModal entityFormModal,
-        CancellationToken cancellationToken
-    )
-    {
-        await _jSInteropDOM.SetTitleAsync(entityFormModal.EntityForm.HtmlTitle, cancellationToken);
-        await Task.WhenAll(
-            _jSInteropDOM.SetZIndexAsync(
-                entityFormModal.EntityForm.RootId,
-                ByteConstants.INDEX_BACKDROP_Z + 1,
-                cancellationToken
-            ),
-            CloseAsyncCommonCommon(entityFormModal, cancellationToken)
-        );
-    }
-
-    public async Task CloseAllAsyncCommon(
-        IEntityFormModal entityFormModal,
-        CancellationToken cancellationToken
-    )
-    {
-        // First set the title to the current tab's title.
-        await _jSInteropDOM.SetTitleAsync(entityFormModal.EntityForm.Index.SelectedTab.HtmlTitle, cancellationToken);
-
-        // Then hide the first level modal.
-        await Task.WhenAll(
-            _jSInteropDOM.RemoveClassAsync(entityFormModal.EntityForm.RootId, CssClasses.SHOW, cancellationToken),
-            _jSInteropDOM.Block2NoneAsync(entityFormModal.EntityForm.RootId, cancellationToken)
-        );
-
-        // Then hide the second level modal and backdrop and move the first level modal before the backdrop.
-        await _jSInteropDOM.RemoveClassAsync(entityFormModal.EntityForm.Index.BackdropId, CssClasses.SHOW, cancellationToken);
-        await CloseAsyncCommonCommon(entityFormModal, cancellationToken);
-        await Task.WhenAll(
-            _jSInteropDOM.Block2NoneAsync(entityFormModal.EntityForm.Index.BackdropId, cancellationToken),
-            _jSInteropDOM.SetZIndexAsync(
-                entityFormModal.EntityForm.RootId,
-                ByteConstants.INDEX_BACKDROP_Z + 1,
-                cancellationToken
-            )
-        );
-    }
-
-    private async Task OpenAsyncCommonCommon(
         IModal modal,
         CancellationToken cancellationToken
     )
     {
-        await _jSInteropDOM.None2BlockAsync(modal.RootId, cancellationToken);
+        ThrowOnInvalidModal(modal);
 
-        // This separation and ordering is important because of the fade effect when opening the form.
+        if (modal.Page is { } modalPage)
+        {
+            await _jSInteropDOM.None2BlockAsync(modalPage.BackdropId, cancellationToken);
+            await _jSInteropDOM.AddClassAsync(modalPage.BackdropId, CssClasses.SHOW, cancellationToken);
+        }
+        else
+        {
+            await LowerAllZIndexesAsync(modal.ModalLowerLevel!, ByteConstants.INDEX_BACKDROP_Z, cancellationToken);
+        }
+
+        await _jSInteropDOM.None2BlockAsync(modal.RootId, cancellationToken);
         await Task.Delay(IntConstants.MODAL_SHOW_DELAY, cancellationToken);
         await _jSInteropDOM.AddClassAsync(modal.RootId, CssClasses.SHOW, cancellationToken);
     }
 
-    private async Task CloseAsyncCommonCommon(
+    public async Task OpenAsyncCommon(
+        IModal modal,
+        string htmlTitle,
+        CancellationToken cancellationToken
+    )
+    {
+        ThrowOnInvalidModal(modal);
+        await _jSInteropDOM.SetTitleAsync(htmlTitle, cancellationToken);
+        await OpenAsyncCommon(modal, cancellationToken);
+    }
+
+    public async Task CloseAsyncCommon(
         IModal modal,
         CancellationToken cancellationToken
     )
     {
-        await _jSInteropDOM.RemoveClassAsync(modal.RootId, CssClasses.SHOW, cancellationToken);
+        ThrowOnInvalidModal(modal);
 
-        // This separation and ordering is important because of the fade effect when closing the form.
+        if (modal.Page is { } modalPage)
+        {
+            await _jSInteropDOM.SetTitleAsync(modalPage.HtmlTitle, cancellationToken);
+            await _jSInteropDOM.RemoveClassAsync(modalPage.BackdropId, CssClasses.SHOW, cancellationToken);
+            await _jSInteropDOM.Block2NoneAsync(modalPage.BackdropId, cancellationToken);
+        }
+        else
+        {
+            await _jSInteropDOM.SetTitleAsync(modal.ModalLowerLevel!.HtmlTitle, cancellationToken);
+            await IncreaseAllZIndexesAsync(modal.ModalLowerLevel!, ByteConstants.INDEX_BACKDROP_Z, cancellationToken);
+        }
+
+        await CloseAsyncCommonCommon(modal, cancellationToken);
+    }
+
+    public async Task CloseAllAsyncCommon(
+        IModal modal,
+        CancellationToken cancellationToken
+    )
+    {
+        ThrowOnInvalidModal(modal);
+
+        if (modal.Page is { } modalPage)
+        {
+            await _jSInteropDOM.SetTitleAsync(modalPage.HtmlTitle, cancellationToken);
+            await _jSInteropDOM.RemoveClassAsync(modalPage.BackdropId, CssClasses.SHOW, cancellationToken);
+            await _jSInteropDOM.Block2NoneAsync(modalPage.BackdropId, cancellationToken);
+            await CloseAsyncCommonCommon(modal, cancellationToken);
+        }
+        else
+        {
+            await Task.WhenAll(
+                CloseAllAsyncCommon(modal.ModalLowerLevel!, cancellationToken),
+                CloseAsyncCommon(modal, cancellationToken)
+            );
+        }
+    }
+
+    private static void ThrowOnInvalidModal(IModal modal)
+    {
+        if (modal.Page is not null && modal.ModalLowerLevel is not null)
+        {
+            throw new InvalidModalException(
+                $"Modal '{modal.RootId}' has configured both the page and the lower level modal."
+                + " It must have configured exactly one of them."
+            );
+        }
+
+        if (modal.Page is null && modal.ModalLowerLevel is null)
+        {
+            throw new InvalidModalException(
+                $"Modal '{modal.RootId}' has configured neither the page nor the lower level modal."
+                + " It must have configured exactly one of them."
+            );
+        }
+    }
+
+    private async Task LowerAllZIndexesAsync(IModal modal, int higherLevelZIndex, CancellationToken cancellationToken)
+    {
+        if (modal.ModalLowerLevel is { } modalLowerLevel)
+        {
+            await LowerAllZIndexesAsync(modalLowerLevel, higherLevelZIndex - 1, cancellationToken);
+        }
+
+        await _jSInteropDOM.SetZIndexAsync(
+            modal.RootId,
+            higherLevelZIndex - 1,
+            cancellationToken
+        );
+    }
+
+    private async Task IncreaseAllZIndexesAsync(IModal modal, int lowerLevelZIndex, CancellationToken cancellationToken)
+    {
+        await _jSInteropDOM.SetZIndexAsync(
+            modal.RootId,
+            lowerLevelZIndex + 1,
+            cancellationToken
+        );
+
+        if (modal.ModalLowerLevel is { } modalLowerLevel)
+        {
+            await IncreaseAllZIndexesAsync(modalLowerLevel, lowerLevelZIndex + 1, cancellationToken);
+        }
+    }
+
+    private async Task CloseAsyncCommonCommon(IModal modal, CancellationToken cancellationToken)
+    {
+        await _jSInteropDOM.RemoveClassAsync(modal.RootId, CssClasses.SHOW, cancellationToken);
         await Task.Delay(IntConstants.MODAL_HIDE_DELAY, cancellationToken);
         await _jSInteropDOM.Block2NoneAsync(modal.RootId, cancellationToken);
     }

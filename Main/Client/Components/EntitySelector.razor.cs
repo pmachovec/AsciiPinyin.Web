@@ -7,9 +7,11 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Components;
 
-public class EntitySelectorBase<TEntity> : ComponentBase, IEntityFormModal where TEntity : IEntity
+public class EntitySelectorBase<TEntity> : ComponentBase, IModal where TEntity : IEntity
 {
-    public IEntityForm EntityForm { get; private set; } = default!;
+    public IPage? Page { get; private set; }
+
+    public IModal? ModalLowerLevel { get; private set; }
 
     [Inject]
     private IModalCommons ModalCommons { get; set; } = default!;
@@ -24,7 +26,7 @@ public class EntitySelectorBase<TEntity> : ComponentBase, IEntityFormModal where
     public IEnumerable<TEntity> Entities { get; set; } = default!;
 
     [Parameter]
-    public string HtmlTitle { private get; set; } = default!;
+    public string HtmlTitle { get; set; } = default!;
 
     [Parameter]
     public string Title { get; set; } = default!;
@@ -33,11 +35,11 @@ public class EntitySelectorBase<TEntity> : ComponentBase, IEntityFormModal where
     public Func<TEntity, CancellationToken, Task> SelectEntityAsync { get; set; } = default!;
 
     public async Task OpenAsync(
-        IEntityForm entityForm,
+        IModal modalLowerLevel,
         CancellationToken cancellationToken
     )
     {
-        EntityForm = entityForm;
+        ModalLowerLevel = modalLowerLevel;
 
         await ModalCommons.OpenAsyncCommon(
             this,
