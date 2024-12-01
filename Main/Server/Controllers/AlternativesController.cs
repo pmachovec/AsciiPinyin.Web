@@ -173,7 +173,7 @@ public sealed class AlternativesController(
         DbSet<Alternative> knownAlternatives
     )
     {
-        var originalChachar = knownChachars!.Find(
+        var originalChachar = knownChachars.Find(
             alternative.OriginalCharacter,
             alternative.OriginalPinyin,
             alternative.OriginalTone

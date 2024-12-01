@@ -316,6 +316,8 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         CancellationToken cancellationToken
     )
     {
+        await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
+
         var chachar = new Chachar()
         {
             Ipa = ipa,
@@ -331,7 +333,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
         LogCommons.LogFormDataInfo(Logger, chachar);
         LogCommons.LogDatabaseIntegrityVerificationDebug(Logger);
-        var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(chachar);
+        var databseIntegrityErrorText = await GetDatabaseIntegrityErrorTextAsync(chachar, cancellationToken);
 
         if (databseIntegrityErrorText is not null)
         {
@@ -347,9 +349,11 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         }
     }
 
-    private string? GetDatabaseIntegrityErrorText(Chachar chachar)
+    private async Task<string?> GetDatabaseIntegrityErrorTextAsync(Chachar chachar, CancellationToken cancellationToken)
     {
-        if (Index.Chachars.Contains(chachar))
+        var chacharsContainsTask = Task.Run(() => Index.Chachars.Contains(chachar), cancellationToken);
+
+        if (await chacharsContainsTask)
         {
             LogCommons.LogError(Logger, Errors.CHACHAR_ALREADY_EXISTS);
 
@@ -367,7 +371,6 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
     private async Task SubmitAsync(Chachar chachar, CancellationToken cancellationToken)
     {
         var postTask = EntityClient.PostEntityAsync(ApiNames.CHARACTERS, chachar, cancellationToken);
-        await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
         var postResult = await postTask;
 
         if (postResult == HttpStatusCode.OK)

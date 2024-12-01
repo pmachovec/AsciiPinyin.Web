@@ -51,7 +51,7 @@ public sealed class ModalCommons(IJSInteropDOM _jSInteropDOM) : IModalCommons
         {
             await _jSInteropDOM.SetTitleAsync(modalPage.HtmlTitle, cancellationToken);
             await _jSInteropDOM.RemoveClassAsync(modalPage.BackdropId, CssClasses.SHOW, cancellationToken);
-            await _jSInteropDOM.Block2NoneAsync(modalPage.BackdropId, cancellationToken);
+            await _jSInteropDOM.Display2NoneAsync(modalPage.BackdropId, cancellationToken);
         }
         else
         {
@@ -73,7 +73,7 @@ public sealed class ModalCommons(IJSInteropDOM _jSInteropDOM) : IModalCommons
         {
             await _jSInteropDOM.SetTitleAsync(modalPage.HtmlTitle, cancellationToken);
             await _jSInteropDOM.RemoveClassAsync(modalPage.BackdropId, CssClasses.SHOW, cancellationToken);
-            await _jSInteropDOM.Block2NoneAsync(modalPage.BackdropId, cancellationToken);
+            await _jSInteropDOM.Display2NoneAsync(modalPage.BackdropId, cancellationToken);
             await CloseAsyncCommonCommon(modal, cancellationToken);
         }
         else
@@ -136,6 +136,6 @@ public sealed class ModalCommons(IJSInteropDOM _jSInteropDOM) : IModalCommons
     {
         await _jSInteropDOM.RemoveClassAsync(modal.RootId, CssClasses.SHOW, cancellationToken);
         await Task.Delay(IntConstants.MODAL_HIDE_DELAY, cancellationToken);
-        await _jSInteropDOM.Block2NoneAsync(modal.RootId, cancellationToken);
+        await _jSInteropDOM.Display2NoneAsync(modal.RootId, cancellationToken);
     }
 }

@@ -5,6 +5,7 @@ using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
+using System.Globalization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
@@ -48,5 +49,26 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
         await ModalCommons.CloseAsyncCommon(this, cancellationToken);
         Alternative = null;
         StateHasChanged();
+    }
+
+    protected async Task InitiateDeleteAsync(CancellationToken cancellationToken)
+    {
+        await Index.SubmitDialog.SetWarningAsync(
+            this,
+            string.Format(
+                CultureInfo.InvariantCulture,
+                Localizer[Resource.AlternativeWillBeDeleted],
+                Alternative!.TheCharacter!,
+                Alternative.OriginalCharacter!,
+                Alternative.OriginalRealPinyin!
+            ),
+            SubmitDeleteAsync,
+            cancellationToken
+        );
+    }
+
+    private async Task SubmitDeleteAsync(CancellationToken cancellationToken)
+    {
+        // TODO when server side implemented
     }
 }

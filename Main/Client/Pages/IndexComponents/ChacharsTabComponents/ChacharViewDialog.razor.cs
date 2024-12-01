@@ -5,6 +5,7 @@ using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
+using System.Globalization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
@@ -48,5 +49,25 @@ public class ChacharViewDialogBase : ComponentBase, IModal
         await ModalCommons.CloseAsyncCommon(this, cancellationToken);
         Chachar = null;
         StateHasChanged();
+    }
+
+    protected async Task InitiateDeleteAsync(CancellationToken cancellationToken)
+    {
+        await Index.SubmitDialog.SetWarningAsync(
+            this,
+            string.Format(
+                CultureInfo.InvariantCulture,
+                Localizer[Resource.CharacterWillBeDeleted],
+                Chachar!.TheCharacter!,
+                Chachar.RealPinyin!
+            ),
+            SubmitDeleteAsync,
+            cancellationToken
+        );
+    }
+
+    private async Task SubmitDeleteAsync(CancellationToken cancellationToken)
+    {
+        // TODO when server side implemented
     }
 }

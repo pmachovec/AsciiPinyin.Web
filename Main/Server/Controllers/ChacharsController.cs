@@ -329,7 +329,7 @@ public sealed class ChacharsController(
     {
         if (chachar.RadicalCharacter is { } radicalCharacter)
         {
-            var radicalChachar = knownChachars!.Find(
+            var radicalChachar = knownChachars.Find(
                 radicalCharacter,
                 chachar.RadicalPinyin,
                 chachar.RadicalTone
@@ -359,7 +359,7 @@ public sealed class ChacharsController(
 
             if (chachar.RadicalAlternativeCharacter is { } radicalAlternativeCharacter)
             {
-                var radicalAlternative = knownAlternatives!.Find(
+                var radicalAlternative = knownAlternatives.Find(
                    radicalAlternativeCharacter,
                    radicalChachar.TheCharacter,
                    radicalChachar.Pinyin,

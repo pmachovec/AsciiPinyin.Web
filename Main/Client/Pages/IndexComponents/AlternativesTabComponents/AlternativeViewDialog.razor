@@ -31,7 +31,8 @@
             <div class="border-0 modal-footer">
                 <button
                     type="button"
-                    class="btn btn-modal btn-danger">
+                    class="btn btn-modal btn-danger"
+                    @onclick="async _ => await InitiateDeleteAsync(CancellationToken.None)">
                     <span>@Localizer[Resource.Delete]</span>
                 </button>
                 <button

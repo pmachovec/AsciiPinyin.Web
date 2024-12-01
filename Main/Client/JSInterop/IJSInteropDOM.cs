@@ -106,13 +106,13 @@ public interface IJSInteropDOM
     Task SetZIndexAsync(string elementId, int value, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Removes "d-block" css class from the given element, if the element has the class.
+    /// Removes all but "d-none" display css classes from the given element.
     /// Adds "d-none" css class to the given element.
     /// </summary>
     /// <param name="elementId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task Block2NoneAsync(string elementId, CancellationToken cancellationToken);
+    Task Display2NoneAsync(string elementId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Removes "d-none" css class from the given element, if the element has the class.
@@ -122,4 +122,43 @@ public interface IJSInteropDOM
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task None2BlockAsync(string elementId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Removes "d-none" css class from the given element, if the element has the class.
+    /// Adds "d-flex" css class to the given element.
+    /// </summary>
+    /// <param name="elementId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task None2FlexAsync(string elementId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Adds the 'bg-primary' css class for the given element.
+    /// If the element already has the class, nothing happens.
+    /// If the element has other 'bg' classes, they are removed from the element
+    /// </summary>
+    /// <param name="elementId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task SetBgPrimaryAsync(string elementId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Adds the 'bg-warning' css class for the given element.
+    /// If the element already has the class, nothing happens.
+    /// If the element has other 'bg' classes, they are removed from the element
+    /// </summary>
+    /// <param name="elementId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task SetBgWarningAsync(string elementId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Adds the 'bg-danger' css class for the given element.
+    /// If the element already has the class, nothing happens.
+    /// If the element has other 'bg' classes, they are removed from the element
+    /// </summary>
+    /// <param name="elementId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task SetBgDangerAsync(string elementId, CancellationToken cancellationToken);
 }

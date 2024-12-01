@@ -44,9 +44,10 @@ public sealed class JSInteropDOM(IJSRuntime jsRuntime) : IJSInteropDOM
     public async Task SetZIndexAsync(string elementId, int value, CancellationToken cancellationToken) =>
         await _jsRuntime.InvokeVoidAsync(DOMFunctions.SET_Z_INDEX, cancellationToken, elementId, value);
 
-    public async Task Block2NoneAsync(string elementId, CancellationToken cancellationToken) =>
+    public async Task Display2NoneAsync(string elementId, CancellationToken cancellationToken) =>
         await Task.WhenAll(
             RemoveClassAsync(elementId, CssClasses.D_BLOCK, cancellationToken),
+            RemoveClassAsync(elementId, CssClasses.D_FLEX, cancellationToken),
             AddClassAsync(elementId, CssClasses.D_NONE, cancellationToken)
         );
 
@@ -54,5 +55,32 @@ public sealed class JSInteropDOM(IJSRuntime jsRuntime) : IJSInteropDOM
         await Task.WhenAll(
             RemoveClassAsync(elementId, CssClasses.D_NONE, cancellationToken),
             AddClassAsync(elementId, CssClasses.D_BLOCK, cancellationToken)
+        );
+
+    public async Task None2FlexAsync(string elementId, CancellationToken cancellationToken) =>
+        await Task.WhenAll(
+            RemoveClassAsync(elementId, CssClasses.D_NONE, cancellationToken),
+            AddClassAsync(elementId, CssClasses.D_FLEX, cancellationToken)
+        );
+
+    public async Task SetBgPrimaryAsync(string elementId, CancellationToken cancellationToken) =>
+        await Task.WhenAll(
+            RemoveClassAsync(elementId, CssClasses.BG_DANGER, cancellationToken),
+            RemoveClassAsync(elementId, CssClasses.BG_WARNING, cancellationToken),
+            AddClassAsync(elementId, CssClasses.BG_PRIMARY, cancellationToken)
+        );
+
+    public async Task SetBgWarningAsync(string elementId, CancellationToken cancellationToken) =>
+        await Task.WhenAll(
+            RemoveClassAsync(elementId, CssClasses.BG_PRIMARY, cancellationToken),
+            RemoveClassAsync(elementId, CssClasses.BG_DANGER, cancellationToken),
+            AddClassAsync(elementId, CssClasses.BG_WARNING, cancellationToken)
+        );
+
+    public async Task SetBgDangerAsync(string elementId, CancellationToken cancellationToken) =>
+        await Task.WhenAll(
+            RemoveClassAsync(elementId, CssClasses.BG_PRIMARY, cancellationToken),
+            RemoveClassAsync(elementId, CssClasses.BG_WARNING, cancellationToken),
+            AddClassAsync(elementId, CssClasses.BG_DANGER, cancellationToken)
         );
 }

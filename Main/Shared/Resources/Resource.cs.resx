@@ -231,4 +231,16 @@
   <data name="AlternativeCreated" xml:space="preserve">
     <value>Alternativa &lt;b&gt;{0}&lt;/b&gt; pro znak &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; byla úspěšně vytvořena.</value>
   </data>
+  <data name="Warning" xml:space="preserve">
+    <value>Varování</value>
+  </data>
+  <data name="Proceed" xml:space="preserve">
+    <value>Pokračovat</value>
+  </data>
+  <data name="CharacterWillBeDeleted" xml:space="preserve">
+    <value>Znak &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; bude smazán z databáze. Tato operace je nevratná. Pokračovat?</value>
+  </data>
+  <data name="AlternativeWillBeDeleted" xml:space="preserve">
+    <value>Alternativa &lt;b&gt;{0}&lt;/b&gt; pro znak &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; bude smazána z databáze. Tato operace je nevratná. Pokračovat?</value>
+  </data>
 </root>

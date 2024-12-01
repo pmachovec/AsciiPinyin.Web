@@ -194,6 +194,8 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         CancellationToken cancellationToken
     )
     {
+        await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
+
         var alternative = new Alternative()
         {
             OriginalCharacter = originalCharacter,
@@ -205,7 +207,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
         LogCommons.LogFormDataInfo(Logger, alternative);
         LogCommons.LogDatabaseIntegrityVerificationDebug(Logger);
-        var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(alternative);
+        var databseIntegrityErrorText = await GetDatabaseIntegrityErrorTextAsync(alternative, cancellationToken);
 
         if (databseIntegrityErrorText is not null)
         {
@@ -221,9 +223,11 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         }
     }
 
-    private string? GetDatabaseIntegrityErrorText(Alternative alternative)
+    private async Task<string?> GetDatabaseIntegrityErrorTextAsync(Alternative alternative, CancellationToken cancellationToken)
     {
-        if (Index.Alternatives.Contains(alternative))
+        var alternativesContainsTask = Task.Run(() => Index.Alternatives.Contains(alternative), cancellationToken);
+
+        if (await alternativesContainsTask)
         {
             LogCommons.LogError(Logger, Errors.ALTERNATIVE_ALREADY_EXISTS);
 
@@ -242,7 +246,6 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     private async Task SubmitAsync(Alternative alternative, CancellationToken cancellationToken)
     {
         var postTask = EntityClient.PostEntityAsync(ApiNames.ALTERNATIVES, alternative, cancellationToken);
-        await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
         var postResult = await postTask;
 
         if (postResult == HttpStatusCode.OK)

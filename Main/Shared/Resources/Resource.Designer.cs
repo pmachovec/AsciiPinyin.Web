@@ -97,6 +97,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; will be deleted from the database. This operation can&apos;t be undone. Continue?.
+        /// </summary>
+        public static string AlternativeWillBeDeleted {
+            get {
+                return ResourceManager.GetString("AlternativeWillBeDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Back
         ///.
         /// </summary>
@@ -148,6 +157,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         public static string Characters {
             get {
                 return ResourceManager.GetString("Characters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; will be deleted from the database. This operation can&apos;t be undone. Proceed?.
+        /// </summary>
+        public static string CharacterWillBeDeleted {
+            get {
+                return ResourceManager.GetString("CharacterWillBeDeleted", resourceCulture);
             }
         }
         
@@ -314,6 +332,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Proceed.
+        /// </summary>
+        public static string Proceed {
+            get {
+                return ResourceManager.GetString("Proceed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Processing.
         /// </summary>
         public static string Processing {
@@ -400,6 +427,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         public static string Tone {
             get {
                 return ResourceManager.GetString("Tone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warning.
+        /// </summary>
+        public static string Warning {
+            get {
+                return ResourceManager.GetString("Warning", resourceCulture);
             }
         }
     }

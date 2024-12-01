@@ -14,9 +14,9 @@ public class SubmitDialogBase : ComponentBase, IModal
 
     protected MarkupString BodyText { get; private set; } = new(string.Empty);
 
-    protected string ButtonText { get; private set; } = string.Empty;
+    protected string ButtonProceedText { get; private set; } = string.Empty;
 
-    protected Func<CancellationToken, Task> CloseAsync { get; private set; } = default!;
+    protected Func<CancellationToken, Task> ProceedAsync { get; private set; } = default!;
 
     public string RootId { get; } = IDs.SUBMIT_DIALOG;
 
@@ -26,13 +26,11 @@ public class SubmitDialogBase : ComponentBase, IModal
 
     public string HtmlTitle { get; private set; } = string.Empty;
 
-    public IEntityForm EntityForm { get; private set; } = default!;
-
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
     [Inject]
-    private IModalCommons ModalCommons { get; set; } = default!;
+    protected IModalCommons ModalCommons { get; set; } = default!;
 
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
@@ -43,13 +41,12 @@ public class SubmitDialogBase : ComponentBase, IModal
         ModalLowerLevel = entityForm;
         HtmlTitle = $"{Localizer[Resource.Processing]}...";
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
-        EntityForm = entityForm;
 
         await Task.WhenAll(
-            JSInteropDOM.Block2NoneAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
-            JSInteropDOM.Block2NoneAsync(IDs.SUBMIT_DIALOG_BODY_TEXT, cancellationToken),
-            JSInteropDOM.Block2NoneAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_BODY_TEXT, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
+            JSInteropDOM.None2FlexAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
             ModalCommons.OpenAsyncCommon(this, cancellationToken)
         );
 
@@ -57,64 +54,88 @@ public class SubmitDialogBase : ComponentBase, IModal
     }
 
     public async Task SetSuccessAsync(
-        IEntityForm entityForm,
+        IModal modalLowerLevel,
         string message,
         CancellationToken cancellationToken
     )
     {
         Page = null;
-        ModalLowerLevel = entityForm;
+        ModalLowerLevel = modalLowerLevel;
         HtmlTitle = Localizer[Resource.Success];
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
-        EntityForm = entityForm;
         HeaderText = $"{Localizer[Resource.Success]}!";
         BodyText = new(message);
-        ButtonText = Localizer[Resource.OK];
-        CloseAsync = CloseSuccessAsync;
+        ButtonProceedText = Localizer[Resource.OK];
+        ProceedAsync = CloseAllAsync;
         StateHasChanged();
 
         await Task.WhenAll(
-            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.None2FlexAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.None2FlexAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
             JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BODY_TEXT, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
-            JSInteropDOM.Block2NoneAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
-            JSInteropDOM.RemoveClassAsync(IDs.SUBMIT_DIALOG_HEADER, CssClasses.BG_DANGER, cancellationToken),
-            JSInteropDOM.AddClassAsync(IDs.SUBMIT_DIALOG_HEADER, CssClasses.BG_PRIMARY, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BUTTON_PROCEED, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_BUTTON_BACK, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
+            JSInteropDOM.SetBgPrimaryAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
             ModalCommons.OpenAsyncCommon(this, cancellationToken)
         );
     }
 
     public async Task SetErrorAsync(
-        IEntityForm entityForm,
+        IModal modalLowerLevel,
         string message,
         CancellationToken cancellationToken
     )
     {
         Page = null;
-        ModalLowerLevel = entityForm;
+        ModalLowerLevel = modalLowerLevel;
         HtmlTitle = Localizer[Resource.Error];
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
-        EntityForm = entityForm;
         HeaderText = $"{Localizer[Resource.Error]}!";
         BodyText = new(message);
-        ButtonText = Localizer[Resource.Back];
-        CloseAsync = CloseErrorAsync;
         StateHasChanged();
 
         await Task.WhenAll(
-            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.None2FlexAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.None2FlexAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
             JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BODY_TEXT, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
-            JSInteropDOM.Block2NoneAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
-            JSInteropDOM.RemoveClassAsync(IDs.SUBMIT_DIALOG_HEADER, CssClasses.BG_PRIMARY, cancellationToken),
-            JSInteropDOM.AddClassAsync(IDs.SUBMIT_DIALOG_HEADER, CssClasses.BG_DANGER, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BUTTON_BACK, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_BUTTON_PROCEED, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
+            JSInteropDOM.SetBgDangerAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
             ModalCommons.OpenAsyncCommon(this, cancellationToken)
         );
     }
 
-    protected async Task CloseSuccessAsync(CancellationToken cancellationToken)
-        => await ModalCommons.CloseAllAsyncCommon(this, cancellationToken);
+    public async Task SetWarningAsync(
+        IModal modalLowerLevel,
+        string message,
+        Func<CancellationToken, Task> methodOnProceedAsync,
+        CancellationToken cancellationToken
+    )
+    {
+        Page = null;
+        ModalLowerLevel = modalLowerLevel;
+        HtmlTitle = Localizer[Resource.Warning];
+        await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
+        HeaderText = $"{Localizer[Resource.Warning]}!";
+        BodyText = new(message);
+        ButtonProceedText = Localizer[Resource.Proceed];
+        ProceedAsync = methodOnProceedAsync;
+        StateHasChanged();
 
-    protected async Task CloseErrorAsync(CancellationToken cancellationToken)
-        => await ModalCommons.CloseAsyncCommon(this, cancellationToken);
+        await Task.WhenAll(
+            JSInteropDOM.None2FlexAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.None2FlexAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BODY_TEXT, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BUTTON_BACK, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BUTTON_PROCEED, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
+            JSInteropDOM.SetBgWarningAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
+            ModalCommons.OpenAsyncCommon(this, cancellationToken)
+        );
+    }
+
+    protected async Task CloseAllAsync(CancellationToken cancellationToken)
+        => await ModalCommons.CloseAllAsyncCommon(this, cancellationToken);
 }

@@ -44,7 +44,9 @@ public static class IDs
     public const string SAVE_FAILED_ROOT = "save-failed-root";
     public const string SAVE_SUCCESS_ROOT = "save-success-root";
     public const string SUBMIT_DIALOG_BODY_TEXT = "submit-dialog-body-text";
-    public const string SUBMIT_DIALOG_BUTTON_TEXT = "submit-dialog-button-text";
+    public const string SUBMIT_DIALOG_BUTTON_BACK = "submit-dialog-button-back";
+    public const string SUBMIT_DIALOG_BUTTON_PROCEED = "submit-dialog-button-proceed";
+    public const string SUBMIT_DIALOG_BUTTON_PROCEED_TEXT = "submit-dialog-button-proceed-text";
     public const string SUBMIT_DIALOG_FOOTER = "submit-dialog-footer";
     public const string SUBMIT_DIALOG_HEADER = "submit-dialog-header";
     public const string SUBMIT_DIALOG_LOADING = "submit-dialog-loading";

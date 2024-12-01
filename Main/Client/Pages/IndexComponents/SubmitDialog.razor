@@ -28,13 +28,21 @@
                 <div id="@IDs.SUBMIT_DIALOG_BODY_TEXT">@BodyText</div>
             </div>
             <div
-                class="modal-footer border-0 bottom-0 end-0 position-absolute"
+                class="modal-footer border-0 bottom-0 end-0"
                 id="@IDs.SUBMIT_DIALOG_FOOTER">
                 <button
                     type="button"
+                    class="btn btn-modal btn-danger"
+                    id="@IDs.SUBMIT_DIALOG_BUTTON_BACK"
+                    @onclick="async _ => await ModalCommons.CloseAsyncCommon(this, CancellationToken.None)">
+                    <span>@Localizer[Resource.Back]</span>
+                </button>
+                <button
+                    type="button"
                     class="btn btn-modal btn-primary"
-                    @onclick="async _ => await CloseAsync(CancellationToken.None)">
-                    <span id="@IDs.SUBMIT_DIALOG_BUTTON_TEXT">@ButtonText</span>
+                    id="@IDs.SUBMIT_DIALOG_BUTTON_PROCEED"
+                    @onclick="async _ => await ProceedAsync(CancellationToken.None)">
+                    <span id="@IDs.SUBMIT_DIALOG_BUTTON_PROCEED_TEXT">@ButtonProceedText</span>
                 </button>
             </div>
         </div>
