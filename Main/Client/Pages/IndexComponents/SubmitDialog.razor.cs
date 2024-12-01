@@ -8,7 +8,7 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
-public class FormSubmitBase : ComponentBase, IModal
+public class SubmitDialogBase : ComponentBase, IModal
 {
     protected string HeaderText { get; private set; } = string.Empty;
 
@@ -18,7 +18,7 @@ public class FormSubmitBase : ComponentBase, IModal
 
     protected Func<CancellationToken, Task> CloseAsync { get; private set; } = default!;
 
-    public string RootId { get; } = IDs.FORM_SUBMIT;
+    public string RootId { get; } = IDs.SUBMIT_DIALOG;
 
     public IPage? Page { get; private set; }
 
@@ -46,10 +46,10 @@ public class FormSubmitBase : ComponentBase, IModal
         EntityForm = entityForm;
 
         await Task.WhenAll(
-            JSInteropDOM.Block2NoneAsync(IDs.FORM_SUBMIT_HEADER, cancellationToken),
-            JSInteropDOM.Block2NoneAsync(IDs.FORM_SUBMIT_BODY_TEXT, cancellationToken),
-            JSInteropDOM.Block2NoneAsync(IDs.FORM_SUBMIT_FOOTER, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.FORM_SUBMIT_LOADING, cancellationToken),
+            JSInteropDOM.Block2NoneAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.Block2NoneAsync(IDs.SUBMIT_DIALOG_BODY_TEXT, cancellationToken),
+            JSInteropDOM.Block2NoneAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
             ModalCommons.OpenAsyncCommon(this, cancellationToken)
         );
 
@@ -74,12 +74,12 @@ public class FormSubmitBase : ComponentBase, IModal
         StateHasChanged();
 
         await Task.WhenAll(
-            JSInteropDOM.None2BlockAsync(IDs.FORM_SUBMIT_HEADER, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.FORM_SUBMIT_BODY_TEXT, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.FORM_SUBMIT_FOOTER, cancellationToken),
-            JSInteropDOM.Block2NoneAsync(IDs.FORM_SUBMIT_LOADING, cancellationToken),
-            JSInteropDOM.RemoveClassAsync(IDs.FORM_SUBMIT_HEADER, CssClasses.BG_DANGER, cancellationToken),
-            JSInteropDOM.AddClassAsync(IDs.FORM_SUBMIT_HEADER, CssClasses.BG_PRIMARY, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BODY_TEXT, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
+            JSInteropDOM.Block2NoneAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
+            JSInteropDOM.RemoveClassAsync(IDs.SUBMIT_DIALOG_HEADER, CssClasses.BG_DANGER, cancellationToken),
+            JSInteropDOM.AddClassAsync(IDs.SUBMIT_DIALOG_HEADER, CssClasses.BG_PRIMARY, cancellationToken),
             ModalCommons.OpenAsyncCommon(this, cancellationToken)
         );
     }
@@ -102,12 +102,12 @@ public class FormSubmitBase : ComponentBase, IModal
         StateHasChanged();
 
         await Task.WhenAll(
-            JSInteropDOM.None2BlockAsync(IDs.FORM_SUBMIT_HEADER, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.FORM_SUBMIT_BODY_TEXT, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.FORM_SUBMIT_FOOTER, cancellationToken),
-            JSInteropDOM.Block2NoneAsync(IDs.FORM_SUBMIT_LOADING, cancellationToken),
-            JSInteropDOM.RemoveClassAsync(IDs.FORM_SUBMIT_HEADER, CssClasses.BG_PRIMARY, cancellationToken),
-            JSInteropDOM.AddClassAsync(IDs.FORM_SUBMIT_HEADER, CssClasses.BG_DANGER, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BODY_TEXT, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
+            JSInteropDOM.Block2NoneAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
+            JSInteropDOM.RemoveClassAsync(IDs.SUBMIT_DIALOG_HEADER, CssClasses.BG_PRIMARY, cancellationToken),
+            JSInteropDOM.AddClassAsync(IDs.SUBMIT_DIALOG_HEADER, CssClasses.BG_DANGER, cancellationToken),
             ModalCommons.OpenAsyncCommon(this, cancellationToken)
         );
     }

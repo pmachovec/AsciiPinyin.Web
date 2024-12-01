@@ -335,7 +335,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
         if (databseIntegrityErrorText is not null)
         {
-            await Index.FormSubmit.SetErrorAsync(
+            await Index.SubmitDialog.SetErrorAsync(
                 this,
                 databseIntegrityErrorText,
                 cancellationToken
@@ -367,13 +367,13 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
     private async Task SubmitAsync(Chachar chachar, CancellationToken cancellationToken)
     {
         var postTask = EntityClient.PostEntityAsync(ApiNames.CHARACTERS, chachar, cancellationToken);
-        await Index.FormSubmit.SetProcessingAsync(this, cancellationToken);
+        await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
         var postResult = await postTask;
 
         if (postResult == HttpStatusCode.OK)
         {
             LogCommons.LogHttpMethodSuccessInfo(Logger, HttpMethod.Post);
-            await Index.FormSubmit.SetSuccessAsync(
+            await Index.SubmitDialog.SetSuccessAsync(
                 this,
                 string.Format(
                     CultureInfo.InvariantCulture,
@@ -390,7 +390,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         else
         {
             LogCommons.LogHttpMethodFailedError(Logger, HttpMethod.Post);
-            await Index.FormSubmit.SetErrorAsync(
+            await Index.SubmitDialog.SetErrorAsync(
                 this,
                 Localizer[Resource.ProcessingError],
                 cancellationToken

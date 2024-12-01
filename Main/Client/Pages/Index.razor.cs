@@ -23,7 +23,7 @@ public class IndexBase : ComponentBase, IIndex
 
     public string HtmlTitle { get; private set; } = string.Empty;
 
-    public FormSubmit FormSubmit { get; set; } = default!;
+    public SubmitDialog SubmitDialog { get; set; } = default!;
 
     public IEntityTab SelectedTab => _selectedTab!;
 

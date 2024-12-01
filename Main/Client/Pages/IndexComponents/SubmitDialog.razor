@@ -3,7 +3,7 @@
 @using AsciiPinyin.Web.Shared.Resources
 @using Microsoft.AspNetCore.Components.Web
 
-@inherits FormSubmitBase
+@inherits SubmitDialogBase
 
 <div
     class="modal fade @CssClasses.D_NONE"
@@ -15,26 +15,26 @@
         role="document">
         <div
             class="modal-content"
-            id="@IDs.FORM_SUBMIT_MODAL_CONTENT">
+            id="@IDs.SUBMIT_DIALOG_MODAL_CONTENT">
             <div
                 class="modal-header"
-                id="@IDs.FORM_SUBMIT_HEADER">
+                id="@IDs.SUBMIT_DIALOG_HEADER">
                 <div class="fw-bold text-center text-uppercase text-white w-100">@HeaderText</div>
             </div>
             <div class="modal-body">
                 <Loading
-                    Id="@IDs.FORM_SUBMIT_LOADING"
+                    Id="@IDs.SUBMIT_DIALOG_LOADING"
                     TextResource="@Resource.Processing" />
-                <div id="@IDs.FORM_SUBMIT_BODY_TEXT">@BodyText</div>
+                <div id="@IDs.SUBMIT_DIALOG_BODY_TEXT">@BodyText</div>
             </div>
             <div
                 class="modal-footer border-0 bottom-0 end-0 position-absolute"
-                id="@IDs.FORM_SUBMIT_FOOTER">
+                id="@IDs.SUBMIT_DIALOG_FOOTER">
                 <button
                     type="button"
                     class="btn btn-modal btn-primary"
                     @onclick="async _ => await CloseAsync(CancellationToken.None)">
-                    <span id="@IDs.FORM_SUBMIT_BUTTON_TEXT">@ButtonText</span>
+                    <span id="@IDs.SUBMIT_DIALOG_BUTTON_TEXT">@ButtonText</span>
                 </button>
             </div>
         </div>
