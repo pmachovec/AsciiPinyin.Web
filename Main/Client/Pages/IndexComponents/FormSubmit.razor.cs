@@ -12,7 +12,7 @@ public class FormSubmitBase : ComponentBase, IModal
 {
     protected string HeaderText { get; private set; } = string.Empty;
 
-    protected string BodyText { get; private set; } = string.Empty;
+    protected MarkupString BodyText { get; private set; } = new(string.Empty);
 
     protected string ButtonText { get; private set; } = string.Empty;
 
@@ -68,7 +68,7 @@ public class FormSubmitBase : ComponentBase, IModal
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
         EntityForm = entityForm;
         HeaderText = $"{Localizer[Resource.Success]}!";
-        BodyText = message;
+        BodyText = new(message);
         ButtonText = Localizer[Resource.OK];
         CloseAsync = CloseSuccessAsync;
         StateHasChanged();
@@ -96,7 +96,7 @@ public class FormSubmitBase : ComponentBase, IModal
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
         EntityForm = entityForm;
         HeaderText = $"{Localizer[Resource.Error]}!";
-        BodyText = message;
+        BodyText = new(message);
         ButtonText = Localizer[Resource.Back];
         CloseAsync = CloseErrorAsync;
         StateHasChanged();

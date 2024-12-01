@@ -217,18 +217,18 @@
     <value>Zpět</value>
   </data>
   <data name="CharacterAlreadyInDb" xml:space="preserve">
-    <value>Znak "{0} - {1}" již v databázi existuje.</value>
+    <value>Znak &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; již v databázi existuje.</value>
   </data>
   <data name="CharacterCreated" xml:space="preserve">
-    <value>Znak "{0} - {1}" byl úspěšně vytvořen.</value>
+    <value>Znak &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; byl úspěšně vytvořen.</value>
   </data>
   <data name="ProcessingError" xml:space="preserve">
     <value>Při zpracování došlo k chybě. Kontaktujte vyšší moc.</value>
   </data>
   <data name="AlternativeAlreadyInDb" xml:space="preserve">
-    <value>Alternativa "{0}" pro znak "{1} - {2}" již v databázi existuje.</value>
+    <value>Alternativa &lt;b&gt;{0}&lt;/b&gt; pro znak &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; již v databázi existuje.</value>
   </data>
   <data name="AlternativeCreated" xml:space="preserve">
-    <value>Alternativa "{0}" pro znak "{1} - {2}" byla úspěšně vytvořena.</value>
+    <value>Alternativa &lt;b&gt;{0}&lt;/b&gt; pro znak &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; byla úspěšně vytvořena.</value>
   </data>
 </root>

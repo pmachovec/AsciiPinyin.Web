@@ -61,7 +61,7 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The alternative &quot;{0}&quot; for the character &quot;{1} - {2}&quot; already exists in the database..
+        ///   Looks up a localized string similar to The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; already exists in the database..
         /// </summary>
         public static string AlternativeAlreadyInDb {
             get {
@@ -79,7 +79,7 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The alternative &apos;{0}&apos; for the character &quot;{1} - {2}&quot; was successfully created..
+        ///   Looks up a localized string similar to The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; was successfully created..
         /// </summary>
         public static string AlternativeCreated {
             get {
@@ -125,7 +125,7 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The character &quot;{0} - {1}&quot; already exists in the database..
+        ///   Looks up a localized string similar to The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; already exists in the database..
         /// </summary>
         public static string CharacterAlreadyInDb {
             get {
@@ -134,7 +134,7 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The character &quot;{0} - {1}&quot; was successfully created..
+        ///   Looks up a localized string similar to The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; was successfully created..
         /// </summary>
         public static string CharacterCreated {
             get {
