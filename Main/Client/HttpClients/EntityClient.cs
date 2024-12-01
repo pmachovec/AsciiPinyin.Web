@@ -9,19 +9,19 @@ public sealed partial class EntityClient(
     ILogger<EntityClient> _logger
 ) : IEntityClient
 {
-    public async Task<IEnumerable<TEntity>> GetEntitiesAsync<TEntity>(
+    public async Task<ISet<T>> GetEntitiesAsync<T>(
         string entitiesApiName,
         CancellationToken cancellationToken
-    ) where TEntity : IEntity
+    ) where T : IEntity
     {
         try
         {
-            var result = await _httpClient.GetFromJsonAsync<IEnumerable<TEntity>>(entitiesApiName, cancellationToken);
+            var result = await _httpClient.GetFromJsonAsync<ISet<T>>(entitiesApiName, cancellationToken);
 
             if (result is null)
             {
                 LogApiNullError(_logger, entitiesApiName);
-                return [];
+                return new HashSet<T>();
             }
 
             if (!result.Any())
@@ -37,7 +37,7 @@ public sealed partial class EntityClient(
             LogExceptionError(_logger, e);
         }
 
-        return [];
+        return new HashSet<T>();
     }
 
     public async Task<HttpStatusCode> PostEntityAsync<TEntity>(

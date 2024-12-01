@@ -132,59 +132,14 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
         if (areAllInputsValid)
         {
-            var alternative = new Alternative()
-            {
-                OriginalCharacter = OriginalCharacter,
-                OriginalPinyin = OriginalPinyin,
-                OriginalTone = OriginalTone,
-                Strokes = Strokes,
-                TheCharacter = TheCharacter
-            };
-
-            LogCommons.LogFormDataInfo(Logger, alternative);
-            LogCommons.LogDatabaseIntegrityVerificationDebug(Logger);
-            var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(alternative);
-
-            if (databseIntegrityErrorText is not null)
-            {
-                await Index.FormSubmit.SetErrorAsync(
-                    this,
-                    databseIntegrityErrorText,
-                    cancellationToken
-                );
-            }
-            else
-            {
-                var postTask = EntityClient.PostEntityAsync(ApiNames.ALTERNATIVES, alternative, cancellationToken);
-                await Index.FormSubmit.SetProcessingAsync(this, cancellationToken);
-                var postResult = await postTask;
-
-                if (postResult == HttpStatusCode.OK)
-                {
-                    LogCommons.LogHttpMethodSuccessInfo(Logger, HttpMethod.Post);
-                    await Index.FormSubmit.SetSuccessAsync(
-                        this,
-                        string.Format(
-                        CultureInfo.InvariantCulture,
-                            Localizer[Resource.AlternativeCreated],
-                            alternative.TheCharacter,
-                            alternative.OriginalCharacter,
-                            alternative.OriginalPinyin
-                        ),
-                        cancellationToken
-                    );
-                    StateHasChanged();
-                }
-                else
-                {
-                    LogCommons.LogHttpMethodFailedError(Logger, HttpMethod.Post);
-                    await Index.FormSubmit.SetErrorAsync(
-                        this,
-                        Localizer[Resource.ProcessingError],
-                        cancellationToken
-                    );
-                }
-            }
+            await CheckIntegrityAndSubmitAsync(
+                TheCharacter!,
+                OriginalCharacter!,
+                OriginalPinyin!,
+                (byte)OriginalTone!,
+                (byte)Strokes!,
+                cancellationToken
+            );
         }
     }
 
@@ -230,6 +185,42 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         return null;
     }
 
+    private async Task CheckIntegrityAndSubmitAsync(
+        string theCharacter,
+        string originalCharacter,
+        string originalPinyin,
+        byte originalTone,
+        byte strokes,
+        CancellationToken cancellationToken
+    )
+    {
+        var alternative = new Alternative()
+        {
+            OriginalCharacter = originalCharacter,
+            OriginalPinyin = originalPinyin,
+            OriginalTone = originalTone,
+            Strokes = strokes,
+            TheCharacter = theCharacter
+        };
+
+        LogCommons.LogFormDataInfo(Logger, alternative);
+        LogCommons.LogDatabaseIntegrityVerificationDebug(Logger);
+        var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(alternative);
+
+        if (databseIntegrityErrorText is not null)
+        {
+            await Index.FormSubmit.SetErrorAsync(
+                this,
+                databseIntegrityErrorText,
+                cancellationToken
+            );
+        }
+        else
+        {
+            await SubmitAsync(alternative, cancellationToken);
+        }
+    }
+
     private string? GetDatabaseIntegrityErrorText(Alternative alternative)
     {
         if (Index.Alternatives.Contains(alternative))
@@ -241,10 +232,45 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
                 Localizer[Resource.AlternativeAlreadyInDb],
                 alternative.TheCharacter,
                 alternative.OriginalCharacter,
-                alternative.OriginalPinyin
+                alternative.OriginalRealPinyin
             );
         }
 
         return null;
+    }
+
+    private async Task SubmitAsync(Alternative alternative, CancellationToken cancellationToken)
+    {
+        var postTask = EntityClient.PostEntityAsync(ApiNames.ALTERNATIVES, alternative, cancellationToken);
+        await Index.FormSubmit.SetProcessingAsync(this, cancellationToken);
+        var postResult = await postTask;
+
+        if (postResult == HttpStatusCode.OK)
+        {
+            LogCommons.LogHttpMethodSuccessInfo(Logger, HttpMethod.Post);
+            await Index.FormSubmit.SetSuccessAsync(
+                this,
+                string.Format(
+                CultureInfo.InvariantCulture,
+                    Localizer[Resource.AlternativeCreated],
+                    alternative.TheCharacter,
+                    alternative.OriginalCharacter,
+                    alternative.OriginalRealPinyin
+            ),
+                cancellationToken
+            );
+
+            _ = Index.Alternatives.Add(alternative);
+            Index.StateHasChangedPublic();
+        }
+        else
+        {
+            LogCommons.LogHttpMethodFailedError(Logger, HttpMethod.Post);
+            await Index.FormSubmit.SetErrorAsync(
+                this,
+                Localizer[Resource.ProcessingError],
+                cancellationToken
+            );
+        }
     }
 }

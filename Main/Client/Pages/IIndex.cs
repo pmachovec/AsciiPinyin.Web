@@ -11,7 +11,9 @@ public interface IIndex : IPage
 
     IEntityTab SelectedTab { get; }
 
-    IEnumerable<Alternative> Alternatives { get; }
+    ISet<Alternative> Alternatives { get; }
 
-    IEnumerable<Chachar> Chachars { get; }
+    ISet<Chachar> Chachars { get; }
+
+    void StateHasChangedPublic();
 }

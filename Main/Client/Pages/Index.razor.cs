@@ -27,9 +27,9 @@ public class IndexBase : ComponentBase, IIndex
 
     public IEntityTab SelectedTab => _selectedTab!;
 
-    public IEnumerable<Alternative> Alternatives { get; private set; } = [];
+    public ISet<Alternative> Alternatives { get; private set; } = new HashSet<Alternative>();
 
-    public IEnumerable<Chachar> Chachars { get; private set; } = [];
+    public ISet<Chachar> Chachars { get; private set; } = new HashSet<Chachar>();
 
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
@@ -42,6 +42,8 @@ public class IndexBase : ComponentBase, IIndex
 
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
+
+    public void StateHasChangedPublic() => StateHasChanged();
 
     protected override async Task OnInitializedAsync()
     {

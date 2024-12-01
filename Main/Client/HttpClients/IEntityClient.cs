@@ -5,7 +5,7 @@ namespace AsciiPinyin.Web.Client.HttpClients;
 
 public interface IEntityClient
 {
-    Task<IEnumerable<TEntity>> GetEntitiesAsync<TEntity>(
+    Task<ISet<TEntity>> GetEntitiesAsync<TEntity>(
         string entitiesApiName,
         CancellationToken cancellationToken
     ) where TEntity : IEntity;

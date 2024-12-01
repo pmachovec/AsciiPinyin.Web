@@ -212,62 +212,18 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
         if (areAllInputsValid)
         {
-            var chachar = new Chachar()
-            {
-                Ipa = Ipa,
-                Pinyin = Pinyin,
-                RadicalAlternativeCharacter = RadicalAlternativeCharacter,
-                RadicalCharacter = RadicalCharacter,
-                RadicalPinyin = RadicalPinyin,
-                RadicalTone = RadicalTone,
-                Strokes = Strokes,
-                Tone = Tone,
-                TheCharacter = TheCharacter
-            };
-
-            LogCommons.LogFormDataInfo(Logger, chachar);
-            LogCommons.LogDatabaseIntegrityVerificationDebug(Logger);
-            var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(chachar);
-
-            if (databseIntegrityErrorText is not null)
-            {
-                await Index.FormSubmit.SetErrorAsync(
-                    this,
-                    databseIntegrityErrorText,
-                    cancellationToken
-                );
-            }
-            else
-            {
-                var postTask = EntityClient.PostEntityAsync(ApiNames.CHARACTERS, chachar, cancellationToken);
-                await Index.FormSubmit.SetProcessingAsync(this, cancellationToken);
-                var postResult = await postTask;
-
-                if (postResult == HttpStatusCode.OK)
-                {
-                    LogCommons.LogHttpMethodSuccessInfo(Logger, HttpMethod.Post);
-                    await Index.FormSubmit.SetSuccessAsync(
-                        this,
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            Localizer[Resource.CharacterCreated],
-                            chachar.TheCharacter,
-                            chachar.RealPinyin
-                        ),
-                        cancellationToken
-                    );
-                    StateHasChanged();
-                }
-                else
-                {
-                    LogCommons.LogHttpMethodFailedError(Logger, HttpMethod.Post);
-                    await Index.FormSubmit.SetErrorAsync(
-                        this,
-                        Localizer[Resource.ProcessingError],
-                        cancellationToken
-                    );
-                }
-            }
+            await CheckIntegrityAndSubmitAsync(
+                TheCharacter!,
+                Pinyin!,
+                (byte)Tone!,
+                Ipa!,
+                (byte)Strokes!,
+                RadicalCharacter,
+                RadicalPinyin,
+                RadicalTone,
+                RadicalAlternativeCharacter,
+                cancellationToken
+            );
         }
     }
 
@@ -347,6 +303,50 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         return null;
     }
 
+    private async Task CheckIntegrityAndSubmitAsync(
+        string theCharacter,
+        string pinyin,
+        byte tone,
+        string ipa,
+        byte strokes,
+        string? radicalCharacter,
+        string? radicalPinyin,
+        byte? radicalTone,
+        string? radicalAlternativeCharacter,
+        CancellationToken cancellationToken
+    )
+    {
+        var chachar = new Chachar()
+        {
+            Ipa = ipa,
+            Pinyin = pinyin,
+            RadicalAlternativeCharacter = radicalAlternativeCharacter,
+            RadicalCharacter = radicalCharacter,
+            RadicalPinyin = radicalPinyin,
+            RadicalTone = radicalTone,
+            Strokes = strokes,
+            Tone = tone,
+            TheCharacter = theCharacter
+        };
+
+        LogCommons.LogFormDataInfo(Logger, chachar);
+        LogCommons.LogDatabaseIntegrityVerificationDebug(Logger);
+        var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(chachar);
+
+        if (databseIntegrityErrorText is not null)
+        {
+            await Index.FormSubmit.SetErrorAsync(
+                this,
+                databseIntegrityErrorText,
+                cancellationToken
+            );
+        }
+        else
+        {
+            await SubmitAsync(chachar, cancellationToken);
+        }
+    }
+
     private string? GetDatabaseIntegrityErrorText(Chachar chachar)
     {
         if (Index.Chachars.Contains(chachar))
@@ -362,5 +362,39 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         }
 
         return null;
+    }
+
+    private async Task SubmitAsync(Chachar chachar, CancellationToken cancellationToken)
+    {
+        var postTask = EntityClient.PostEntityAsync(ApiNames.CHARACTERS, chachar, cancellationToken);
+        await Index.FormSubmit.SetProcessingAsync(this, cancellationToken);
+        var postResult = await postTask;
+
+        if (postResult == HttpStatusCode.OK)
+        {
+            LogCommons.LogHttpMethodSuccessInfo(Logger, HttpMethod.Post);
+            await Index.FormSubmit.SetSuccessAsync(
+                this,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    Localizer[Resource.CharacterCreated],
+                    chachar.TheCharacter,
+                    chachar.RealPinyin
+                ),
+                cancellationToken
+            );
+
+            _ = Index.Chachars.Add(chachar);
+            Index.StateHasChangedPublic();
+        }
+        else
+        {
+            LogCommons.LogHttpMethodFailedError(Logger, HttpMethod.Post);
+            await Index.FormSubmit.SetErrorAsync(
+                this,
+                Localizer[Resource.ProcessingError],
+                cancellationToken
+            );
+        }
     }
 }

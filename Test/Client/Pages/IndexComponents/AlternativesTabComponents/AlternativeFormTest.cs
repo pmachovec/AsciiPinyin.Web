@@ -31,9 +31,9 @@ internal sealed class AlternativeFormTest : IDisposable
         IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT
     ];
 
-    private readonly IEnumerable<Chachar> _radicalChachars =
-    [
-        new Chachar()
+    private readonly ISet<Chachar> _radicalChachars = new HashSet<Chachar>
+    {
+        new()
         {
             TheCharacter = "雨",
             Pinyin = "yu",
@@ -41,11 +41,11 @@ internal sealed class AlternativeFormTest : IDisposable
             Tone = 3,
             Strokes = 8
         }
-    ];
+    };
 
-    private readonly IEnumerable<Chachar> _nonRadicalChachars =
-    [
-        new Chachar()
+    private readonly ISet<Chachar> _nonRadicalChachars = new HashSet<Chachar>
+    {
+        new()
         {
             TheCharacter = "零",
             Pinyin = "ling",
@@ -57,7 +57,7 @@ internal sealed class AlternativeFormTest : IDisposable
             RadicalTone = 3,
             RadicalAlternativeCharacter = "⻗"
         }
-    ];
+    };
 
     private readonly Mock<IIndex> _indexMock = new();
     private readonly Mock<IStringLocalizer<Resource>> _localizerMock = new();
@@ -70,21 +70,20 @@ internal sealed class AlternativeFormTest : IDisposable
     public void OneTimeSetUp()
     {
         _ = _indexMock
+            .Setup(index => index.Alternatives)
+            .Returns(new HashSet<Alternative>());
+        _ = _indexMock
             .Setup(index => index.Chachars)
-            .Returns(_radicalChachars.Concat(_nonRadicalChachars)
-        );
+            .Returns(_radicalChachars.Concat(_nonRadicalChachars).ToHashSet());
         _ = _localizerMock
             .Setup(localizer => localizer[Resource.CreateNewAlternative])
-            .Returns(new LocalizedString(CREATE_NEW_ALTERNATIVE, CREATE_NEW_ALTERNATIVE)
-        );
+            .Returns(new LocalizedString(CREATE_NEW_ALTERNATIVE, CREATE_NEW_ALTERNATIVE));
         _ = _localizerMock
             .Setup(localizer => localizer[Resource.CompulsoryValue])
-            .Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE)
-        );
+            .Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE));
         _ = _localizerMock
             .Setup(localizer => localizer[Resource.MustBeChineseCharacter])
-            .Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER)
-        );
+            .Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER));
     }
 
     [SetUp]
@@ -381,7 +380,7 @@ internal sealed class AlternativeFormTest : IDisposable
 
         // Click on the first button in the selector
         var buttonDivs = _alternativeFormComponent.FindAll("div").Where(div => div.ClassList.Contains("stretched-link"));
-        Assert.That(buttonDivs.Count(), Is.EqualTo(_radicalChachars.Count()));
+        Assert.That(buttonDivs.Count(), Is.EqualTo(_radicalChachars.Count));
         var originalButtonDiv = buttonDivs.First();
 
         var (addBorderDangerClassHandler, setErrorTextInvocationHandler, _, alternativeFormSubmitButton) = _entityFormTestCommons.MockFormElements(

@@ -6,6 +6,7 @@ using AsciiPinyin.Web.Client.Pages;
 using AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Constants.JSInterop;
+using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
 using AsciiPinyin.Web.Shared.Utils;
 using Bunit;
@@ -44,22 +45,24 @@ internal sealed class ChacharFormTest : IDisposable
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
+        _ = _indexMock
+            .Setup(index => index.Alternatives)
+            .Returns(new HashSet<Alternative>());
+        _ = _indexMock
+            .Setup(index => index.Chachars)
+            .Returns(new HashSet<Chachar>());
         _ = _localizerMock
             .Setup(localizer => localizer[Resource.CompulsoryValue])
-            .Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE)
-        );
+            .Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE));
         _ = _localizerMock
             .Setup(localizer => localizer[Resource.MustBeChineseCharacter])
-            .Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER)
-        );
+            .Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER));
         _ = _localizerMock
             .Setup(localizer => localizer[Resource.OnlyAsciiAllowed])
-            .Returns(new LocalizedString(ONLY_ASCII_ALLOWED, ONLY_ASCII_ALLOWED)
-        );
+            .Returns(new LocalizedString(ONLY_ASCII_ALLOWED, ONLY_ASCII_ALLOWED));
         _ = _localizerMock
             .Setup(localizer => localizer[Resource.OnlyIpaAllowed])
-            .Returns(new LocalizedString(ONLY_IPA_ALLOWED, ONLY_IPA_ALLOWED)
-        );
+            .Returns(new LocalizedString(ONLY_IPA_ALLOWED, ONLY_IPA_ALLOWED));
     }
 
     [SetUp]
