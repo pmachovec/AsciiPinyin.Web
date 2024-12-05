@@ -1,11 +1,14 @@
 using Asciipinyin.Web.Server.Test.Commons;
+using Asciipinyin.Web.Server.Test.Constants;
 using AsciiPinyin.Web.Server.Constants;
 using AsciiPinyin.Web.Server.Controllers;
 using AsciiPinyin.Web.Server.Data;
+using AsciiPinyin.Web.Shared.DTO;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Test.Constants;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -183,7 +186,7 @@ internal sealed partial class ChacharsControllerTest
         };
 
         var result = _chacharsController.Post(chachar);
-        EntityControllerTestCommons.PostFieldWrongTest(result, expectedErrorMessage, theCharacter, ColumnNames.THE_CHARACTER);
+        EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.THE_CHARACTER, theCharacter, expectedErrorMessage);
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostPinyinWrongTest)} - null")]
@@ -296,7 +299,8 @@ internal sealed partial class ChacharsControllerTest
         };
 
         var result = _chacharsController.Post(chachar);
-        EntityControllerTestCommons.PostFieldWrongTest(result, expectedErrorMessage, pinyin, ColumnNames.PINYIN);
+
+        EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.PINYIN, pinyin, expectedErrorMessage);
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostToneWrongTest)} - null")]
@@ -312,7 +316,7 @@ internal sealed partial class ChacharsControllerTest
         };
 
         var result = _chacharsController.Post(chachar);
-        EntityControllerTestCommons.PostFieldWrongTest(result, expectedErrorMessage, tone, ColumnNames.TONE);
+        EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.TONE, tone, expectedErrorMessage);
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostIpaWrongTest)} - null")]
@@ -419,7 +423,7 @@ internal sealed partial class ChacharsControllerTest
         };
 
         var result = _chacharsController.Post(chachar);
-        EntityControllerTestCommons.PostFieldWrongTest(result, expectedErrorMessage, ipa, "ipa");
+        EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.IPA, ipa, expectedErrorMessage);
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostStrokesWrongTest)} - null")]
@@ -435,7 +439,7 @@ internal sealed partial class ChacharsControllerTest
         };
 
         var result = _chacharsController.Post(chachar);
-        EntityControllerTestCommons.PostFieldWrongTest(result, expectedErrorMessage, strokes, "strokes");
+        EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.STROKES, strokes, expectedErrorMessage);
     }
 
     [TestCase("", Errors.EMPTY, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalCharacterWrongTest)} - empty string")]
@@ -540,12 +544,13 @@ internal sealed partial class ChacharsControllerTest
         };
 
         var result = _chacharsController.Post(chachar);
-        EntityControllerTestCommons.PostFieldWrongTest(result, expectedErrorMessage, radicalCharacter, ColumnNames.RADICAL_CHARACTER);
+
+        EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.RADICAL_CHARACTER, radicalCharacter, expectedErrorMessage);
         EntityControllerTestCommons.PostFieldsWrongTest(
             result,
             Errors.MISSING,
-            (null, ColumnNames.RADICAL_PINYIN),
-            (null, ColumnNames.RADICAL_TONE)
+            (JsonPropertyNames.RADICAL_PINYIN, null),
+            (JsonPropertyNames.RADICAL_TONE, null)
         );
     }
 
@@ -658,12 +663,13 @@ internal sealed partial class ChacharsControllerTest
         };
 
         var result = _chacharsController.Post(chachar);
-        EntityControllerTestCommons.PostFieldWrongTest(result, expectedErrorMessage, radicalPinyin, ColumnNames.RADICAL_PINYIN);
+
+        EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.RADICAL_PINYIN, radicalPinyin, expectedErrorMessage);
         EntityControllerTestCommons.PostFieldsWrongTest(
             result,
             Errors.MISSING,
-            (null, ColumnNames.RADICAL_CHARACTER),
-            (null, ColumnNames.RADICAL_TONE)
+            (JsonPropertyNames.RADICAL_CHARACTER, null),
+            (JsonPropertyNames.RADICAL_TONE, null)
         );
     }
 
@@ -679,12 +685,13 @@ internal sealed partial class ChacharsControllerTest
         };
 
         var result = _chacharsController.Post(chachar);
-        EntityControllerTestCommons.PostFieldWrongTest(result, expectedErrorMessage, radicalTone, ColumnNames.RADICAL_TONE);
+
+        EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.RADICAL_TONE, radicalTone, expectedErrorMessage);
         EntityControllerTestCommons.PostFieldsWrongTest(
             result,
             Errors.MISSING,
-            (null, ColumnNames.RADICAL_CHARACTER),
-            (null, ColumnNames.RADICAL_PINYIN)
+            (JsonPropertyNames.RADICAL_CHARACTER, null),
+            (JsonPropertyNames.RADICAL_PINYIN, null)
         );
     }
 
@@ -790,13 +797,14 @@ internal sealed partial class ChacharsControllerTest
         };
 
         var result = _chacharsController.Post(chachar);
-        EntityControllerTestCommons.PostFieldWrongTest(result, expectedErrorMessage, radicalAlternativeCharacter, ColumnNames.RADICAL_ALTERNATIVE_CHARACTER);
+
+        EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER, radicalAlternativeCharacter, expectedErrorMessage);
         EntityControllerTestCommons.PostFieldsWrongTest(
             result,
             Errors.MISSING,
-            (null, ColumnNames.RADICAL_CHARACTER),
-            (null, ColumnNames.RADICAL_PINYIN),
-            (null, ColumnNames.RADICAL_TONE)
+            (JsonPropertyNames.RADICAL_CHARACTER, null),
+            (JsonPropertyNames.RADICAL_PINYIN, null),
+            (JsonPropertyNames.RADICAL_TONE, null)
         );
     }
 
@@ -804,36 +812,39 @@ internal sealed partial class ChacharsControllerTest
     public void PostGetAllChacharsErrorTest()
     {
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
-
         var result = _chacharsController.Post(_nonRadicalChacharWithAlternative);
+
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
 
     [Test]
     public void PostGetAllAlternativesErrorTest()
     {
-        var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock(_radicalChachar);
+        var chacharsDbSetMock = EntityControllerTestCommons.GetChacharDbSetMock(_radicalChachar);
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
         _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Throws(new InvalidOperationException());
-
         var result = _chacharsController.Post(_nonRadicalChacharWithAlternative);
+
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
 
     [Test]
     public void PostRadicalUnknownTest()
     {
-        var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock<Chachar>();
+        var chacharsDbSetMock = EntityControllerTestCommons.GetChacharDbSetMock();
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
-        _httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
-
         var result = _chacharsController.Post(_nonRadicalChacharWithAlternative);
-        EntityControllerTestCommons.PostFieldsWrongTest(
+
+        EntityControllerTestCommons.PostDatabaseIntegrityErrorTest(
             result,
-            Errors.UNKNOWN_CHACHAR,
-            (_nonRadicalChacharWithAlternative.RadicalCharacter, ColumnNames.RADICAL_CHARACTER),
-            (_nonRadicalChacharWithAlternative.RadicalPinyin, ColumnNames.RADICAL_PINYIN),
-            (_nonRadicalChacharWithAlternative.RadicalTone, ColumnNames.RADICAL_TONE)
+            TableNames.CHACHAR,
+            _nonRadicalChacharWithAlternative,
+            EntityControllerTestCommons.GetEntityUnknownErrorMessage(
+                TableNames.CHACHAR,
+                JsonPropertyNames.RADICAL_CHARACTER,
+                JsonPropertyNames.RADICAL_PINYIN,
+                JsonPropertyNames.RADICAL_TONE
+            )
         );
     }
 
@@ -850,51 +861,64 @@ internal sealed partial class ChacharsControllerTest
             RadicalCharacter = _radicalChachar.TheCharacter
         };
 
-        var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock(malformedRadicalChachar);
+        var chacharsDbSetMock = EntityControllerTestCommons.GetChacharDbSetMock(malformedRadicalChachar);
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
-
         var result = _chacharsController.Post(_nonRadicalChacharWithAlternative);
-        EntityControllerTestCommons.PostFieldsWrongTest(
+
+        EntityControllerTestCommons.PostDatabaseIntegrityErrorTest(
             result,
-            Errors.NO_RADICAL,
-            (_nonRadicalChacharWithAlternative.RadicalCharacter, ColumnNames.RADICAL_CHARACTER),
-            (_nonRadicalChacharWithAlternative.RadicalPinyin, ColumnNames.RADICAL_PINYIN),
-            (_nonRadicalChacharWithAlternative.RadicalTone, ColumnNames.RADICAL_TONE)
+            TableNames.CHACHAR,
+            _nonRadicalChacharWithAlternative,
+            EntityControllerTestCommons.GetNoRadicalErrorMessage(
+                JsonPropertyNames.RADICAL_CHARACTER,
+                JsonPropertyNames.RADICAL_PINYIN,
+                JsonPropertyNames.RADICAL_TONE
+            ),
+            new ConflictEntity(TableNames.CHACHAR, malformedRadicalChachar)
         );
     }
 
     [Test]
     public void PostAlternativeUnknownTest()
     {
-        var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock(_radicalChachar);
-        var alternativesDbSetMock = EntityControllerTestCommons.GetDbSetMock<Alternative>();
+        var chacharsDbSetMock = EntityControllerTestCommons.GetChacharDbSetMock(_radicalChachar);
+        var alternativesDbSetMock = EntityControllerTestCommons.GetAlternativeDbSetMock();
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
         _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
-
         var result = _chacharsController.Post(_nonRadicalChacharWithAlternative);
-        EntityControllerTestCommons.PostFieldsWrongTest(
+
+        EntityControllerTestCommons.PostDatabaseIntegrityErrorTest(
             result,
-            Errors.UNKNOWN_ALTERNATIVE,
-            (_nonRadicalChacharWithAlternative.RadicalAlternativeCharacter, ColumnNames.RADICAL_ALTERNATIVE_CHARACTER),
-            (_nonRadicalChacharWithAlternative.RadicalCharacter, ColumnNames.RADICAL_CHARACTER),
-            (_nonRadicalChacharWithAlternative.RadicalPinyin, ColumnNames.RADICAL_PINYIN),
-            (_nonRadicalChacharWithAlternative.RadicalTone, ColumnNames.RADICAL_TONE)
+            TableNames.CHACHAR,
+            _nonRadicalChacharWithAlternative,
+            EntityControllerTestCommons.GetEntityUnknownErrorMessage(
+                TableNames.ALTERNATIVE,
+                JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER,
+                JsonPropertyNames.RADICAL_CHARACTER,
+                JsonPropertyNames.RADICAL_PINYIN,
+                JsonPropertyNames.RADICAL_TONE
+            )
         );
     }
 
     [Test]
     public void PostChacharAlreadyExistsTest()
     {
-        var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock(_radicalChachar);
+        var chacharsDbSetMock = EntityControllerTestCommons.GetChacharDbSetMock(_radicalChachar);
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
-
         var result = _chacharsController.Post(_radicalChachar);
-        EntityControllerTestCommons.PostFieldsWrongTest(
+
+        EntityControllerTestCommons.PostDatabaseIntegrityErrorTest(
             result,
-            Errors.CHACHAR_ALREADY_EXISTS,
-            (_radicalChachar.TheCharacter, ColumnNames.THE_CHARACTER),
-            (_radicalChachar.Pinyin, ColumnNames.PINYIN),
-            (_radicalChachar.Tone, ColumnNames.TONE)
+            TableNames.CHACHAR,
+            _radicalChachar,
+            EntityControllerTestCommons.GetEntityExistsErrorMessage(
+                TableNames.CHACHAR,
+                JsonPropertyNames.THE_CHARACTER,
+                JsonPropertyNames.PINYIN,
+                JsonPropertyNames.TONE
+            ),
+            new ConflictEntity(TableNames.CHACHAR, _radicalChachar)
         );
     }
 
@@ -902,12 +926,12 @@ internal sealed partial class ChacharsControllerTest
     public void PostRadicalChacharOkTest()
     {
         EntityControllerTestCommons.MockDatabaseFacadeTransaction(_asciiPinyinContextMock);
-        var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock<Chachar>();
-        var alternativesDbSetMock = EntityControllerTestCommons.GetDbSetMock<Alternative>();
+        var chacharsDbSetMock = EntityControllerTestCommons.GetChacharDbSetMock();
+        var alternativesDbSetMock = EntityControllerTestCommons.GetAlternativeDbSetMock();
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
         _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
-
         var result = _chacharsController.Post(_radicalChachar);
+
         EntityControllerTestCommons.PostOkTest(result);
     }
 
@@ -915,12 +939,12 @@ internal sealed partial class ChacharsControllerTest
     public void PostNonRadicalChacharOkTest()
     {
         EntityControllerTestCommons.MockDatabaseFacadeTransaction(_asciiPinyinContextMock);
-        var chacharsDbSetMock = EntityControllerTestCommons.GetDbSetMock(_radicalChachar);
-        var alternativesDbSetMock = EntityControllerTestCommons.GetDbSetMock(_alternative);
+        var chacharsDbSetMock = EntityControllerTestCommons.GetChacharDbSetMock(_radicalChachar);
+        var alternativesDbSetMock = EntityControllerTestCommons.GetAlternativeDbSetMock(_alternative);
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
         _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
-
         var result = _chacharsController.Post(_nonRadicalChacharWithAlternative);
+
         EntityControllerTestCommons.PostOkTest(result);
     }
 }

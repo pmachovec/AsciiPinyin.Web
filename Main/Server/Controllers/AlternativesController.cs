@@ -45,7 +45,7 @@ public sealed class AlternativesController(
     }
 
     [HttpPost]
-    public ActionResult<FieldErrorsContainer> Post(Alternative alternative)
+    public ActionResult Post(Alternative alternative)
     {
         LogCommons.LogHttpMethodInfo(_logger, HttpMethod.Post, Actions.CREATE_NEW_ALTERNATIVE);
 
@@ -97,7 +97,7 @@ public sealed class AlternativesController(
 
         if (postDatabaseIntegrityErrorsContainer is not null)
         {
-            LogCommons.LogFieldErrorsContainerError(_logger, postDatabaseIntegrityErrorsContainer);
+            LogCommons.LogDatabaseIntegrityErrorsContainerError(_logger, postDatabaseIntegrityErrorsContainer);
             return BadRequest(postDatabaseIntegrityErrorsContainer);
         }
 
@@ -126,7 +126,7 @@ public sealed class AlternativesController(
         EntityControllerCommons.GetInvalidValueFieldError(
             _logger,
             alternative.TheCharacter,
-            ColumnNames.THE_CHARACTER,
+            JsonPropertyNames.THE_CHARACTER,
             EntityControllerCommons.GetCharacterErrorMessage
         );
 
@@ -134,7 +134,7 @@ public sealed class AlternativesController(
         EntityControllerCommons.GetInvalidValueFieldError(
             _logger,
             alternative.Strokes,
-            ColumnNames.STROKES,
+            JsonPropertyNames.STROKES,
             EntityControllerCommons.GetStrokesErrorMessage
         );
 
@@ -142,7 +142,7 @@ public sealed class AlternativesController(
         EntityControllerCommons.GetInvalidValueFieldError(
             _logger,
             alternative.OriginalCharacter,
-            ColumnNames.ORIGINAL_CHARACTER,
+            JsonPropertyNames.ORIGINAL_CHARACTER,
             EntityControllerCommons.GetCharacterErrorMessage
         );
 
@@ -150,7 +150,7 @@ public sealed class AlternativesController(
         EntityControllerCommons.GetInvalidValueFieldError(
             _logger,
             alternative.OriginalPinyin,
-            ColumnNames.ORIGINAL_PINYIN,
+            JsonPropertyNames.ORIGINAL_PINYIN,
             EntityControllerCommons.GetPinyinErrorMessage
         );
 
@@ -158,16 +158,11 @@ public sealed class AlternativesController(
         EntityControllerCommons.GetInvalidValueFieldError(
             _logger,
             alternative.OriginalTone,
-            ColumnNames.ORIGINAL_TONE,
+            JsonPropertyNames.ORIGINAL_TONE,
             EntityControllerCommons.GetToneErrorMessage
         );
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Style",
-        "IDE0046:Convert to conditional expression",
-        Justification = "Conditional return just looks terrible here."
-    )]
-    private FieldErrorsContainer? GetPostDatabaseIntegrityErrorContainer(
+    private DatabaseIntegrityErrorsContainer? GetPostDatabaseIntegrityErrorContainer(
         Alternative alternative,
         DbSet<Chachar> knownChachars,
         DbSet<Alternative> knownAlternatives
@@ -181,35 +176,64 @@ public sealed class AlternativesController(
 
         if (originalChachar is null)
         {
-            return EntityControllerCommons.GetInvalidValueFieldErrorsContainer(
-                _logger,
-                Errors.UNKNOWN_CHACHAR,
-                (alternative.OriginalCharacter, ColumnNames.ORIGINAL_CHARACTER),
-                (alternative.OriginalPinyin, ColumnNames.ORIGINAL_PINYIN),
-                (alternative.OriginalTone, ColumnNames.ORIGINAL_TONE)
+            var errorMessage = EntityControllerCommons.GetEntityUnknownErrorMessage(
+                TableNames.CHACHAR,
+                JsonPropertyNames.ORIGINAL_CHARACTER,
+                JsonPropertyNames.ORIGINAL_PINYIN,
+                JsonPropertyNames.ORIGINAL_TONE
+            );
+
+            LogCommons.LogEntityError(_logger, errorMessage, TableNames.ALTERNATIVE, alternative);
+
+            return new DatabaseIntegrityErrorsContainer(
+                TableNames.ALTERNATIVE,
+                alternative,
+                errorMessage
             );
         }
 
         if (!originalChachar.IsRadical)
         {
-            return EntityControllerCommons.GetInvalidValueFieldErrorsContainer(
-                _logger,
-                Errors.NO_RADICAL,
-                (alternative.OriginalCharacter, ColumnNames.ORIGINAL_CHARACTER),
-                (alternative.OriginalPinyin, ColumnNames.ORIGINAL_PINYIN),
-                (alternative.OriginalTone, ColumnNames.ORIGINAL_TONE)
+            var errorMessage = EntityControllerCommons.GetNoRadicalErrorMessage(
+                JsonPropertyNames.ORIGINAL_CHARACTER,
+                JsonPropertyNames.ORIGINAL_PINYIN,
+                JsonPropertyNames.ORIGINAL_TONE
+            );
+
+            LogCommons.LogEntityError(_logger, errorMessage, TableNames.ALTERNATIVE, alternative, $"conflict chachar: {originalChachar}");
+
+            return new DatabaseIntegrityErrorsContainer(
+                TableNames.ALTERNATIVE,
+                alternative,
+                errorMessage,
+                new ConflictEntity(TableNames.CHACHAR, originalChachar)
             );
         }
 
-        if (knownAlternatives.Contains(alternative))
+        var existingAlternative = knownAlternatives.Find(
+            alternative.TheCharacter,
+            alternative.OriginalCharacter,
+            alternative.OriginalPinyin,
+            alternative.OriginalTone
+        );
+
+        if (existingAlternative is not null)
         {
-            return EntityControllerCommons.GetInvalidValueFieldErrorsContainer(
-                _logger,
-                Errors.ALTERNATIVE_ALREADY_EXISTS,
-                (alternative.TheCharacter, ColumnNames.THE_CHARACTER),
-                (alternative.OriginalCharacter, ColumnNames.ORIGINAL_CHARACTER),
-                (alternative.OriginalPinyin, ColumnNames.ORIGINAL_PINYIN),
-                (alternative.OriginalTone, ColumnNames.ORIGINAL_TONE)
+            var errorMessage = EntityControllerCommons.GetEntityExistsErrorMessage(
+                TableNames.ALTERNATIVE,
+                JsonPropertyNames.THE_CHARACTER,
+                JsonPropertyNames.ORIGINAL_CHARACTER,
+                JsonPropertyNames.ORIGINAL_PINYIN,
+                JsonPropertyNames.ORIGINAL_TONE
+            );
+
+            LogCommons.LogEntityError(_logger, errorMessage, TableNames.ALTERNATIVE, alternative, $"conflict alternative: {existingAlternative}");
+
+            return new DatabaseIntegrityErrorsContainer(
+                TableNames.ALTERNATIVE,
+                alternative,
+                errorMessage,
+                new ConflictEntity(TableNames.ALTERNATIVE, existingAlternative)
             );
         }
 

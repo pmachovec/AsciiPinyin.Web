@@ -21,11 +21,11 @@ internal sealed partial class AlternativeTest
 
     [GeneratedRegex(
         @"^\{"
-            + $@"(?=.*""{ColumnNames.THE_CHARACTER}"":""⻗"")"
-            + $@"(?=.*""{ColumnNames.ORIGINAL_CHARACTER}"":""雨"")"
-            + $@"(?=.*""{ColumnNames.ORIGINAL_PINYIN}"":""yu"")"
-            + $@"(?=.*""{ColumnNames.ORIGINAL_TONE}"":3)"
-            + $@"(?=.*""{ColumnNames.STROKES}"":8)"
+            + $@"(?=.*""{JsonPropertyNames.THE_CHARACTER}"":""⻗"")"
+            + $@"(?=.*""{JsonPropertyNames.ORIGINAL_CHARACTER}"":""雨"")"
+            + $@"(?=.*""{JsonPropertyNames.ORIGINAL_PINYIN}"":""yu"")"
+            + $@"(?=.*""{JsonPropertyNames.ORIGINAL_TONE}"":3)"
+            + $@"(?=.*""{JsonPropertyNames.STROKES}"":8)"
             + @".*\}$",
         RegexOptions.Compiled
     )]
@@ -33,11 +33,11 @@ internal sealed partial class AlternativeTest
 
     [GeneratedRegex(
         @"^\{"
-            + $@"(?=.*""{ColumnNames.THE_CHARACTER}"":null)"
-            + $@"(?=.*""{ColumnNames.ORIGINAL_CHARACTER}"":null)"
-            + $@"(?=.*""{ColumnNames.ORIGINAL_PINYIN}"":null)"
-            + $@"(?=.*""{ColumnNames.ORIGINAL_TONE}"":null)"
-            + $@"(?=.*""{ColumnNames.STROKES}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.THE_CHARACTER}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.ORIGINAL_CHARACTER}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.ORIGINAL_PINYIN}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.ORIGINAL_TONE}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.STROKES}"":null)"
             + @".*\}$",
         RegexOptions.Compiled
     )]

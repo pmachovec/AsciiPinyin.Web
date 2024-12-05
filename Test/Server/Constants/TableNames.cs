@@ -1,7 +1,6 @@
+namespace Asciipinyin.Web.Server.Test.Constants;
 
-namespace AsciiPinyin.Web.Shared.Constants.JSInterop;
-
-public static class TableNames
+internal static class TableNames
 {
     public const string ALTERNATIVE = "alternative";
     public const string CHACHAR = "chachar";

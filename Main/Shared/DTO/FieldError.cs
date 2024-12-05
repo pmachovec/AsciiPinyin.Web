@@ -1,19 +1,20 @@
+using AsciiPinyin.Web.Shared.Constants;
 using System.Text.Json.Serialization;
 
 namespace AsciiPinyin.Web.Shared.DTO;
 
 public class FieldError(
-    object? _errorValue,
-    string _errorMessage,
-    string _fieldJsonPropertyName
+    string _fieldName,
+    object? _fieldValue,
+    string _errorMessage
 )
 {
-    [JsonPropertyName("value")]
-    public object? ErrorValue { get; } = _errorValue;
+    [JsonPropertyName(JsonPropertyNames.FIELD_NAME)]
+    public string FieldName { get; } = _fieldName;
 
-    [JsonPropertyName("message")]
+    [JsonPropertyName(JsonPropertyNames.FIELD_VALUE)]
+    public object? FieldValue { get; } = _fieldValue;
+
+    [JsonPropertyName(JsonPropertyNames.ERROR_MESSAGE)]
     public string ErrorMessage { get; } = _errorMessage;
-
-    [JsonIgnore]
-    public string FieldJsonPropertyName { get; } = _fieldJsonPropertyName;
 }

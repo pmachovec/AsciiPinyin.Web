@@ -47,7 +47,7 @@ public sealed class ChacharsController(
     }
 
     [HttpPost]
-    public ActionResult<FieldErrorsContainer> Post(Chachar chachar)
+    public ActionResult<IErrorsContainer> Post(Chachar chachar)
     {
         LogCommons.LogHttpMethodInfo(_logger, HttpMethod.Post, Actions.CREATE_NEW_CHACHAR);
 
@@ -103,7 +103,7 @@ public sealed class ChacharsController(
 
         if (postDatabaseIntegrityErrorsContainer is not null)
         {
-            LogCommons.LogFieldErrorsContainerError(_logger, postDatabaseIntegrityErrorsContainer);
+            LogCommons.LogDatabaseIntegrityErrorsContainerError(_logger, postDatabaseIntegrityErrorsContainer);
             return BadRequest(postDatabaseIntegrityErrorsContainer);
         }
 
@@ -132,7 +132,7 @@ public sealed class ChacharsController(
         EntityControllerCommons.GetInvalidValueFieldError(
             _logger,
             chachar.TheCharacter,
-            ColumnNames.THE_CHARACTER,
+            JsonPropertyNames.THE_CHARACTER,
             EntityControllerCommons.GetCharacterErrorMessage
         );
 
@@ -140,7 +140,7 @@ public sealed class ChacharsController(
         EntityControllerCommons.GetInvalidValueFieldError(
             _logger,
             chachar.Strokes,
-            ColumnNames.STROKES,
+            JsonPropertyNames.STROKES,
             EntityControllerCommons.GetStrokesErrorMessage
         );
 
@@ -148,7 +148,7 @@ public sealed class ChacharsController(
         EntityControllerCommons.GetInvalidValueFieldError(
             _logger,
             chachar.Pinyin,
-            ColumnNames.PINYIN,
+            JsonPropertyNames.PINYIN,
             EntityControllerCommons.GetPinyinErrorMessage
         );
 
@@ -156,7 +156,7 @@ public sealed class ChacharsController(
         EntityControllerCommons.GetInvalidValueFieldError(
             _logger,
             chachar.Tone,
-            ColumnNames.TONE,
+            JsonPropertyNames.TONE,
             EntityControllerCommons.GetToneErrorMessage
         );
 
@@ -179,8 +179,8 @@ public sealed class ChacharsController(
 
         if (errorMessage is not null)
         {
-            LogCommons.LogInvalidValueError(_logger, chachar.Ipa, ColumnNames.IPA, errorMessage);
-            return new FieldError(chachar.Ipa, errorMessage, ColumnNames.IPA);
+            LogCommons.LogInvalidValueError(_logger, chachar.Ipa, JsonPropertyNames.IPA, errorMessage);
+            return new FieldError(JsonPropertyNames.IPA, chachar.Ipa, errorMessage);
         }
 
         return null;
@@ -216,8 +216,8 @@ public sealed class ChacharsController(
 
         if (errorMessage is not null)
         {
-            LogCommons.LogInvalidValueError(_logger, chachar.RadicalCharacter, ColumnNames.RADICAL_CHARACTER, errorMessage);
-            return new FieldError(chachar.RadicalCharacter, errorMessage, ColumnNames.RADICAL_CHARACTER);
+            LogCommons.LogInvalidValueError(_logger, chachar.RadicalCharacter, JsonPropertyNames.RADICAL_CHARACTER, errorMessage);
+            return new FieldError(JsonPropertyNames.RADICAL_CHARACTER, chachar.RadicalCharacter, errorMessage);
         }
 
         return null;
@@ -253,8 +253,8 @@ public sealed class ChacharsController(
 
         if (errorMessage is not null)
         {
-            LogCommons.LogInvalidValueError(_logger, chachar.RadicalPinyin, ColumnNames.RADICAL_PINYIN, errorMessage);
-            return new FieldError(chachar.RadicalPinyin, errorMessage, ColumnNames.RADICAL_PINYIN);
+            LogCommons.LogInvalidValueError(_logger, chachar.RadicalPinyin, JsonPropertyNames.RADICAL_PINYIN, errorMessage);
+            return new FieldError(JsonPropertyNames.RADICAL_PINYIN, chachar.RadicalPinyin, errorMessage);
         }
 
         return null;
@@ -280,8 +280,8 @@ public sealed class ChacharsController(
 
         if (errorMessage is not null)
         {
-            LogCommons.LogInvalidValueError(_logger, chachar.RadicalTone, ColumnNames.RADICAL_TONE, errorMessage);
-            return new FieldError(chachar.RadicalTone, errorMessage, ColumnNames.RADICAL_TONE);
+            LogCommons.LogInvalidValueError(_logger, chachar.RadicalTone, JsonPropertyNames.RADICAL_TONE, errorMessage);
+            return new FieldError(JsonPropertyNames.RADICAL_TONE, chachar.RadicalTone, errorMessage);
         }
 
         return null;
@@ -308,20 +308,15 @@ public sealed class ChacharsController(
 
             if (errorMessage is not null)
             {
-                LogCommons.LogInvalidValueError(_logger, chachar.RadicalAlternativeCharacter, ColumnNames.RADICAL_ALTERNATIVE_CHARACTER, errorMessage);
-                return new FieldError(chachar.RadicalAlternativeCharacter, errorMessage, ColumnNames.RADICAL_ALTERNATIVE_CHARACTER);
+                LogCommons.LogInvalidValueError(_logger, chachar.RadicalAlternativeCharacter, JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER, errorMessage);
+                return new FieldError(JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER, chachar.RadicalAlternativeCharacter, errorMessage);
             }
         }
 
         return null;
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Style",
-        "IDE0046:Convert to conditional expression",
-        Justification = "Conditional return just looks terrible here."
-    )]
-    private FieldErrorsContainer? GetPostDatabaseIntegrityErrorsContainer(
+    private DatabaseIntegrityErrorsContainer? GetPostDatabaseIntegrityErrorsContainer(
         Chachar chachar,
         DbSet<Chachar> knownChachars,
         DbSet<Alternative> knownAlternatives
@@ -337,23 +332,37 @@ public sealed class ChacharsController(
 
             if (radicalChachar is null)
             {
-                return EntityControllerCommons.GetInvalidValueFieldErrorsContainer(
-                    _logger,
-                    Errors.UNKNOWN_CHACHAR,
-                    (radicalCharacter, ColumnNames.RADICAL_CHARACTER),
-                    (chachar.RadicalPinyin, ColumnNames.RADICAL_PINYIN),
-                    (chachar.RadicalTone, ColumnNames.RADICAL_TONE)
+                var errorMessage = EntityControllerCommons.GetEntityUnknownErrorMessage(
+                    TableNames.CHACHAR,
+                    JsonPropertyNames.RADICAL_CHARACTER,
+                    JsonPropertyNames.RADICAL_PINYIN,
+                    JsonPropertyNames.RADICAL_TONE
+                );
+
+                LogCommons.LogEntityError(_logger, errorMessage, TableNames.CHACHAR, chachar);
+
+                return new DatabaseIntegrityErrorsContainer(
+                    TableNames.CHACHAR,
+                    chachar,
+                    errorMessage
                 );
             }
 
             if (!radicalChachar!.IsRadical)
             {
-                return EntityControllerCommons.GetInvalidValueFieldErrorsContainer(
-                    _logger,
-                    Errors.NO_RADICAL,
-                    (radicalCharacter, ColumnNames.RADICAL_CHARACTER),
-                    (chachar.RadicalPinyin, ColumnNames.RADICAL_PINYIN),
-                    (chachar.RadicalTone, ColumnNames.RADICAL_TONE)
+                var errorMessage = EntityControllerCommons.GetNoRadicalErrorMessage(
+                    JsonPropertyNames.RADICAL_CHARACTER,
+                    JsonPropertyNames.RADICAL_PINYIN,
+                    JsonPropertyNames.RADICAL_TONE
+                );
+
+                LogCommons.LogEntityError(_logger, errorMessage, TableNames.CHACHAR, chachar, $"conflict chachar: {radicalChachar}");
+
+                return new DatabaseIntegrityErrorsContainer(
+                    TableNames.CHACHAR,
+                    chachar,
+                    errorMessage,
+                    new ConflictEntity(TableNames.CHACHAR, radicalChachar)
                 );
             }
 
@@ -368,26 +377,47 @@ public sealed class ChacharsController(
 
                 if (radicalAlternative is null)
                 {
-                    return EntityControllerCommons.GetInvalidValueFieldErrorsContainer(
-                        _logger,
-                        Errors.UNKNOWN_ALTERNATIVE,
-                        (radicalAlternativeCharacter, ColumnNames.RADICAL_ALTERNATIVE_CHARACTER),
-                        (chachar.RadicalCharacter, ColumnNames.RADICAL_CHARACTER),
-                        (chachar.RadicalPinyin, ColumnNames.RADICAL_PINYIN),
-                        (chachar.RadicalTone, ColumnNames.RADICAL_TONE)
+                    var errorMessage = EntityControllerCommons.GetEntityUnknownErrorMessage(
+                        TableNames.ALTERNATIVE,
+                        JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER,
+                        JsonPropertyNames.RADICAL_CHARACTER,
+                        JsonPropertyNames.RADICAL_PINYIN,
+                        JsonPropertyNames.RADICAL_TONE
+                    );
+
+                    LogCommons.LogEntityError(_logger, errorMessage, TableNames.CHACHAR, chachar);
+
+                    return new DatabaseIntegrityErrorsContainer(
+                        TableNames.CHACHAR,
+                        chachar,
+                        errorMessage
                     );
                 }
             }
         }
 
-        if (knownChachars.Contains(chachar))
+        var existingChachar = knownChachars.Find(
+            chachar.TheCharacter,
+            chachar.Pinyin,
+            chachar.Tone
+        );
+
+        if (existingChachar is not null)
         {
-            return EntityControllerCommons.GetInvalidValueFieldErrorsContainer(
-                _logger,
-                Errors.CHACHAR_ALREADY_EXISTS,
-                (chachar.TheCharacter, ColumnNames.THE_CHARACTER),
-                (chachar.Pinyin, ColumnNames.PINYIN),
-                (chachar.Tone, ColumnNames.TONE)
+            var errorMessage = EntityControllerCommons.GetEntityExistsErrorMessage(
+                TableNames.CHACHAR,
+                JsonPropertyNames.THE_CHARACTER,
+                JsonPropertyNames.PINYIN,
+                JsonPropertyNames.TONE
+            );
+
+            LogCommons.LogEntityError(_logger, errorMessage, TableNames.CHACHAR, chachar, $"conflict chachar: {existingChachar}");
+
+            return new DatabaseIntegrityErrorsContainer(
+                TableNames.CHACHAR,
+                chachar,
+                errorMessage,
+                new ConflictEntity(TableNames.CHACHAR, existingChachar)
             );
         }
 

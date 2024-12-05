@@ -19,7 +19,7 @@ internal static partial class EntityControllerCommons
             getFieldErrorMethods
         );
 
-        return fieldErrors.Count > 0 ? new FieldErrorsContainer(fieldErrors) : null;
+        return fieldErrors.Count > 0 ? new FieldErrorsContainer([.. fieldErrors]) : null;
     }
 
     public static string? GetCharacterErrorMessage(string? theCharacter)
@@ -100,10 +100,19 @@ internal static partial class EntityControllerCommons
         return errorMessage;
     }
 
+    public static string GetEntityUnknownErrorMessage(string entityType, params string[] fieldNames) =>
+        $"combination of fields '{string.Join(" + ", fieldNames)}' does not identify an existing {entityType}";
+
+    public static string GetEntityExistsErrorMessage(string entityType, params string[] fieldNames) =>
+        $"combination of fields '{string.Join(" + ", fieldNames)}' identifies an already existing {entityType}";
+
+    public static string GetNoRadicalErrorMessage(params string[] fieldNames) =>
+        $"combination of fields '{string.Join(" + ", fieldNames)}' identifies a chachar, which is not radical";
+
     public static FieldError? GetInvalidValueFieldError<T1, T2>(
         ILogger<T1> logger,
         T2 value,
-        string columnName,
+        string fieldName,
         Func<T2, string?> getErrorMessage
     ) where T1 : IEntityController
     {
@@ -111,33 +120,11 @@ internal static partial class EntityControllerCommons
 
         if (errorMessage is not null)
         {
-            LogCommons.LogInvalidValueError(logger, value, columnName, errorMessage);
-            return new FieldError(value, errorMessage, columnName);
+            LogCommons.LogInvalidValueError(logger, value, fieldName, errorMessage);
+            return new FieldError(fieldName, value, errorMessage);
         }
 
         return null;
-    }
-
-    public static FieldErrorsContainer? GetInvalidValueFieldErrorsContainer<T>(
-        ILogger<T> logger,
-        string errorMessage,
-        params (object? errorValue, string fieldJsonPropertyName)[] valuesWithPropertyNames
-    ) where T : IEntityController
-    {
-        if (valuesWithPropertyNames.Length == 0)
-        {
-            return null;
-        }
-
-        var fieldErrors = valuesWithPropertyNames.Select(
-            pair =>
-            {
-                LogCommons.LogInvalidValueError(logger, pair.errorValue, pair.fieldJsonPropertyName, errorMessage);
-                return new FieldError(pair.errorValue, errorMessage, pair.fieldJsonPropertyName);
-            }
-        );
-
-        return new FieldErrorsContainer(fieldErrors);
     }
 
     private static List<FieldError> GetFieldErrors<T>(

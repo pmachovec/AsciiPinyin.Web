@@ -15,8 +15,17 @@ internal static partial class LogCommons
     [LoggerMessage(LogLevel.Information, "{dbAction} successfully performed in the database")]
     public static partial void LogActionInDbSuccessInfo(ILogger logger, string dbAction);
 
+    [LoggerMessage(LogLevel.Error, "{databaseIntegrityErrorsContainer}")]
+    public static partial void LogDatabaseIntegrityErrorsContainerError(ILogger logger, DatabaseIntegrityErrorsContainer databaseIntegrityErrorsContainer);
+
     [LoggerMessage(LogLevel.Debug, "Database integrity verification")]
     public static partial void LogDatabaseIntegrityVerificationDebug(ILogger logger);
+
+    [LoggerMessage(LogLevel.Error, "{errorMessage}; {entityType}: {entity}")]
+    public static partial void LogEntityError(ILogger logger, string errorMessage, string entityType, IEntity entity);
+
+    [LoggerMessage(LogLevel.Error, "{errorMessage}; {entityType}: {entity}; {additionalInfo}")]
+    public static partial void LogEntityError(ILogger logger, string errorMessage, string entityType, IEntity entity, string additionalInfo);
 
     [LoggerMessage(LogLevel.Information, "Entity type: {entityType}; entity: {entity}")]
     public static partial void LogEntityInfo(ILogger logger, string entityType, IEntity entity);

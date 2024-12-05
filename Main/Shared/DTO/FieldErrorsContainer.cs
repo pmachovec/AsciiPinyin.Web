@@ -1,18 +1,13 @@
+using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.DTO.Tools;
 using System.Text.Json.Serialization;
 
 namespace AsciiPinyin.Web.Shared.DTO;
 
-public class FieldErrorsContainer
+public class FieldErrorsContainer(params FieldError[] _fieldErrors) : IErrorsContainer
 {
-    [JsonPropertyName("errors")]
-    public IDictionary<string, FieldError> Errors { get; } = new Dictionary<string, FieldError>();
-
-    public FieldErrorsContainer(IEnumerable<FieldError> fieldErrors) =>
-        Errors = fieldErrors.ToDictionary(f => f.FieldJsonPropertyName);
-
-    public FieldErrorsContainer(params FieldError[] fieldErrors) =>
-        Errors = fieldErrors.ToDictionary(f => f.FieldJsonPropertyName);
+    [JsonPropertyName(JsonPropertyNames.ERRORS)]
+    public IEnumerable<FieldError> Errors { get; } = _fieldErrors;
 
     public override string ToString() => JsonCreator.ToJson(this);
 }

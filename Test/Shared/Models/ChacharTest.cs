@@ -46,15 +46,15 @@ internal sealed partial class ChacharTest
 
     [GeneratedRegex(
         @"^\{"
-            + $@"(?=.*""{ColumnNames.THE_CHARACTER}"":""雨"")"
-            + $@"(?=.*""{ColumnNames.PINYIN}"":""yu"")"
-            + $@"(?=.*""{ColumnNames.IPA}"":""y:"")"
-            + $@"(?=.*""{ColumnNames.TONE}"":3)"
-            + $@"(?=.*""{ColumnNames.STROKES}"":8)"
-            + $@"(?=.*""{ColumnNames.RADICAL_CHARACTER}"":null)"
-            + $@"(?=.*""{ColumnNames.RADICAL_PINYIN}"":null)"
-            + $@"(?=.*""{ColumnNames.RADICAL_TONE}"":null)"
-            + $@"(?=.*""{ColumnNames.RADICAL_ALTERNATIVE_CHARACTER}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.THE_CHARACTER}"":""雨"")"
+            + $@"(?=.*""{JsonPropertyNames.PINYIN}"":""yu"")"
+            + $@"(?=.*""{JsonPropertyNames.IPA}"":""y:"")"
+            + $@"(?=.*""{JsonPropertyNames.TONE}"":3)"
+            + $@"(?=.*""{JsonPropertyNames.STROKES}"":8)"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_CHARACTER}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_PINYIN}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_TONE}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER}"":null)"
             + @".*\}$",
         RegexOptions.Compiled
     )]
@@ -62,15 +62,15 @@ internal sealed partial class ChacharTest
 
     [GeneratedRegex(
         @"^\{"
-            + $@"(?=.*""{ColumnNames.THE_CHARACTER}"":""零"")"
-            + $@"(?=.*""{ColumnNames.PINYIN}"":""ling"")"
-            + $@"(?=.*""{ColumnNames.IPA}"":""liŋ"")"
-            + $@"(?=.*""{ColumnNames.TONE}"":2)"
-            + $@"(?=.*""{ColumnNames.STROKES}"":13)"
-            + $@"(?=.*""{ColumnNames.RADICAL_CHARACTER}"":""雨"")"
-            + $@"(?=.*""{ColumnNames.RADICAL_PINYIN}"":""yu"")"
-            + $@"(?=.*""{ColumnNames.RADICAL_TONE}"":3)"
-            + $@"(?=.*""{ColumnNames.RADICAL_ALTERNATIVE_CHARACTER}"":""⻗"")"
+            + $@"(?=.*""{JsonPropertyNames.THE_CHARACTER}"":""零"")"
+            + $@"(?=.*""{JsonPropertyNames.PINYIN}"":""ling"")"
+            + $@"(?=.*""{JsonPropertyNames.IPA}"":""liŋ"")"
+            + $@"(?=.*""{JsonPropertyNames.TONE}"":2)"
+            + $@"(?=.*""{JsonPropertyNames.STROKES}"":13)"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_CHARACTER}"":""雨"")"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_PINYIN}"":""yu"")"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_TONE}"":3)"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER}"":""⻗"")"
             + @".*\}$",
         RegexOptions.Compiled
     )]
@@ -78,15 +78,15 @@ internal sealed partial class ChacharTest
 
     [GeneratedRegex(
         @"^\{"
-            + $@"(?=.*""{ColumnNames.THE_CHARACTER}"":""四"")"
-            + $@"(?=.*""{ColumnNames.PINYIN}"":""si"")"
-            + $@"(?=.*""{ColumnNames.IPA}"":""sɹ̩"")"
-            + $@"(?=.*""{ColumnNames.TONE}"":4)"
-            + $@"(?=.*""{ColumnNames.STROKES}"":5)"
-            + $@"(?=.*""{ColumnNames.RADICAL_CHARACTER}"":""儿"")"
-            + $@"(?=.*""{ColumnNames.RADICAL_PINYIN}"":""er"")"
-            + $@"(?=.*""{ColumnNames.RADICAL_TONE}"":2)"
-            + $@"(?=.*""{ColumnNames.RADICAL_ALTERNATIVE_CHARACTER}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.THE_CHARACTER}"":""四"")"
+            + $@"(?=.*""{JsonPropertyNames.PINYIN}"":""si"")"
+            + $@"(?=.*""{JsonPropertyNames.IPA}"":""sɹ̩"")"
+            + $@"(?=.*""{JsonPropertyNames.TONE}"":4)"
+            + $@"(?=.*""{JsonPropertyNames.STROKES}"":5)"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_CHARACTER}"":""儿"")"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_PINYIN}"":""er"")"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_TONE}"":2)"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER}"":null)"
             + @".*\}$",
         RegexOptions.Compiled
     )]
@@ -94,15 +94,15 @@ internal sealed partial class ChacharTest
 
     [GeneratedRegex(
         @"^\{"
-            + $@"(?=.*""{ColumnNames.THE_CHARACTER}"":null)"
-            + $@"(?=.*""{ColumnNames.PINYIN}"":null)"
-            + $@"(?=.*""{ColumnNames.IPA}"":null)"
-            + $@"(?=.*""{ColumnNames.TONE}"":null)"
-            + $@"(?=.*""{ColumnNames.STROKES}"":null)"
-            + $@"(?=.*""{ColumnNames.RADICAL_CHARACTER}"":null)"
-            + $@"(?=.*""{ColumnNames.RADICAL_PINYIN}"":null)"
-            + $@"(?=.*""{ColumnNames.RADICAL_TONE}"":null)"
-            + $@"(?=.*""{ColumnNames.RADICAL_ALTERNATIVE_CHARACTER}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.THE_CHARACTER}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.PINYIN}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.IPA}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.TONE}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.STROKES}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_CHARACTER}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_PINYIN}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_TONE}"":null)"
+            + $@"(?=.*""{JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER}"":null)"
             + @".*\}$",
         RegexOptions.Compiled
     )]

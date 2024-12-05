@@ -1,5 +1,4 @@
 using AsciiPinyin.Web.Shared.Constants;
-using AsciiPinyin.Web.Shared.Constants.JSInterop;
 using AsciiPinyin.Web.Shared.Models.Tools;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
@@ -13,24 +12,24 @@ public sealed class Alternative : IEntity
      * The string type must be used even for single characters.
      * The char type tends to malfunction when sent over HTTP requests.
      */
-    [JsonPropertyName(ColumnNames.THE_CHARACTER)]
-    [Column(ColumnNames.THE_CHARACTER)]
+    [JsonPropertyName(JsonPropertyNames.THE_CHARACTER)]
+    [Column(JsonPropertyNames.THE_CHARACTER)]
     public string? TheCharacter { get; set; }
 
-    [JsonPropertyName(ColumnNames.ORIGINAL_CHARACTER)]
-    [Column(ColumnNames.ORIGINAL_CHARACTER)]
+    [JsonPropertyName(JsonPropertyNames.ORIGINAL_CHARACTER)]
+    [Column(JsonPropertyNames.ORIGINAL_CHARACTER)]
     public string? OriginalCharacter { get; set; }
 
-    [JsonPropertyName(ColumnNames.ORIGINAL_PINYIN)]
-    [Column(ColumnNames.ORIGINAL_PINYIN)]
+    [JsonPropertyName(JsonPropertyNames.ORIGINAL_PINYIN)]
+    [Column(JsonPropertyNames.ORIGINAL_PINYIN)]
     public string? OriginalPinyin { get; set; }
 
-    [JsonPropertyName(ColumnNames.ORIGINAL_TONE)]
-    [Column(ColumnNames.ORIGINAL_TONE)]
+    [JsonPropertyName(JsonPropertyNames.ORIGINAL_TONE)]
+    [Column(JsonPropertyNames.ORIGINAL_TONE)]
     public byte? OriginalTone { get; set; }
 
-    [JsonPropertyName(ColumnNames.STROKES)]
-    [Column(ColumnNames.STROKES)]
+    [JsonPropertyName(JsonPropertyNames.STROKES)]
+    [Column(JsonPropertyNames.STROKES)]
     public byte? Strokes { get; set; }
 
     // To be replaced by conversion to showing tones by diacritics.

@@ -1,6 +1,7 @@
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Server.Test.Constants;
 using AsciiPinyin.Web.Shared.DTO;
+using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -12,7 +13,7 @@ namespace Asciipinyin.Web.Server.Test.Commons;
 
 internal static class EntityControllerTestCommons
 {
-    public static void NoUserAgentHeaderTest(ActionResult<FieldErrorsContainer>? result)
+    public static void NoUserAgentHeaderTest(ActionResult<IErrorsContainer>? result)
     {
         Assert.That(result, Is.Not.Null);
         Assert.That(result!.Result, Is.Not.Null);
@@ -20,7 +21,7 @@ internal static class EntityControllerTestCommons
         Assert.That((result.Result as BadRequestObjectResult)!.Value, Is.EqualTo(Errors.USER_AGENT_MISSING));
     }
 
-    public static void InternalServerErrorTest(ActionResult<FieldErrorsContainer>? result)
+    public static void InternalServerErrorTest(ActionResult<IErrorsContainer>? result)
     {
         Assert.That(result, Is.Not.Null);
         Assert.That(result!.Result, Is.Not.Null);
@@ -31,16 +32,16 @@ internal static class EntityControllerTestCommons
     }
 
     public static void PostFieldWrongTest(
-        ActionResult<FieldErrorsContainer>? result,
-        string expectedErrorMessage,
-        object? value,
-        string fieldJsonPropertyName
-    ) => PostFieldsWrongTest(result, expectedErrorMessage, (value, fieldJsonPropertyName));
+        ActionResult<IErrorsContainer>? result,
+        string fieldName,
+        object? fieldValue,
+        string expectedErrorMessage
+    ) => PostFieldsWrongTest(result, expectedErrorMessage, (fieldName, fieldValue));
 
     public static void PostFieldsWrongTest(
-        ActionResult<FieldErrorsContainer>? result,
+        ActionResult<IErrorsContainer>? result,
         string expectedErrorMessage,
-        params (object? value, string fieldJsonPropertyName)[] fieldData
+        params (string fieldName, object? fieldValue)[] fieldData
     )
     {
         Assert.That(result, Is.Not.Null);
@@ -53,33 +54,125 @@ internal static class EntityControllerTestCommons
 
         var fieldErrorsContainer = badRequestObjectResult.Value as FieldErrorsContainer;
 
-        foreach ((var value, var fieldJsonPropertyName) in fieldData)
+        foreach ((var fieldName, var fieldValue) in fieldData)
         {
-            var error = fieldErrorsContainer!.Errors[fieldJsonPropertyName];
+            var error = fieldErrorsContainer!.Errors.FirstOrDefault(e => e.FieldName == fieldName);
 
             Assert.That(error, Is.Not.Null);
-            Assert.That(error!.ErrorValue, Is.EqualTo(value));
+            Assert.That(error!.FieldValue, Is.EqualTo(fieldValue));
             Assert.That(error!.ErrorMessage, Is.EqualTo(expectedErrorMessage));
-            Assert.That(error!.FieldJsonPropertyName, Is.EqualTo(fieldJsonPropertyName));
         }
     }
 
-    public static void PostOkTest(ActionResult<FieldErrorsContainer>? result)
+    public static void PostDatabaseIntegrityErrorTest(
+        ActionResult<IErrorsContainer>? result,
+        string expectedEntityType,
+        IEntity expectedEntity,
+        string expectedErrorMessage,
+        params ConflictEntity[] expectedConflictEntities
+    )
+    {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Result, Is.Not.Null);
+        Assert.That(result.Result!, Is.InstanceOf<BadRequestObjectResult>());
+
+        var badRequestObjectResult = result.Result as BadRequestObjectResult;
+        Assert.That(badRequestObjectResult!.Value, Is.Not.Null);
+        Assert.That(badRequestObjectResult.Value, Is.InstanceOf<DatabaseIntegrityErrorsContainer>());
+
+        var databaseIntegrityErrorsContainer = badRequestObjectResult.Value as DatabaseIntegrityErrorsContainer;
+        Assert.That(databaseIntegrityErrorsContainer!.Errors.Count, Is.EqualTo(1));
+
+        var error = databaseIntegrityErrorsContainer.Errors.First();
+        Assert.That(error.EntityType, Is.EqualTo(expectedEntityType));
+        Assert.That(error.Entity, Is.EqualTo(expectedEntity));
+        Assert.That(error.ErrorMessage, Is.EqualTo(expectedErrorMessage));
+        Assert.That(error.ConflictEntities.Count, Is.EqualTo(expectedConflictEntities.Length));
+
+        foreach (var expectedConflictEntity in expectedConflictEntities)
+        {
+            var conflictEntity = error.ConflictEntities.FirstOrDefault(c => c.EntityType == expectedConflictEntity.EntityType);
+
+            Assert.That(conflictEntity, Is.Not.Null);
+            Assert.That(conflictEntity!.Entity, Is.EqualTo(expectedConflictEntity.Entity));
+        }
+    }
+
+    public static void PostOkTest(ActionResult<IErrorsContainer>? result)
     {
         Assert.That(result, Is.Not.Null);
         Assert.That(result!.Result, Is.Not.Null);
         Assert.That(result.Result!, Is.InstanceOf<OkResult>());
     }
 
-    public static Mock<DbSet<T>> GetDbSetMock<T>(params T[] data) where T : class
+    public static Mock<DbSet<Chachar>> GetChacharDbSetMock(params Chachar[] data)
     {
         var dataQueryable = data.AsQueryable();
-        var dbSetMock = new Mock<DbSet<T>>();
-        _ = dbSetMock.Setup(m => m.Find(It.IsAny<object[]>())).Returns(data.FirstOrDefault);
-        _ = dbSetMock.As<IQueryable<T>>().Setup(m => m.Provider).Returns(dataQueryable.Provider);
-        _ = dbSetMock.As<IQueryable<T>>().Setup(m => m.Expression).Returns(dataQueryable.Expression);
-        _ = dbSetMock.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(dataQueryable.ElementType);
-        _ = dbSetMock.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(dataQueryable.GetEnumerator);
+        var dbSetMock = new Mock<DbSet<Chachar>>();
+
+        _ = dbSetMock
+            .Setup(m => m.Find(It.IsAny<object[]>()))
+            .Returns((object[] parameters) =>
+                {
+                    if (
+                        parameters.Length == 3
+                        && parameters[0] is string theCharacter
+                        && parameters[1] is string pinyin
+                        && parameters[2] is byte tone
+                    )
+                    {
+                        return data.FirstOrDefault(d =>
+                            d.TheCharacter == theCharacter
+                            && d.Pinyin == pinyin
+                            && d.Tone == tone
+                        );
+                    }
+
+                    return null;
+                }
+            );
+
+        _ = dbSetMock.As<IQueryable<Chachar>>().Setup(m => m.Provider).Returns(dataQueryable.Provider);
+        _ = dbSetMock.As<IQueryable<Chachar>>().Setup(m => m.Expression).Returns(dataQueryable.Expression);
+        _ = dbSetMock.As<IQueryable<Chachar>>().Setup(m => m.ElementType).Returns(dataQueryable.ElementType);
+        _ = dbSetMock.As<IQueryable<Chachar>>().Setup(m => m.GetEnumerator()).Returns(dataQueryable.GetEnumerator);
+
+        return dbSetMock;
+    }
+
+    public static Mock<DbSet<Alternative>> GetAlternativeDbSetMock(params Alternative[] data)
+    {
+        var dataQueryable = data.AsQueryable();
+        var dbSetMock = new Mock<DbSet<Alternative>>();
+
+        _ = dbSetMock
+            .Setup(m => m.Find(It.IsAny<object[]>()))
+            .Returns((object[] parameters) =>
+                {
+                    if (
+                        parameters.Length == 4
+                        && parameters[0] is string theCharacter
+                        && parameters[1] is string originalCharacter
+                        && parameters[2] is string originalPinyin
+                        && parameters[3] is byte originalTone
+                    )
+                    {
+                        return data.FirstOrDefault(d =>
+                            d.TheCharacter == theCharacter
+                            && d.OriginalCharacter == originalCharacter
+                            && d.OriginalPinyin == originalPinyin
+                            && d.OriginalTone == originalTone
+                        );
+                    }
+
+                    return null;
+                }
+            );
+
+        _ = dbSetMock.As<IQueryable<Alternative>>().Setup(m => m.Provider).Returns(dataQueryable.Provider);
+        _ = dbSetMock.As<IQueryable<Alternative>>().Setup(m => m.Expression).Returns(dataQueryable.Expression);
+        _ = dbSetMock.As<IQueryable<Alternative>>().Setup(m => m.ElementType).Returns(dataQueryable.ElementType);
+        _ = dbSetMock.As<IQueryable<Alternative>>().Setup(m => m.GetEnumerator()).Returns(dataQueryable.GetEnumerator);
 
         return dbSetMock;
     }
@@ -91,4 +184,13 @@ internal static class EntityControllerTestCommons
         _ = databaseFacadeMock.Setup(m => m.BeginTransaction()).Returns(dbContextTransactionMock.Object);
         _ = asciiPinyinContextMock.Setup(context => context.Database).Returns(databaseFacadeMock.Object);
     }
+
+    public static string GetEntityUnknownErrorMessage(string entityType, params string[] fieldNames) =>
+        $"combination of fields '{string.Join(" + ", fieldNames)}' does not identify an existing {entityType}";
+
+    public static string GetEntityExistsErrorMessage(string entityType, params string[] fieldNames) =>
+        $"combination of fields '{string.Join(" + ", fieldNames)}' identifies an already existing {entityType}";
+
+    public static string GetNoRadicalErrorMessage(params string[] fieldNames) =>
+        $"combination of fields '{string.Join(" + ", fieldNames)}' identifies a chachar, which is not radical";
 }

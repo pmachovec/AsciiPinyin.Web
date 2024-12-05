@@ -1,6 +1,6 @@
 namespace AsciiPinyin.Web.Shared.Test.Constants;
 
-public static class ColumnNames
+public static class JsonPropertyNames
 {
     public const string IPA = "ipa";
     public const string ORIGINAL_CHARACTER = "original_character";
