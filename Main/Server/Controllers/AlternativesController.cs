@@ -60,6 +60,7 @@ public sealed class AlternativesController(
         LogCommons.LogInitialIntegrityVerificationDebug(_logger);
 
         var postInitialDataErrorsContainer = EntityControllerCommons.GetPostInitialDataErrorsContainer(
+            TableNames.ALTERNATIVE,
             alternative,
             GetTheCharacterError,
             GetStrokesError,
@@ -70,7 +71,7 @@ public sealed class AlternativesController(
 
         if (postInitialDataErrorsContainer is not null)
         {
-            LogCommons.LogFieldErrorsContainerError(_logger, postInitialDataErrorsContainer);
+            LogCommons.LogFieldsErrorsContainerError(_logger, postInitialDataErrorsContainer);
             return BadRequest(postInitialDataErrorsContainer);
         }
 

@@ -62,6 +62,7 @@ public sealed class ChacharsController(
         LogCommons.LogInitialIntegrityVerificationDebug(_logger);
 
         var postInitialDataErrorsContainer = EntityControllerCommons.GetPostInitialDataErrorsContainer(
+            TableNames.CHACHAR,
             chachar,
             GetTheCharacterError,
             GetStrokesError,
@@ -76,7 +77,7 @@ public sealed class ChacharsController(
 
         if (postInitialDataErrorsContainer is not null)
         {
-            LogCommons.LogFieldErrorsContainerError(_logger, postInitialDataErrorsContainer);
+            LogCommons.LogFieldsErrorsContainerError(_logger, postInitialDataErrorsContainer);
             return BadRequest(postInitialDataErrorsContainer);
         }
 

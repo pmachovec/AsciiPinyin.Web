@@ -1,17 +1,16 @@
 using AsciiPinyin.Web.Shared.Constants;
-using AsciiPinyin.Web.Shared.Models;
 using System.Text.Json.Serialization;
 
 namespace AsciiPinyin.Web.Shared.DTO;
 
-public sealed class ConflictEntity(
+public sealed class FieldsError(
     string _entityType,
-    IEntity _entity
+    params FieldError[] _fieldErrors
 )
 {
     [JsonPropertyName(JsonPropertyNames.ENTITY_TYPE)]
     public string EntityType { get; } = _entityType;
 
-    [JsonPropertyName(JsonPropertyNames.ENTITY)]
-    public IEntity? Entity { get; } = _entity;
+    [JsonPropertyName(JsonPropertyNames.FIELD_ERRORS)]
+    public IEnumerable<FieldError> FieldErrors { get; } = _fieldErrors;
 }

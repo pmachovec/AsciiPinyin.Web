@@ -50,13 +50,16 @@ internal static class EntityControllerTestCommons
 
         var badRequestObjectResult = result.Result as BadRequestObjectResult;
         Assert.That(badRequestObjectResult!.Value, Is.Not.Null);
-        Assert.That(badRequestObjectResult.Value, Is.InstanceOf<FieldErrorsContainer>());
+        Assert.That(badRequestObjectResult.Value, Is.InstanceOf<FieldsErrorsContainer>());
 
-        var fieldErrorsContainer = badRequestObjectResult.Value as FieldErrorsContainer;
+        var fieldsErrorsContainer = badRequestObjectResult.Value as FieldsErrorsContainer;
+        Assert.That(fieldsErrorsContainer!.Errors.Count, Is.EqualTo(1));
+
+        var fieldsErrors = fieldsErrorsContainer!.Errors.First();
 
         foreach ((var fieldName, var fieldValue) in fieldData)
         {
-            var error = fieldErrorsContainer!.Errors.FirstOrDefault(e => e.FieldName == fieldName);
+            var error = fieldsErrors!.FieldErrors.FirstOrDefault(e => e.FieldName == fieldName);
 
             Assert.That(error, Is.Not.Null);
             Assert.That(error!.FieldValue, Is.EqualTo(fieldValue));
@@ -105,6 +108,11 @@ internal static class EntityControllerTestCommons
         Assert.That(result.Result!, Is.InstanceOf<OkResult>());
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Style",
+        "IDE0046:Convert to conditional expression",
+        Justification = "Conditional expression looks terrible on that 'if' statement."
+    )]
     public static Mock<DbSet<Chachar>> GetChacharDbSetMock(params Chachar[] data)
     {
         var dataQueryable = data.AsQueryable();
@@ -140,6 +148,11 @@ internal static class EntityControllerTestCommons
         return dbSetMock;
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Style",
+        "IDE0046:Convert to conditional expression",
+        Justification = "Conditional expression looks terrible on that 'if' statement."
+    )]
     public static Mock<DbSet<Alternative>> GetAlternativeDbSetMock(params Alternative[] data)
     {
         var dataQueryable = data.AsQueryable();

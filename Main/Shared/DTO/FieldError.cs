@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace AsciiPinyin.Web.Shared.DTO;
 
-public class FieldError(
+public sealed class FieldError(
     string _fieldName,
     object? _fieldValue,
     string _errorMessage

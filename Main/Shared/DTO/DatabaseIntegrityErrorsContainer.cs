@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace AsciiPinyin.Web.Shared.DTO;
 
-public class DatabaseIntegrityErrorsContainer(params DatabaseIntegrityError[] _databaseIntegrityErrors) : IErrorsContainer
+public sealed class DatabaseIntegrityErrorsContainer(params DatabaseIntegrityError[] _databaseIntegrityErrors) : IErrorsContainer
 {
     public DatabaseIntegrityErrorsContainer(
         string entityType,

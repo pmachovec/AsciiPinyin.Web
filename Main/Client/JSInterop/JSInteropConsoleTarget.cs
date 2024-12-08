@@ -5,7 +5,7 @@ using LogLevel = NLog.LogLevel;
 namespace AsciiPinyin.Web.Client.JSInterop;
 
 [Target(nameof(JSInteropConsoleTarget))]
-public class JSInteropConsoleTarget : TargetWithLayout
+public sealed class JSInteropConsoleTarget : TargetWithLayout
 {
     public IJSInteropConsole? JSInteropConsole { private get; set; }
 

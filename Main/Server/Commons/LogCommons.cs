@@ -33,8 +33,8 @@ internal static partial class LogCommons
     [LoggerMessage(LogLevel.Error, "{message}")]
     public static partial void LogError(ILogger logger, string message);
 
-    [LoggerMessage(LogLevel.Error, "{fieldErrorsContainer}")]
-    public static partial void LogFieldErrorsContainerError(ILogger logger, FieldErrorsContainer fieldErrorsContainer);
+    [LoggerMessage(LogLevel.Error, "{fieldsErrorsContainer}")]
+    public static partial void LogFieldsErrorsContainerError(ILogger logger, FieldsErrorsContainer fieldsErrorsContainer);
 
     [LoggerMessage(LogLevel.Information, "HTTP method received: {method}; action: {action}")]
     public static partial void LogHttpMethodInfo(ILogger logger, HttpMethod method, string action);

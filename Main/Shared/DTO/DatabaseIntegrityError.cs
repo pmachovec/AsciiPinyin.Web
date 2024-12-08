@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace AsciiPinyin.Web.Shared.DTO;
 
-public class DatabaseIntegrityError(
+public sealed class DatabaseIntegrityError(
     string _entityType,
     IEntity _entity,
     string _errorMessage,

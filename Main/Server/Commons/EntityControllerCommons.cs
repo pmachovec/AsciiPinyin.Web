@@ -9,17 +9,18 @@ namespace AsciiPinyin.Web.Server.Commons;
 
 internal static partial class EntityControllerCommons
 {
-    public static FieldErrorsContainer? GetPostInitialDataErrorsContainer<T>(
+    public static FieldsErrorsContainer? GetPostInitialDataErrorsContainer<T>(
+        string entityType,
         T entity,
         params Func<T, FieldError?>[] getFieldErrorMethods
     ) where T : IEntity
     {
-        var fieldErrors = GetFieldErrors(
+        var fieldsErrors = GetFieldsErrors(
             entity,
             getFieldErrorMethods
         );
 
-        return fieldErrors.Count > 0 ? new FieldErrorsContainer([.. fieldErrors]) : null;
+        return fieldsErrors.Count > 0 ? new FieldsErrorsContainer(entityType, [.. fieldsErrors]) : null;
     }
 
     public static string? GetCharacterErrorMessage(string? theCharacter)
@@ -127,21 +128,21 @@ internal static partial class EntityControllerCommons
         return null;
     }
 
-    private static List<FieldError> GetFieldErrors<T>(
+    private static List<FieldError> GetFieldsErrors<T>(
         T entity,
         params Func<T, FieldError?>[] getFieldErrorMethods
     ) where T : IEntity
     {
-        var fieldErrors = new List<FieldError>();
+        var fieldsErrors = new List<FieldError>();
 
         foreach (var getFieldError in getFieldErrorMethods)
         {
             if (getFieldError(entity) is { } error)
             {
-                fieldErrors.Add(error);
+                fieldsErrors.Add(error);
             }
         }
 
-        return fieldErrors;
+        return fieldsErrors;
     }
 }
