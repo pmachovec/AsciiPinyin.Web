@@ -41,7 +41,7 @@ internal static class EntityControllerTestCommons
     public static void PostFieldsWrongTest(
         ActionResult<IErrorsContainer>? result,
         string expectedErrorMessage,
-        params (string fieldName, object? fieldValue)[] fieldData
+        params (string, object?)[] fieldData
     )
     {
         Assert.That(result, Is.Not.Null);
@@ -50,9 +50,9 @@ internal static class EntityControllerTestCommons
 
         var badRequestObjectResult = result.Result as BadRequestObjectResult;
         Assert.That(badRequestObjectResult!.Value, Is.Not.Null);
-        Assert.That(badRequestObjectResult.Value, Is.InstanceOf<FieldsErrorsContainer>());
+        Assert.That(badRequestObjectResult.Value, Is.InstanceOf<EntityFieldsErrorsContainer>());
 
-        var fieldsErrorsContainer = badRequestObjectResult.Value as FieldsErrorsContainer;
+        var fieldsErrorsContainer = badRequestObjectResult.Value as EntityFieldsErrorsContainer;
         Assert.That(fieldsErrorsContainer!.Errors.Count, Is.EqualTo(1));
 
         var fieldsErrors = fieldsErrorsContainer!.Errors.First();

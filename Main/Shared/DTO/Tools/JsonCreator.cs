@@ -5,9 +5,9 @@ namespace AsciiPinyin.Web.Shared.DTO.Tools;
 
 internal static class JsonCreator
 {
-    public static string ToJson(DatabaseIntegrityErrorsContainer entityErrorsContainer) =>
-        JsonSerializer.Serialize(entityErrorsContainer, JsonCreatorCommons.Options);
+    public static string ToJson(DatabaseIntegrityErrorsContainer databaseIntegrityErrorsContainer) =>
+        JsonSerializer.Serialize(databaseIntegrityErrorsContainer, JsonCreatorCommons.Options);
 
-    public static string ToJson(FieldsErrorsContainer fieldsErrorsContainer) =>
+    public static string ToJson(EntityFieldsErrorsContainer fieldsErrorsContainer) =>
         JsonSerializer.Serialize(fieldsErrorsContainer, JsonCreatorCommons.Options);
 }

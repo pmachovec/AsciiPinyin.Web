@@ -1,5 +1,9 @@
+using System.Text.Json.Serialization;
+
 namespace AsciiPinyin.Web.Shared.Models;
 
+[JsonDerivedType(typeof(Alternative))]
+[JsonDerivedType(typeof(Chachar))]
 public interface IEntity
 {
     /*

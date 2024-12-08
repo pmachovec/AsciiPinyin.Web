@@ -34,7 +34,7 @@ internal static partial class LogCommons
     public static partial void LogError(ILogger logger, string message);
 
     [LoggerMessage(LogLevel.Error, "{fieldsErrorsContainer}")]
-    public static partial void LogFieldsErrorsContainerError(ILogger logger, FieldsErrorsContainer fieldsErrorsContainer);
+    public static partial void LogFieldsErrorsContainerError(ILogger logger, EntityFieldsErrorsContainer fieldsErrorsContainer);
 
     [LoggerMessage(LogLevel.Information, "HTTP method received: {method}; action: {action}")]
     public static partial void LogHttpMethodInfo(ILogger logger, HttpMethod method, string action);

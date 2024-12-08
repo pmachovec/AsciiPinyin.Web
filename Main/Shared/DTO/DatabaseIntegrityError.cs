@@ -4,22 +4,41 @@ using System.Text.Json.Serialization;
 
 namespace AsciiPinyin.Web.Shared.DTO;
 
-public sealed class DatabaseIntegrityError(
-    string _entityType,
-    IEntity _entity,
-    string _errorMessage,
-    params ConflictEntity[] _conflictEntities
-)
+public sealed class DatabaseIntegrityError
 {
+    public DatabaseIntegrityError(
+        Chachar chachar,
+        string errorMessage,
+        params ConflictEntity[] conflictEntities
+    )
+    {
+        EntityType = TableNames.CHACHAR;
+        Entity = chachar;
+        ErrorMessage = errorMessage;
+        ConflictEntities = conflictEntities;
+    }
+
+    public DatabaseIntegrityError(
+        Alternative alternative,
+        string errorMessage,
+        params ConflictEntity[] conflictEntities
+    )
+    {
+        EntityType = TableNames.ALTERNATIVE;
+        Entity = alternative;
+        ErrorMessage = errorMessage;
+        ConflictEntities = conflictEntities;
+    }
+
     [JsonPropertyName(JsonPropertyNames.ENTITY_TYPE)]
-    public string EntityType { get; } = _entityType;
+    public string EntityType { get; }
 
     [JsonPropertyName(JsonPropertyNames.ENTITY)]
-    public IEntity? Entity { get; } = _entity;
+    public IEntity? Entity { get; }
 
     [JsonPropertyName(JsonPropertyNames.ERROR_MESSAGE)]
-    public string ErrorMessage { get; } = _errorMessage;
+    public string ErrorMessage { get; }
 
     [JsonPropertyName(JsonPropertyNames.CONFLICT_ENTITIES)]
-    public IEnumerable<ConflictEntity> ConflictEntities { get; } = _conflictEntities;
+    public IEnumerable<ConflictEntity> ConflictEntities { get; }
 }

@@ -254,12 +254,12 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
             await Index.SubmitDialog.SetSuccessAsync(
                 this,
                 string.Format(
-                CultureInfo.InvariantCulture,
+                    CultureInfo.InvariantCulture,
                     Localizer[Resource.AlternativeCreated],
                     alternative.TheCharacter,
                     alternative.OriginalCharacter,
                     alternative.OriginalRealPinyin
-            ),
+                ),
                 cancellationToken
             );
 

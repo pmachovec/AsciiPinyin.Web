@@ -9,7 +9,7 @@ namespace AsciiPinyin.Web.Server.Commons;
 
 internal static partial class EntityControllerCommons
 {
-    public static FieldsErrorsContainer? GetPostInitialDataErrorsContainer<T>(
+    public static EntityFieldsErrorsContainer? GetPostInitialDataErrorsContainer<T>(
         string entityType,
         T entity,
         params Func<T, FieldError?>[] getFieldErrorMethods
@@ -20,7 +20,7 @@ internal static partial class EntityControllerCommons
             getFieldErrorMethods
         );
 
-        return fieldsErrors.Count > 0 ? new FieldsErrorsContainer(entityType, [.. fieldsErrors]) : null;
+        return fieldsErrors.Count > 0 ? new EntityFieldsErrorsContainer(entityType, [.. fieldsErrors]) : null;
     }
 
     public static string? GetCharacterErrorMessage(string? theCharacter)

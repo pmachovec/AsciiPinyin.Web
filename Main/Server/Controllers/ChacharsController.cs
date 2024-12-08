@@ -343,7 +343,6 @@ public sealed class ChacharsController(
                 LogCommons.LogEntityError(_logger, errorMessage, TableNames.CHACHAR, chachar);
 
                 return new DatabaseIntegrityErrorsContainer(
-                    TableNames.CHACHAR,
                     chachar,
                     errorMessage
                 );
@@ -360,7 +359,6 @@ public sealed class ChacharsController(
                 LogCommons.LogEntityError(_logger, errorMessage, TableNames.CHACHAR, chachar, $"conflict chachar: {radicalChachar}");
 
                 return new DatabaseIntegrityErrorsContainer(
-                    TableNames.CHACHAR,
                     chachar,
                     errorMessage,
                     new ConflictEntity(TableNames.CHACHAR, radicalChachar)
@@ -389,7 +387,6 @@ public sealed class ChacharsController(
                     LogCommons.LogEntityError(_logger, errorMessage, TableNames.CHACHAR, chachar);
 
                     return new DatabaseIntegrityErrorsContainer(
-                        TableNames.CHACHAR,
                         chachar,
                         errorMessage
                     );
@@ -415,7 +412,6 @@ public sealed class ChacharsController(
             LogCommons.LogEntityError(_logger, errorMessage, TableNames.CHACHAR, chachar, $"conflict chachar: {existingChachar}");
 
             return new DatabaseIntegrityErrorsContainer(
-                TableNames.CHACHAR,
                 chachar,
                 errorMessage,
                 new ConflictEntity(TableNames.CHACHAR, existingChachar)

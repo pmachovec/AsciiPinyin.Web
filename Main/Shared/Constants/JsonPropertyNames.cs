@@ -3,9 +3,10 @@ namespace AsciiPinyin.Web.Shared.Constants;
 public static class JsonPropertyNames
 {
     public const string CONFLICT_ENTITIES = "conflict_entities";
+    public const string DATABASE_INTEGRITY_ERRORS = "database_integrity_errors";
     public const string ENTITY = "entity";
     public const string ENTITY_TYPE = "entity_type";
-    public const string ERRORS = "errors";
+    public const string ENTITY_FIELDS_ERRORS = "entity_fields_errors";
     public const string ERROR_MESSAGE = "error_message";
     public const string FIELD_ERRORS = "field_errors";
     public const string FIELD_NAME = "field_name";

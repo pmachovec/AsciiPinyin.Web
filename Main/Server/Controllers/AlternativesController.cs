@@ -45,7 +45,7 @@ public sealed class AlternativesController(
     }
 
     [HttpPost]
-    public ActionResult Post(Alternative alternative)
+    public ActionResult<IErrorsContainer> Post(Alternative alternative)
     {
         LogCommons.LogHttpMethodInfo(_logger, HttpMethod.Post, Actions.CREATE_NEW_ALTERNATIVE);
 
@@ -187,7 +187,6 @@ public sealed class AlternativesController(
             LogCommons.LogEntityError(_logger, errorMessage, TableNames.ALTERNATIVE, alternative);
 
             return new DatabaseIntegrityErrorsContainer(
-                TableNames.ALTERNATIVE,
                 alternative,
                 errorMessage
             );
@@ -204,7 +203,6 @@ public sealed class AlternativesController(
             LogCommons.LogEntityError(_logger, errorMessage, TableNames.ALTERNATIVE, alternative, $"conflict chachar: {originalChachar}");
 
             return new DatabaseIntegrityErrorsContainer(
-                TableNames.ALTERNATIVE,
                 alternative,
                 errorMessage,
                 new ConflictEntity(TableNames.CHACHAR, originalChachar)
@@ -231,7 +229,6 @@ public sealed class AlternativesController(
             LogCommons.LogEntityError(_logger, errorMessage, TableNames.ALTERNATIVE, alternative, $"conflict alternative: {existingAlternative}");
 
             return new DatabaseIntegrityErrorsContainer(
-                TableNames.ALTERNATIVE,
                 alternative,
                 errorMessage,
                 new ConflictEntity(TableNames.ALTERNATIVE, existingAlternative)

@@ -8,15 +8,22 @@ namespace AsciiPinyin.Web.Shared.DTO;
 public sealed class DatabaseIntegrityErrorsContainer(params DatabaseIntegrityError[] _databaseIntegrityErrors) : IErrorsContainer
 {
     public DatabaseIntegrityErrorsContainer(
-        string entityType,
-        IEntity entity,
+        Chachar chachar,
         string errorMessage,
         params ConflictEntity[] conflictEntities
-    ) : this(new DatabaseIntegrityError(entityType, entity, errorMessage, conflictEntities))
+    ) : this(new DatabaseIntegrityError(chachar, errorMessage, conflictEntities))
     {
     }
 
-    [JsonPropertyName(JsonPropertyNames.ERRORS)]
+    public DatabaseIntegrityErrorsContainer(
+        Alternative alternative,
+        string errorMessage,
+        params ConflictEntity[] conflictEntities
+    ) : this(new DatabaseIntegrityError(alternative, errorMessage, conflictEntities))
+    {
+    }
+
+    [JsonPropertyName(JsonPropertyNames.DATABASE_INTEGRITY_ERRORS)]
     public IEnumerable<DatabaseIntegrityError> Errors { get; } = _databaseIntegrityErrors;
 
     public override string ToString() => JsonCreator.ToJson(this);
