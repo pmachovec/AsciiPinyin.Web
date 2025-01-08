@@ -38,7 +38,7 @@ public sealed class AlternativesController(
         }
         catch (Exception e)
         {
-            LogCommons.LogActionInDbFailedError(_logger, Actions.GET_ALL_ALTERNATIVES);
+            LogCommons.LogActionInDbFailedError(_logger, DbActions.SELECT);
             LogCommons.LogError(_logger, e.ToString());
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
@@ -114,7 +114,7 @@ public sealed class AlternativesController(
         }
         catch (Exception e)
         {
-            LogCommons.LogActionInDbFailedError(_logger, Actions.CREATE_NEW_ALTERNATIVE);
+            LogCommons.LogActionInDbFailedError(_logger, DbActions.INSERT);
             LogCommons.LogError(_logger, e.ToString());
             return StatusCode(StatusCodes.Status500InternalServerError);
         }

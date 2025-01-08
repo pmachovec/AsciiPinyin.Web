@@ -40,7 +40,7 @@ public sealed class ChacharsController(
         }
         catch (Exception e)
         {
-            LogCommons.LogActionInDbFailedError(_logger, Actions.GET_ALL_CHACHARS);
+            LogCommons.LogActionInDbFailedError(_logger, DbActions.SELECT);
             LogCommons.LogError(_logger, e.ToString());
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
@@ -120,7 +120,7 @@ public sealed class ChacharsController(
         }
         catch (Exception e)
         {
-            LogCommons.LogActionInDbFailedError(_logger, Actions.CREATE_NEW_CHACHAR);
+            LogCommons.LogActionInDbFailedError(_logger, DbActions.INSERT);
             LogCommons.LogError(_logger, e.ToString());
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
