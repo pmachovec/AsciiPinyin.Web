@@ -1,17 +1,17 @@
-using AsciiPinyin.Web.Server.Constants;
 using Asciipinyin.Web.Server.Test.Commons;
+using Asciipinyin.Web.Server.Test.Constants;
+using AsciiPinyin.Web.Server.Constants;
 using AsciiPinyin.Web.Server.Controllers;
 using AsciiPinyin.Web.Server.Data;
+using AsciiPinyin.Web.Shared.DTO;
 using AsciiPinyin.Web.Shared.Models;
+using AsciiPinyin.Web.Shared.Test.Constants;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using Errors = AsciiPinyin.Web.Server.Test.Constants.Errors;
-using AsciiPinyin.Web.Shared.Test.Constants;
-using AsciiPinyin.Web.Shared.DTO;
-using Asciipinyin.Web.Server.Test.Constants;
 
 namespace Asciipinyin.Web.Server.Test.Controllers;
 
@@ -27,13 +27,31 @@ internal sealed class AlternativesControllerTest
         Strokes = 8
     };
 
-    private static readonly Alternative _alternative = new()
+    private static readonly Alternative _alternative1 = new()
     {
         TheCharacter = "⻗",
         OriginalCharacter = "雨",
         OriginalPinyin = "yu",
         OriginalTone = 3,
         Strokes = 8
+    };
+
+    private static readonly Alternative _alternative2 = new()
+    {
+        TheCharacter = "乁",
+        OriginalCharacter = "丿",
+        OriginalPinyin = "pie",
+        OriginalTone = 3,
+        Strokes = 1
+    };
+
+    private static readonly Alternative _alternative3 = new()
+    {
+        TheCharacter = "乀",
+        OriginalCharacter = "丿",
+        OriginalPinyin = "pie",
+        OriginalTone = 3,
+        Strokes = 1
     };
 
     private static readonly Mock<AsciiPinyinContext> _asciiPinyinContextMock = new();
@@ -59,6 +77,44 @@ internal sealed class AlternativesControllerTest
 
     [TearDown]
     public void TearDown() => _asciiPinyinContextMock.Reset();
+
+    [Test]
+    public void GetNoUserAgentHeaderTest()
+    {
+        _httpContext.Request.Headers.Clear();
+
+        var result = _alternativesController.Get();
+        EntityControllerTestCommons.NoUserAgentHeaderTest(result);
+    }
+
+    [Test]
+    public void GetAllAlternativesErrorTest()
+    {
+        _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Throws(new InvalidOperationException());
+        var result = _alternativesController.Get();
+
+        EntityControllerTestCommons.InternalServerErrorTest(result);
+    }
+
+    [Test]
+    public void GetAllAlternativesOkTest()
+    {
+        EntityControllerTestCommons.MockDatabaseFacadeTransaction(_asciiPinyinContextMock);
+        var alternativesDbSetMock = EntityControllerTestCommons.GetAlternativeDbSetMock(
+            _alternative1,
+            _alternative2,
+            _alternative3
+        );
+        _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
+
+        var result = _alternativesController.Get();
+        EntityControllerTestCommons.GetAllEntitiesOkTest(
+            result,
+            _alternative1,
+            _alternative2,
+            _alternative3
+        );
+    }
 
     [Test]
     public void PostNoUserAgentHeaderTest()
@@ -431,7 +487,7 @@ internal sealed class AlternativesControllerTest
     {
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
 
-        var result = _alternativesController.Post(_alternative);
+        var result = _alternativesController.Post(_alternative1);
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
 
@@ -442,7 +498,7 @@ internal sealed class AlternativesControllerTest
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
         _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Throws(new InvalidOperationException());
 
-        var result = _alternativesController.Post(_alternative);
+        var result = _alternativesController.Post(_alternative1);
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
 
@@ -451,12 +507,12 @@ internal sealed class AlternativesControllerTest
     {
         var chacharsDbSetMock = EntityControllerTestCommons.GetChacharDbSetMock();
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
-        var result = _alternativesController.Post(_alternative);
+        var result = _alternativesController.Post(_alternative1);
 
         EntityControllerTestCommons.PostDatabaseIntegrityErrorTest(
             result,
             TableNames.ALTERNATIVE,
-            _alternative,
+            _alternative1,
             EntityControllerTestCommons.GetEntityUnknownErrorMessage(
                 TableNames.CHACHAR,
                 JsonPropertyNames.ORIGINAL_CHARACTER,
@@ -481,12 +537,12 @@ internal sealed class AlternativesControllerTest
 
         var chacharsDbSetMock = EntityControllerTestCommons.GetChacharDbSetMock(malformedRadicalChachar);
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
-        var result = _alternativesController.Post(_alternative);
+        var result = _alternativesController.Post(_alternative1);
 
         EntityControllerTestCommons.PostDatabaseIntegrityErrorTest(
             result,
             TableNames.ALTERNATIVE,
-            _alternative,
+            _alternative1,
             EntityControllerTestCommons.GetNoRadicalErrorMessage(
                 JsonPropertyNames.ORIGINAL_CHARACTER,
                 JsonPropertyNames.ORIGINAL_PINYIN,
@@ -500,15 +556,15 @@ internal sealed class AlternativesControllerTest
     public void PostAlternativeAlreadyExistsTest()
     {
         var chacharsDbSetMock = EntityControllerTestCommons.GetChacharDbSetMock(_radicalChachar);
-        var alternativesDbSetMock = EntityControllerTestCommons.GetAlternativeDbSetMock(_alternative);
+        var alternativesDbSetMock = EntityControllerTestCommons.GetAlternativeDbSetMock(_alternative1);
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
         _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
-        var result = _alternativesController.Post(_alternative);
+        var result = _alternativesController.Post(_alternative1);
 
         EntityControllerTestCommons.PostDatabaseIntegrityErrorTest(
             result,
             TableNames.ALTERNATIVE,
-            _alternative,
+            _alternative1,
             EntityControllerTestCommons.GetEntityExistsErrorMessage(
                 TableNames.ALTERNATIVE,
                 JsonPropertyNames.THE_CHARACTER,
@@ -516,8 +572,21 @@ internal sealed class AlternativesControllerTest
                 JsonPropertyNames.ORIGINAL_PINYIN,
                 JsonPropertyNames.ORIGINAL_TONE
             ),
-            new ConflictEntity(TableNames.ALTERNATIVE, _alternative)
+            new ConflictEntity(TableNames.ALTERNATIVE, _alternative1)
         );
+    }
+
+    [Test]
+    public void PostAlternativeSaveFailedTest()
+    {
+        var chacharsDbSetMock = EntityControllerTestCommons.GetChacharDbSetMock(_radicalChachar);
+        var alternativesDbSetMock = EntityControllerTestCommons.GetAlternativeDbSetMock();
+        _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
+        _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
+        _ = _asciiPinyinContextMock.Setup(context => context.SaveChanges()).Throws(new InvalidOperationException());
+        var result = _alternativesController.Post(_alternative1);
+
+        EntityControllerTestCommons.InternalServerErrorTest(result);
     }
 
     [Test]
@@ -528,8 +597,8 @@ internal sealed class AlternativesControllerTest
         var alternativesDbSetMock = EntityControllerTestCommons.GetAlternativeDbSetMock();
         _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
         _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
+        var result = _alternativesController.Post(_alternative1);
 
-        var result = _alternativesController.Post(_alternative);
         EntityControllerTestCommons.PostOkTest(result);
     }
 }

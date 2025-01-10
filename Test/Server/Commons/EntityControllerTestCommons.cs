@@ -13,7 +13,7 @@ namespace Asciipinyin.Web.Server.Test.Commons;
 
 internal static class EntityControllerTestCommons
 {
-    public static void NoUserAgentHeaderTest(ActionResult<IErrorsContainer>? result)
+    public static void NoUserAgentHeaderTest<T>(ActionResult<T>? result)
     {
         Assert.That(result, Is.Not.Null);
         Assert.That(result!.Result, Is.Not.Null);
@@ -21,7 +21,7 @@ internal static class EntityControllerTestCommons
         Assert.That((result.Result as BadRequestObjectResult)!.Value, Is.EqualTo(Errors.USER_AGENT_MISSING));
     }
 
-    public static void InternalServerErrorTest(ActionResult<IErrorsContainer>? result)
+    public static void InternalServerErrorTest<T>(ActionResult<T>? result)
     {
         Assert.That(result, Is.Not.Null);
         Assert.That(result!.Result, Is.Not.Null);
@@ -29,6 +29,28 @@ internal static class EntityControllerTestCommons
 
         var statusCodeResult = result.Result as StatusCodeResult;
         Assert.That(statusCodeResult!.StatusCode, Is.EqualTo(500));
+    }
+
+    public static void GetAllEntitiesOkTest<T>(
+        ActionResult<IEnumerable<T>>? result,
+        params T[] expectedEntities
+    ) where T : IEntity
+    {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Result, Is.Not.Null);
+        Assert.That(result.Result!, Is.InstanceOf<OkObjectResult>());
+
+        var value = (result.Result as OkObjectResult)!.Value;
+        Assert.That(value, Is.Not.Null);
+        Assert.That(value!, Is.InstanceOf<IEnumerable<T>>());
+
+        var entities = (value as IEnumerable<T>)!;
+        Assert.That(entities.Count, Is.EqualTo(expectedEntities.Length));
+
+        foreach (var expectedEntity in expectedEntities)
+        {
+            Assert.That(entities.Contains(expectedEntity), Is.True);
+        }
     }
 
     public static void PostFieldWrongTest(

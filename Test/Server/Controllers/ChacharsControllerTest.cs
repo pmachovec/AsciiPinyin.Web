@@ -8,7 +8,6 @@ using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Test.Constants;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -39,6 +38,18 @@ internal sealed partial class ChacharsControllerTest
         RadicalPinyin = "yu",
         RadicalTone = 3,
         RadicalAlternativeCharacter = "⻗"
+    };
+
+    private static readonly Chachar _nonRadicalChacharWithoutAlternative = new()
+    {
+        TheCharacter = "四",
+        Pinyin = "si",
+        Ipa = "sɹ̩",
+        Tone = 4,
+        Strokes = 5,
+        RadicalCharacter = "儿",
+        RadicalPinyin = "er",
+        RadicalTone = 2
     };
 
     private static readonly Alternative _alternative = new()
@@ -73,6 +84,44 @@ internal sealed partial class ChacharsControllerTest
 
     [TearDown]
     public void TearDown() => _asciiPinyinContextMock.Reset();
+
+    [Test]
+    public void GetNoUserAgentHeaderTest()
+    {
+        _httpContext.Request.Headers.Clear();
+
+        var result = _chacharsController.Get();
+        EntityControllerTestCommons.NoUserAgentHeaderTest(result);
+    }
+
+    [Test]
+    public void GetAllChacharsErrorTest()
+    {
+        _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
+        var result = _chacharsController.Get();
+
+        EntityControllerTestCommons.InternalServerErrorTest(result);
+    }
+
+    [Test]
+    public void GetAllChacharsOkTest()
+    {
+        EntityControllerTestCommons.MockDatabaseFacadeTransaction(_asciiPinyinContextMock);
+        var chacharsDbSetMock = EntityControllerTestCommons.GetChacharDbSetMock(
+            _radicalChachar,
+            _nonRadicalChacharWithAlternative,
+            _nonRadicalChacharWithoutAlternative
+        );
+        _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
+
+        var result = _chacharsController.Get();
+        EntityControllerTestCommons.GetAllEntitiesOkTest(
+            result,
+            _radicalChachar,
+            _nonRadicalChacharWithAlternative,
+            _nonRadicalChacharWithoutAlternative
+        );
+    }
 
     [Test]
     public void PostNoUserAgentHeaderTest()
@@ -920,6 +969,17 @@ internal sealed partial class ChacharsControllerTest
             ),
             new ConflictEntity(TableNames.CHACHAR, _radicalChachar)
         );
+    }
+
+    [Test]
+    public void PostChacharSaveFailedTest()
+    {
+        var chacharsDbSetMock = EntityControllerTestCommons.GetChacharDbSetMock();
+        _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
+        _ = _asciiPinyinContextMock.Setup(context => context.SaveChanges()).Throws(new InvalidOperationException());
+        var result = _chacharsController.Post(_radicalChachar);
+
+        EntityControllerTestCommons.InternalServerErrorTest(result);
     }
 
     [Test]

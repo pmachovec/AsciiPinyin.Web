@@ -31,8 +31,8 @@ internal sealed class AlternativeFormTest : IDisposable
         IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT
     ];
 
-    private readonly ISet<Chachar> _radicalChachars = new HashSet<Chachar>
-    {
+    private readonly HashSet<Chachar> _radicalChachars =
+    [
         new()
         {
             TheCharacter = "雨",
@@ -41,10 +41,10 @@ internal sealed class AlternativeFormTest : IDisposable
             Tone = 3,
             Strokes = 8
         }
-    };
+    ];
 
-    private readonly ISet<Chachar> _nonRadicalChachars = new HashSet<Chachar>
-    {
+    private readonly HashSet<Chachar> _nonRadicalChachars =
+    [
         new()
         {
             TheCharacter = "零",
@@ -57,7 +57,7 @@ internal sealed class AlternativeFormTest : IDisposable
             RadicalTone = 3,
             RadicalAlternativeCharacter = "⻗"
         }
-    };
+    ];
 
     private readonly Mock<IIndex> _indexMock = new();
     private readonly Mock<IStringLocalizer<Resource>> _localizerMock = new();

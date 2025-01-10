@@ -242,10 +242,6 @@ public sealed class ChacharsController(
             {
                 errorMessage = Errors.EMPTY;
             }
-            else if (radicalPinyin.Length == 0)
-            {
-                errorMessage = Errors.EMPTY;
-            }
             else if (!Regexes.AsciiLettersRegex().IsMatch(radicalPinyin))
             {
                 errorMessage = Errors.NO_ASCII;
