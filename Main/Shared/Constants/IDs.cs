@@ -14,7 +14,7 @@ public static class IDs
     public const string ALTERNATIVE_VIEW_DIALOG_ROOT = "alternative-view-dialog-root";
     public const string ALTERNATIVES_TAB_BUTTON = "alternatives-tab-button";
     public const string APP_LOADING = "app-loading";
-    public const string CHACHAR_FORM_ALTERNATIVE = "chachar-form-alternative";
+    public const string CHACHAR_FORM_ALTERNATIVE_INPUT = "chachar-form-alternative-input";
     public const string CHACHAR_FORM_ALTERNATIVE_LABEL = "chachar-form-alternative-label";
     public const string CHACHAR_FORM_ALTERNATIVE_SELECTOR = "chachar-form-alternative-selector";
     public const string CHACHAR_FORM_CLEAR_ALTERNATIVE = "chachar-form-clear-alternative";
@@ -22,6 +22,7 @@ public static class IDs
     public const string CHACHAR_FORM_IPA_INPUT = "chachar-form-ipa-input";
     public const string CHACHAR_FORM_PINYIN_ERROR = "chachar-form-pinyin-error";
     public const string CHACHAR_FORM_PINYIN_INPUT = "chachar-form-pinyin-input";
+    public const string CHACHAR_FORM_RADICAL_INPUT = "chachar-form-radical-input";
     public const string CHACHAR_FORM_RADICAL_SELECTOR = "chachar-form-radical-selector";
     public const string CHACHAR_FORM_ROOT = "chachar-form-root";
     public const string CHACHAR_FORM_STROKES_ERROR = "chachar-form-strokes-error";

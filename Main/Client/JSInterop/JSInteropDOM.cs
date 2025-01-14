@@ -1,5 +1,5 @@
+using AsciiPinyin.Web.Client.Constants.JSInterop;
 using AsciiPinyin.Web.Shared.Constants;
-using AsciiPinyin.Web.Shared.Constants.JSInterop;
 using Microsoft.JSInterop;
 
 namespace AsciiPinyin.Web.Client.JSInterop;

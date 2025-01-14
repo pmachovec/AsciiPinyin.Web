@@ -5,9 +5,12 @@ namespace AsciiPinyin.Web.Client.Components;
 
 public class EntityCardsBase<T> : ComponentBase where T : IEntity
 {
-    [Parameter]
-    public required IEnumerable<T> Entities { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required IEnumerable<T> Entities { get; init; }
 
-    [Parameter]
-    public required Func<T, CancellationToken, Task> SelectEntityAsync { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required Func<T, CancellationToken, Task> SelectEntityAsync { get; init; }
+
+    [Parameter, EditorRequired]
+    public required string SelectorClass { get; init; }
 }

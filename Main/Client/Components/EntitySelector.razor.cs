@@ -19,20 +19,23 @@ public class EntitySelectorBase<T> : ComponentBase, IModal where T : IEntity
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    [Parameter]
-    public string RootId { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required string RootId { get; init; }
 
-    [Parameter]
-    public IEnumerable<T> Entities { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required IEnumerable<T> Entities { get; init; }
 
-    [Parameter]
-    public string HtmlTitle { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required string HtmlTitle { get; init; }
 
-    [Parameter]
-    public string Title { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required string Title { get; init; }
 
-    [Parameter]
-    public Func<T, CancellationToken, Task> SelectEntityAsync { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required string SelectorClass { get; init; }
+
+    [Parameter, EditorRequired]
+    public required Func<T, CancellationToken, Task> SelectEntityAsync { get; init; }
 
     public async Task OpenAsync(
         IModal modalLowerLevel,

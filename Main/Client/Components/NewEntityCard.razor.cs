@@ -4,9 +4,9 @@ namespace AsciiPinyin.Web.Client.Components;
 
 public class NewEntityCardBase : ComponentBase
 {
-    [Parameter]
-    public required string Label { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required string Label { get; init; }
 
-    [Parameter]
-    public required Func<CancellationToken, Task> ShowEntityFormAsync { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required Func<CancellationToken, Task> ShowEntityFormAsync { get; init; }
 }

@@ -7,11 +7,11 @@ namespace AsciiPinyin.Web.Client.Components;
 public class CloseButtonBase : ComponentBase
 {
     [Inject]
-    protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
+    protected IStringLocalizer<Resource> Localizer { get; init; } = default!;
 
-    [Parameter]
-    public required Func<CancellationToken, Task> CloseAsync { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required Func<CancellationToken, Task> CloseAsync { get; init; }
 
-    [Parameter]
-    public required CancellationToken CancellationToken { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required CancellationToken CancellationToken { get; init; }
 }

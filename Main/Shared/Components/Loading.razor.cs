@@ -9,9 +9,9 @@ public class LoadingBase : ComponentBase
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    [Parameter]
-    public required string Id { protected get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required string Id { protected get; init; }
 
-    [Parameter]
-    public required string TextResource { protected get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required string TextResource { protected get; init; }
 }

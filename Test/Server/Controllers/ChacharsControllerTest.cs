@@ -1,8 +1,7 @@
-using Asciipinyin.Web.Server.Test.Commons;
-using Asciipinyin.Web.Server.Test.Constants;
-using AsciiPinyin.Web.Server.Constants;
 using AsciiPinyin.Web.Server.Controllers;
 using AsciiPinyin.Web.Server.Data;
+using AsciiPinyin.Web.Server.Test.Commons;
+using AsciiPinyin.Web.Server.Test.Constants;
 using AsciiPinyin.Web.Shared.DTO;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Test.Constants;

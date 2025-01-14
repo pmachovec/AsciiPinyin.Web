@@ -15,7 +15,7 @@
             <div class="modal-header justify-content-between">
                 <div></div>
                 <h2 class="modal-title fw-bold" id="theCharacter">@(Chachar?.TheCharacter ?? string.Empty)</h2>
-                <CloseButton CloseAsync="CloseAsync" CancellationToken="CancellationToken.None" />
+                <CloseButton CloseAsync="@CloseAsync" CancellationToken="@CancellationToken.None" />
             </div>
             <div class="modal-body">
                 <p class="card-text">

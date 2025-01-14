@@ -1,6 +1,6 @@
-namespace AsciiPinyin.Web.Shared.Constants.JSInterop;
+namespace AsciiPinyin.Web.Client.Constants.JSInterop;
 
-public static class ConsoleFunctions
+internal static class ConsoleFunctions
 {
     public const string CONSOLE_ERROR = "consoleError";
     public const string CONSOLE_INFO = "consoleInfo";

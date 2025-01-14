@@ -67,8 +67,8 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    [Parameter]
-    public required IIndex Index { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required IIndex Index { get; init; }
 
     protected override void OnInitialized() =>
         HtmlTitle = Localizer[Resource.CreateNewCharacter];
@@ -79,7 +79,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         if (AvailableAlternatives.Any())
         {
             await Task.WhenAll(
-                JSInteropDOM.EnableAsync(IDs.CHACHAR_FORM_ALTERNATIVE, CancellationToken.None),
+                JSInteropDOM.EnableAsync(IDs.CHACHAR_FORM_ALTERNATIVE_INPUT, CancellationToken.None),
                 JSInteropDOM.EnableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CancellationToken.None),
                 JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50, CancellationToken.None),
                 JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY, CancellationToken.None),
@@ -90,7 +90,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         else
         {
             await Task.WhenAll(
-                JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_ALTERNATIVE, CancellationToken.None),
+                JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_ALTERNATIVE_INPUT, CancellationToken.None),
                 JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CancellationToken.None),
                 JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK, CancellationToken.None),
                 JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY, CancellationToken.None),
@@ -333,7 +333,7 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
 
         LogCommons.LogFormDataInfo(Logger, chachar);
         LogCommons.LogDatabaseIntegrityVerificationDebug(Logger);
-        var databseIntegrityErrorText = await GetDatabaseIntegrityErrorTextAsync(chachar, cancellationToken);
+        var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(chachar);
 
         if (databseIntegrityErrorText is not null)
         {
@@ -349,11 +349,9 @@ public partial class ChacharFormBase : ComponentBase, IEntityForm
         }
     }
 
-    private async Task<string?> GetDatabaseIntegrityErrorTextAsync(Chachar chachar, CancellationToken cancellationToken)
+    private string? GetDatabaseIntegrityErrorText(Chachar chachar)
     {
-        var chacharsContainsTask = Task.Run(() => Index.Chachars.Contains(chachar), cancellationToken);
-
-        if (await chacharsContainsTask)
+        if (Index.Chachars.Contains(chachar))
         {
             LogCommons.LogError(Logger, Errors.CHACHAR_ALREADY_EXISTS);
 

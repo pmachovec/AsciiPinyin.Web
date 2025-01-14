@@ -19,11 +19,12 @@
             <div class="container-cards container-cards-tab">
                 <NewEntityCard
                     Label="@($"{Localizer[Resource.NewMale]}...")"
-                    ShowEntityFormAsync="ShowChacharFormAsync" />
+                    ShowEntityFormAsync="@ShowChacharFormAsync" />
                 <EntityCards
-                    T="Chachar"
-                    Entities="Index.Chachars"
-                    SelectEntityAsync="ShowChacharViewDialogAsync" />
+                    T="@Chachar"
+                    Entities="@Index.Chachars"
+                    SelectEntityAsync="@ShowChacharViewDialogAsync"
+                    SelectorClass="@CssClasses.CHACHAR_SELECTOR" />
             </div>
         }
     }

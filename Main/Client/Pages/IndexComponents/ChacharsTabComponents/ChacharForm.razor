@@ -16,7 +16,7 @@
         <div class="modal-content">
             <div class="modal-header justify-content-between">
                 <h4 class="modal-title fw-bold ms-3" id="theCharacter">@Localizer[Resource.CreateNewCharacter]</h4>
-                <CloseButton CloseAsync="CloseAsync" CancellationToken="CancellationToken.None" />
+                <CloseButton CloseAsync="@CloseAsync" CancellationToken="@CancellationToken.None" />
             </div>
             <div class="modal-body m-3">
                 <form>
@@ -31,7 +31,8 @@
                                 @onmousedown="async _ => await ClearWrongInputAsync(
                                     IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
                                     IDs.CHACHAR_FORM_THE_CHARACTER_ERROR,
-                                    CancellationToken.None)">
+                                    CancellationToken.None
+                                )">
                         </div>
                         <div
                             class="error-label form-text mx-1 mt-0 text-danger d-inline"
@@ -49,7 +50,8 @@
                                 @onmousedown="async _ => await ClearWrongInputAsync(
                                     IDs.CHACHAR_FORM_PINYIN_INPUT,
                                     IDs.CHACHAR_FORM_PINYIN_ERROR,
-                                    CancellationToken.None)">
+                                    CancellationToken.None
+                                )">
                         </div>
                         <div
                             class="error-label form-text mx-1 mt-0 text-danger"
@@ -67,7 +69,8 @@
                                 @onmousedown="async _ => await ClearWrongInputAsync(
                                     IDs.CHACHAR_FORM_IPA_INPUT,
                                     IDs.CHACHAR_FORM_IPA_ERROR,
-                                    CancellationToken.None)">
+                                    CancellationToken.None
+                                )">
                         </div>
                         <div
                             class="error-label form-text mx-1 mt-0 text-danger"
@@ -87,7 +90,8 @@
                                 @onmousedown="async _ => await ClearWrongInputAsync(
                                     IDs.CHACHAR_FORM_TONE_INPUT,
                                     IDs.CHACHAR_FORM_TONE_ERROR,
-                                    CancellationToken.None)">
+                                    CancellationToken.None
+                                )">
                         </div>
                         <div
                             class="error-label form-text mx-1 mt-0 text-danger"
@@ -107,7 +111,8 @@
                                 @onmousedown="async _ => await ClearWrongInputAsync(
                                     IDs.CHACHAR_FORM_STROKES_INPUT,
                                     IDs.CHACHAR_FORM_STROKES_ERROR,
-                                    CancellationToken.None)">
+                                    CancellationToken.None
+                                )">
                         </div>
                         <div
                             class="error-label form-text mx-1 mt-0 text-danger"
@@ -119,6 +124,7 @@
                             <button
                                 type="button"
                                 class="btn-input-text form-control"
+                                id="@IDs.CHACHAR_FORM_RADICAL_INPUT"
                                 @onclick="async _ => await OpenRadicalSelectorAsync(CancellationToken.None)">
                                 @RadicalCharacter
                             </button>
@@ -140,7 +146,7 @@
                             <button
                                 type="button"
                                 class="btn-input-text form-control"
-                                id="@IDs.CHACHAR_FORM_ALTERNATIVE"
+                                id="@IDs.CHACHAR_FORM_ALTERNATIVE_INPUT"
                                 @onclick="async _ => await OpenAlternativeSelectorAsync(CancellationToken.None)">
                                 @RadicalAlternativeCharacter
                             </button>
@@ -169,17 +175,19 @@
 </div>
 <EntitySelector
     @ref="RadicalSelector"
-    T="Chachar"
-    Entities="Index.Chachars.Where(chachar => chachar.IsRadical)"
+    T="@Chachar"
+    Entities="@Index.Chachars.Where(chachar => chachar.IsRadical)"
     HtmlTitle="@Localizer[Resource.SelectRadical]"
     Title="@Localizer[Resource.SelectRadical]"
     RootId="@IDs.CHACHAR_FORM_RADICAL_SELECTOR"
-    SelectEntityAsync="SelectRadicalAsync" />
+    SelectEntityAsync="@SelectRadicalAsync"
+    SelectorClass="@CssClasses.RADICAL_SELECTOR" />
 <EntitySelector
     @ref="AlternativeSelector"
-    T="Alternative"
-    Entities="AvailableAlternatives"
+    T="@Alternative"
+    Entities="@AvailableAlternatives"
     HtmlTitle="@Localizer[Resource.SelectRadicalAlternative]"
     Title="@Localizer[Resource.SelectRadicalAlternative]"
     RootId="@IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR"
-    SelectEntityAsync="SelectAlternativeAsync" />
+    SelectEntityAsync="@SelectAlternativeAsync"
+    SelectorClass="@CssClasses.ALTERNATIVE_SELECTOR" />

@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
 using NUnit.Framework;
 
-namespace Asciipinyin.Web.Server.Test.Commons;
+namespace AsciiPinyin.Web.Server.Test.Commons;
 
 internal static class EntityControllerTestCommons
 {

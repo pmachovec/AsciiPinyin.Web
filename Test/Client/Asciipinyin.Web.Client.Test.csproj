@@ -15,6 +15,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Main\Client\AsciiPinyin.Web.Client.csproj" />
         <ProjectReference Include="..\..\Main\Shared\AsciiPinyin.Web.Shared.csproj" />
+        <ProjectReference Include="..\Shared\AsciiPinyin.Web.Shared.Test.csproj" />
     </ItemGroup>
 
 </Project>

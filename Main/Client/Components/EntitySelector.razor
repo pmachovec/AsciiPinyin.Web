@@ -14,13 +14,14 @@
         <div class="modal-content">
             <div class="modal-header justify-content-between">
                 <h4 class="modal-title fw-bold ms-3" id="theCharacter">@Title</h4>
-                <CloseButton CloseAsync="CloseAsync" CancellationToken="CancellationToken.None" />
+                <CloseButton CloseAsync="@CloseAsync" CancellationToken="@CancellationToken.None" />
             </div>
             <div class="container-cards container-cards-entity-selector">
                 <EntityCards
-                    T="T"
-                    Entities="Entities"
-                    SelectEntityAsync="SelectEntityAsync" />
+                    T="@T"
+                    Entities="@Entities"
+                    SelectEntityAsync="@SelectEntityAsync"
+                    SelectorClass="@SelectorClass" />
             </div>
         </div>
     </div>

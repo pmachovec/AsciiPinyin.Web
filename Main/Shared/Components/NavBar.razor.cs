@@ -11,11 +11,11 @@ public class NavBarBase : ComponentBase
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
     [Parameter]
-    public IEntityTab AlternativesTab { get; set; } = default!;
+    public required IEntityTab AlternativesTab { get; init; }
 
     [Parameter]
-    public IEntityTab ChacharsTab { get; set; } = default!;
+    public required IEntityTab ChacharsTab { get; init; }
 
     [Parameter]
-    public Func<IEntityTab, CancellationToken, Task> SelectTabAsync { get; set; } = (_, _) => Task.CompletedTask;
+    public required Func<IEntityTab, CancellationToken, Task> SelectTabAsync { get; init; }
 }

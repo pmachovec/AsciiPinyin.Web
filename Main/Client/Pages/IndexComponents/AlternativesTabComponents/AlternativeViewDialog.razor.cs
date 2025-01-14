@@ -27,8 +27,8 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    [Parameter]
-    public required IIndex Index { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required IIndex Index { get; init; }
 
     public async Task OpenAsync(
         IPage page,

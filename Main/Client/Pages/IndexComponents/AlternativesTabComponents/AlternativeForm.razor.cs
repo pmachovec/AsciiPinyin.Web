@@ -54,8 +54,8 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    [Parameter]
-    public required IIndex Index { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public required IIndex Index { get; init; }
 
     protected override void OnInitialized() =>
         HtmlTitle = Localizer[Resource.CreateNewAlternative];
@@ -207,7 +207,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
         LogCommons.LogFormDataInfo(Logger, alternative);
         LogCommons.LogDatabaseIntegrityVerificationDebug(Logger);
-        var databseIntegrityErrorText = await GetDatabaseIntegrityErrorTextAsync(alternative, cancellationToken);
+        var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(alternative);
 
         if (databseIntegrityErrorText is not null)
         {
@@ -223,11 +223,9 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         }
     }
 
-    private async Task<string?> GetDatabaseIntegrityErrorTextAsync(Alternative alternative, CancellationToken cancellationToken)
+    private string? GetDatabaseIntegrityErrorText(Alternative alternative)
     {
-        var alternativesContainsTask = Task.Run(() => Index.Alternatives.Contains(alternative), cancellationToken);
-
-        if (await alternativesContainsTask)
+        if (Index.Alternatives.Contains(alternative))
         {
             LogCommons.LogError(Logger, Errors.ALTERNATIVE_ALREADY_EXISTS);
 

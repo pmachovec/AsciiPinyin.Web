@@ -19,14 +19,15 @@
             <div class="container-cards container-cards-tab">
                 <NewEntityCard
                     Label="@($"{Localizer[Resource.NewFemale]}...")"
-                    ShowEntityFormAsync="ShowAlternativeFormAsync" />
+                    ShowEntityFormAsync="@ShowAlternativeFormAsync" />
                 <EntityCards
-                    T="Alternative"
-                    Entities="Index.Alternatives"
-                    SelectEntityAsync="ShowAlternativeViewDialogAsync" />
+                    T="@Alternative"
+                    Entities="@Index.Alternatives"
+                    SelectEntityAsync="@ShowAlternativeViewDialogAsync"
+                    SelectorClass="@CssClasses.ALTERNATIVE_SELECTOR" />
             </div>
         }
     }
 </div>
-<AlternativeForm @ref="AlternativeForm" Index="Index" />
-<AlternativeViewDialog @ref="AlternativeViewDialog" Index="Index" />
+<AlternativeForm @ref="AlternativeForm" Index="@Index" />
+<AlternativeViewDialog @ref="AlternativeViewDialog" Index="@Index" />

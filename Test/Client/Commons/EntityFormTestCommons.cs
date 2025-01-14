@@ -1,10 +1,16 @@
 using AngleSharp.Dom;
-using AsciiPinyin.Web.Shared.Constants;
-using AsciiPinyin.Web.Shared.Constants.JSInterop;
+using AsciiPinyin.Web.Client.ComponentInterfaces;
+using AsciiPinyin.Web.Client.HttpClients;
+using AsciiPinyin.Web.Client.Pages.IndexComponents;
+using AsciiPinyin.Web.Client.Test.Constants.JSInterop;
+using AsciiPinyin.Web.Shared.Models;
+using AsciiPinyin.Web.Shared.Test.Constants;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Moq;
 using NUnit.Framework;
+using System.Globalization;
+using System.Net;
 using TestContext = Bunit.TestContext;
 
 namespace Asciipinyin.Web.Client.Test.Commons;
@@ -12,22 +18,37 @@ namespace Asciipinyin.Web.Client.Test.Commons;
 internal sealed class EntityFormTestCommons(
     TestContext _testContext,
     IRenderedComponent<IComponent> _formComponent,
+    Mock<IEntityClient> _entityClientMock,
+    Mock<ISubmitDialog> _submitDialogMock,
     IEnumerable<string> _inputIds
 )
 {
+    /// <summary>
+    /// Tests if a string input, when it's given a value, keeps the value unchanged
+    /// - if an eventual 'oninput' event does not alter the value.
+    /// </summary>
+    /// <param name="inputValue">Value given to the input</param>
+    /// <param name="inputId">ID of the input</param>
     public void StringInputUnchangedTest(
-        string theInput,
+        string inputValue,
         string inputId
     )
     {
-        var setValueInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, theInput);
+        var setValueInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, inputValue);
         var formInput = _formComponent.Find($"#{inputId}");
-        formInput.Input(theInput);
+        formInput.Input(inputValue);
 
         setValueInvocationHandler.VerifyNotInvoke(DOMFunctions.SET_VALUE);
         _ = setValueInvocationHandler.SetVoidResult();
     }
 
+    /// <summary>
+    /// Tests if a number input, when it's given a value, changes the value to the one that was in it before
+    /// - if an 'oninput' event replaces the given value with the previous one.
+    /// The actual value given to the input really is not among method parameters, universal string placeholder is used.
+    /// </summary>
+    /// <param name="previousValidInput">Previous value of the input.</param>
+    /// <param name="inputId">ID of the input.</param>
     public void NumberInputAdjustedTest(
         string previousValidInput,
         string inputId
@@ -45,6 +66,12 @@ internal sealed class EntityFormTestCommons(
         VerifyInputValueSet(It.IsAny<string>(), previousValidInput, inputId);
     }
 
+    /// <summary>
+    /// Tests if a number input, when it's given a value, keeps the value unchanged
+    /// - if an eventual 'oninput' event does not alter the value.
+    /// </summary>
+    /// <param name="theInput">Value given to the input</param>
+    /// <param name="inputId">ID of the input</param>
     public void NumberInputUnchangedTest(
         string theInput,
         string inputId
@@ -71,102 +98,90 @@ internal sealed class EntityFormTestCommons(
         _ = setValueInvocationHandler.SetVoidResult();
     }
 
+    /// <summary>
+    /// Tests behavior of an input when it contains an invalid value and the form is submitted.
+    /// The value of the input is processed and assigned to a variable of the form by the 'oninput' callback.
+    /// </summary>
+    /// <param name="inputValue">Invalid value in the input</param>
+    /// <param name="expectedError">Expected error message to appear in the error label</param>
+    /// <param name="inputId">ID of the input</param>
+    /// <param name="submitButtonId">ID of the submit button of the form</param>
+    /// <param name="errorDivId">ID of the error label div</param>
     public void WrongSubmitOnInputTest(
-        string theInput,
+        string inputValue,
         string expectedError,
         string inputId,
         string submitButtonId,
         string errorDivId
     )
     {
-        var (addBorderDangerClassHandler, setErrorTextInvocationHandler, formInput, formSubmitButton) = MockFormElements(
-            inputId,
-            submitButtonId,
-            errorDivId,
-            expectedError
-         );
-
-        formInput.Input(theInput);
-        formSubmitButton.Click();
-
-        WrongSubmitTest(
-            expectedError,
-            inputId,
-            errorDivId,
-            addBorderDangerClassHandler,
-            setErrorTextInvocationHandler
-        );
+        var formInput = _formComponent.Find($"#{inputId}");
+        WrongSubmitTest(formInput.Input, inputValue, expectedError, inputId, submitButtonId, errorDivId);
     }
 
+    /// <summary>
+    /// Tests behavior of an input when it contains an invalid value and the form is submitted.
+    /// The value of the input is assigned to a variable of the form by the 'bind-value' attribute.
+    /// </summary>
+    /// <param name="inputValue">Invalid value in the input</param>
+    /// <param name="expectedError">Expected error message to appear in the error label</param>
+    /// <param name="inputId">ID of the input</param>
+    /// <param name="submitButtonId">ID of the submit button of the form</param>
+    /// <param name="errorDivId">ID of the error label div</param>
     public void WrongSubmitOnChangeTest(
-        string theInput,
+        string inputValue,
         string expectedError,
         string inputId,
         string submitButtonId,
         string errorDivId
     )
     {
-        var (addBorderDangerClassHandler, setErrorTextInvocationHandler, formInput, formSubmitButton) = MockFormElements(
-            inputId,
-            submitButtonId,
-            errorDivId,
-            expectedError
-        );
-
-        formInput.Change(theInput);
-        formSubmitButton.Click();
-
-        WrongSubmitTest(
-            expectedError,
-            inputId,
-            errorDivId,
-            addBorderDangerClassHandler,
-            setErrorTextInvocationHandler
-        );
+        var formInput = _formComponent.Find($"#{inputId}");
+        WrongSubmitTest(formInput.Change, inputValue, expectedError, inputId, submitButtonId, errorDivId);
     }
 
+    /// <summary>
+    /// Tests behavior of an input when it contains a valid value and the form is submitted.
+    /// The value of the input is processed and assigned to a variable of the form by the 'oninput' callback.
+    /// </summary>
+    /// <param name="inputValue">Valid value in the input</param>
+    /// <param name="inputId">ID of the input</param>
+    /// <param name="submitButtonId">ID of the submit button of the form</param>
+    /// <param name="errorDivId">ID of the error label div</param>
     public void CorrectSubmitOnInputTest(
-        string theInput,
+        string inputValue,
         string inputId,
         string submitButtonId,
         string errorDivId
     )
     {
-        MockOtherInputsBorderDanger(inputId);
-
-        var (addBorderDangerClassHandler, setTextInvocationHandler, formInput, chacharFormSubmitButton) = MockFormElements(
-            inputId,
-            submitButtonId,
-            errorDivId
-        );
-
-        formInput.Input(theInput);
-        chacharFormSubmitButton.Click();
-
-        CorrectSubmitTest(addBorderDangerClassHandler, setTextInvocationHandler);
+        var formInput = _formComponent.Find($"#{inputId}");
+        CorrectSubmitTest(formInput.Input, inputValue, inputId, submitButtonId, errorDivId);
     }
 
+    /// <summary>
+    /// Tests behavior of an input when it contains a valid value and the form is submitted.
+    /// The value of the input is assigned to a variable of the form by the 'bind-value' attribute.
+    /// </summary>
+    /// <param name="inputValue">Valid value in the input</param>
+    /// <param name="inputId">ID of the input</param>
+    /// <param name="submitButtonId">ID of the submit button of the form</param>
+    /// <param name="errorDivId">ID of the error label div</param>
     public void CorrectSubmitOnChangeTest(
-       string theInput,
+       string inputValue,
        string inputId,
        string submitButtonId,
        string errorDivId
     )
     {
-        MockOtherInputsBorderDanger(inputId);
-
-        var (addBorderDangerClassHandler, setErrorTextInvocationHandler, formInput, chacharFormSubmitButton) = MockFormElements(
-            inputId,
-            submitButtonId,
-            errorDivId
-        );
-
-        formInput.Change(theInput);
-        chacharFormSubmitButton.Click();
-
-        CorrectSubmitTest(addBorderDangerClassHandler, setErrorTextInvocationHandler);
+        var formInput = _formComponent.Find($"#{inputId}");
+        CorrectSubmitTest(formInput.Change, inputValue, inputId, submitButtonId, errorDivId);
     }
 
+    /// <summary>
+    /// Mocks setting the danger border for all other inputs than the one corresponding to the given ID.
+    /// </summary>
+    /// <param name="inputId">ID of the input</param>
     public void MockOtherInputsBorderDanger(string inputId)
     {
         foreach (var otherInputId in _inputIds)
@@ -182,7 +197,15 @@ internal sealed class EntityFormTestCommons(
         }
     }
 
-    public (JSRuntimeInvocationHandler, JSRuntimeInvocationHandler, IElement, IElement) MockFormElements(
+    /// <summary>
+    /// Mocks form elements for testing one concrete input behavior and returns their handlers.
+    /// </summary>
+    /// <param name="inputId">ID of the input</param>
+    /// <param name="submitButtonId">ID of the submit button of the form</param>
+    /// <param name="errorDivId">ID of the error label div</param>
+    /// <param name="expectedError">Expected error message to appear in the error label</param>
+    /// <returns>Add danger border css class handler, set error text handler, form submit button handler</returns>
+    public (JSRuntimeInvocationHandler, JSRuntimeInvocationHandler, IElement) MockInputFormElements(
         string inputId,
         string submitButtonId,
         string errorDivId,
@@ -194,23 +217,66 @@ internal sealed class EntityFormTestCommons(
             inputId,
             CssClasses.BORDER_DANGER
         );
+
         var setErrorTextHandler = _testContext.JSInterop.SetupVoid(
             DOMFunctions.SET_TEXT,
             errorDivId,
             expectedError
         );
-        var formInput = _formComponent.Find($"#{inputId}");
+
         var formSubmitButton = _formComponent.Find($"#{submitButtonId}");
 
         return (
             addBorderDangerClassHandler,
             setErrorTextHandler,
-            formInput,
             formSubmitButton
         );
     }
 
-    public static void WrongSubmitTest(
+    public void MockPostStatusCode<T>(T entity, HttpStatusCode statusCode) where T : IEntity
+    {
+        var apiName = (entity is Alternative) ? ApiNames.ALTERNATIVES : ApiNames.CHARACTERS;
+
+        _ = _entityClientMock
+            .Setup(entityClient => entityClient.PostEntityAsync(apiName, entity, It.IsAny<CancellationToken>()))
+            .Returns(Task.Run(() => statusCode));
+    }
+
+    public void CaptureErrorMessage(Action<string?> captureErrorMessage)
+    {
+        _ = _submitDialogMock
+            .Setup(submitDialog =>
+                submitDialog.SetErrorAsync(
+                    (IEntityForm)_formComponent.Instance, // Yes, the cast is necessary and it works.
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback((IModal _, string errorMessage, CancellationToken _) => captureErrorMessage(errorMessage));
+    }
+
+    public void CaptureSuccessMessage(Action<string?> captureSuccessMessage)
+    {
+        _ = _submitDialogMock
+            .Setup(submitDialog =>
+                submitDialog.SetSuccessAsync(
+                    (IEntityForm)_formComponent.Instance, // Yes, the cast is necessary and it works.
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .Callback((IModal _, string successMessage, CancellationToken _) => captureSuccessMessage(successMessage));
+    }
+
+    /// <summary>
+    /// Verifies if the form input reacted correctly when it contained an invalid value after the form was submitted.
+    /// </summary>
+    /// <param name="expectedError">Expected error message to appear in the error label</param>
+    /// <param name="inputId">ID of the input</param>
+    /// <param name="errorDivId">ID of the error label div</param>
+    /// <param name="addBorderDangerClassHandler">Add danger border css class handler corresponding to the input</param>
+    /// <param name="setErrorTextHandler">Set error text handler corresponding to the input</param>
+    public static void WrongSubmitVerifications(
         string expectedError,
         string inputId,
         string errorDivId,
@@ -231,7 +297,12 @@ internal sealed class EntityFormTestCommons(
         _ = setErrorTextHandler.SetVoidResult();
     }
 
-    public static void CorrectSubmitTest(
+    /// <summary>
+    /// Verifies if the form input reacted correctly when it contained a valid value after the form was submitted.
+    /// </summary>
+    /// <param name="addBorderDangerClassHandler">Add danger border css class handler corresponding to the input</param>
+    /// <param name="setErrorTextInvocationHandler">Set error text handler corresponding to the input</param>
+    public static void CorrectSubmitVerifications(
         JSRuntimeInvocationHandler addBorderDangerClassHandler,
         JSRuntimeInvocationHandler setErrorTextInvocationHandler
     )
@@ -240,5 +311,85 @@ internal sealed class EntityFormTestCommons(
         setErrorTextInvocationHandler.VerifyNotInvoke(DOMFunctions.SET_TEXT);
         _ = addBorderDangerClassHandler.SetVoidResult();
         _ = setErrorTextInvocationHandler.SetVoidResult();
+    }
+
+    public void SubmitDialogErrorMessageTest(string? errorMessage, string expectedErrorMessage)
+    {
+        Assert.That(errorMessage, Is.Not.Null);
+        Assert.That(errorMessage, Is.EqualTo(expectedErrorMessage));
+
+        _submitDialogMock.Verify(submitDialog =>
+            submitDialog.SetErrorAsync(
+                (IEntityForm)_formComponent.Instance, // Yes, the cast is necessary and it works.
+                expectedErrorMessage,
+                It.IsAny<CancellationToken>()
+            ),
+            Times.Once
+        );
+    }
+
+    public void SubmitDialogSuccessMessageTest(string? successMessage, string expectedSuccessMessage)
+    {
+        Assert.That(successMessage, Is.Not.Null);
+        Assert.That(successMessage, Is.EqualTo(expectedSuccessMessage));
+
+        _submitDialogMock.Verify(submitDialog =>
+            submitDialog.SetSuccessAsync(
+                (IEntityForm)_formComponent.Instance, // Yes, the cast is necessary and it works.
+                expectedSuccessMessage,
+                It.IsAny<CancellationToken>()
+            ),
+            Times.Once
+        );
+    }
+
+    private void WrongSubmitTest(
+        Action<string> inputMethod,
+        string inputValue,
+        string expectedError,
+        string inputId,
+        string submitButtonId,
+        string errorDivId
+    )
+    {
+        var (addBorderDangerClassHandler, setErrorTextInvocationHandler, formSubmitButton) = MockInputFormElements(
+            inputId,
+            submitButtonId,
+            errorDivId,
+            expectedError
+        );
+
+        inputMethod(inputValue);
+        formSubmitButton.Click();
+
+        WrongSubmitVerifications(
+            expectedError,
+            inputId,
+            errorDivId,
+            addBorderDangerClassHandler,
+            setErrorTextInvocationHandler
+        );
+    }
+
+    private void CorrectSubmitTest(
+        Action<string> inputMethod,
+        string inputValue,
+        string inputId,
+        string submitButtonId,
+        string errorDivId
+    )
+    {
+        MockOtherInputsBorderDanger(inputId);
+
+        var (addBorderDangerClassHandler, setErrorTextInvocationHandler, formSubmitButton) = MockInputFormElements(
+            inputId,
+            submitButtonId,
+            errorDivId
+        );
+
+        inputMethod(inputValue);
+        formSubmitButton.Click();
+
+        CorrectSubmitVerifications(addBorderDangerClassHandler, setErrorTextInvocationHandler);
     }
 }

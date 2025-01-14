@@ -1,4 +1,4 @@
-namespace Asciipinyin.Web.Server.Test.Constants;
+namespace AsciiPinyin.Web.Server.Test.Constants;
 
 internal static class TableNames
 {
