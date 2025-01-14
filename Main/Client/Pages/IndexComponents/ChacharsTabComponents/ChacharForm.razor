@@ -169,7 +169,7 @@
 </div>
 <EntitySelector
     @ref="RadicalSelector"
-    TEntity="Chachar"
+    T="Chachar"
     Entities="Index.Chachars.Where(chachar => chachar.IsRadical)"
     HtmlTitle="@Localizer[Resource.SelectRadical]"
     Title="@Localizer[Resource.SelectRadical]"
@@ -177,7 +177,7 @@
     SelectEntityAsync="SelectRadicalAsync" />
 <EntitySelector
     @ref="AlternativeSelector"
-    TEntity="Alternative"
+    T="Alternative"
     Entities="AvailableAlternatives"
     HtmlTitle="@Localizer[Resource.SelectRadicalAlternative]"
     Title="@Localizer[Resource.SelectRadicalAlternative]"

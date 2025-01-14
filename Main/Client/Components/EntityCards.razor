@@ -1,8 +1,8 @@
 @using AsciiPinyin.Web.Shared.Models
 @using Microsoft.AspNetCore.Components.Web
 
-@typeparam TEntity where TEntity : IEntity
-@inherits EntityCardsBase<TEntity>
+@typeparam T where T : IEntity
+@inherits EntityCardsBase<T>
 
 @foreach (var entity in Entities)
 {

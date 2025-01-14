@@ -7,7 +7,7 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Components;
 
-public class EntitySelectorBase<TEntity> : ComponentBase, IModal where TEntity : IEntity
+public class EntitySelectorBase<T> : ComponentBase, IModal where T : IEntity
 {
     public IPage? Page { get; private set; }
 
@@ -23,7 +23,7 @@ public class EntitySelectorBase<TEntity> : ComponentBase, IModal where TEntity :
     public string RootId { get; set; } = default!;
 
     [Parameter]
-    public IEnumerable<TEntity> Entities { get; set; } = default!;
+    public IEnumerable<T> Entities { get; set; } = default!;
 
     [Parameter]
     public string HtmlTitle { get; set; } = default!;
@@ -32,7 +32,7 @@ public class EntitySelectorBase<TEntity> : ComponentBase, IModal where TEntity :
     public string Title { get; set; } = default!;
 
     [Parameter]
-    public Func<TEntity, CancellationToken, Task> SelectEntityAsync { get; set; } = default!;
+    public Func<T, CancellationToken, Task> SelectEntityAsync { get; set; } = default!;
 
     public async Task OpenAsync(
         IModal modalLowerLevel,

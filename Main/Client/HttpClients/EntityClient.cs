@@ -40,11 +40,11 @@ public sealed partial class EntityClient(
         return new HashSet<T>();
     }
 
-    public async Task<HttpStatusCode> PostEntityAsync<TEntity>(
+    public async Task<HttpStatusCode> PostEntityAsync<T>(
         string entitiesApiName,
-        TEntity entity,
+        T entity,
         CancellationToken cancellationToken
-    ) where TEntity : IEntity
+    ) where T : IEntity
     {
         LogCreateInfo(_logger, entity.GetType(), entity);
         var result = await _httpClient.PostAsJsonAsync(entitiesApiName, entity, cancellationToken);

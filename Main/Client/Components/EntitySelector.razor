@@ -2,8 +2,8 @@
 @using AsciiPinyin.Web.Shared.Models
 @using AsciiPinyin.Web.Shared.Resources
 
-@typeparam TEntity where TEntity : IEntity
-@inherits EntitySelectorBase<TEntity>
+@typeparam T where T : IEntity
+@inherits EntitySelectorBase<T>
 
 <div
     class="modal fade @CssClasses.D_NONE"
@@ -18,7 +18,7 @@
             </div>
             <div class="container-cards container-cards-entity-selector">
                 <EntityCards
-                    TEntity="TEntity"
+                    T="T"
                     Entities="Entities"
                     SelectEntityAsync="SelectEntityAsync" />
             </div>

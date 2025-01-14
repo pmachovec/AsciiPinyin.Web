@@ -2,7 +2,7 @@ namespace AsciiPinyin.Web.Shared.Models.Tools;
 
 internal static class Comparator
 {
-    public static bool EqualsForOperator<TEntity>(TEntity left, TEntity right) where TEntity : IEntity
+    public static bool EqualsForOperator<T>(T left, T right) where T : IEntity
     {
         if (left is null)
         {
