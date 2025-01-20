@@ -2,6 +2,9 @@
 [Bb]in/
 [Oo]bj/
 
+# Coverage results
+CoverageResults/
+
 # Test results
 TestResults/
 
