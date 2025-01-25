@@ -8,7 +8,7 @@ namespace AsciiPinyin.Web.Server.Controllers;
 
 [ApiController]
 [Route($"/{ApiNames.BASE}/{ApiNames.NLOGCONFIG}")]
-public partial class NLogConfigController(
+public sealed class NLogConfigController(
     ILocals _locals,
     ILogger<NLogConfigController> _logger
 ) : ControllerBase
@@ -18,7 +18,7 @@ public partial class NLogConfigController(
     {
         if (Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
         {
-            LogGetInfo(_logger, userAgent!);
+            LogCommons.LogGetInfo(_logger, userAgent!);
         }
         else
         {
@@ -31,7 +31,4 @@ public partial class NLogConfigController(
             System.IO.File.ReadAllText(_locals.NLogConfigYamlPath)
         );
     }
-
-    [LoggerMessage(LogLevel.Information, "GET nlog.config; User-Agent: {userAgent}")]
-    private static partial void LogGetInfo(ILogger logger, string userAgent);
 }

@@ -15,7 +15,7 @@ using System.Net;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
-public partial class ChacharFormBase : ComponentBase, IEntityForm
+public class ChacharFormBase : ComponentBase, IEntityForm
 {
     protected EntitySelector<Alternative> AlternativeSelector { get; set; } = default!;
 

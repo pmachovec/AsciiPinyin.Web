@@ -1,7 +1,6 @@
 using AsciiPinyin.Web.Shared.Models;
-using AsciiPinyin.Web.Shared.Test.Constants;
+using AsciiPinyin.Web.Shared.Test.Commons;
 using NUnit.Framework;
-using System.Text.RegularExpressions;
 
 namespace AsciiPinyin.Web.Shared.Test.Models;
 
@@ -18,30 +17,6 @@ internal sealed partial class AlternativeTest
     };
 
     private static readonly Alternative _newAlternative = new();
-
-    [GeneratedRegex(
-        @"^\{"
-            + $@"(?=.*""{JsonPropertyNames.THE_CHARACTER}"":""⻗"",?)"
-            + $@"(?=.*""{JsonPropertyNames.ORIGINAL_CHARACTER}"":""雨"",?)"
-            + $@"(?=.*""{JsonPropertyNames.ORIGINAL_PINYIN}"":""yu"",?)"
-            + $@"(?=.*""{JsonPropertyNames.ORIGINAL_TONE}"":3,?)"
-            + $@"(?=.*""{JsonPropertyNames.STROKES}"":8,?)"
-            + @".*\}$",
-        RegexOptions.Compiled
-    )]
-    private static partial Regex AlternativeStringRegex();
-
-    [GeneratedRegex(
-        @"^\{"
-            + $@"(?=.*""{JsonPropertyNames.THE_CHARACTER}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.ORIGINAL_CHARACTER}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.ORIGINAL_PINYIN}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.ORIGINAL_TONE}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.STROKES}"":null,?)"
-            + @".*\}$",
-        RegexOptions.Compiled
-    )]
-    private static partial Regex AllNullAlternativeStringRegex();
 
     [Test]
     public void OriginalRealPinyinTest() =>
@@ -79,11 +54,11 @@ internal sealed partial class AlternativeTest
 
     [Test]
     public void AlternativeToStringTest() =>
-        Assert.That(_alternative.ToString(), Does.Match(AlternativeStringRegex()));
+        Assert.That(_alternative.ToString(), Does.Match(Regexes.AlternativeStringRegex()));
 
     [Test]
     public void NewAlternativeToStringTest() =>
-        Assert.That(_newAlternative.ToString(), Does.Match(AllNullAlternativeStringRegex()));
+        Assert.That(_newAlternative.ToString(), Does.Match(Regexes.AllNullAlternativeStringRegex()));
 
     [Test]
     public void AlternativeEqualsFullCloneTest()

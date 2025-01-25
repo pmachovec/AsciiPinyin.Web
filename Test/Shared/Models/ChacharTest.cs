@@ -1,7 +1,6 @@
 using AsciiPinyin.Web.Shared.Models;
-using AsciiPinyin.Web.Shared.Test.Constants;
+using AsciiPinyin.Web.Shared.Test.Commons;
 using NUnit.Framework;
-using System.Text.RegularExpressions;
 
 namespace AsciiPinyin.Web.Shared.Test.Models;
 
@@ -44,70 +43,6 @@ internal sealed partial class ChacharTest
 
     private static readonly Chachar _newChachar = new();
 
-    [GeneratedRegex(
-        @"^\{"
-            + $@"(?=.*""{JsonPropertyNames.THE_CHARACTER}"":""雨"",?)"
-            + $@"(?=.*""{JsonPropertyNames.PINYIN}"":""yu"",?)"
-            + $@"(?=.*""{JsonPropertyNames.IPA}"":""y:"",?)"
-            + $@"(?=.*""{JsonPropertyNames.TONE}"":3,?)"
-            + $@"(?=.*""{JsonPropertyNames.STROKES}"":8,?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_CHARACTER}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_PINYIN}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_TONE}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER}"":null,?)"
-            + @".*\}$",
-        RegexOptions.Compiled
-    )]
-    private static partial Regex RadicalChacharStringRegex();
-
-    [GeneratedRegex(
-        @"^\{"
-            + $@"(?=.*""{JsonPropertyNames.THE_CHARACTER}"":""零"",?)"
-            + $@"(?=.*""{JsonPropertyNames.PINYIN}"":""ling"",?)"
-            + $@"(?=.*""{JsonPropertyNames.IPA}"":""liŋ"",?)"
-            + $@"(?=.*""{JsonPropertyNames.TONE}"":2,?)"
-            + $@"(?=.*""{JsonPropertyNames.STROKES}"":13,?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_CHARACTER}"":""雨"",?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_PINYIN}"":""yu"",?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_TONE}"":3,?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER}"":""⻗"",?)"
-            + @".*\}$",
-        RegexOptions.Compiled
-    )]
-    private static partial Regex NonRadicalChacharWithAlternativeStringRegex();
-
-    [GeneratedRegex(
-        @"^\{"
-            + $@"(?=.*""{JsonPropertyNames.THE_CHARACTER}"":""四"",?)"
-            + $@"(?=.*""{JsonPropertyNames.PINYIN}"":""si"",?)"
-            + $@"(?=.*""{JsonPropertyNames.IPA}"":""sɹ̩"",?)"
-            + $@"(?=.*""{JsonPropertyNames.TONE}"":4,?)"
-            + $@"(?=.*""{JsonPropertyNames.STROKES}"":5)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_CHARACTER}"":""儿"",?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_PINYIN}"":""er"",?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_TONE}"":2,?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER}"":null,?)"
-            + @".*\}$",
-        RegexOptions.Compiled
-    )]
-    private static partial Regex NonRadicalChacharWithoutAlternativeStringRegex();
-
-    [GeneratedRegex(
-        @"^\{"
-            + $@"(?=.*""{JsonPropertyNames.THE_CHARACTER}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.PINYIN}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.IPA}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.TONE}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.STROKES}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_CHARACTER}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_PINYIN}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_TONE}"":null,?)"
-            + $@"(?=.*""{JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER}"":null,?)"
-            + @".*\}$",
-        RegexOptions.Compiled
-    )]
-    private static partial Regex AllNullChacharStringRegex();
-
     [Test]
     public void RealPinyinTest() =>
         Assert.That(_radicalChachar.RealPinyin, Is.EqualTo("yu3"));
@@ -142,19 +77,19 @@ internal sealed partial class ChacharTest
 
     [Test]
     public void RadicalChacharToStringTest() =>
-        Assert.That(_radicalChachar.ToString(), Does.Match(RadicalChacharStringRegex()));
+        Assert.That(_radicalChachar.ToString(), Does.Match(Regexes.RadicalChacharStringRegex()));
 
     [Test]
     public void NonRadicalChacharWithAlternativeToStringTest() =>
-        Assert.That(_nonRadicalChacharWithAlternative.ToString(), Does.Match(NonRadicalChacharWithAlternativeStringRegex()));
+        Assert.That(_nonRadicalChacharWithAlternative.ToString(), Does.Match(Regexes.NonRadicalChacharWithAlternativeStringRegex()));
 
     [Test]
     public void NonRadicalChacharWithoutAlternativeToStringTest() =>
-        Assert.That(_nonRadicalChacharWithoutAlternative.ToString(), Does.Match(NonRadicalChacharWithoutAlternativeStringRegex()));
+        Assert.That(_nonRadicalChacharWithoutAlternative.ToString(), Does.Match(Regexes.NonRadicalChacharWithoutAlternativeStringRegex()));
 
     [Test]
     public void NewChacharToStringTest() =>
-        Assert.That(_newChachar.ToString(), Does.Match(AllNullChacharStringRegex()));
+        Assert.That(_newChachar.ToString(), Does.Match(Regexes.AllNullChacharStringRegex()));
 
     [Test]
     public void ChacharEqualsFullCloneTest()

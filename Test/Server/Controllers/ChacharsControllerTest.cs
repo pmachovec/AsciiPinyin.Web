@@ -15,7 +15,7 @@ using Errors = AsciiPinyin.Web.Server.Test.Constants.Errors;
 namespace Asciipinyin.Web.Server.Test.Controllers;
 
 [TestFixture]
-internal sealed partial class ChacharsControllerTest
+internal sealed class ChacharsControllerTest
 {
     private static readonly Chachar _radicalChachar = new()
     {

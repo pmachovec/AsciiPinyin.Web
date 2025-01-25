@@ -7,7 +7,7 @@ using AsciiPinyin.Web.Shared.Utils;
 
 namespace AsciiPinyin.Web.Server.Commons;
 
-internal static partial class EntityControllerCommons
+internal static class EntityControllerCommons
 {
     public static EntityFieldsErrorsContainer? GetPostInitialDataErrorsContainer<T>(
         string entityType,
