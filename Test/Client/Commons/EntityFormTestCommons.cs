@@ -9,7 +9,6 @@ using Bunit;
 using Microsoft.AspNetCore.Components;
 using Moq;
 using NUnit.Framework;
-using System.Globalization;
 using System.Net;
 using TestContext = Bunit.TestContext;
 

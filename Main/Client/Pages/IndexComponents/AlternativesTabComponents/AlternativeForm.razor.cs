@@ -10,7 +10,6 @@ using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System.Globalization;
-using System.Net;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
@@ -227,7 +226,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     {
         if (Index.Alternatives.Contains(alternative))
         {
-            LogCommons.LogError(Logger, Errors.ALTERNATIVE_ALREADY_EXISTS);
+            LogCommons.LogAlternativeAlreadyExistsError(Logger);
 
             return string.Format(
                 CultureInfo.InvariantCulture,
@@ -241,37 +240,19 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         return null;
     }
 
-    private async Task SubmitAsync(Alternative alternative, CancellationToken cancellationToken)
-    {
-        var postTask = EntityClient.PostEntityAsync(ApiNames.ALTERNATIVES, alternative, cancellationToken);
-        var postResult = await postTask;
-
-        if (postResult == HttpStatusCode.OK)
-        {
-            LogCommons.LogHttpMethodSuccessInfo(Logger, HttpMethod.Post);
-            await Index.SubmitDialog.SetSuccessAsync(
-                this,
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    Localizer[Resource.AlternativeCreated],
-                    alternative.TheCharacter,
-                    alternative.OriginalCharacter,
-                    alternative.OriginalRealPinyin
-                ),
-                cancellationToken
-            );
-
-            _ = Index.Alternatives.Add(alternative);
-            Index.StateHasChangedPublic();
-        }
-        else
-        {
-            LogCommons.LogHttpMethodFailedError(Logger, HttpMethod.Post);
-            await Index.SubmitDialog.SetErrorAsync(
-                this,
-                Localizer[Resource.ProcessingError],
-                cancellationToken
-            );
-        }
-    }
+    private async Task SubmitAsync(Alternative alternative, CancellationToken cancellationToken) =>
+        await ModalCommons.PostAsync(
+            this,
+            alternative,
+            Index,
+            EntityClient.PostEntityAsync,
+            ApiNames.ALTERNATIVES,
+            Logger,
+            Index.Alternatives.Add,
+            Resource.AlternativeCreated,
+            cancellationToken,
+            alternative.TheCharacter!,
+            alternative.OriginalCharacter!,
+            alternative.OriginalRealPinyin!
+        );
 }

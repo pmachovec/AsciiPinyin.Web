@@ -45,23 +45,21 @@ public sealed class AlternativesController(
     }
 
     [HttpPost]
-    public ActionResult<IErrorsContainer> Post(Alternative alternative)
-    {
-        LogCommons.LogHttpMethodInfo(_logger, HttpMethod.Post, Actions.CREATE_NEW_ALTERNATIVE);
-
-        if (!Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
-        {
-            LogCommons.LogUserAgentMissingError(_logger);
-            return BadRequest(Errors.USER_AGENT_MISSING);
-        }
-
-        LogCommons.LogUserAgentInfo(_logger, userAgent!);
-        LogCommons.LogEntityInfo(_logger, nameof(Alternative), alternative);
-        LogCommons.LogInitialIntegrityVerificationDebug(_logger);
-
-        var postInitialDataErrorsContainer = EntityControllerCommons.GetPostInitialDataErrorsContainer(
-            TableNames.ALTERNATIVE,
+    public ActionResult<IErrorsContainer> Post(Alternative alternative) =>
+        EntityControllerCommons.Post(
+            _logger,
+            Request,
             alternative,
+            TableNames.ALTERNATIVE,
+            Actions.CREATE_NEW_ALTERNATIVE,
+            DbActions.INSERT,
+            ContextCollectionNames.ALTERNATIVES,
+            DbSetMethods.ADD,
+            _asciiPinyinContext,
+            BadRequest,
+            StatusCode,
+            Ok,
+            GetPostDatabaseIntegrityErrorsContainer,
             GetTheCharacterError,
             GetStrokesError,
             GetOriginalCharacterError,
@@ -69,66 +67,34 @@ public sealed class AlternativesController(
             GetOriginalToneError
         );
 
-        if (postInitialDataErrorsContainer is not null)
-        {
-            LogCommons.LogFieldsErrorsContainerError(_logger, postInitialDataErrorsContainer);
-            return BadRequest(postInitialDataErrorsContainer);
-        }
-
-        LogCommons.LogDatabaseIntegrityVerificationDebug(_logger);
-        DbSet<Chachar>? knownChachars;
-        DbSet<Alternative> knownAlternatives;
-
-        try
-        {
-            knownChachars = _asciiPinyinContext.Chachars;
-            knownAlternatives = _asciiPinyinContext.Alternatives;
-        }
-        catch (Exception e)
-        {
-            LogCommons.LogError(_logger, e.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-
-        var postDatabaseIntegrityErrorsContainer = GetPostDatabaseIntegrityErrorContainer(
+    [HttpPost(ApiNames.DELETE)]
+    public ActionResult<IErrorsContainer> PostDelete(Alternative alternative) =>
+        EntityControllerCommons.Post(
+            _logger,
+            Request,
             alternative,
-            knownChachars,
-            knownAlternatives
+            TableNames.ALTERNATIVE,
+            Actions.DELETE_ALTERNATIVE,
+            DbActions.DELETE,
+            ContextCollectionNames.ALTERNATIVES,
+            DbSetMethods.REMOVE,
+            _asciiPinyinContext,
+            BadRequest,
+            StatusCode,
+            Ok,
+            GetPostDeleteDatabaseIntegrityErrorsContainer,
+            GetTheCharacterError,
+            GetOriginalCharacterError,
+            GetOriginalPinyinError,
+            GetOriginalToneError
         );
-
-        if (postDatabaseIntegrityErrorsContainer is not null)
-        {
-            LogCommons.LogDatabaseIntegrityErrorsContainerError(_logger, postDatabaseIntegrityErrorsContainer);
-            return BadRequest(postDatabaseIntegrityErrorsContainer);
-        }
-
-        LogCommons.LogIntegrityVerificationSuccessDebug(_logger);
-        LogCommons.LogActionInDbInfo(_logger, DbActions.INSERT, Actions.CREATE_NEW_ALTERNATIVE);
-
-        try
-        {
-            using var dbContextTransaction = _asciiPinyinContext.Database.BeginTransaction();
-            _ = _asciiPinyinContext.Alternatives.Add(alternative);
-            _ = _asciiPinyinContext.SaveChanges();
-            dbContextTransaction.Commit();
-        }
-        catch (Exception e)
-        {
-            LogCommons.LogActionInDbFailedError(_logger, DbActions.INSERT);
-            LogCommons.LogError(_logger, e.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-
-        LogCommons.LogActionInDbSuccessInfo(_logger, DbActions.INSERT);
-        return Ok();
-    }
 
     private FieldError? GetTheCharacterError(Alternative alternative) =>
         EntityControllerCommons.GetInvalidValueFieldError(
             _logger,
             alternative.TheCharacter,
             JsonPropertyNames.THE_CHARACTER,
-            EntityControllerCommons.GetCharacterErrorMessage
+            EntityControllerCommons.GetTheCharacterErrorMessage
         );
 
     private FieldError? GetStrokesError(Alternative alternative) =>
@@ -144,7 +110,7 @@ public sealed class AlternativesController(
             _logger,
             alternative.OriginalCharacter,
             JsonPropertyNames.ORIGINAL_CHARACTER,
-            EntityControllerCommons.GetCharacterErrorMessage
+            EntityControllerCommons.GetTheCharacterErrorMessage
         );
 
     private FieldError? GetOriginalPinyinError(Alternative alternative) =>
@@ -163,7 +129,7 @@ public sealed class AlternativesController(
             EntityControllerCommons.GetToneErrorMessage
         );
 
-    private DatabaseIntegrityErrorsContainer? GetPostDatabaseIntegrityErrorContainer(
+    private DatabaseIntegrityErrorsContainer? GetPostDatabaseIntegrityErrorsContainer(
         Alternative alternative,
         DbSet<Chachar> knownChachars,
         DbSet<Alternative> knownAlternatives
@@ -232,6 +198,57 @@ public sealed class AlternativesController(
                 alternative,
                 errorMessage,
                 new ConflictEntity(TableNames.ALTERNATIVE, existingAlternative)
+            );
+        }
+
+        return null;
+    }
+
+    private DatabaseIntegrityErrorsContainer? GetPostDeleteDatabaseIntegrityErrorsContainer(
+        Alternative alternative,
+        DbSet<Chachar> knownChachars,
+        DbSet<Alternative> knownAlternatives
+    )
+    {
+        if (!knownAlternatives.Contains(alternative))
+        {
+            var errorMessage = EntityControllerCommons.GetEntityUnknownErrorMessage(
+                TableNames.ALTERNATIVE,
+                JsonPropertyNames.THE_CHARACTER,
+                JsonPropertyNames.ORIGINAL_CHARACTER,
+                JsonPropertyNames.ORIGINAL_PINYIN,
+                JsonPropertyNames.ORIGINAL_TONE
+            );
+
+            return new DatabaseIntegrityErrorsContainer(
+                alternative,
+                errorMessage
+            );
+        }
+
+        List<DatabaseIntegrityError> databaseIntegrityErrors = [];
+
+        var chacharsWithThis = knownChachars.Where(knownChachar =>
+            knownChachar.RadicalAlternativeCharacter == alternative.TheCharacter
+            && knownChachar.RadicalCharacter == alternative.OriginalCharacter
+            && knownChachar.RadicalPinyin == alternative.OriginalPinyin
+            && knownChachar.RadicalTone == alternative.OriginalTone
+        );
+
+        if (chacharsWithThis.Any())
+        {
+            LogCommons.LogEntityError(
+                _logger,
+                Errors.IS_ALTERNATIVE_FOR_CHACHARS,
+                TableNames.ALTERNATIVE,
+                alternative,
+                $"conflict chachars: [{string.Join(",", chacharsWithThis)}]"
+            );
+
+            return new DatabaseIntegrityErrorsContainer(
+                alternative,
+                Errors.IS_ALTERNATIVE_FOR_CHACHARS,
+                [.. chacharsWithThis.Select(chachar => new ConflictEntity(TableNames.CHACHAR, chachar))]
             );
         }
 

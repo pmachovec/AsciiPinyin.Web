@@ -1,5 +1,7 @@
 using AsciiPinyin.Web.Client.Commons;
 using AsciiPinyin.Web.Client.ComponentInterfaces;
+using AsciiPinyin.Web.Client.HttpClients;
+using AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
@@ -20,6 +22,12 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
     public IModal? ModalLowerLevel { get; private set; }
 
     public string HtmlTitle { get; private set; } = string.Empty;
+
+    [Inject]
+    private IEntityClient EntityClient { get; set; } = default!;
+
+    [Inject]
+    private ILogger<ChacharViewDialog> Logger { get; set; } = default!;
 
     [Inject]
     private IModalCommons ModalCommons { get; set; } = default!;
@@ -67,8 +75,19 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
         );
     }
 
-    private async Task SubmitDeleteAsync(CancellationToken cancellationToken)
-    {
-        // TODO when server side implemented
-    }
+    private async Task SubmitDeleteAsync(CancellationToken cancellationToken) =>
+        await ModalCommons.PostAsync(
+            this,
+            Alternative!,
+            Index,
+            EntityClient.PostDeleteEntityAsync,
+            ApiNames.ALTERNATIVES,
+            Logger,
+            Index.Alternatives.Remove,
+            Resource.AlternativeDeleted,
+            cancellationToken,
+            Alternative!.TheCharacter!,
+            Alternative.OriginalCharacter!,
+            Alternative.OriginalRealPinyin!
+        );
 }

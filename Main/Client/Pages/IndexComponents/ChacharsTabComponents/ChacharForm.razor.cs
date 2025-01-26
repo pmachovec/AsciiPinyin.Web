@@ -11,7 +11,6 @@ using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System.Globalization;
-using System.Net;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
@@ -353,7 +352,7 @@ public class ChacharFormBase : ComponentBase, IEntityForm
     {
         if (Index.Chachars.Contains(chachar))
         {
-            LogCommons.LogError(Logger, Errors.CHACHAR_ALREADY_EXISTS);
+            LogCommons.LogChacharAlreadyExistsError(Logger);
 
             return string.Format(
                 CultureInfo.InvariantCulture,
@@ -366,36 +365,18 @@ public class ChacharFormBase : ComponentBase, IEntityForm
         return null;
     }
 
-    private async Task SubmitAsync(Chachar chachar, CancellationToken cancellationToken)
-    {
-        var postTask = EntityClient.PostEntityAsync(ApiNames.CHARACTERS, chachar, cancellationToken);
-        var postResult = await postTask;
-
-        if (postResult == HttpStatusCode.OK)
-        {
-            LogCommons.LogHttpMethodSuccessInfo(Logger, HttpMethod.Post);
-            await Index.SubmitDialog.SetSuccessAsync(
-                this,
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    Localizer[Resource.CharacterCreated],
-                    chachar.TheCharacter,
-                    chachar.RealPinyin
-                ),
-                cancellationToken
-            );
-
-            _ = Index.Chachars.Add(chachar);
-            Index.StateHasChangedPublic();
-        }
-        else
-        {
-            LogCommons.LogHttpMethodFailedError(Logger, HttpMethod.Post);
-            await Index.SubmitDialog.SetErrorAsync(
-                this,
-                Localizer[Resource.ProcessingError],
-                cancellationToken
-            );
-        }
-    }
+    private async Task SubmitAsync(Chachar chachar, CancellationToken cancellationToken) =>
+        await ModalCommons.PostAsync(
+            this,
+            chachar,
+            Index,
+            EntityClient.PostEntityAsync,
+            ApiNames.CHARACTERS,
+            Logger,
+            Index.Chachars.Add,
+            Resource.CharacterCreated,
+            cancellationToken,
+            chachar.TheCharacter!,
+            chachar.RealPinyin!
+        );
 }

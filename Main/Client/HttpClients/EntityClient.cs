@@ -1,10 +1,16 @@
 using AsciiPinyin.Web.Client.Commons;
+using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Json;
 
 namespace AsciiPinyin.Web.Client.HttpClients;
 
+// Methods used on HttpClient come from the extension HttpClientJsonExtensions.
+// And as methods from extensions can't be mocked, this thing can't be tested.
+// This is basically just a wrapper around HttpClient. To test it, you would have to write another untestable wrapper.
+[ExcludeFromCodeCoverage]
 public sealed class EntityClient(
     HttpClient _httpClient,
     ILogger<EntityClient> _logger
@@ -21,7 +27,7 @@ public sealed class EntityClient(
 
             if (result is null)
             {
-                LogCommons.LogApiNullError(_logger, entitiesApiName);
+                LogCommons.LogApiNullError(_logger, HttpMethod.Get, entitiesApiName);
                 return new HashSet<T>();
             }
 
@@ -45,10 +51,41 @@ public sealed class EntityClient(
         string entitiesApiName,
         T entity,
         CancellationToken cancellationToken
+    ) where T : IEntity =>
+        await PostEntityCommonsAsync(LogCommons.LogCreateInfo, entitiesApiName, entity, cancellationToken);
+
+    public async Task<HttpStatusCode> PostDeleteEntityAsync<T>(
+        string entitiesApiName,
+        T entity,
+        CancellationToken cancellationToken
+    ) where T : IEntity =>
+        await PostEntityCommonsAsync(LogCommons.LogDeleteInfo, $"{entitiesApiName}/{ApiNames.DELETE}", entity, cancellationToken);
+
+    private async Task<HttpStatusCode> PostEntityCommonsAsync<T>(
+        Action<ILogger<EntityClient>, Type, IEntity> logAction,
+        string entitiesApiName,
+        T entity,
+        CancellationToken cancellationToken
     ) where T : IEntity
     {
-        LogCommons.LogCreateInfo(_logger, entity.GetType(), entity);
-        var result = await _httpClient.PostAsJsonAsync(entitiesApiName, entity, cancellationToken);
+        logAction(_logger, entity.GetType(), entity);
+        HttpResponseMessage? result;
+
+        try
+        {
+            result = await _httpClient.PostAsJsonAsync(entitiesApiName, entity, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            LogCommons.LogExceptionError(_logger, e);
+            return HttpStatusCode.InternalServerError;
+        }
+
+        if (result is null)
+        {
+            LogCommons.LogApiNullError(_logger, HttpMethod.Post, entitiesApiName);
+            return HttpStatusCode.InternalServerError;
+        }
 
         if (result.StatusCode == HttpStatusCode.OK)
         {

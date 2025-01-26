@@ -88,6 +88,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; was successfully deleted..
+        /// </summary>
+        public static string AlternativeDeleted {
+            get {
+                return ResourceManager.GetString("AlternativeDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Alternatives.
         /// </summary>
         public static string Alternatives {
@@ -148,6 +157,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         public static string CharacterCreated {
             get {
                 return ResourceManager.GetString("CharacterCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; was successfully deleted..
+        /// </summary>
+        public static string CharacterDeleted {
+            get {
+                return ResourceManager.GetString("CharacterDeleted", resourceCulture);
             }
         }
         

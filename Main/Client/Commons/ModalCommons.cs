@@ -1,11 +1,20 @@
 using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.Exceptions;
 using AsciiPinyin.Web.Client.JSInterop;
+using AsciiPinyin.Web.Client.Pages;
 using AsciiPinyin.Web.Shared.Constants;
+using AsciiPinyin.Web.Shared.Models;
+using AsciiPinyin.Web.Shared.Resources;
+using Microsoft.Extensions.Localization;
+using System.Globalization;
+using System.Net;
 
 namespace AsciiPinyin.Web.Client.Commons;
 
-public sealed class ModalCommons(IJSInteropDOM _jSInteropDOM) : IModalCommons
+public sealed class ModalCommons(
+    IJSInteropDOM _jSInteropDOM,
+    IStringLocalizer<Resource> _localizer
+) : IModalCommons
 {
     public async Task OpenAsyncCommon(
         IModal modal,
@@ -81,6 +90,49 @@ public sealed class ModalCommons(IJSInteropDOM _jSInteropDOM) : IModalCommons
             await Task.WhenAll(
                 CloseAllAsyncCommon(modal.ModalLowerLevel!, cancellationToken),
                 CloseAsyncCommon(modal, cancellationToken)
+            );
+        }
+    }
+
+    public async Task PostAsync<T>(
+        IModal modal,
+        T entity,
+        IIndex index,
+        Func<string, T, CancellationToken, Task<HttpStatusCode>> entityClientPostAsync,
+        string entitiesApiName,
+        ILogger<IModal> logger,
+        Func<T, bool> indexAlterCollection,
+        string successMessageResource,
+        CancellationToken cancellationToken,
+        params string[] successMessageParams
+    ) where T : IEntity
+    {
+        var postResult = await entityClientPostAsync(entitiesApiName, entity, cancellationToken);
+
+        if (postResult == HttpStatusCode.OK)
+        {
+            LogCommons.LogHttpMethodSuccessInfo(logger, HttpMethod.Post);
+
+            await index.SubmitDialog.SetSuccessAsync(
+                modal,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    _localizer[successMessageResource],
+                    successMessageParams
+                ),
+                cancellationToken
+            );
+
+            _ = indexAlterCollection(entity);
+            index.StateHasChangedPublic();
+        }
+        else
+        {
+            LogCommons.LogHttpMethodFailedError(logger, HttpMethod.Post);
+            await index.SubmitDialog.SetErrorAsync(
+                modal,
+                _localizer[Resource.ProcessingError],
+                cancellationToken
             );
         }
     }

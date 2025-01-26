@@ -89,12 +89,26 @@ internal static class EntityControllerTestCommons
         }
     }
 
-    public static void PostDatabaseIntegrityErrorTest(
+    public static void PostDatabaseSingleIntegrityErrorTest(
         ActionResult<IErrorsContainer>? result,
         string expectedEntityType,
         IEntity expectedEntity,
         string expectedErrorMessage,
         params ConflictEntity[] expectedConflictEntities
+    ) =>
+        PostDatabaseIntegrityErrorsTest(
+            result,
+            (expectedEntityType, expectedEntity, expectedErrorMessage, expectedConflictEntities)
+        );
+
+    public static void PostDatabaseIntegrityErrorsTest(
+        ActionResult<IErrorsContainer>? result,
+        params (
+            string ExpectedEntityType,
+            IEntity ExpectedEntity,
+            string ExpectedErrorMessage,
+            ConflictEntity[] ExpectedConflictEntities
+        )[] expectedDatabaseIntegrityErrorsData
     )
     {
         Assert.That(result, Is.Not.Null);
@@ -106,20 +120,27 @@ internal static class EntityControllerTestCommons
         Assert.That(badRequestObjectResult.Value, Is.InstanceOf<DatabaseIntegrityErrorsContainer>());
 
         var databaseIntegrityErrorsContainer = badRequestObjectResult.Value as DatabaseIntegrityErrorsContainer;
-        Assert.That(databaseIntegrityErrorsContainer!.Errors.Count, Is.EqualTo(1));
+        Assert.That(databaseIntegrityErrorsContainer!.Errors.Count, Is.EqualTo(expectedDatabaseIntegrityErrorsData.Length));
 
-        var error = databaseIntegrityErrorsContainer.Errors.First();
-        Assert.That(error.EntityType, Is.EqualTo(expectedEntityType));
-        Assert.That(error.Entity, Is.EqualTo(expectedEntity));
-        Assert.That(error.ErrorMessage, Is.EqualTo(expectedErrorMessage));
-        Assert.That(error.ConflictEntities.Count, Is.EqualTo(expectedConflictEntities.Length));
-
-        foreach (var expectedConflictEntity in expectedConflictEntities)
+        // For each error in the container, verify that there's a matching entry among expected errors data
+        foreach (var error in databaseIntegrityErrorsContainer.Errors)
         {
-            var conflictEntity = error.ConflictEntities.FirstOrDefault(c => c.EntityType == expectedConflictEntity.EntityType);
+            Assert.That(expectedDatabaseIntegrityErrorsData.Any(expectedData => error.EntityType == expectedData.ExpectedEntityType));
+            Assert.That(expectedDatabaseIntegrityErrorsData.Any(expectedData => error.Entity == expectedData.ExpectedEntity));
+            Assert.That(expectedDatabaseIntegrityErrorsData.Any(expectedData => error.ErrorMessage == expectedData.ExpectedErrorMessage));
 
-            Assert.That(conflictEntity, Is.Not.Null);
-            Assert.That(conflictEntity!.Entity, Is.EqualTo(expectedConflictEntity.Entity));
+            // Verify that, for the actual error, there's an entry with matching conflict entities among expected errors data:
+            // * The length of conflict entities of the error must match the length of expected conflict entities in the entry.
+            // * For each conflict entity from the actual error, there must be a matching expected conflict entity among those in the entry.
+            Assert.That(expectedDatabaseIntegrityErrorsData.Any(expectedData =>
+                error.ConflictEntities.Count() == expectedData.ExpectedConflictEntities.Length
+                && error.ConflictEntities.All(confilctEntity =>
+                    expectedData.ExpectedConflictEntities.Any(expectedConflictEntity =>
+                        confilctEntity.EntityType == expectedConflictEntity.EntityType
+                        && confilctEntity.Entity == expectedConflictEntity.Entity
+                    )
+                )
+            ));
         }
     }
 
@@ -135,13 +156,16 @@ internal static class EntityControllerTestCommons
         "IDE0046:Convert to conditional expression",
         Justification = "Conditional expression looks terrible on that 'if' statement."
     )]
-    public static Mock<DbSet<Chachar>> GetChacharDbSetMock(params Chachar[] data)
+    public static void MockChacharsDbSet(
+        Mock<AsciiPinyinContext> asciiPinyinContextMock,
+        params Chachar[] data
+    )
     {
         var dataQueryable = data.AsQueryable();
-        var dbSetMock = new Mock<DbSet<Chachar>>();
+        var chacharsDbSetMock = new Mock<DbSet<Chachar>>();
 
-        _ = dbSetMock
-            .Setup(m => m.Find(It.IsAny<object[]>()))
+        _ = chacharsDbSetMock
+            .Setup(chacharsDbSet => chacharsDbSet.Find(It.IsAny<object[]>()))
             .Returns((object[] parameters) =>
                 {
                     if (
@@ -162,12 +186,12 @@ internal static class EntityControllerTestCommons
                 }
             );
 
-        _ = dbSetMock.As<IQueryable<Chachar>>().Setup(m => m.Provider).Returns(dataQueryable.Provider);
-        _ = dbSetMock.As<IQueryable<Chachar>>().Setup(m => m.Expression).Returns(dataQueryable.Expression);
-        _ = dbSetMock.As<IQueryable<Chachar>>().Setup(m => m.ElementType).Returns(dataQueryable.ElementType);
-        _ = dbSetMock.As<IQueryable<Chachar>>().Setup(m => m.GetEnumerator()).Returns(dataQueryable.GetEnumerator);
 
-        return dbSetMock;
+        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.Provider).Returns(dataQueryable.Provider);
+        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.Expression).Returns(dataQueryable.Expression);
+        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.ElementType).Returns(dataQueryable.ElementType);
+        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.GetEnumerator()).Returns(dataQueryable.GetEnumerator);
+        _ = asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -175,13 +199,16 @@ internal static class EntityControllerTestCommons
         "IDE0046:Convert to conditional expression",
         Justification = "Conditional expression looks terrible on that 'if' statement."
     )]
-    public static Mock<DbSet<Alternative>> GetAlternativeDbSetMock(params Alternative[] data)
+    public static void MockAlternativesDbSet(
+        Mock<AsciiPinyinContext> asciiPinyinContextMock,
+        params Alternative[] data
+    )
     {
         var dataQueryable = data.AsQueryable();
-        var dbSetMock = new Mock<DbSet<Alternative>>();
+        var alternativesDbSetMock = new Mock<DbSet<Alternative>>();
 
-        _ = dbSetMock
-            .Setup(m => m.Find(It.IsAny<object[]>()))
+        _ = alternativesDbSetMock
+            .Setup(alternativesDbSet => alternativesDbSet.Find(It.IsAny<object[]>()))
             .Returns((object[] parameters) =>
                 {
                     if (
@@ -204,12 +231,11 @@ internal static class EntityControllerTestCommons
                 }
             );
 
-        _ = dbSetMock.As<IQueryable<Alternative>>().Setup(m => m.Provider).Returns(dataQueryable.Provider);
-        _ = dbSetMock.As<IQueryable<Alternative>>().Setup(m => m.Expression).Returns(dataQueryable.Expression);
-        _ = dbSetMock.As<IQueryable<Alternative>>().Setup(m => m.ElementType).Returns(dataQueryable.ElementType);
-        _ = dbSetMock.As<IQueryable<Alternative>>().Setup(m => m.GetEnumerator()).Returns(dataQueryable.GetEnumerator);
-
-        return dbSetMock;
+        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.Provider).Returns(dataQueryable.Provider);
+        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.Expression).Returns(dataQueryable.Expression);
+        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.ElementType).Returns(dataQueryable.ElementType);
+        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.GetEnumerator()).Returns(dataQueryable.GetEnumerator);
+        _ = asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
     }
 
     public static void MockDatabaseFacadeTransaction(Mock<AsciiPinyinContext> asciiPinyinContextMock)

@@ -9,7 +9,7 @@ public sealed class DatabaseIntegrityError
     public DatabaseIntegrityError(
         Chachar chachar,
         string errorMessage,
-        params ConflictEntity[] conflictEntities
+        IEnumerable<ConflictEntity> conflictEntities
     )
     {
         EntityType = TableNames.CHACHAR;
@@ -21,7 +21,7 @@ public sealed class DatabaseIntegrityError
     public DatabaseIntegrityError(
         Alternative alternative,
         string errorMessage,
-        params ConflictEntity[] conflictEntities
+        IEnumerable<ConflictEntity> conflictEntities
     )
     {
         EntityType = TableNames.ALTERNATIVE;

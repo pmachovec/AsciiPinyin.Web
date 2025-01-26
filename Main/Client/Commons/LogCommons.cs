@@ -1,3 +1,4 @@
+using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using System.Net;
 
@@ -5,8 +6,11 @@ namespace AsciiPinyin.Web.Client.Commons;
 
 internal static partial class LogCommons
 {
-    [LoggerMessage(LogLevel.Error, "Result of retrieving '{entitiesApiName}' is null.")]
-    public static partial void LogApiNullError(ILogger logger, string entitiesApiName);
+    [LoggerMessage(LogLevel.Error, $"The used combination '{IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT} + {IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT} + {IDs.CHACHAR_FORM_TONE_INPUT}' identifies an alternative that already exists in the database.")]
+    public static partial void LogAlternativeAlreadyExistsError(ILogger logger);
+
+    [LoggerMessage(LogLevel.Error, "Result of '{method} {entitiesApiName}' is null.")]
+    public static partial void LogApiNullError(ILogger logger, HttpMethod method, string entitiesApiName);
 
     [LoggerMessage(LogLevel.Error, "Result of retrieving '{entitiesApiName}' is empty.")]
     public static partial void LogApiEmptyError(ILogger logger, string entitiesApiName);
@@ -14,14 +18,17 @@ internal static partial class LogCommons
     [LoggerMessage(LogLevel.Error, "Error occured on the server side when retrieving '{entitiesApiName}'.")]
     public static partial void LogApiServerSideError(ILogger logger, string entitiesApiName);
 
+    [LoggerMessage(LogLevel.Error, $"The used combination '{IDs.CHACHAR_FORM_THE_CHARACTER_INPUT} + {IDs.CHACHAR_FORM_PINYIN_INPUT} + {IDs.CHACHAR_FORM_TONE_INPUT}' identifies a chachar that already exists in the database.")]
+    public static partial void LogChacharAlreadyExistsError(ILogger logger);
+
     [LoggerMessage(LogLevel.Information, "CREATE {entityClassName}: {entity}")]
     public static partial void LogCreateInfo(ILogger logger, Type entityClassName, IEntity entity);
 
     [LoggerMessage(LogLevel.Debug, "Database integrity verification")]
     public static partial void LogDatabaseIntegrityVerificationDebug(ILogger logger);
 
-    [LoggerMessage(LogLevel.Error, "{message}")]
-    public static partial void LogError(ILogger logger, string message);
+    [LoggerMessage(LogLevel.Information, "DELETE {entityClassName}: {entity}")]
+    public static partial void LogDeleteInfo(ILogger logger, Type entityClassName, IEntity entity);
 
     [LoggerMessage(LogLevel.Error)]
     public static partial void LogExceptionError(ILogger logger, Exception exception);

@@ -1,29 +1,110 @@
+using AsciiPinyin.Web.Server.Constants;
 using AsciiPinyin.Web.Server.Controllers;
+using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Shared.Commons;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.DTO;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Utils;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AsciiPinyin.Web.Server.Commons;
 
 internal static class EntityControllerCommons
 {
-    public static EntityFieldsErrorsContainer? GetPostInitialDataErrorsContainer<T>(
-        string entityType,
-        T entity,
-        params Func<T, FieldError?>[] getFieldErrorMethods
-    ) where T : IEntity
+    public static ActionResult<IErrorsContainer> Post<T1, T2>(
+        ILogger<T1> logger,
+        HttpRequest request,
+        T2 entity,
+        string tableName,
+        string action,
+        string dbAction,
+        string contextCollectionName,
+        string alterDbSetMethodName,
+        AsciiPinyinContext asciiPinyinContext,
+        Func<object?, BadRequestObjectResult> badRequest,
+        Func<int, StatusCodeResult> statusCode,
+        Func<OkResult> ok,
+        Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDatabaseIntegrityErrorsContainer,
+        params Func<T2, FieldError?>[] getFieldErrorMethods
+    ) where T1 : IEntityController where T2 : IEntity
     {
-        var fieldsErrors = GetFieldsErrors(
+        LogCommons.LogHttpMethodInfo(logger, HttpMethod.Post, action);
+
+        if (!request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
+        {
+            LogCommons.LogUserAgentMissingError(logger);
+            return badRequest(Errors.USER_AGENT_MISSING);
+        }
+
+        LogCommons.LogUserAgentInfo(logger, userAgent!);
+        LogCommons.LogEntityInfo(logger, nameof(T2), entity);
+        LogCommons.LogInitialIntegrityVerificationDebug(logger);
+
+        var postInitialDataErrorsContainer = GetPostInitialDataErrorsContainer(
+            tableName,
             entity,
             getFieldErrorMethods
         );
 
-        return fieldsErrors.Count > 0 ? new EntityFieldsErrorsContainer(entityType, [.. fieldsErrors]) : null;
+        if (postInitialDataErrorsContainer is not null)
+        {
+            LogCommons.LogFieldsErrorsContainerError(logger, postInitialDataErrorsContainer);
+            return badRequest(postInitialDataErrorsContainer);
+        }
+
+        LogCommons.LogDatabaseIntegrityVerificationDebug(logger);
+        DbSet<Chachar>? knownChachars;
+        DbSet<Alternative>? knownAlternatives;
+
+        try
+        {
+            knownChachars = asciiPinyinContext.Chachars;
+            knownAlternatives = asciiPinyinContext.Alternatives;
+        }
+        catch (Exception e)
+        {
+            LogCommons.LogError(logger, e.ToString());
+            return statusCode(StatusCodes.Status500InternalServerError);
+        }
+
+        var postDatabaseIntegrityErrorsContainer = getPostDatabaseIntegrityErrorsContainer(
+            entity,
+            knownChachars,
+            knownAlternatives
+        );
+
+        if (postDatabaseIntegrityErrorsContainer is not null)
+        {
+            LogCommons.LogDatabaseIntegrityErrorsContainerError(logger, postDatabaseIntegrityErrorsContainer);
+            return badRequest(postDatabaseIntegrityErrorsContainer);
+        }
+
+        LogCommons.LogIntegrityVerificationSuccessDebug(logger);
+        LogCommons.LogActionInDbInfo(logger, dbAction, action);
+
+        try
+        {
+            using var dbContextTransaction = asciiPinyinContext.Database.BeginTransaction();
+            dynamic contextCollection = asciiPinyinContext.GetType().GetProperty(contextCollectionName)!.GetValue(asciiPinyinContext)!;
+            var contextAlterCollectionMethod = contextCollection!.GetType().GetMethod(alterDbSetMethodName);
+            _ = contextAlterCollectionMethod!.Invoke(contextCollection, (T2[])[entity]);
+            _ = asciiPinyinContext.SaveChanges();
+            dbContextTransaction.Commit();
+        }
+        catch (Exception e)
+        {
+            LogCommons.LogActionInDbFailedError(logger, dbAction);
+            LogCommons.LogError(logger, e.ToString());
+            return statusCode(StatusCodes.Status500InternalServerError);
+        }
+
+        LogCommons.LogActionInDbSuccessInfo(logger, dbAction);
+        return ok();
     }
 
-    public static string? GetCharacterErrorMessage(string? theCharacter)
+    public static string? GetTheCharacterErrorMessage(string? theCharacter)
     {
         string? errorMessage = null;
 
@@ -126,6 +207,20 @@ internal static class EntityControllerCommons
         }
 
         return null;
+    }
+
+    private static EntityFieldsErrorsContainer? GetPostInitialDataErrorsContainer<T>(
+        string entityType,
+        T entity,
+        params Func<T, FieldError?>[] getFieldErrorMethods
+    ) where T : IEntity
+    {
+        var fieldsErrors = GetFieldsErrors(
+            entity,
+            getFieldErrorMethods
+        );
+
+        return fieldsErrors.Count > 0 ? new EntityFieldsErrorsContainer(entityType, [.. fieldsErrors]) : null;
     }
 
     private static List<FieldError> GetFieldsErrors<T>(

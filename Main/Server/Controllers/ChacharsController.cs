@@ -47,23 +47,21 @@ public sealed class ChacharsController(
     }
 
     [HttpPost]
-    public ActionResult<IErrorsContainer> Post(Chachar chachar)
-    {
-        LogCommons.LogHttpMethodInfo(_logger, HttpMethod.Post, Actions.CREATE_NEW_CHACHAR);
-
-        if (!Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
-        {
-            LogCommons.LogUserAgentMissingError(_logger);
-            return BadRequest(Errors.USER_AGENT_MISSING);
-        }
-
-        LogCommons.LogUserAgentInfo(_logger, userAgent!);
-        LogCommons.LogEntityInfo(_logger, nameof(Chachar), chachar);
-        LogCommons.LogInitialIntegrityVerificationDebug(_logger);
-
-        var postInitialDataErrorsContainer = EntityControllerCommons.GetPostInitialDataErrorsContainer(
-            TableNames.CHACHAR,
+    public ActionResult<IErrorsContainer> Post(Chachar chachar) =>
+        EntityControllerCommons.Post(
+            _logger,
+            Request,
             chachar,
+            TableNames.CHACHAR,
+            Actions.CREATE_NEW_CHACHAR,
+            DbActions.INSERT,
+            ContextCollectionNames.CHACHARS,
+            DbSetMethods.ADD,
+            _asciiPinyinContext,
+            BadRequest,
+            StatusCode,
+            Ok,
+            GetPostDatabaseIntegrityErrorsContainer,
             GetTheCharacterError,
             GetStrokesError,
             GetPinyinError,
@@ -75,66 +73,34 @@ public sealed class ChacharsController(
             GetRadicalAlternativeCharacterError
         );
 
-        if (postInitialDataErrorsContainer is not null)
-        {
-            LogCommons.LogFieldsErrorsContainerError(_logger, postInitialDataErrorsContainer);
-            return BadRequest(postInitialDataErrorsContainer);
-        }
 
-        LogCommons.LogDatabaseIntegrityVerificationDebug(_logger);
-        DbSet<Chachar>? knownChachars;
-        DbSet<Alternative>? knownAlternatives;
-
-        try
-        {
-            knownChachars = _asciiPinyinContext.Chachars;
-            knownAlternatives = _asciiPinyinContext.Alternatives;
-        }
-        catch (Exception e)
-        {
-            LogCommons.LogError(_logger, e.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-
-        var postDatabaseIntegrityErrorsContainer = GetPostDatabaseIntegrityErrorsContainer(
+    [HttpPost(ApiNames.DELETE)]
+    public ActionResult<IErrorsContainer> PostDelete(Chachar chachar) =>
+        EntityControllerCommons.Post(
+            _logger,
+            Request,
             chachar,
-            knownChachars,
-            knownAlternatives
+            TableNames.CHACHAR,
+            Actions.DELETE_CHACHAR,
+            DbActions.DELETE,
+            ContextCollectionNames.CHACHARS,
+            DbSetMethods.REMOVE,
+            _asciiPinyinContext,
+            BadRequest,
+            StatusCode,
+            Ok,
+            GetPostDeleteDatabaseIntegrityErrorsContainer,
+            GetTheCharacterError,
+            GetPinyinError,
+            GetToneError
         );
-
-        if (postDatabaseIntegrityErrorsContainer is not null)
-        {
-            LogCommons.LogDatabaseIntegrityErrorsContainerError(_logger, postDatabaseIntegrityErrorsContainer);
-            return BadRequest(postDatabaseIntegrityErrorsContainer);
-        }
-
-        LogCommons.LogIntegrityVerificationSuccessDebug(_logger);
-        LogCommons.LogActionInDbInfo(_logger, DbActions.INSERT, Actions.CREATE_NEW_CHACHAR);
-
-        try
-        {
-            using var dbContextTransaction = _asciiPinyinContext.Database.BeginTransaction();
-            _ = _asciiPinyinContext.Chachars.Add(chachar);
-            _ = _asciiPinyinContext.SaveChanges();
-            dbContextTransaction.Commit();
-        }
-        catch (Exception e)
-        {
-            LogCommons.LogActionInDbFailedError(_logger, DbActions.INSERT);
-            LogCommons.LogError(_logger, e.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-
-        LogCommons.LogActionInDbSuccessInfo(_logger, DbActions.INSERT);
-        return Ok();
-    }
 
     private FieldError? GetTheCharacterError(Chachar chachar) =>
         EntityControllerCommons.GetInvalidValueFieldError(
             _logger,
             chachar.TheCharacter,
             JsonPropertyNames.THE_CHARACTER,
-            EntityControllerCommons.GetCharacterErrorMessage
+            EntityControllerCommons.GetTheCharacterErrorMessage
         );
 
     private FieldError? GetStrokesError(Chachar chachar) =>
@@ -415,5 +381,84 @@ public sealed class ChacharsController(
         }
 
         return null;
+    }
+
+    private DatabaseIntegrityErrorsContainer? GetPostDeleteDatabaseIntegrityErrorsContainer(
+        Chachar chachar,
+        DbSet<Chachar> knownChachars,
+        DbSet<Alternative> knownAlternatives
+    )
+    {
+        if (!knownChachars.Contains(chachar))
+        {
+            var errorMessage = EntityControllerCommons.GetEntityUnknownErrorMessage(
+                TableNames.CHACHAR,
+                JsonPropertyNames.THE_CHARACTER,
+                JsonPropertyNames.PINYIN,
+                JsonPropertyNames.TONE
+            );
+
+            return new DatabaseIntegrityErrorsContainer(
+                chachar,
+                errorMessage
+            );
+        }
+
+        List<DatabaseIntegrityError> databaseIntegrityErrors = [];
+
+        if (chachar.IsRadical)
+        {
+            var chacharsWithThisAsRadical = knownChachars.Where(knownChachar =>
+                knownChachar.RadicalCharacter == chachar.TheCharacter
+                && knownChachar.RadicalPinyin == chachar.Pinyin
+                && knownChachar.RadicalTone == chachar.Tone
+            );
+
+            if (chacharsWithThisAsRadical.Any())
+            {
+                LogCommons.LogEntityError(
+                    _logger,
+                    Errors.IS_RADICAL_FOR_OTHERS,
+                    TableNames.CHACHAR,
+                    chachar,
+                    $"conflict chachars: [{string.Join(",", chacharsWithThisAsRadical)}]"
+                );
+
+                databaseIntegrityErrors.Add(
+                    new DatabaseIntegrityError(
+                        chachar,
+                        Errors.IS_RADICAL_FOR_OTHERS,
+                        chacharsWithThisAsRadical.Select(chacharWithThisAsRadical => new ConflictEntity(TableNames.CHACHAR, chacharWithThisAsRadical))
+                    )
+                );
+            }
+        }
+
+        var alternativesOfThis = knownAlternatives.Where(knownAlternative =>
+            knownAlternative.OriginalCharacter == chachar.TheCharacter
+            && knownAlternative.OriginalPinyin == chachar.Pinyin
+            && knownAlternative.OriginalTone == chachar.Tone
+        );
+
+        if (alternativesOfThis.Any())
+        {
+            LogCommons.LogEntityError(
+                _logger,
+                Errors.HAS_ALTERNATIVES,
+                TableNames.CHACHAR,
+                chachar,
+                $"conflict alternatives: [{string.Join(",", alternativesOfThis)}]"
+            );
+
+            databaseIntegrityErrors.Add(
+                new DatabaseIntegrityError(
+                    chachar,
+                    Errors.HAS_ALTERNATIVES,
+                    alternativesOfThis.Select(alternative => new ConflictEntity(TableNames.ALTERNATIVE, alternative))
+                )
+            );
+        }
+
+        return databaseIntegrityErrors.Count != 0 ? new DatabaseIntegrityErrorsContainer([.. databaseIntegrityErrors]) : null;
     }
 }

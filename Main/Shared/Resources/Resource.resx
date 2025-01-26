@@ -223,6 +223,9 @@
   <data name="CharacterCreated" xml:space="preserve">
     <value>The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; was successfully created.</value>
   </data>
+  <data name="CharacterDeleted" xml:space="preserve">
+    <value>The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; was successfully deleted.</value>
+  </data>
   <data name="ProcessingError" xml:space="preserve">
     <value>An error occured during processing. Contact force majeure.</value>
   </data>
@@ -231,6 +234,9 @@
   </data>
   <data name="AlternativeCreated" xml:space="preserve">
     <value>The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; was successfully created.</value>
+  </data>
+  <data name="AlternativeDeleted" xml:space="preserve">
+    <value>The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; was successfully deleted.</value>
   </data>
   <data name="Warning" xml:space="preserve">
     <value>Warning</value>
