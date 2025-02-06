@@ -218,7 +218,20 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         }
         else
         {
-            await SubmitAsync(alternative, cancellationToken);
+            await ModalCommons.PostAsync(
+                this,
+                alternative,
+                Index,
+                EntityClient.PostEntityAsync,
+                ApiNames.ALTERNATIVES,
+                Logger,
+                Index.Alternatives.Add,
+                Resource.AlternativeCreated,
+                cancellationToken,
+                alternative.TheCharacter!,
+                alternative.OriginalCharacter!,
+                alternative.OriginalRealPinyin!
+            );
         }
     }
 
@@ -239,20 +252,4 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
         return null;
     }
-
-    private async Task SubmitAsync(Alternative alternative, CancellationToken cancellationToken) =>
-        await ModalCommons.PostAsync(
-            this,
-            alternative,
-            Index,
-            EntityClient.PostEntityAsync,
-            ApiNames.ALTERNATIVES,
-            Logger,
-            Index.Alternatives.Add,
-            Resource.AlternativeCreated,
-            cancellationToken,
-            alternative.TheCharacter!,
-            alternative.OriginalCharacter!,
-            alternative.OriginalRealPinyin!
-        );
 }

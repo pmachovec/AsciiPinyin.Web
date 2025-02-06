@@ -75,7 +75,10 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
         );
     }
 
-    private async Task SubmitDeleteAsync(CancellationToken cancellationToken) =>
+    private async Task SubmitDeleteAsync(CancellationToken cancellationToken)
+    {
+        await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
+
         await ModalCommons.PostAsync(
             this,
             Alternative!,
@@ -90,4 +93,5 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
             Alternative.OriginalCharacter!,
             Alternative.OriginalRealPinyin!
         );
+    }
 }

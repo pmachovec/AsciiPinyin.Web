@@ -344,7 +344,19 @@ public class ChacharFormBase : ComponentBase, IEntityForm
         }
         else
         {
-            await SubmitAsync(chachar, cancellationToken);
+            await ModalCommons.PostAsync(
+                this,
+                chachar,
+                Index,
+                EntityClient.PostEntityAsync,
+                ApiNames.CHARACTERS,
+                Logger,
+                Index.Chachars.Add,
+                Resource.CharacterCreated,
+                cancellationToken,
+                chachar.TheCharacter!,
+                chachar.RealPinyin!
+            );
         }
     }
 
@@ -364,19 +376,4 @@ public class ChacharFormBase : ComponentBase, IEntityForm
 
         return null;
     }
-
-    private async Task SubmitAsync(Chachar chachar, CancellationToken cancellationToken) =>
-        await ModalCommons.PostAsync(
-            this,
-            chachar,
-            Index,
-            EntityClient.PostEntityAsync,
-            ApiNames.CHARACTERS,
-            Logger,
-            Index.Chachars.Add,
-            Resource.CharacterCreated,
-            cancellationToken,
-            chachar.TheCharacter!,
-            chachar.RealPinyin!
-        );
 }

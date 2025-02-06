@@ -82,6 +82,10 @@ a, .btn-link {
     outline: 1px solid red;
 }
 
+.modal-content {
+    min-height: 215px;
+}
+
 .modal-entity-selector {
     max-width: fit-content !important;
     min-width: var(--bs-modal-width);

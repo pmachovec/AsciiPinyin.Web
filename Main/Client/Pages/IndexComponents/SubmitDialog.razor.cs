@@ -35,10 +35,10 @@ public class SubmitDialogBase : ComponentBase, ISubmitDialog
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
-    public async Task SetProcessingAsync(IEntityForm entityForm, CancellationToken cancellationToken)
+    public async Task SetProcessingAsync(IModal modalLowerLevel, CancellationToken cancellationToken)
     {
         Page = null;
-        ModalLowerLevel = entityForm;
+        ModalLowerLevel = modalLowerLevel;
         HtmlTitle = $"{Localizer[Resource.Processing]}...";
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
 
@@ -46,7 +46,7 @@ public class SubmitDialogBase : ComponentBase, ISubmitDialog
             JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
             JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_BODY_TEXT, cancellationToken),
             JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
-            JSInteropDOM.None2FlexAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
             ModalCommons.OpenAsyncCommon(this, cancellationToken)
         );
 

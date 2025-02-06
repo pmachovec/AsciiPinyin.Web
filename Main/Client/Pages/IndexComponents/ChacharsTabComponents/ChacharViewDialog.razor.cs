@@ -73,7 +73,10 @@ public class ChacharViewDialogBase : ComponentBase, IModal
         );
     }
 
-    private async Task SubmitDeleteAsync(CancellationToken cancellationToken) =>
+    private async Task SubmitDeleteAsync(CancellationToken cancellationToken)
+    {
+        await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
+
         await ModalCommons.PostAsync(
             this,
             Chachar!,
@@ -87,4 +90,5 @@ public class ChacharViewDialogBase : ComponentBase, IModal
             Chachar!.TheCharacter!,
             Chachar.RealPinyin!
         );
+    }
 }
