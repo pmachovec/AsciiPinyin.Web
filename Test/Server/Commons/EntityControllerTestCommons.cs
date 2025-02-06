@@ -1,11 +1,13 @@
+using AsciiPinyin.Web.Server.Controllers;
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Server.Test.Constants;
 using AsciiPinyin.Web.Shared.DTO;
 using AsciiPinyin.Web.Shared.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 
@@ -13,6 +15,87 @@ namespace AsciiPinyin.Web.Server.Test.Commons;
 
 internal static class EntityControllerTestCommons
 {
+    public static T GetNoUserAgentHeaderController<T>(ServiceProvider serviceProvider) where T : ControllerBase, IEntityController
+    {
+        var controller = serviceProvider.GetRequiredService<T>();
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext()
+        };
+
+        return controller;
+    }
+
+    public static ChacharsController GetChacharsErrorChacharsController(
+        Mock<AsciiPinyinContext> asciiPinyinContextMock,
+        Mock<ILogger<ChacharsController>> loggerMock
+    )
+    {
+        _ = asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
+        return GetErrorChacharsController(asciiPinyinContextMock, loggerMock);
+    }
+
+    public static ChacharsController GetAlternativesErrorChacharsController(
+        Mock<AsciiPinyinContext> asciiPinyinContextMock,
+        Mock<ILogger<ChacharsController>> loggerMock
+    )
+    {
+        MockChacharsDbSet(asciiPinyinContextMock);
+        _ = asciiPinyinContextMock.Setup(context => context.Alternatives).Throws(new InvalidOperationException());
+        return GetErrorChacharsController(asciiPinyinContextMock, loggerMock);
+    }
+
+    public static ChacharsController GetSaveErrorChacharsController(
+        Mock<AsciiPinyinContext> asciiPinyinContextMock,
+        Mock<ILogger<ChacharsController>> loggerMock
+    )
+    {
+        _ = asciiPinyinContextMock.Setup(context => context.SaveChanges()).Throws(new InvalidOperationException());
+        return GetErrorChacharsController(asciiPinyinContextMock, loggerMock);
+    }
+
+    public static AlternativesController GetChacharsErrorAlternativesController(
+        Mock<AsciiPinyinContext> asciiPinyinContextMock,
+        Mock<ILogger<AlternativesController>> loggerMock
+    )
+    {
+        _ = asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
+        return GetErrorAlternativesController(asciiPinyinContextMock, loggerMock);
+    }
+
+    public static AlternativesController GetAlternativesErrorAlternativesController(
+        Mock<AsciiPinyinContext> asciiPinyinContextMock,
+        Mock<ILogger<AlternativesController>> loggerMock
+    )
+    {
+        MockChacharsDbSet(asciiPinyinContextMock);
+        _ = asciiPinyinContextMock.Setup(context => context.Alternatives).Throws(new InvalidOperationException());
+        return GetErrorAlternativesController(asciiPinyinContextMock, loggerMock);
+    }
+
+    public static AlternativesController GetSaveErrorAlternativesController(
+        Mock<AsciiPinyinContext> asciiPinyinContextMock,
+        Mock<ILogger<AlternativesController>> loggerMock
+    )
+    {
+        _ = asciiPinyinContextMock.Setup(context => context.SaveChanges()).Throws(new InvalidOperationException());
+        return GetErrorAlternativesController(asciiPinyinContextMock, loggerMock);
+    }
+
+    public static void AddToContext(
+        AsciiPinyinContext asciiPinyinContext,
+        params IEntity[] entities
+    )
+    {
+        foreach (var entity in entities)
+        {
+            _ = asciiPinyinContext.Add(entity);
+        }
+
+        _ = asciiPinyinContext.SaveChanges();
+    }
+
     public static void NoUserAgentHeaderTest<T>(ActionResult<T>? result)
     {
         Assert.That(result, Is.Not.Null);
@@ -151,101 +234,6 @@ internal static class EntityControllerTestCommons
         Assert.That(result.Result!, Is.InstanceOf<OkResult>());
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Style",
-        "IDE0046:Convert to conditional expression",
-        Justification = "Conditional expression looks terrible on that 'if' statement."
-    )]
-    public static void MockChacharsDbSet(
-        Mock<AsciiPinyinContext> asciiPinyinContextMock,
-        params Chachar[] data
-    )
-    {
-        var dataQueryable = data.AsQueryable();
-        var chacharsDbSetMock = new Mock<DbSet<Chachar>>();
-
-        _ = chacharsDbSetMock
-            .Setup(chacharsDbSet => chacharsDbSet.Find(It.IsAny<object[]>()))
-            .Returns((object[] parameters) =>
-                {
-                    if (
-                        parameters.Length == 3
-                        && parameters[0] is string theCharacter
-                        && parameters[1] is string pinyin
-                        && parameters[2] is byte tone
-                    )
-                    {
-                        return data.FirstOrDefault(d =>
-                            d.TheCharacter == theCharacter
-                            && d.Pinyin == pinyin
-                            && d.Tone == tone
-                        );
-                    }
-
-                    return null;
-                }
-            );
-
-
-        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.Provider).Returns(dataQueryable.Provider);
-        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.Expression).Returns(dataQueryable.Expression);
-        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.ElementType).Returns(dataQueryable.ElementType);
-        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.GetEnumerator()).Returns(dataQueryable.GetEnumerator);
-        _ = asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
-    }
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Style",
-        "IDE0046:Convert to conditional expression",
-        Justification = "Conditional expression looks terrible on that 'if' statement."
-    )]
-    public static void MockAlternativesDbSet(
-        Mock<AsciiPinyinContext> asciiPinyinContextMock,
-        params Alternative[] data
-    )
-    {
-        var dataQueryable = data.AsQueryable();
-        var alternativesDbSetMock = new Mock<DbSet<Alternative>>();
-
-        _ = alternativesDbSetMock
-            .Setup(alternativesDbSet => alternativesDbSet.Find(It.IsAny<object[]>()))
-            .Returns((object[] parameters) =>
-                {
-                    if (
-                        parameters.Length == 4
-                        && parameters[0] is string theCharacter
-                        && parameters[1] is string originalCharacter
-                        && parameters[2] is string originalPinyin
-                        && parameters[3] is byte originalTone
-                    )
-                    {
-                        return data.FirstOrDefault(d =>
-                            d.TheCharacter == theCharacter
-                            && d.OriginalCharacter == originalCharacter
-                            && d.OriginalPinyin == originalPinyin
-                            && d.OriginalTone == originalTone
-                        );
-                    }
-
-                    return null;
-                }
-            );
-
-        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.Provider).Returns(dataQueryable.Provider);
-        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.Expression).Returns(dataQueryable.Expression);
-        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.ElementType).Returns(dataQueryable.ElementType);
-        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.GetEnumerator()).Returns(dataQueryable.GetEnumerator);
-        _ = asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
-    }
-
-    public static void MockDatabaseFacadeTransaction(Mock<AsciiPinyinContext> asciiPinyinContextMock)
-    {
-        var databaseFacadeMock = new Mock<DatabaseFacade>(asciiPinyinContextMock.Object);
-        var dbContextTransactionMock = new Mock<IDbContextTransaction>();
-        _ = databaseFacadeMock.Setup(m => m.BeginTransaction()).Returns(dbContextTransactionMock.Object);
-        _ = asciiPinyinContextMock.Setup(context => context.Database).Returns(databaseFacadeMock.Object);
-    }
-
     public static string GetEntityUnknownErrorMessage(string entityType, params string[] fieldNames) =>
         $"combination of fields '{string.Join(" + ", fieldNames)}' does not identify an existing {entityType}";
 
@@ -254,4 +242,95 @@ internal static class EntityControllerTestCommons
 
     public static string GetNoRadicalErrorMessage(params string[] fieldNames) =>
         $"combination of fields '{string.Join(" + ", fieldNames)}' identifies a chachar, which is not radical";
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Style",
+        "IDE0046:Convert to conditional expression",
+        Justification = "Conditional expression looks terrible on that 'if' statement."
+    )]
+    public static void MockChacharsDbSet(
+        Mock<AsciiPinyinContext> asciiPinyinContextMock,
+        Chachar? chachar = null
+    )
+    {
+        IEnumerable<Chachar> chacharInCollection = chachar is null ? [] : [chachar];
+        var dataQueryable = chacharInCollection.AsQueryable();
+        var chacharsDbSetMock = new Mock<DbSet<Chachar>>();
+
+        _ = chacharsDbSetMock
+            .Setup(chacharsDbSet => chacharsDbSet.Find(It.IsAny<object[]>()))
+            .Returns(
+                (object[] parameters) =>
+                {
+                    if (chachar is null)
+                    {
+                        return null;
+                    }
+
+                    if (
+                        parameters.Length == 3
+                        && parameters[0] is string theCharacter
+                        && parameters[1] is string pinyin
+                        && parameters[2] is byte tone
+                        && theCharacter == chachar.TheCharacter
+                        && pinyin == chachar.Pinyin
+                        && tone == chachar.Tone
+                    )
+                    {
+                        return chachar;
+                    }
+
+                    return null;
+                }
+            );
+
+        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.Provider).Returns(dataQueryable.Provider);
+        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.Expression).Returns(dataQueryable.Expression);
+        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.ElementType).Returns(dataQueryable.ElementType);
+        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.GetEnumerator()).Returns(dataQueryable.GetEnumerator);
+        _ = asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
+    }
+
+    public static void MockAlternativesDbSet(
+        Mock<AsciiPinyinContext> asciiPinyinContextMock,
+        Alternative? alternative = null
+    )
+    {
+        IEnumerable<Alternative> alternativeInCollection = alternative is null ? [] : [alternative];
+        var dataQueryable = alternativeInCollection.AsQueryable();
+        var alternativesDbSetMock = new Mock<DbSet<Alternative>>();
+        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.Provider).Returns(dataQueryable.Provider);
+        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.Expression).Returns(dataQueryable.Expression);
+        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.ElementType).Returns(dataQueryable.ElementType);
+        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.GetEnumerator()).Returns(dataQueryable.GetEnumerator);
+        _ = asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
+    }
+
+    private static ChacharsController GetErrorChacharsController(Mock<AsciiPinyinContext> asciiPinyinContextMock, Mock<ILogger<ChacharsController>> loggerMock)
+    {
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
+
+        return new ChacharsController(asciiPinyinContextMock.Object, loggerMock.Object)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            }
+        };
+    }
+
+    private static AlternativesController GetErrorAlternativesController(Mock<AsciiPinyinContext> asciiPinyinContextMock, Mock<ILogger<AlternativesController>> loggerMock)
+    {
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
+
+        return new AlternativesController(asciiPinyinContextMock.Object, loggerMock.Object)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            }
+        };
+    }
 }

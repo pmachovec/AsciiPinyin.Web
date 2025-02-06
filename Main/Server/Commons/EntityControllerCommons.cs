@@ -14,28 +14,24 @@ namespace AsciiPinyin.Web.Server.Commons;
 internal static class EntityControllerCommons
 {
     public static ActionResult<IErrorsContainer> Post<T1, T2>(
-        ILogger<T1> logger,
-        HttpRequest request,
+        T1 entityController,
         T2 entity,
+        AsciiPinyinContext asciiPinyinContext,
+        ILogger<T1> logger,
         string tableName,
         string action,
         string dbAction,
-        string contextCollectionName,
         string alterDbSetMethodName,
-        AsciiPinyinContext asciiPinyinContext,
-        Func<object?, BadRequestObjectResult> badRequest,
-        Func<int, StatusCodeResult> statusCode,
-        Func<OkResult> ok,
         Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDatabaseIntegrityErrorsContainer,
         params Func<T2, FieldError?>[] getFieldErrorMethods
-    ) where T1 : IEntityController where T2 : IEntity
+    ) where T1 : ControllerBase, IEntityController where T2 : IEntity
     {
         LogCommons.LogHttpMethodInfo(logger, HttpMethod.Post, action);
 
-        if (!request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
+        if (!entityController.Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
         {
             LogCommons.LogUserAgentMissingError(logger);
-            return badRequest(Errors.USER_AGENT_MISSING);
+            return entityController.BadRequest(Errors.USER_AGENT_MISSING);
         }
 
         LogCommons.LogUserAgentInfo(logger, userAgent!);
@@ -51,7 +47,7 @@ internal static class EntityControllerCommons
         if (postInitialDataErrorsContainer is not null)
         {
             LogCommons.LogFieldsErrorsContainerError(logger, postInitialDataErrorsContainer);
-            return badRequest(postInitialDataErrorsContainer);
+            return entityController.BadRequest(postInitialDataErrorsContainer);
         }
 
         LogCommons.LogDatabaseIntegrityVerificationDebug(logger);
@@ -66,7 +62,7 @@ internal static class EntityControllerCommons
         catch (Exception e)
         {
             LogCommons.LogError(logger, e.ToString());
-            return statusCode(StatusCodes.Status500InternalServerError);
+            return entityController.StatusCode(StatusCodes.Status500InternalServerError);
         }
 
         var postDatabaseIntegrityErrorsContainer = getPostDatabaseIntegrityErrorsContainer(
@@ -78,7 +74,7 @@ internal static class EntityControllerCommons
         if (postDatabaseIntegrityErrorsContainer is not null)
         {
             LogCommons.LogDatabaseIntegrityErrorsContainerError(logger, postDatabaseIntegrityErrorsContainer);
-            return badRequest(postDatabaseIntegrityErrorsContainer);
+            return entityController.BadRequest(postDatabaseIntegrityErrorsContainer);
         }
 
         LogCommons.LogIntegrityVerificationSuccessDebug(logger);
@@ -87,9 +83,8 @@ internal static class EntityControllerCommons
         try
         {
             using var dbContextTransaction = asciiPinyinContext.Database.BeginTransaction();
-            dynamic contextCollection = asciiPinyinContext.GetType().GetProperty(contextCollectionName)!.GetValue(asciiPinyinContext)!;
-            var contextAlterCollectionMethod = contextCollection!.GetType().GetMethod(alterDbSetMethodName);
-            _ = contextAlterCollectionMethod!.Invoke(contextCollection, (T2[])[entity]);
+            dynamic contextAlterCollectionMethod = asciiPinyinContext.GetType().GetMethod(alterDbSetMethodName, [typeof(T2)])!;
+            _ = contextAlterCollectionMethod!.Invoke(asciiPinyinContext, (T2[])[entity]);
             _ = asciiPinyinContext.SaveChanges();
             dbContextTransaction.Commit();
         }
@@ -97,11 +92,11 @@ internal static class EntityControllerCommons
         {
             LogCommons.LogActionInDbFailedError(logger, dbAction);
             LogCommons.LogError(logger, e.ToString());
-            return statusCode(StatusCodes.Status500InternalServerError);
+            return entityController.StatusCode(StatusCodes.Status500InternalServerError);
         }
 
         LogCommons.LogActionInDbSuccessInfo(logger, dbAction);
-        return ok();
+        return entityController.Ok();
     }
 
     public static string? GetTheCharacterErrorMessage(string? theCharacter)

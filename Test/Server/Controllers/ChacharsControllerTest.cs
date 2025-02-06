@@ -7,6 +7,9 @@ using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Test.Constants;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -168,55 +171,65 @@ internal sealed class ChacharsControllerTest
         Strokes = 3
     };
 
-    private static readonly Mock<AsciiPinyinContext> _asciiPinyinContextMock = new();
+    private static readonly Mock<AsciiPinyinContext> _asciiPinyinContextMock = new(new DbContextOptions<AsciiPinyinContext>());
     private static readonly Mock<ILogger<ChacharsController>> _loggerMock = new();
 
-    private HttpContext _httpContext = default!;
+    private ServiceProvider _serviceProvider = default!;
+    private AsciiPinyinContext _asciiPinyinContext = default!;
     private ChacharsController _chacharsController = default!;
 
     [SetUp]
     public void SetUp()
     {
-        _httpContext = new DefaultHttpContext();
-        _httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
+        _serviceProvider = new ServiceCollection()
+            .AddDbContext<AsciiPinyinContext>(optionsBuilder =>
+                optionsBuilder
+                .UseInMemoryDatabase("testDb")
+                .ConfigureWarnings(warningsConfigurationBuilder => warningsConfigurationBuilder.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            )
+            .AddSingleton(_loggerMock.Object)
+            .AddTransient<ChacharsController>()
+            .BuildServiceProvider();
 
-        _chacharsController = new(_asciiPinyinContextMock.Object, _loggerMock.Object)
+        _asciiPinyinContext = _serviceProvider.GetRequiredService<AsciiPinyinContext>();
+        _chacharsController = _serviceProvider.GetRequiredService<ChacharsController>();
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
+
+        _chacharsController.ControllerContext = new ControllerContext
         {
-            ControllerContext = new ControllerContext
-            {
-                HttpContext = _httpContext
-            }
+            HttpContext = httpContext
         };
     }
 
     [TearDown]
-    public void TearDown() => _asciiPinyinContextMock.Reset();
+    public void TearDown()
+    {
+        _ = _asciiPinyinContext!.Database.EnsureDeleted();
+        _asciiPinyinContextMock.Reset();
+    }
 
     [Test]
     public void GetNoUserAgentHeaderTest()
     {
-        _httpContext.Request.Headers.Clear();
-        var result = _chacharsController.Get();
-
+        var chacharsController = EntityControllerTestCommons.GetNoUserAgentHeaderController<ChacharsController>(_serviceProvider);
+        var result = chacharsController.Get();
         EntityControllerTestCommons.NoUserAgentHeaderTest(result);
     }
 
     [Test]
     public void GetAllChacharsErrorTest()
     {
-        _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
-        var result = _chacharsController.Get();
-
+        var chacharsController = EntityControllerTestCommons.GetChacharsErrorChacharsController(_asciiPinyinContextMock, _loggerMock);
+        var result = chacharsController.Get();
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
 
     [Test]
     public void GetAllChacharsOkTest()
     {
-        EntityControllerTestCommons.MockDatabaseFacadeTransaction(_asciiPinyinContextMock);
-
-        EntityControllerTestCommons.MockChacharsDbSet(
-            _asciiPinyinContextMock,
+        EntityControllerTestCommons.AddToContext(
+            _asciiPinyinContext,
             _radicalChachar1,
             _nonRadicalChacharWithAlternative11,
             _nonRadicalChacharWithoutAlternative21
@@ -235,10 +248,10 @@ internal sealed class ChacharsControllerTest
     [Test]
     public void PostNoUserAgentHeaderTest()
     {
-        _httpContext.Request.Headers.Clear();
-        var result = _chacharsController.Post(new Chachar());
-
+        var chacharsController = EntityControllerTestCommons.GetNoUserAgentHeaderController<ChacharsController>(_serviceProvider);
+        var result = chacharsController.Post(_radicalChachar1);
         EntityControllerTestCommons.NoUserAgentHeaderTest(result);
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_radicalChachar1));
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostTheCharacterWrongTest)} - null")]
@@ -344,8 +357,8 @@ internal sealed class ChacharsControllerTest
         };
 
         var result = _chacharsController.Post(chachar);
-
         EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.THE_CHARACTER, theCharacter, expectedErrorMessage);
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostPinyinWrongTest)} - null")]
@@ -458,8 +471,8 @@ internal sealed class ChacharsControllerTest
         };
 
         var result = _chacharsController.Post(chachar);
-
         EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.PINYIN, pinyin, expectedErrorMessage);
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostToneWrongTest)} - null")]
@@ -475,8 +488,8 @@ internal sealed class ChacharsControllerTest
         };
 
         var result = _chacharsController.Post(chachar);
-
         EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.TONE, tone, expectedErrorMessage);
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostIpaWrongTest)} - null")]
@@ -583,8 +596,8 @@ internal sealed class ChacharsControllerTest
         };
 
         var result = _chacharsController.Post(chachar);
-
         EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.IPA, ipa, expectedErrorMessage);
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostStrokesWrongTest)} - null")]
@@ -600,8 +613,8 @@ internal sealed class ChacharsControllerTest
         };
 
         var result = _chacharsController.Post(chachar);
-
         EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.STROKES, strokes, expectedErrorMessage);
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
     [TestCase("", Errors.EMPTY, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalCharacterWrongTest)} - empty string")]
@@ -720,6 +733,8 @@ internal sealed class ChacharsControllerTest
             (JsonPropertyNames.RADICAL_PINYIN, null),
             (JsonPropertyNames.RADICAL_TONE, null)
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
     [TestCase("", Errors.EMPTY, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalPinyinWrongTest)} - empty string")]
@@ -845,6 +860,8 @@ internal sealed class ChacharsControllerTest
             (JsonPropertyNames.RADICAL_CHARACTER, null),
             (JsonPropertyNames.RADICAL_TONE, null)
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
     [TestCase(5, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalToneWrongTest)} - five")]
@@ -873,6 +890,8 @@ internal sealed class ChacharsControllerTest
             (JsonPropertyNames.RADICAL_CHARACTER, null),
             (JsonPropertyNames.RADICAL_PINYIN, null)
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
     [TestCase("", Errors.EMPTY, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalAlternativeCharacterWrongTest)} - empty string")]
@@ -992,31 +1011,29 @@ internal sealed class ChacharsControllerTest
             (JsonPropertyNames.RADICAL_PINYIN, null),
             (JsonPropertyNames.RADICAL_TONE, null)
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
     [Test]
     public void PostGetAllChacharsErrorTest()
     {
-        _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
-        var result = _chacharsController.Post(_nonRadicalChacharWithAlternative11);
-
+        var chacharsController = EntityControllerTestCommons.GetChacharsErrorChacharsController(_asciiPinyinContextMock, _loggerMock);
+        var result = chacharsController.Post(_radicalChachar1);
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
 
     [Test]
     public void PostGetAllAlternativesErrorTest()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar1);
-        _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Throws(new InvalidOperationException());
-        var result = _chacharsController.Post(_nonRadicalChacharWithAlternative11);
-
+        var chacharsController = EntityControllerTestCommons.GetAlternativesErrorChacharsController(_asciiPinyinContextMock, _loggerMock);
+        var result = chacharsController.Post(_nonRadicalChacharWithAlternative11);
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
 
     [Test]
     public void PostRadicalUnknownTest()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock);
         var result = _chacharsController.Post(_nonRadicalChacharWithAlternative11);
 
         EntityControllerTestCommons.PostDatabaseSingleIntegrityErrorTest(
@@ -1030,12 +1047,14 @@ internal sealed class ChacharsControllerTest
                 JsonPropertyNames.RADICAL_TONE
             )
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_nonRadicalChacharWithAlternative11));
     }
 
     [Test]
     public void PostRadicalNotRadicalTest()
     {
-        var malformedRadicalChachar = new Chachar()
+        var radicalNotRadical = new Chachar()
         {
             TheCharacter = _radicalChachar1.TheCharacter,
             Pinyin = _radicalChachar1.Pinyin,
@@ -1045,7 +1064,7 @@ internal sealed class ChacharsControllerTest
             RadicalCharacter = _radicalChachar1.TheCharacter
         };
 
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, malformedRadicalChachar);
+        EntityControllerTestCommons.AddToContext(_asciiPinyinContext, radicalNotRadical);
         var result = _chacharsController.Post(_nonRadicalChacharWithAlternative11);
 
         EntityControllerTestCommons.PostDatabaseSingleIntegrityErrorTest(
@@ -1057,15 +1076,16 @@ internal sealed class ChacharsControllerTest
                 JsonPropertyNames.RADICAL_PINYIN,
                 JsonPropertyNames.RADICAL_TONE
             ),
-            new ConflictEntity(TableNames.CHACHAR, malformedRadicalChachar)
+            new ConflictEntity(TableNames.CHACHAR, radicalNotRadical)
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_nonRadicalChacharWithAlternative11));
     }
 
     [Test]
     public void PostAlternativeUnknownTest()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar1);
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock);
+        EntityControllerTestCommons.AddToContext(_asciiPinyinContext, _radicalChachar1);
         var result = _chacharsController.Post(_nonRadicalChacharWithAlternative11);
 
         EntityControllerTestCommons.PostDatabaseSingleIntegrityErrorTest(
@@ -1080,12 +1100,14 @@ internal sealed class ChacharsControllerTest
                 JsonPropertyNames.RADICAL_TONE
             )
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_nonRadicalChacharWithAlternative11));
     }
 
     [Test]
     public void PostChacharAlreadyExistsTest()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar1);
+        EntityControllerTestCommons.AddToContext(_asciiPinyinContext, _radicalChachar1);
         var result = _chacharsController.Post(_radicalChachar1);
 
         EntityControllerTestCommons.PostDatabaseSingleIntegrityErrorTest(
@@ -1100,48 +1122,48 @@ internal sealed class ChacharsControllerTest
             ),
             new ConflictEntity(TableNames.CHACHAR, _radicalChachar1)
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
     }
 
     [Test]
     public void PostChacharSaveFailedTest()
     {
         EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock);
-        var result = _chacharsController.Post(_radicalChachar1);
-
+        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock);
+        var chacharsController = EntityControllerTestCommons.GetSaveErrorChacharsController(_asciiPinyinContextMock, _loggerMock);
+        var result = chacharsController.Post(_radicalChachar1);
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
 
     [Test]
     public void PostRadicalChacharOkTest()
     {
-        EntityControllerTestCommons.MockDatabaseFacadeTransaction(_asciiPinyinContextMock);
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock);
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock);
         var result = _chacharsController.Post(_radicalChachar1);
-
         EntityControllerTestCommons.PostOkTest(result);
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
     }
 
     [Test]
     public void PostNonRadicalChacharOkTest()
     {
-        EntityControllerTestCommons.MockDatabaseFacadeTransaction(_asciiPinyinContextMock);
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar1);
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock, _alternative11);
+        EntityControllerTestCommons.AddToContext(_asciiPinyinContext, _radicalChachar1, _alternative11);
         var result = _chacharsController.Post(_nonRadicalChacharWithAlternative11);
-
         EntityControllerTestCommons.PostOkTest(result);
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_nonRadicalChacharWithAlternative11));
     }
 
     [Test]
     public void PostDeleteNoUserAgentHeaderTest()
     {
-        _httpContext.Request.Headers.Clear();
-        var result = _chacharsController.PostDelete(new Chachar());
-
+        EntityControllerTestCommons.AddToContext(_asciiPinyinContext, _radicalChachar1);
+        var chacharsController = EntityControllerTestCommons.GetNoUserAgentHeaderController<ChacharsController>(_serviceProvider);
+        var result = chacharsController.PostDelete(_radicalChachar1);
         EntityControllerTestCommons.NoUserAgentHeaderTest(result);
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
     }
 
+    // Malformed chachars can't exist in the database => it makes no sense to test if they're inside after a failed delete.
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteTheCharacterWrongTest)} - null")]
     [TestCase("", Errors.EMPTY, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteTheCharacterWrongTest)} - empty string")]
     [TestCase("-1", Errors.ONLY_ONE_CHARACTER_ALLOWED, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteTheCharacterWrongTest)} - single digit negative integer")]
@@ -1245,7 +1267,6 @@ internal sealed class ChacharsControllerTest
         };
 
         var result = _chacharsController.PostDelete(chachar);
-
         EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.THE_CHARACTER, theCharacter, expectedErrorMessage);
     }
 
@@ -1359,7 +1380,6 @@ internal sealed class ChacharsControllerTest
         };
 
         var result = _chacharsController.PostDelete(chachar);
-
         EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.PINYIN, pinyin, expectedErrorMessage);
     }
 
@@ -1376,33 +1396,28 @@ internal sealed class ChacharsControllerTest
         };
 
         var result = _chacharsController.PostDelete(chachar);
-
         EntityControllerTestCommons.PostFieldWrongTest(result, JsonPropertyNames.TONE, tone, expectedErrorMessage);
     }
 
     [Test]
     public void PostDeleteGetAllChacharsErrorTest()
     {
-        _ = _asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
-        var result = _chacharsController.PostDelete(_nonRadicalChacharWithAlternative11);
-
+        var chacharsController = EntityControllerTestCommons.GetChacharsErrorChacharsController(_asciiPinyinContextMock, _loggerMock);
+        var result = chacharsController.PostDelete(_nonRadicalChacharWithAlternative11);
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
 
     [Test]
     public void PostDeleteGetAllAlternativesErrorTest()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar1);
-        _ = _asciiPinyinContextMock.Setup(context => context.Alternatives).Throws(new InvalidOperationException());
-        var result = _chacharsController.PostDelete(_nonRadicalChacharWithAlternative11);
-
+        var chacharsController = EntityControllerTestCommons.GetAlternativesErrorChacharsController(_asciiPinyinContextMock, _loggerMock);
+        var result = chacharsController.PostDelete(_nonRadicalChacharWithAlternative11);
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
 
     [Test]
     public void PostDeleteChacharDoesNotExistTest()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock);
         var result = _chacharsController.PostDelete(_radicalChachar1);
 
         EntityControllerTestCommons.PostDatabaseSingleIntegrityErrorTest(
@@ -1416,13 +1431,13 @@ internal sealed class ChacharsControllerTest
                 JsonPropertyNames.TONE
             )
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_radicalChachar1));
     }
 
     [Test]
     public void PostDeleteMinimalChacharDoesNotExistTest()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock);
-
         var minimalChachar = new Chachar
         {
             TheCharacter = _radicalChachar1.TheCharacter,
@@ -1443,14 +1458,14 @@ internal sealed class ChacharsControllerTest
                 JsonPropertyNames.TONE
             )
         );
-    }
 
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(minimalChachar));
+    }
 
     [Test]
     public void PostDeleteRadicalForOneExistingChachar()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar2, _nonRadicalChacharWithoutAlternative21);
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock);
+        EntityControllerTestCommons.AddToContext(_asciiPinyinContext, _radicalChachar2, _nonRadicalChacharWithoutAlternative21);
         var result = _chacharsController.PostDelete(_radicalChachar2);
 
         EntityControllerTestCommons.PostDatabaseSingleIntegrityErrorTest(
@@ -1460,20 +1475,21 @@ internal sealed class ChacharsControllerTest
             Errors.IS_RADICAL_FOR_OTHERS,
             new ConflictEntity(TableNames.CHACHAR, _nonRadicalChacharWithoutAlternative21)
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar2));
     }
 
     [Test]
     public void PostDeleteRadicalForMultipleExistingChachars()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(
-            _asciiPinyinContextMock,
+        EntityControllerTestCommons.AddToContext(
+            _asciiPinyinContext,
             _radicalChachar2,
             _nonRadicalChacharWithoutAlternative21,
             _nonRadicalChacharWithoutAlternative22,
             _nonRadicalChacharWithoutAlternative23
         );
 
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock);
         var result = _chacharsController.PostDelete(_radicalChachar2);
 
         EntityControllerTestCommons.PostDatabaseSingleIntegrityErrorTest(
@@ -1485,13 +1501,14 @@ internal sealed class ChacharsControllerTest
             new ConflictEntity(TableNames.CHACHAR, _nonRadicalChacharWithoutAlternative22),
             new ConflictEntity(TableNames.CHACHAR, _nonRadicalChacharWithoutAlternative23)
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar2));
     }
 
     [Test]
     public void PostDeleteRadicalWithOneExistingAlternative()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar3);
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock, _alternative31);
+        EntityControllerTestCommons.AddToContext(_asciiPinyinContext, _radicalChachar3, _alternative31);
         var result = _chacharsController.PostDelete(_radicalChachar3);
 
         EntityControllerTestCommons.PostDatabaseSingleIntegrityErrorTest(
@@ -1501,13 +1518,21 @@ internal sealed class ChacharsControllerTest
             Errors.HAS_ALTERNATIVES,
             new ConflictEntity(TableNames.ALTERNATIVE, _alternative31)
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar3));
     }
 
     [Test]
     public void PostDeleteRadicalWithMultipleExistingAlternatives()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar3);
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock, _alternative31, _alternative32, _alternative33);
+        EntityControllerTestCommons.AddToContext(
+            _asciiPinyinContext,
+            _radicalChachar3,
+            _alternative31,
+            _alternative32,
+            _alternative33
+        );
+
         var result = _chacharsController.PostDelete(_radicalChachar3);
 
         EntityControllerTestCommons.PostDatabaseSingleIntegrityErrorTest(
@@ -1519,13 +1544,20 @@ internal sealed class ChacharsControllerTest
             new ConflictEntity(TableNames.ALTERNATIVE, _alternative32),
             new ConflictEntity(TableNames.ALTERNATIVE, _alternative33)
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar3));
     }
 
     [Test]
     public void PostDeleteRadicalForOneExistingChacharWithOneExistingAlternative()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar1, _nonRadicalChacharWithAlternative11);
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock, _alternative11);
+        EntityControllerTestCommons.AddToContext(
+            _asciiPinyinContext,
+            _radicalChachar1,
+            _nonRadicalChacharWithAlternative11,
+            _alternative11
+        );
+
         var result = _chacharsController.PostDelete(_radicalChachar1);
 
         EntityControllerTestCommons.PostDatabaseIntegrityErrorsTest(
@@ -1533,20 +1565,22 @@ internal sealed class ChacharsControllerTest
             (TableNames.CHACHAR, _radicalChachar1, Errors.IS_RADICAL_FOR_OTHERS, [new ConflictEntity(TableNames.CHACHAR, _nonRadicalChacharWithAlternative11)]),
             (TableNames.CHACHAR, _radicalChachar1, Errors.HAS_ALTERNATIVES, [new ConflictEntity(TableNames.ALTERNATIVE, _alternative11)])
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
     }
 
     [Test]
     public void PostDeleteRadicalForMultipleExistingChacharsWithOneExistingAlternative()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(
-            _asciiPinyinContextMock,
+        EntityControllerTestCommons.AddToContext(
+            _asciiPinyinContext,
             _radicalChachar3,
             _nonRadicalChacharWithAlternative31,
             _nonRadicalChacharWithAlternative32,
-            _nonRadicalChacharWithAlternative33
+            _nonRadicalChacharWithAlternative33,
+            _alternative31
         );
 
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock, _alternative31);
         var result = _chacharsController.PostDelete(_radicalChachar3);
 
         EntityControllerTestCommons.PostDatabaseIntegrityErrorsTest(
@@ -1568,13 +1602,22 @@ internal sealed class ChacharsControllerTest
                 [new ConflictEntity(TableNames.ALTERNATIVE, _alternative31)]
             )
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar3));
     }
 
     [Test]
     public void PostDeleteRadicalForOneExistingChacharWithMultipleExistingAlternatives()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar3, _nonRadicalChacharWithAlternative31);
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock, _alternative31, _alternative32, _alternative33);
+        EntityControllerTestCommons.AddToContext(
+            _asciiPinyinContext,
+            _radicalChachar3,
+            _nonRadicalChacharWithAlternative31,
+            _alternative31,
+            _alternative32,
+            _alternative33
+        );
+
         var result = _chacharsController.PostDelete(_radicalChachar3);
 
         EntityControllerTestCommons.PostDatabaseIntegrityErrorsTest(
@@ -1596,20 +1639,24 @@ internal sealed class ChacharsControllerTest
                 ]
             )
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar3));
     }
 
     [Test]
     public void PostDeleteRadicalForMultipleExistingChacharsWithMultipleExistingAlternatives()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(
-            _asciiPinyinContextMock,
+        EntityControllerTestCommons.AddToContext(
+            _asciiPinyinContext,
             _radicalChachar3,
             _nonRadicalChacharWithAlternative31,
             _nonRadicalChacharWithAlternative32,
-            _nonRadicalChacharWithAlternative33
+            _nonRadicalChacharWithAlternative33,
+            _alternative31,
+            _alternative32,
+            _alternative33
         );
 
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock, _alternative31, _alternative32, _alternative33);
         var result = _chacharsController.PostDelete(_radicalChachar3);
 
         EntityControllerTestCommons.PostDatabaseIntegrityErrorsTest(
@@ -1635,6 +1682,8 @@ internal sealed class ChacharsControllerTest
                 ]
             )
         );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar3));
     }
 
     [Test]
@@ -1642,30 +1691,38 @@ internal sealed class ChacharsControllerTest
     {
         EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar1);
         EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock);
-        var result = _chacharsController.PostDelete(_radicalChachar1);
-
+        var chacharsController = EntityControllerTestCommons.GetSaveErrorChacharsController(_asciiPinyinContextMock, _loggerMock);
+        var result = chacharsController.PostDelete(_radicalChachar1);
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
 
     [Test]
     public void PostDeleteRadicalChacharOkTest()
     {
-        EntityControllerTestCommons.MockDatabaseFacadeTransaction(_asciiPinyinContextMock);
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar1);
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock);
-        var result = _chacharsController.PostDelete(_radicalChachar1);
+        EntityControllerTestCommons.AddToContext(
+            _asciiPinyinContext,
+            _radicalChachar1
+        );
 
+        var result = _chacharsController.PostDelete(_radicalChachar1);
         EntityControllerTestCommons.PostOkTest(result);
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_radicalChachar1));
     }
 
     [Test]
     public void PostDeleteNonRadicalChacharOkTest()
     {
-        EntityControllerTestCommons.MockDatabaseFacadeTransaction(_asciiPinyinContextMock);
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar1, _nonRadicalChacharWithAlternative11);
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock, _alternative11);
-        var result = _chacharsController.PostDelete(_nonRadicalChacharWithAlternative11);
+        EntityControllerTestCommons.AddToContext(
+            _asciiPinyinContext,
+            _radicalChachar1,
+            _nonRadicalChacharWithAlternative11,
+            _alternative11
+        );
 
+        var result = _chacharsController.PostDelete(_nonRadicalChacharWithAlternative11);
         EntityControllerTestCommons.PostOkTest(result);
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_nonRadicalChacharWithAlternative11));
+        Assert.That(_asciiPinyinContext.Alternatives, Does.Contain(_alternative11));
     }
 }

@@ -3,6 +3,7 @@ using AsciiPinyin.Web.Server.Locals;
 using AsciiPinyin.Web.Server.Pages;
 using AsciiPinyin.Web.Shared.Constants;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.EntityFrameworkCore;
 using NLog.Extensions.Logging;
 using NLog.Web;
 using System.Globalization;
@@ -31,7 +32,7 @@ _ = builder.Services
 _ = builder.Services
     .AddLocalization()
     .AddEntityFrameworkSqlite()
-    .AddDbContext<AsciiPinyinContext>()
+    .AddDbContext<AsciiPinyinContext>(optionsBuilder => optionsBuilder.UseSqlite("Data Source=Data/asciipinyin.sqlite"))
     .AddControllers();
 
 var app = builder.Build();

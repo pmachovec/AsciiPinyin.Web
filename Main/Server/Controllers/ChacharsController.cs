@@ -49,18 +49,14 @@ public sealed class ChacharsController(
     [HttpPost]
     public ActionResult<IErrorsContainer> Post(Chachar chachar) =>
         EntityControllerCommons.Post(
-            _logger,
-            Request,
+            this,
             chachar,
+            _asciiPinyinContext,
+            _logger,
             TableNames.CHACHAR,
             Actions.CREATE_NEW_CHACHAR,
             DbActions.INSERT,
-            ContextCollectionNames.CHACHARS,
             DbSetMethods.ADD,
-            _asciiPinyinContext,
-            BadRequest,
-            StatusCode,
-            Ok,
             GetPostDatabaseIntegrityErrorsContainer,
             GetTheCharacterError,
             GetStrokesError,
@@ -77,18 +73,14 @@ public sealed class ChacharsController(
     [HttpPost(ApiNames.DELETE)]
     public ActionResult<IErrorsContainer> PostDelete(Chachar chachar) =>
         EntityControllerCommons.Post(
-            _logger,
-            Request,
+            this,
             chachar,
+            _asciiPinyinContext,
+            _logger,
             TableNames.CHACHAR,
             Actions.DELETE_CHACHAR,
             DbActions.DELETE,
-            ContextCollectionNames.CHACHARS,
             DbSetMethods.REMOVE,
-            _asciiPinyinContext,
-            BadRequest,
-            StatusCode,
-            Ok,
             GetPostDeleteDatabaseIntegrityErrorsContainer,
             GetTheCharacterError,
             GetPinyinError,

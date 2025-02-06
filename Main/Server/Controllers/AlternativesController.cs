@@ -47,18 +47,14 @@ public sealed class AlternativesController(
     [HttpPost]
     public ActionResult<IErrorsContainer> Post(Alternative alternative) =>
         EntityControllerCommons.Post(
-            _logger,
-            Request,
+            this,
             alternative,
+            _asciiPinyinContext,
+            _logger,
             TableNames.ALTERNATIVE,
             Actions.CREATE_NEW_ALTERNATIVE,
             DbActions.INSERT,
-            ContextCollectionNames.ALTERNATIVES,
             DbSetMethods.ADD,
-            _asciiPinyinContext,
-            BadRequest,
-            StatusCode,
-            Ok,
             GetPostDatabaseIntegrityErrorsContainer,
             GetTheCharacterError,
             GetStrokesError,
@@ -70,18 +66,14 @@ public sealed class AlternativesController(
     [HttpPost(ApiNames.DELETE)]
     public ActionResult<IErrorsContainer> PostDelete(Alternative alternative) =>
         EntityControllerCommons.Post(
-            _logger,
-            Request,
+            this,
             alternative,
+            _asciiPinyinContext,
+            _logger,
             TableNames.ALTERNATIVE,
             Actions.DELETE_ALTERNATIVE,
             DbActions.DELETE,
-            ContextCollectionNames.ALTERNATIVES,
             DbSetMethods.REMOVE,
-            _asciiPinyinContext,
-            BadRequest,
-            StatusCode,
-            Ok,
             GetPostDeleteDatabaseIntegrityErrorsContainer,
             GetTheCharacterError,
             GetOriginalCharacterError,
