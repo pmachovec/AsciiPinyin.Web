@@ -8,6 +8,7 @@ using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System.Globalization;
+using System.Text;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
@@ -61,18 +62,68 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
 
     protected async Task InitiateDeleteAsync(CancellationToken cancellationToken)
     {
-        await Index.SubmitDialog.SetWarningAsync(
-            this,
+        await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
+        var databaseIntegrityErrorMessages = GetDeleteDatabaseIntegrityErrorMessages();
+
+        if (databaseIntegrityErrorMessages.Count != 0)
+        {
+            var errorMessageFormatted = GetErrorMessageFormatted(databaseIntegrityErrorMessages);
+            await Index.SubmitDialog.SetErrorAsync(this, errorMessageFormatted, cancellationToken);
+        }
+        else
+        {
+            await Index.SubmitDialog.SetWarningAsync(
+                this,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    Localizer[Resource.AlternativeWillBeDeleted],
+                    Alternative!.TheCharacter!,
+                    Alternative.OriginalCharacter!,
+                    Alternative.OriginalRealPinyin!
+                ),
+                SubmitDeleteAsync,
+                cancellationToken
+            );
+        }
+    }
+
+    private List<string> GetDeleteDatabaseIntegrityErrorMessages()
+    {
+        List<string> databaseIntegrityErrorMessages = [];
+
+        var chacharsWithThis = Index.Chachars.Where(chachar =>
+            chachar.RadicalAlternativeCharacter == Alternative!.TheCharacter
+            && chachar.RadicalCharacter == Alternative.OriginalCharacter
+            && chachar.RadicalPinyin == Alternative.OriginalPinyin
+            && chachar.RadicalTone == Alternative.OriginalTone
+        );
+
+        if (chacharsWithThis.Any())
+        {
+            databaseIntegrityErrorMessages.Add(Localizer[Resource.AlternativeUsedByCharactersInDb]);
+        }
+
+        return databaseIntegrityErrorMessages;
+    }
+
+    private string GetErrorMessageFormatted(IEnumerable<string> databaseIntegrityErrorMessages)
+    {
+        var errorMessageBuilder = new StringBuilder(
             string.Format(
                 CultureInfo.InvariantCulture,
-                Localizer[Resource.AlternativeWillBeDeleted],
+                Localizer[Resource.AlternativeCannotBeDeleted],
                 Alternative!.TheCharacter!,
                 Alternative.OriginalCharacter!,
                 Alternative.OriginalRealPinyin!
-            ),
-            SubmitDeleteAsync,
-            cancellationToken
+            )
         );
+
+        foreach (var errorMessage in databaseIntegrityErrorMessages)
+        {
+            _ = errorMessageBuilder.Append(Html.BR).Append(errorMessage);
+        }
+
+        return errorMessageBuilder.ToString();
     }
 
     private async Task SubmitDeleteAsync(CancellationToken cancellationToken)

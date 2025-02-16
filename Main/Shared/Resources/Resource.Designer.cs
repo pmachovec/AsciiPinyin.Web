@@ -70,6 +70,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; cannot be deleted..
+        /// </summary>
+        public static string AlternativeCannotBeDeleted {
+            get {
+                return ResourceManager.GetString("AlternativeCannotBeDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Alternative character.
         /// </summary>
         public static string AlternativeCharacter {
@@ -102,6 +111,24 @@ namespace AsciiPinyin.Web.Shared.Resources {
         public static string Alternatives {
             get {
                 return ResourceManager.GetString("Alternatives", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alternatives exist for the character in the database..
+        /// </summary>
+        public static string AlternativesExistForCharacter {
+            get {
+                return ResourceManager.GetString("AlternativesExistForCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alternative is used by existing characters in the database..
+        /// </summary>
+        public static string AlternativeUsedByCharactersInDb {
+            get {
+                return ResourceManager.GetString("AlternativeUsedByCharactersInDb", resourceCulture);
             }
         }
         
@@ -152,6 +179,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; cannot be deleted..
+        /// </summary>
+        public static string CharacterCannotBeDeleted {
+            get {
+                return ResourceManager.GetString("CharacterCannotBeDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; was successfully created..
         /// </summary>
         public static string CharacterCreated {
@@ -166,6 +202,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         public static string CharacterDeleted {
             get {
                 return ResourceManager.GetString("CharacterDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The character is radical for other characters in the database..
+        /// </summary>
+        public static string CharacterIsRadicalForOthers {
+            get {
+                return ResourceManager.GetString("CharacterIsRadicalForOthers", resourceCulture);
             }
         }
         

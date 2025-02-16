@@ -250,4 +250,19 @@
   <data name="AlternativeWillBeDeleted" xml:space="preserve">
     <value>The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; will be deleted from the database. This operation can't be undone. Continue?</value>
   </data>
+  <data name="CharacterCannotBeDeleted" xml:space="preserve">
+    <value>The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; cannot be deleted.</value>
+  </data>
+  <data name="CharacterIsRadicalForOthers" xml:space="preserve">
+    <value>The character is radical for other characters in the database.</value>
+  </data>
+  <data name="AlternativesExistForCharacter" xml:space="preserve">
+    <value>Alternatives exist for the character in the database.</value>
+  </data>
+  <data name="AlternativeCannotBeDeleted" xml:space="preserve">
+    <value>The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; cannot be deleted.</value>
+  </data>
+  <data name="AlternativeUsedByCharactersInDb" xml:space="preserve">
+    <value>Alternative is used by existing characters in the database.</value>
+  </data>
 </root>

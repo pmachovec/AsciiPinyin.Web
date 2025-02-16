@@ -7,6 +7,7 @@ using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System.Globalization;
+using System.Text;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
@@ -60,17 +61,79 @@ public class ChacharViewDialogBase : ComponentBase, IModal
 
     protected async Task InitiateDeleteAsync(CancellationToken cancellationToken)
     {
-        await Index.SubmitDialog.SetWarningAsync(
-            this,
+        await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
+        var databaseIntegrityErrorMessages = GetDeleteDatabaseIntegrityErrorMessages();
+
+        if (databaseIntegrityErrorMessages.Count != 0)
+        {
+            var errorMessageFormatted = GetErrorMessageFormatted(databaseIntegrityErrorMessages);
+            await Index.SubmitDialog.SetErrorAsync(this, errorMessageFormatted, cancellationToken);
+        }
+        else
+        {
+            await Index.SubmitDialog.SetWarningAsync(
+                this,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    Localizer[Resource.CharacterWillBeDeleted],
+                    Chachar!.TheCharacter!,
+                    Chachar.RealPinyin!
+                ),
+                SubmitDeleteAsync,
+                cancellationToken
+            );
+        }
+    }
+
+    private List<string> GetDeleteDatabaseIntegrityErrorMessages()
+    {
+        List<string> databaseIntegrityErrorMessages = [];
+
+        if (Chachar!.IsRadical)
+        {
+            var chacharsWithThisAsRadical = Index.Chachars.Where(chachar =>
+                chachar.RadicalCharacter == Chachar.TheCharacter
+                && chachar.RadicalPinyin == Chachar.Pinyin
+                && chachar.RadicalTone == Chachar.Tone
+            );
+
+            if (chacharsWithThisAsRadical.Any())
+            {
+                databaseIntegrityErrorMessages.Add(Localizer[Resource.CharacterIsRadicalForOthers]);
+            }
+        }
+
+        var alternativesOfThis = Index.Alternatives.Where(alternative =>
+            alternative.OriginalCharacter == Chachar!.TheCharacter
+            && alternative.OriginalPinyin == Chachar.Pinyin
+            && alternative.OriginalTone == Chachar.Tone
+        );
+
+        if (alternativesOfThis.Any())
+        {
+            databaseIntegrityErrorMessages.Add(Localizer[Resource.AlternativesExistForCharacter]);
+        }
+
+        return databaseIntegrityErrorMessages;
+    }
+
+    private string GetErrorMessageFormatted(IEnumerable<string> databaseIntegrityErrorMessages)
+    {
+        var errorMessageBuilder = new StringBuilder(
             string.Format(
                 CultureInfo.InvariantCulture,
-                Localizer[Resource.CharacterWillBeDeleted],
+                Localizer[Resource.CharacterCannotBeDeleted],
                 Chachar!.TheCharacter!,
                 Chachar.RealPinyin!
-            ),
-            SubmitDeleteAsync,
-            cancellationToken
+            )
         );
+
+        foreach (var errorMessage in databaseIntegrityErrorMessages)
+        {
+            _ = errorMessageBuilder.Append(Html.BR).Append(errorMessage);
+        }
+
+        return errorMessageBuilder.ToString();
     }
 
     private async Task SubmitDeleteAsync(CancellationToken cancellationToken)
