@@ -1,3 +1,4 @@
+using AsciiPinyin.Web.Server.Commons;
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Server.Locals;
 using AsciiPinyin.Web.Server.Pages;
@@ -17,6 +18,7 @@ var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Loc
 var nLogConfigYamlPath = $@"{assemblyLocation}/{StringConstants.NLOG_CONFIG_YAML_IN_FOLDER}";
 
 _ = builder.Logging.ClearProviders().AddNLog();
+
 _ = builder.Configuration.AddYamlFile(
     nLogConfigYamlPath,
     optional: false,
@@ -32,6 +34,7 @@ _ = builder.Services
 _ = builder.Services
     .AddLocalization()
     .AddEntityFrameworkSqlite()
+    .AddScoped<IEntityControllerCommons, EntityControllerCommons>() // Doesn't work as singleton, must be scoped, because the consumed DB context is also scoped.
     .AddDbContext<AsciiPinyinContext>(optionsBuilder => optionsBuilder.UseSqlite("Data Source=Data/asciipinyin.sqlite"))
     .AddControllers();
 

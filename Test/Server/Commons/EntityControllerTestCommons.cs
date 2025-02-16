@@ -1,3 +1,4 @@
+using AsciiPinyin.Web.Server.Commons;
 using AsciiPinyin.Web.Server.Controllers;
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Server.Test.Constants;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using System;
 
 namespace AsciiPinyin.Web.Server.Test.Commons;
 
@@ -28,59 +30,65 @@ internal static class EntityControllerTestCommons
     }
 
     public static ChacharsController GetChacharsErrorChacharsController(
+        IEntityControllerCommons entityControllerCommons,
         Mock<AsciiPinyinContext> asciiPinyinContextMock,
         Mock<ILogger<ChacharsController>> loggerMock
     )
     {
         _ = asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
-        return GetErrorChacharsController(asciiPinyinContextMock, loggerMock);
+        return GetErrorChacharsController(entityControllerCommons, asciiPinyinContextMock, loggerMock);
     }
 
     public static ChacharsController GetAlternativesErrorChacharsController(
+        IEntityControllerCommons entityControllerCommons,
         Mock<AsciiPinyinContext> asciiPinyinContextMock,
         Mock<ILogger<ChacharsController>> loggerMock
     )
     {
         MockChacharsDbSet(asciiPinyinContextMock);
         _ = asciiPinyinContextMock.Setup(context => context.Alternatives).Throws(new InvalidOperationException());
-        return GetErrorChacharsController(asciiPinyinContextMock, loggerMock);
+        return GetErrorChacharsController(entityControllerCommons, asciiPinyinContextMock, loggerMock);
     }
 
     public static ChacharsController GetSaveErrorChacharsController(
+        IEntityControllerCommons entityControllerCommons,
         Mock<AsciiPinyinContext> asciiPinyinContextMock,
         Mock<ILogger<ChacharsController>> loggerMock
     )
     {
         _ = asciiPinyinContextMock.Setup(context => context.SaveChanges()).Throws(new InvalidOperationException());
-        return GetErrorChacharsController(asciiPinyinContextMock, loggerMock);
+        return GetErrorChacharsController(entityControllerCommons, asciiPinyinContextMock, loggerMock);
     }
 
     public static AlternativesController GetChacharsErrorAlternativesController(
+        IEntityControllerCommons entityControllerCommons,
         Mock<AsciiPinyinContext> asciiPinyinContextMock,
         Mock<ILogger<AlternativesController>> loggerMock
     )
     {
         _ = asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
-        return GetErrorAlternativesController(asciiPinyinContextMock, loggerMock);
+        return GetErrorAlternativesController(entityControllerCommons, asciiPinyinContextMock, loggerMock);
     }
 
     public static AlternativesController GetAlternativesErrorAlternativesController(
+        IEntityControllerCommons entityControllerCommons,
         Mock<AsciiPinyinContext> asciiPinyinContextMock,
         Mock<ILogger<AlternativesController>> loggerMock
     )
     {
         MockChacharsDbSet(asciiPinyinContextMock);
         _ = asciiPinyinContextMock.Setup(context => context.Alternatives).Throws(new InvalidOperationException());
-        return GetErrorAlternativesController(asciiPinyinContextMock, loggerMock);
+        return GetErrorAlternativesController(entityControllerCommons, asciiPinyinContextMock, loggerMock);
     }
 
     public static AlternativesController GetSaveErrorAlternativesController(
+        IEntityControllerCommons entityControllerCommons,
         Mock<AsciiPinyinContext> asciiPinyinContextMock,
         Mock<ILogger<AlternativesController>> loggerMock
     )
     {
         _ = asciiPinyinContextMock.Setup(context => context.SaveChanges()).Throws(new InvalidOperationException());
-        return GetErrorAlternativesController(asciiPinyinContextMock, loggerMock);
+        return GetErrorAlternativesController(entityControllerCommons, asciiPinyinContextMock, loggerMock);
     }
 
     public static void AddToContext(
@@ -306,12 +314,20 @@ internal static class EntityControllerTestCommons
         _ = asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
     }
 
-    private static ChacharsController GetErrorChacharsController(Mock<AsciiPinyinContext> asciiPinyinContextMock, Mock<ILogger<ChacharsController>> loggerMock)
+    private static ChacharsController GetErrorChacharsController(
+        IEntityControllerCommons entityControllerCommons,
+        Mock<AsciiPinyinContext> asciiPinyinContextMock,
+        Mock<ILogger<ChacharsController>> loggerMock
+    )
     {
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
 
-        return new ChacharsController(asciiPinyinContextMock.Object, loggerMock.Object)
+        return new ChacharsController(
+            asciiPinyinContextMock.Object,
+            entityControllerCommons,
+            loggerMock.Object
+        )
         {
             ControllerContext = new ControllerContext
             {
@@ -320,12 +336,20 @@ internal static class EntityControllerTestCommons
         };
     }
 
-    private static AlternativesController GetErrorAlternativesController(Mock<AsciiPinyinContext> asciiPinyinContextMock, Mock<ILogger<AlternativesController>> loggerMock)
+    private static AlternativesController GetErrorAlternativesController(
+        IEntityControllerCommons entityControllerCommons,
+        Mock<AsciiPinyinContext> asciiPinyinContextMock,
+        Mock<ILogger<AlternativesController>> loggerMock
+    )
     {
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
 
-        return new AlternativesController(asciiPinyinContextMock.Object, loggerMock.Object)
+        return new AlternativesController(
+            asciiPinyinContextMock.Object,
+            entityControllerCommons,
+            loggerMock.Object
+        )
         {
             ControllerContext = new ControllerContext
             {

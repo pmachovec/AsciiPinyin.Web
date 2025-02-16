@@ -1,3 +1,4 @@
+using AsciiPinyin.Web.Server.Commons;
 using AsciiPinyin.Web.Server.Controllers;
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Server.Test.Commons;
@@ -95,8 +96,10 @@ internal sealed class AlternativesControllerTest
         Strokes = 1
     };
 
-    private static readonly Mock<AsciiPinyinContext> _asciiPinyinContextMock = new(new DbContextOptions<AsciiPinyinContext>());
+    private static readonly Mock<AsciiPinyinContext> _asciiPinyinContextMockForDbErrorsTests = new(new DbContextOptions<AsciiPinyinContext>());
     private static readonly Mock<ILogger<AlternativesController>> _loggerMock = new();
+
+    private static readonly IEntityControllerCommons _entityControllerCommonsForDbErrorsTests = new EntityControllerCommons(_asciiPinyinContextMockForDbErrorsTests.Object);
 
     private ServiceProvider _serviceProvider = default!;
     private AsciiPinyinContext _asciiPinyinContext = default!;
@@ -106,13 +109,14 @@ internal sealed class AlternativesControllerTest
     public void SetUp()
     {
         _serviceProvider = new ServiceCollection()
+            .AddSingleton(_loggerMock.Object)
+            .AddTransient<AlternativesController>()
+            .AddScoped<IEntityControllerCommons, EntityControllerCommons>()
             .AddDbContext<AsciiPinyinContext>(optionsBuilder =>
                 optionsBuilder
                 .UseInMemoryDatabase("testDb")
                 .ConfigureWarnings(warningsConfigurationBuilder => warningsConfigurationBuilder.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             )
-            .AddSingleton(_loggerMock.Object)
-            .AddTransient<AlternativesController>()
             .BuildServiceProvider();
 
         _asciiPinyinContext = _serviceProvider.GetRequiredService<AsciiPinyinContext>();
@@ -130,7 +134,7 @@ internal sealed class AlternativesControllerTest
     public void TearDown()
     {
         _ = _asciiPinyinContext!.Database.EnsureDeleted();
-        _asciiPinyinContextMock.Reset();
+        _asciiPinyinContextMockForDbErrorsTests.Reset();
     }
 
     [Test]
@@ -144,7 +148,12 @@ internal sealed class AlternativesControllerTest
     [Test]
     public void GetAllAlternativesErrorTest()
     {
-        var alternativesController = EntityControllerTestCommons.GetAlternativesErrorAlternativesController(_asciiPinyinContextMock, _loggerMock);
+        var alternativesController = EntityControllerTestCommons.GetAlternativesErrorAlternativesController(
+            _entityControllerCommonsForDbErrorsTests,
+            _asciiPinyinContextMockForDbErrorsTests,
+            _loggerMock
+        );
+
         var result = alternativesController.Get();
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
@@ -543,7 +552,12 @@ internal sealed class AlternativesControllerTest
     [Test]
     public void PostGetAllChacharsErrorTest()
     {
-        var alternativesController = EntityControllerTestCommons.GetChacharsErrorAlternativesController(_asciiPinyinContextMock, _loggerMock);
+        var alternativesController = EntityControllerTestCommons.GetChacharsErrorAlternativesController(
+            _entityControllerCommonsForDbErrorsTests,
+            _asciiPinyinContextMockForDbErrorsTests,
+            _loggerMock
+        );
+
         var result = alternativesController.Post(_alternative11);
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
@@ -551,7 +565,12 @@ internal sealed class AlternativesControllerTest
     [Test]
     public void PostGetAllAlternativesErrorTest()
     {
-        var alternativesController = EntityControllerTestCommons.GetAlternativesErrorAlternativesController(_asciiPinyinContextMock, _loggerMock);
+        var alternativesController = EntityControllerTestCommons.GetAlternativesErrorAlternativesController(
+            _entityControllerCommonsForDbErrorsTests,
+            _asciiPinyinContextMockForDbErrorsTests,
+            _loggerMock
+        );
+
         var result = alternativesController.Post(_alternative11);
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
@@ -633,9 +652,15 @@ internal sealed class AlternativesControllerTest
     [Test]
     public void PostAlternativeSaveFailedTest()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar1);
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock);
-        var alternativesController = EntityControllerTestCommons.GetSaveErrorAlternativesController(_asciiPinyinContextMock, _loggerMock);
+        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMockForDbErrorsTests, _radicalChachar1);
+        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMockForDbErrorsTests);
+
+        var alternativesController = EntityControllerTestCommons.GetSaveErrorAlternativesController(
+            _entityControllerCommonsForDbErrorsTests,
+            _asciiPinyinContextMockForDbErrorsTests,
+            _loggerMock
+        );
+
         var result = alternativesController.Post(_alternative11);
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
@@ -1003,7 +1028,12 @@ internal sealed class AlternativesControllerTest
     [Test]
     public void PostDeleteGetAllChacharsErrorTest()
     {
-        var alternativesController = EntityControllerTestCommons.GetChacharsErrorAlternativesController(_asciiPinyinContextMock, _loggerMock);
+        var alternativesController = EntityControllerTestCommons.GetChacharsErrorAlternativesController(
+            _entityControllerCommonsForDbErrorsTests,
+            _asciiPinyinContextMockForDbErrorsTests,
+            _loggerMock
+        );
+
         var result = alternativesController.PostDelete(_alternative11);
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
@@ -1011,7 +1041,12 @@ internal sealed class AlternativesControllerTest
     [Test]
     public void PostDeleteGetAllAlternativesErrorTest()
     {
-        var alternativesController = EntityControllerTestCommons.GetAlternativesErrorAlternativesController(_asciiPinyinContextMock, _loggerMock);
+        var alternativesController = EntityControllerTestCommons.GetAlternativesErrorAlternativesController(
+            _entityControllerCommonsForDbErrorsTests,
+            _asciiPinyinContextMockForDbErrorsTests,
+            _loggerMock
+        );
+
         var result = alternativesController.PostDelete(_alternative11);
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }
@@ -1086,9 +1121,15 @@ internal sealed class AlternativesControllerTest
     [Test]
     public void PostDeleteAlternativeSaveFailedTest()
     {
-        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMock, _radicalChachar1);
-        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMock, _alternative11);
-        var alternativesController = EntityControllerTestCommons.GetSaveErrorAlternativesController(_asciiPinyinContextMock, _loggerMock);
+        EntityControllerTestCommons.MockChacharsDbSet(_asciiPinyinContextMockForDbErrorsTests, _radicalChachar1);
+        EntityControllerTestCommons.MockAlternativesDbSet(_asciiPinyinContextMockForDbErrorsTests, _alternative11);
+
+        var alternativesController = EntityControllerTestCommons.GetSaveErrorAlternativesController(
+            _entityControllerCommonsForDbErrorsTests,
+            _asciiPinyinContextMockForDbErrorsTests,
+            _loggerMock
+        );
+
         var result = alternativesController.PostDelete(_alternative11);
         EntityControllerTestCommons.InternalServerErrorTest(result);
     }

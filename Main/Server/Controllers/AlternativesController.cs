@@ -13,6 +13,7 @@ namespace AsciiPinyin.Web.Server.Controllers;
 [Route($"/{ApiNames.BASE}/{ApiNames.ALTERNATIVES}")]
 public sealed class AlternativesController(
     AsciiPinyinContext _asciiPinyinContext,
+    IEntityControllerCommons _entityControllerCommons,
     ILogger<AlternativesController> _logger
 ) : ControllerBase, IEntityController
 {
@@ -46,15 +47,14 @@ public sealed class AlternativesController(
 
     [HttpPost]
     public ActionResult<IErrorsContainer> Post(Alternative alternative) =>
-        EntityControllerCommons.Post(
+        _entityControllerCommons.Post(
             this,
             alternative,
-            _asciiPinyinContext,
             _logger,
             TableNames.ALTERNATIVE,
             Actions.CREATE_NEW_ALTERNATIVE,
             DbActions.INSERT,
-            DbSetMethods.ADD,
+            AlterDbMethods.ADD,
             GetPostDatabaseIntegrityErrorsContainer,
             GetTheCharacterError,
             GetStrokesError,
@@ -65,15 +65,14 @@ public sealed class AlternativesController(
 
     [HttpPost(ApiNames.DELETE)]
     public ActionResult<IErrorsContainer> PostDelete(Alternative alternative) =>
-        EntityControllerCommons.Post(
+        _entityControllerCommons.Post(
             this,
             alternative,
-            _asciiPinyinContext,
             _logger,
             TableNames.ALTERNATIVE,
             Actions.DELETE_ALTERNATIVE,
             DbActions.DELETE,
-            DbSetMethods.REMOVE,
+            AlterDbMethods.REMOVE,
             GetPostDeleteDatabaseIntegrityErrorsContainer,
             GetTheCharacterError,
             GetOriginalCharacterError,
@@ -82,43 +81,43 @@ public sealed class AlternativesController(
         );
 
     private FieldError? GetTheCharacterError(Alternative alternative) =>
-        EntityControllerCommons.GetInvalidValueFieldError(
+        _entityControllerCommons.GetInvalidValueFieldError(
             _logger,
             alternative.TheCharacter,
             JsonPropertyNames.THE_CHARACTER,
-            EntityControllerCommons.GetTheCharacterErrorMessage
+            _entityControllerCommons.GetTheCharacterErrorMessage
         );
 
     private FieldError? GetStrokesError(Alternative alternative) =>
-        EntityControllerCommons.GetInvalidValueFieldError(
+        _entityControllerCommons.GetInvalidValueFieldError(
             _logger,
             alternative.Strokes,
             JsonPropertyNames.STROKES,
-            EntityControllerCommons.GetStrokesErrorMessage
+            _entityControllerCommons.GetStrokesErrorMessage
         );
 
     private FieldError? GetOriginalCharacterError(Alternative alternative) =>
-        EntityControllerCommons.GetInvalidValueFieldError(
+        _entityControllerCommons.GetInvalidValueFieldError(
             _logger,
             alternative.OriginalCharacter,
             JsonPropertyNames.ORIGINAL_CHARACTER,
-            EntityControllerCommons.GetTheCharacterErrorMessage
+            _entityControllerCommons.GetTheCharacterErrorMessage
         );
 
     private FieldError? GetOriginalPinyinError(Alternative alternative) =>
-        EntityControllerCommons.GetInvalidValueFieldError(
+        _entityControllerCommons.GetInvalidValueFieldError(
             _logger,
             alternative.OriginalPinyin,
             JsonPropertyNames.ORIGINAL_PINYIN,
-            EntityControllerCommons.GetPinyinErrorMessage
+            _entityControllerCommons.GetPinyinErrorMessage
         );
 
     private FieldError? GetOriginalToneError(Alternative alternative) =>
-        EntityControllerCommons.GetInvalidValueFieldError(
+        _entityControllerCommons.GetInvalidValueFieldError(
             _logger,
             alternative.OriginalTone,
             JsonPropertyNames.ORIGINAL_TONE,
-            EntityControllerCommons.GetToneErrorMessage
+            _entityControllerCommons.GetToneErrorMessage
         );
 
     private DatabaseIntegrityErrorsContainer? GetPostDatabaseIntegrityErrorsContainer(
@@ -135,7 +134,7 @@ public sealed class AlternativesController(
 
         if (originalChachar is null)
         {
-            var errorMessage = EntityControllerCommons.GetEntityUnknownErrorMessage(
+            var errorMessage = _entityControllerCommons.GetEntityUnknownErrorMessage(
                 TableNames.CHACHAR,
                 JsonPropertyNames.ORIGINAL_CHARACTER,
                 JsonPropertyNames.ORIGINAL_PINYIN,
@@ -152,7 +151,7 @@ public sealed class AlternativesController(
 
         if (!originalChachar.IsRadical)
         {
-            var errorMessage = EntityControllerCommons.GetNoRadicalErrorMessage(
+            var errorMessage = _entityControllerCommons.GetNoRadicalErrorMessage(
                 JsonPropertyNames.ORIGINAL_CHARACTER,
                 JsonPropertyNames.ORIGINAL_PINYIN,
                 JsonPropertyNames.ORIGINAL_TONE
@@ -176,7 +175,7 @@ public sealed class AlternativesController(
 
         if (existingAlternative is not null)
         {
-            var errorMessage = EntityControllerCommons.GetEntityExistsErrorMessage(
+            var errorMessage = _entityControllerCommons.GetEntityExistsErrorMessage(
                 TableNames.ALTERNATIVE,
                 JsonPropertyNames.THE_CHARACTER,
                 JsonPropertyNames.ORIGINAL_CHARACTER,
@@ -204,7 +203,7 @@ public sealed class AlternativesController(
     {
         if (!knownAlternatives.Contains(alternative))
         {
-            var errorMessage = EntityControllerCommons.GetEntityUnknownErrorMessage(
+            var errorMessage = _entityControllerCommons.GetEntityUnknownErrorMessage(
                 TableNames.ALTERNATIVE,
                 JsonPropertyNames.THE_CHARACTER,
                 JsonPropertyNames.ORIGINAL_CHARACTER,

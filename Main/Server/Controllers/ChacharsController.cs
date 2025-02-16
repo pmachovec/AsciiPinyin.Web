@@ -15,6 +15,7 @@ namespace AsciiPinyin.Web.Server.Controllers;
 [Route($"/{ApiNames.BASE}/{ApiNames.CHARACTERS}")]
 public sealed class ChacharsController(
     AsciiPinyinContext _asciiPinyinContext,
+    IEntityControllerCommons _entityControllerCommons,
     ILogger<ChacharsController> _logger
 ) : ControllerBase, IEntityController
 {
@@ -48,15 +49,14 @@ public sealed class ChacharsController(
 
     [HttpPost]
     public ActionResult<IErrorsContainer> Post(Chachar chachar) =>
-        EntityControllerCommons.Post(
+        _entityControllerCommons.Post(
             this,
             chachar,
-            _asciiPinyinContext,
             _logger,
             TableNames.CHACHAR,
             Actions.CREATE_NEW_CHACHAR,
             DbActions.INSERT,
-            DbSetMethods.ADD,
+            AlterDbMethods.ADD,
             GetPostDatabaseIntegrityErrorsContainer,
             GetTheCharacterError,
             GetStrokesError,
@@ -72,15 +72,14 @@ public sealed class ChacharsController(
 
     [HttpPost(ApiNames.DELETE)]
     public ActionResult<IErrorsContainer> PostDelete(Chachar chachar) =>
-        EntityControllerCommons.Post(
+        _entityControllerCommons.Post(
             this,
             chachar,
-            _asciiPinyinContext,
             _logger,
             TableNames.CHACHAR,
             Actions.DELETE_CHACHAR,
             DbActions.DELETE,
-            DbSetMethods.REMOVE,
+            AlterDbMethods.REMOVE,
             GetPostDeleteDatabaseIntegrityErrorsContainer,
             GetTheCharacterError,
             GetPinyinError,
@@ -88,35 +87,35 @@ public sealed class ChacharsController(
         );
 
     private FieldError? GetTheCharacterError(Chachar chachar) =>
-        EntityControllerCommons.GetInvalidValueFieldError(
+        _entityControllerCommons.GetInvalidValueFieldError(
             _logger,
             chachar.TheCharacter,
             JsonPropertyNames.THE_CHARACTER,
-            EntityControllerCommons.GetTheCharacterErrorMessage
+            _entityControllerCommons.GetTheCharacterErrorMessage
         );
 
     private FieldError? GetStrokesError(Chachar chachar) =>
-        EntityControllerCommons.GetInvalidValueFieldError(
+        _entityControllerCommons.GetInvalidValueFieldError(
             _logger,
             chachar.Strokes,
             JsonPropertyNames.STROKES,
-            EntityControllerCommons.GetStrokesErrorMessage
+            _entityControllerCommons.GetStrokesErrorMessage
         );
 
     private FieldError? GetPinyinError(Chachar chachar) =>
-        EntityControllerCommons.GetInvalidValueFieldError(
+        _entityControllerCommons.GetInvalidValueFieldError(
             _logger,
             chachar.Pinyin,
             JsonPropertyNames.PINYIN,
-            EntityControllerCommons.GetPinyinErrorMessage
+            _entityControllerCommons.GetPinyinErrorMessage
         );
 
     private FieldError? GetToneError(Chachar chachar) =>
-        EntityControllerCommons.GetInvalidValueFieldError(
+        _entityControllerCommons.GetInvalidValueFieldError(
             _logger,
             chachar.Tone,
             JsonPropertyNames.TONE,
-            EntityControllerCommons.GetToneErrorMessage
+            _entityControllerCommons.GetToneErrorMessage
         );
 
     private FieldError? GetIpaError(Chachar chachar)
@@ -287,7 +286,7 @@ public sealed class ChacharsController(
 
             if (radicalChachar is null)
             {
-                var errorMessage = EntityControllerCommons.GetEntityUnknownErrorMessage(
+                var errorMessage = _entityControllerCommons.GetEntityUnknownErrorMessage(
                     TableNames.CHACHAR,
                     JsonPropertyNames.RADICAL_CHARACTER,
                     JsonPropertyNames.RADICAL_PINYIN,
@@ -304,7 +303,7 @@ public sealed class ChacharsController(
 
             if (!radicalChachar!.IsRadical)
             {
-                var errorMessage = EntityControllerCommons.GetNoRadicalErrorMessage(
+                var errorMessage = _entityControllerCommons.GetNoRadicalErrorMessage(
                     JsonPropertyNames.RADICAL_CHARACTER,
                     JsonPropertyNames.RADICAL_PINYIN,
                     JsonPropertyNames.RADICAL_TONE
@@ -330,7 +329,7 @@ public sealed class ChacharsController(
 
                 if (radicalAlternative is null)
                 {
-                    var errorMessage = EntityControllerCommons.GetEntityUnknownErrorMessage(
+                    var errorMessage = _entityControllerCommons.GetEntityUnknownErrorMessage(
                         TableNames.ALTERNATIVE,
                         JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER,
                         JsonPropertyNames.RADICAL_CHARACTER,
@@ -356,7 +355,7 @@ public sealed class ChacharsController(
 
         if (existingChachar is not null)
         {
-            var errorMessage = EntityControllerCommons.GetEntityExistsErrorMessage(
+            var errorMessage = _entityControllerCommons.GetEntityExistsErrorMessage(
                 TableNames.CHACHAR,
                 JsonPropertyNames.THE_CHARACTER,
                 JsonPropertyNames.PINYIN,
@@ -383,7 +382,7 @@ public sealed class ChacharsController(
     {
         if (!knownChachars.Contains(chachar))
         {
-            var errorMessage = EntityControllerCommons.GetEntityUnknownErrorMessage(
+            var errorMessage = _entityControllerCommons.GetEntityUnknownErrorMessage(
                 TableNames.CHACHAR,
                 JsonPropertyNames.THE_CHARACTER,
                 JsonPropertyNames.PINYIN,

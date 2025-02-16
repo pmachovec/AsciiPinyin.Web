@@ -11,17 +11,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AsciiPinyin.Web.Server.Commons;
 
-internal static class EntityControllerCommons
+public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinContext) : IEntityControllerCommons
 {
-    public static ActionResult<IErrorsContainer> Post<T1, T2>(
+    public ActionResult<IErrorsContainer> Post<T1, T2>(
         T1 entityController,
         T2 entity,
-        AsciiPinyinContext asciiPinyinContext,
         ILogger<T1> logger,
         string tableName,
         string action,
         string dbAction,
-        string alterDbSetMethodName,
+        string alterDbMethodName,
         Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDatabaseIntegrityErrorsContainer,
         params Func<T2, FieldError?>[] getFieldErrorMethods
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity
@@ -56,8 +55,8 @@ internal static class EntityControllerCommons
 
         try
         {
-            knownChachars = asciiPinyinContext.Chachars;
-            knownAlternatives = asciiPinyinContext.Alternatives;
+            knownChachars = _asciiPinyinContext.Chachars;
+            knownAlternatives = _asciiPinyinContext.Alternatives;
         }
         catch (Exception e)
         {
@@ -82,10 +81,10 @@ internal static class EntityControllerCommons
 
         try
         {
-            using var dbContextTransaction = asciiPinyinContext.Database.BeginTransaction();
-            dynamic contextAlterCollectionMethod = asciiPinyinContext.GetType().GetMethod(alterDbSetMethodName, [typeof(T2)])!;
-            _ = contextAlterCollectionMethod!.Invoke(asciiPinyinContext, (T2[])[entity]);
-            _ = asciiPinyinContext.SaveChanges();
+            using var dbContextTransaction = _asciiPinyinContext.Database.BeginTransaction();
+            dynamic contextAlterCollectionMethod = _asciiPinyinContext.GetType().GetMethod(alterDbMethodName, [typeof(T2)])!;
+            _ = contextAlterCollectionMethod!.Invoke(_asciiPinyinContext, (T2[])[entity]);
+            _ = _asciiPinyinContext.SaveChanges();
             dbContextTransaction.Commit();
         }
         catch (Exception e)
@@ -99,7 +98,7 @@ internal static class EntityControllerCommons
         return entityController.Ok();
     }
 
-    public static string? GetTheCharacterErrorMessage(string? theCharacter)
+    public string? GetTheCharacterErrorMessage(string? theCharacter)
     {
         string? errorMessage = null;
 
@@ -123,7 +122,7 @@ internal static class EntityControllerCommons
         return errorMessage;
     }
 
-    public static string? GetStrokesErrorMessage(byte? strokes)
+    public string? GetStrokesErrorMessage(byte? strokes)
     {
         string? errorMessage = null;
 
@@ -140,7 +139,7 @@ internal static class EntityControllerCommons
         return errorMessage;
     }
 
-    public static string? GetPinyinErrorMessage(string? pinyin)
+    public string? GetPinyinErrorMessage(string? pinyin)
     {
         string? errorMessage = null;
 
@@ -160,7 +159,7 @@ internal static class EntityControllerCommons
         return errorMessage;
     }
 
-    public static string? GetToneErrorMessage(byte? tone)
+    public string? GetToneErrorMessage(byte? tone)
     {
         string? errorMessage = null;
 
@@ -177,16 +176,16 @@ internal static class EntityControllerCommons
         return errorMessage;
     }
 
-    public static string GetEntityUnknownErrorMessage(string entityType, params string[] fieldNames) =>
+    public string GetEntityUnknownErrorMessage(string entityType, params string[] fieldNames) =>
         $"combination of fields '{string.Join(" + ", fieldNames)}' does not identify an existing {entityType}";
 
-    public static string GetEntityExistsErrorMessage(string entityType, params string[] fieldNames) =>
+    public string GetEntityExistsErrorMessage(string entityType, params string[] fieldNames) =>
         $"combination of fields '{string.Join(" + ", fieldNames)}' identifies an already existing {entityType}";
 
-    public static string GetNoRadicalErrorMessage(params string[] fieldNames) =>
+    public string GetNoRadicalErrorMessage(params string[] fieldNames) =>
         $"combination of fields '{string.Join(" + ", fieldNames)}' identifies a chachar, which is not radical";
 
-    public static FieldError? GetInvalidValueFieldError<T1, T2>(
+    public FieldError? GetInvalidValueFieldError<T1, T2>(
         ILogger<T1> logger,
         T2 value,
         string fieldName,
