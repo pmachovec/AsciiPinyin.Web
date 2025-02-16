@@ -12,42 +12,22 @@ namespace AsciiPinyin.Web.Server.Controllers;
 [ApiController]
 [Route($"/{ApiNames.BASE}/{ApiNames.ALTERNATIVES}")]
 public sealed class AlternativesController(
-    AsciiPinyinContext _asciiPinyinContext,
     IEntityControllerCommons _entityControllerCommons,
     ILogger<AlternativesController> _logger
 ) : ControllerBase, IEntityController
 {
     [HttpGet]
-    public ActionResult<IEnumerable<Alternative>> Get()
-    {
-        LogCommons.LogHttpMethodInfo(_logger, HttpMethod.Get, Actions.GET_ALL_ALTERNATIVES);
-
-        if (!Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
-        {
-            LogCommons.LogUserAgentMissingError(_logger);
-            return BadRequest(Errors.USER_AGENT_MISSING);
-        }
-
-        LogCommons.LogUserAgentInfo(_logger, userAgent!);
-        LogCommons.LogActionInDbInfo(_logger, DbActions.SELECT, Actions.GET_ALL_ALTERNATIVES);
-
-        try
-        {
-            var alternatives = _asciiPinyinContext.Alternatives;
-            LogCommons.LogActionInDbSuccessInfo(_logger, DbActions.SELECT);
-            return Ok(alternatives);
-        }
-        catch (Exception e)
-        {
-            LogCommons.LogActionInDbFailedError(_logger, DbActions.SELECT);
-            LogCommons.LogError(_logger, e.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-    }
+    public ActionResult<IEnumerable<Alternative>> Get() =>
+        _entityControllerCommons.TheGet<AlternativesController, Alternative>(
+            this,
+            _logger,
+            Actions.GET_ALL_ALTERNATIVES,
+            nameof(AsciiPinyinContext.Alternatives)
+        );
 
     [HttpPost]
     public ActionResult<IErrorsContainer> Post(Alternative alternative) =>
-        _entityControllerCommons.Post(
+        _entityControllerCommons.ThePost(
             this,
             alternative,
             _logger,
@@ -65,7 +45,7 @@ public sealed class AlternativesController(
 
     [HttpPost(ApiNames.DELETE)]
     public ActionResult<IErrorsContainer> PostDelete(Alternative alternative) =>
-        _entityControllerCommons.Post(
+        _entityControllerCommons.ThePost(
             this,
             alternative,
             _logger,

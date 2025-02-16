@@ -14,42 +14,22 @@ namespace AsciiPinyin.Web.Server.Controllers;
 [ApiController]
 [Route($"/{ApiNames.BASE}/{ApiNames.CHARACTERS}")]
 public sealed class ChacharsController(
-    AsciiPinyinContext _asciiPinyinContext,
     IEntityControllerCommons _entityControllerCommons,
     ILogger<ChacharsController> _logger
 ) : ControllerBase, IEntityController
 {
     [HttpGet]
-    public ActionResult<IEnumerable<Chachar>> Get()
-    {
-        LogCommons.LogHttpMethodInfo(_logger, HttpMethod.Get, Actions.GET_ALL_CHACHARS);
-
-        if (!Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
-        {
-            LogCommons.LogUserAgentMissingError(_logger);
-            return BadRequest(Errors.USER_AGENT_MISSING);
-        }
-
-        LogCommons.LogUserAgentInfo(_logger, userAgent!);
-        LogCommons.LogActionInDbInfo(_logger, DbActions.SELECT, Actions.GET_ALL_CHACHARS);
-
-        try
-        {
-            var chachars = _asciiPinyinContext.Chachars;
-            LogCommons.LogActionInDbSuccessInfo(_logger, DbActions.SELECT);
-            return Ok(chachars);
-        }
-        catch (Exception e)
-        {
-            LogCommons.LogActionInDbFailedError(_logger, DbActions.SELECT);
-            LogCommons.LogError(_logger, e.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-    }
+    public ActionResult<IEnumerable<Chachar>> Get() =>
+        _entityControllerCommons.TheGet<ChacharsController, Chachar>(
+            this,
+            _logger,
+            Actions.GET_ALL_CHACHARS,
+            nameof(AsciiPinyinContext.Chachars)
+        );
 
     [HttpPost]
     public ActionResult<IErrorsContainer> Post(Chachar chachar) =>
-        _entityControllerCommons.Post(
+        _entityControllerCommons.ThePost(
             this,
             chachar,
             _logger,
@@ -72,7 +52,7 @@ public sealed class ChacharsController(
 
     [HttpPost(ApiNames.DELETE)]
     public ActionResult<IErrorsContainer> PostDelete(Chachar chachar) =>
-        _entityControllerCommons.Post(
+        _entityControllerCommons.ThePost(
             this,
             chachar,
             _logger,

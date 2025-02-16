@@ -13,7 +13,39 @@ namespace AsciiPinyin.Web.Server.Commons;
 
 public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinContext) : IEntityControllerCommons
 {
-    public ActionResult<IErrorsContainer> Post<T1, T2>(
+    public ActionResult<IEnumerable<T2>> TheGet<T1, T2>(
+        T1 entityController,
+        ILogger<T1> logger,
+        string action,
+        string contextCollectionName
+    ) where T1 : ControllerBase, IEntityController where T2 : IEntity
+    {
+        LogCommons.LogHttpMethodInfo(logger, HttpMethod.Get, action);
+
+        if (!entityController.Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
+        {
+            LogCommons.LogUserAgentMissingError(logger);
+            return entityController.BadRequest(Errors.USER_AGENT_MISSING);
+        }
+
+        LogCommons.LogUserAgentInfo(logger, userAgent!);
+        LogCommons.LogActionInDbInfo(logger, DbActions.SELECT, action);
+
+        try
+        {
+            dynamic contextCollection = _asciiPinyinContext.GetType().GetProperty(contextCollectionName)!.GetValue(_asciiPinyinContext)!;
+            LogCommons.LogActionInDbSuccessInfo(logger, DbActions.SELECT);
+            return entityController.Ok(contextCollection);
+        }
+        catch (Exception e)
+        {
+            LogCommons.LogActionInDbFailedError(logger, DbActions.SELECT);
+            LogCommons.LogError(logger, e.ToString());
+            return entityController.StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    public ActionResult<IErrorsContainer> ThePost<T1, T2>(
         T1 entityController,
         T2 entity,
         ILogger<T1> logger,

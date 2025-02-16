@@ -11,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using System;
 
 namespace AsciiPinyin.Web.Server.Test.Commons;
 
@@ -36,7 +35,7 @@ internal static class EntityControllerTestCommons
     )
     {
         _ = asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
-        return GetErrorChacharsController(entityControllerCommons, asciiPinyinContextMock, loggerMock);
+        return GetErrorChacharsController(entityControllerCommons, loggerMock);
     }
 
     public static ChacharsController GetAlternativesErrorChacharsController(
@@ -47,7 +46,7 @@ internal static class EntityControllerTestCommons
     {
         MockChacharsDbSet(asciiPinyinContextMock);
         _ = asciiPinyinContextMock.Setup(context => context.Alternatives).Throws(new InvalidOperationException());
-        return GetErrorChacharsController(entityControllerCommons, asciiPinyinContextMock, loggerMock);
+        return GetErrorChacharsController(entityControllerCommons, loggerMock);
     }
 
     public static ChacharsController GetSaveErrorChacharsController(
@@ -57,7 +56,7 @@ internal static class EntityControllerTestCommons
     )
     {
         _ = asciiPinyinContextMock.Setup(context => context.SaveChanges()).Throws(new InvalidOperationException());
-        return GetErrorChacharsController(entityControllerCommons, asciiPinyinContextMock, loggerMock);
+        return GetErrorChacharsController(entityControllerCommons, loggerMock);
     }
 
     public static AlternativesController GetChacharsErrorAlternativesController(
@@ -67,7 +66,7 @@ internal static class EntityControllerTestCommons
     )
     {
         _ = asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
-        return GetErrorAlternativesController(entityControllerCommons, asciiPinyinContextMock, loggerMock);
+        return GetErrorAlternativesController(entityControllerCommons, loggerMock);
     }
 
     public static AlternativesController GetAlternativesErrorAlternativesController(
@@ -78,7 +77,7 @@ internal static class EntityControllerTestCommons
     {
         MockChacharsDbSet(asciiPinyinContextMock);
         _ = asciiPinyinContextMock.Setup(context => context.Alternatives).Throws(new InvalidOperationException());
-        return GetErrorAlternativesController(entityControllerCommons, asciiPinyinContextMock, loggerMock);
+        return GetErrorAlternativesController(entityControllerCommons, loggerMock);
     }
 
     public static AlternativesController GetSaveErrorAlternativesController(
@@ -88,7 +87,7 @@ internal static class EntityControllerTestCommons
     )
     {
         _ = asciiPinyinContextMock.Setup(context => context.SaveChanges()).Throws(new InvalidOperationException());
-        return GetErrorAlternativesController(entityControllerCommons, asciiPinyinContextMock, loggerMock);
+        return GetErrorAlternativesController(entityControllerCommons, loggerMock);
     }
 
     public static void AddToContext(
@@ -316,7 +315,6 @@ internal static class EntityControllerTestCommons
 
     private static ChacharsController GetErrorChacharsController(
         IEntityControllerCommons entityControllerCommons,
-        Mock<AsciiPinyinContext> asciiPinyinContextMock,
         Mock<ILogger<ChacharsController>> loggerMock
     )
     {
@@ -324,7 +322,6 @@ internal static class EntityControllerTestCommons
         httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
 
         return new ChacharsController(
-            asciiPinyinContextMock.Object,
             entityControllerCommons,
             loggerMock.Object
         )
@@ -338,7 +335,6 @@ internal static class EntityControllerTestCommons
 
     private static AlternativesController GetErrorAlternativesController(
         IEntityControllerCommons entityControllerCommons,
-        Mock<AsciiPinyinContext> asciiPinyinContextMock,
         Mock<ILogger<AlternativesController>> loggerMock
     )
     {
@@ -346,7 +342,6 @@ internal static class EntityControllerTestCommons
         httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
 
         return new AlternativesController(
-            asciiPinyinContextMock.Object,
             entityControllerCommons,
             loggerMock.Object
         )
