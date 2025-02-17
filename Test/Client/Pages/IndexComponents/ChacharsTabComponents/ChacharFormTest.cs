@@ -12,6 +12,7 @@ using AsciiPinyin.Web.Shared.Resources;
 using AsciiPinyin.Web.Shared.Test.Constants;
 using AsciiPinyin.Web.Shared.Utils;
 using Bunit;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Moq;
@@ -35,6 +36,7 @@ internal sealed class ChacharFormTest : IDisposable
     private const string ONLY_IPA_ALLOWED = nameof(ONLY_IPA_ALLOWED);
     private const string PROCESSING_ERROR = nameof(PROCESSING_ERROR);
     private const string SELECT_RADICAL = nameof(SELECT_RADICAL);
+    private const string SELECT_RADICAL_ALTERNATIVE = nameof(SELECT_RADICAL_ALTERNATIVE);
 
     private static readonly IEnumerable<string> _inputIds =
     [
@@ -52,6 +54,15 @@ internal sealed class ChacharFormTest : IDisposable
         Ipa = "y:",
         Tone = 3,
         Strokes = 8
+    };
+
+    private static readonly Chachar _anotherRadicalChachar = new()
+    {
+        TheCharacter = "辵",
+        Pinyin = "chuo",
+        Ipa = "ʈʂʰuɔ",
+        Tone = 4,
+        Strokes = 7
     };
 
     private static readonly Chachar _nonRadicalChacharWithAlternative = new()
@@ -88,16 +99,26 @@ internal sealed class ChacharFormTest : IDisposable
         Strokes = 8
     };
 
-    private static readonly HashSet<Chachar> _radicalChachars = [_radicalChachar];
+    private static readonly Alternative _anotherAlternative = new()
+    {
+        TheCharacter = "⻌",
+        OriginalCharacter = "辵",
+        OriginalPinyin = "chuo",
+        OriginalTone = 4,
+        Strokes = 3
+    };
+
+    private static readonly HashSet<Chachar> _radicalChachars = [_radicalChachar, _anotherRadicalChachar];
+    private static readonly HashSet<Alternative> _alternatives = [_alternative, _anotherAlternative];
     private static readonly CompositeFormat _characterAlreadyInDb = CompositeFormat.Parse(CHARACTER_ALREADY_IN_DB);
     private static readonly CompositeFormat _characterCreated = CompositeFormat.Parse(CHARACTER_CREATED);
+    private static readonly MouseEventArgs _mouseEventArgs = new();
 
     private readonly Mock<IEntityClient> _entityClientMock = new();
     private readonly Mock<IIndex> _indexMock = new();
     private readonly Mock<ISubmitDialog> _submitDialogMock = new();
     private readonly Mock<IStringLocalizer<Resource>> _localizerMock = new();
 
-    private HashSet<Alternative> _alternatives = default!;
     private HashSet<Chachar> _chachars = default!;
     private EntityFormTestCommons _entityFormTestCommons = default!;
     private IRenderedComponent<ChacharForm> _chacharFormComponent = default!;
@@ -145,12 +166,15 @@ internal sealed class ChacharFormTest : IDisposable
         _ = _localizerMock
             .Setup(localizer => localizer[Resource.SelectRadical])
             .Returns(new LocalizedString(SELECT_RADICAL, SELECT_RADICAL));
+
+        _ = _localizerMock
+            .Setup(localizer => localizer[Resource.SelectRadicalAlternative])
+            .Returns(new LocalizedString(SELECT_RADICAL_ALTERNATIVE, SELECT_RADICAL_ALTERNATIVE));
     }
 
     [SetUp]
     public void SetUp()
     {
-        _alternatives = [];
         _chachars = [];
 
         _ = _indexMock
@@ -163,14 +187,47 @@ internal sealed class ChacharFormTest : IDisposable
 
         _testContext = new TestContext();
 
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.DISABLE, IDs.CHACHAR_FORM_ALTERNATIVE_INPUT);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ENABLE, IDs.CHACHAR_FORM_ALTERNATIVE_INPUT);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_Z_INDEX, IDs.CHACHAR_FORM_ROOT, 1);
-        _ = _testContext.Services.AddSingleton(_entityClientMock.Object);
-        _ = _testContext.Services.AddSingleton(_localizerMock.Object);
-        _ = _testContext.Services.AddSingleton<IEntityFormCommons, EntityFormCommons>();
-        _ = _testContext.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
-        _ = _testContext.Services.AddSingleton<IModalCommons, ModalCommons>();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_BLOCK).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_FLEX).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_NONE).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.SHOW).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_BLOCK).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_FLEX).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_NONE).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.SHOW).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.DISABLE, IDs.CHACHAR_FORM_ALTERNATIVE_INPUT).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.DISABLE, IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ENABLE, IDs.CHACHAR_FORM_ALTERNATIVE_INPUT).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ENABLE, IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_BLOCK).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_FLEX).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_NONE).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.SHOW).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_RADICAL_INPUT, CssClasses.BORDER_DANGER).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_BLOCK).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_FLEX).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_NONE).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.SHOW).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_RADICAL).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_RADICAL_ALTERNATIVE).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_Z_INDEX, IDs.CHACHAR_FORM_ROOT, 1).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_Z_INDEX, IDs.CHACHAR_FORM_ROOT, 3).SetVoidResult();
+
+        _ = _testContext.Services
+            .AddSingleton(_entityClientMock.Object)
+            .AddSingleton(_localizerMock.Object)
+            .AddSingleton<IEntityFormCommons, EntityFormCommons>()
+            .AddSingleton<IJSInteropDOM, JSInteropDOM>()
+            .AddSingleton<IModalCommons, ModalCommons>();
 
         _chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock.Object));
 
@@ -717,179 +774,163 @@ internal sealed class ChacharFormTest : IDisposable
     }
 
     [Test]
-    public void RadicalChacharAlreadyExistsSubmitTest()
+    public async Task RadicalChacharAlreadyExistsSubmitTest()
     {
-        _chachars.AddRange(_radicalChachars);
-        _ = _chachars.Add(_nonRadicalChacharWithAlternative);
-        _ = _chachars.Add(_nonRadicalChacharWithoutAlternative);
-        _ = _alternatives.Add(_alternative);
+        _chachars.AddRange(
+            _radicalChachars
+                .Concat([_nonRadicalChacharWithAlternative, _nonRadicalChacharWithoutAlternative])
+        );
+
         string? errorMessage = null;
         _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        Submit(_radicalChachar);
+        await SubmitAsync(_radicalChachar);
 
         CharacterAlreadyExistsSubmitDialogErrorMessageTest(errorMessage, _radicalChachar);
     }
 
     [Test]
-    public void NonRadicalChacharWithoutAlternativeAlreadyExistsSubmitTest()
+    public async Task NonRadicalChacharWithoutAlternativeAlreadyExistsSubmitTest()
     {
-        _chachars.AddRange(_radicalChachars);
-        _ = _chachars.Add(_nonRadicalChacharWithAlternative);
-        _ = _chachars.Add(_nonRadicalChacharWithoutAlternative);
-        _ = _alternatives.Add(_alternative);
+        _chachars.AddRange(
+            _radicalChachars
+                .Concat([_nonRadicalChacharWithAlternative, _nonRadicalChacharWithoutAlternative])
+        );
+
         string? errorMessage = null;
         _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        SelectRadical();
-        Submit(_nonRadicalChacharWithoutAlternative);
+        await SelectRadicalAsync();
+        await SubmitAsync(_nonRadicalChacharWithoutAlternative);
 
         CharacterAlreadyExistsSubmitDialogErrorMessageTest(errorMessage, _nonRadicalChacharWithoutAlternative);
     }
 
     [Test]
-    public void NonRadicalChacharWithAlternativeAlreadyExistsSubmitTest()
+    public async Task NonRadicalChacharWithAlternativeAlreadyExistsSubmitTest()
     {
-        _chachars.AddRange(_radicalChachars);
-        _ = _chachars.Add(_nonRadicalChacharWithAlternative);
-        _ = _chachars.Add(_nonRadicalChacharWithoutAlternative);
-        _ = _alternatives.Add(_alternative);
+        _chachars.AddRange(
+            _radicalChachars
+                .Concat([_nonRadicalChacharWithAlternative, _nonRadicalChacharWithoutAlternative])
+        );
+
         string? errorMessage = null;
         _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        SelectRadicalAndAlternative();
-        Submit(_nonRadicalChacharWithAlternative);
+        await SelectRadicalAndAlternativeAsync();
+        await SubmitAsync(_nonRadicalChacharWithAlternative);
 
         CharacterAlreadyExistsSubmitDialogErrorMessageTest(errorMessage, _nonRadicalChacharWithAlternative);
     }
 
     [Test]
-    public void RadicalChacharSubmitProcessingErrorTest()
+    public async Task RadicalChacharSubmitProcessingErrorTest()
     {
-        _ = _chachars.Add(_nonRadicalChacharWithAlternative);
-        _ = _chachars.Add(_nonRadicalChacharWithoutAlternative);
-        _ = _alternatives.Add(_alternative);
-
+        _chachars.AddRange([_nonRadicalChacharWithAlternative, _nonRadicalChacharWithoutAlternative]);
         _entityFormTestCommons.MockPostStatusCode(_radicalChachar, HttpStatusCode.InternalServerError);
         string? errorMessage = null;
         _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        Submit(_radicalChachar);
+        await SubmitAsync(_radicalChachar);
 
         _entityFormTestCommons.SubmitDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
     }
 
     [Test]
-    public void NonRadicalChacharWithoutAlternativeSubmitProcessingErrorTest()
+    public async Task NonRadicalChacharWithoutAlternativeSubmitProcessingErrorTest()
     {
         _chachars.AddRange(_radicalChachars);
         _ = _chachars.Add(_nonRadicalChacharWithAlternative);
-        _ = _alternatives.Add(_alternative);
-
         _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithoutAlternative, HttpStatusCode.InternalServerError);
         string? errorMessage = null;
         _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        SelectRadical();
-        Submit(_nonRadicalChacharWithoutAlternative);
+        await SelectRadicalAsync();
+        await SubmitAsync(_nonRadicalChacharWithoutAlternative);
 
         _entityFormTestCommons.SubmitDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
     }
 
     [Test]
-    public void NonRadicalChacharWithAlternativeSubmitProcessingErrorTest()
+    public async Task NonRadicalChacharWithAlternativeSubmitProcessingErrorTest()
     {
         _chachars.AddRange(_radicalChachars);
         _ = _chachars.Add(_nonRadicalChacharWithoutAlternative);
-        _ = _alternatives.Add(_alternative);
-
         _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithAlternative, HttpStatusCode.InternalServerError);
         string? errorMessage = null;
         _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        SelectRadicalAndAlternative();
-        Submit(_nonRadicalChacharWithAlternative);
+        await SelectRadicalAndAlternativeAsync();
+        await SubmitAsync(_nonRadicalChacharWithAlternative);
 
         _entityFormTestCommons.SubmitDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
     }
 
     [Test]
-    public void RadicalChacharSubmitOkTest()
+    public async Task RadicalChacharSubmitOkTest()
     {
-        _ = _chachars.Add(_nonRadicalChacharWithAlternative);
-        _ = _chachars.Add(_nonRadicalChacharWithoutAlternative);
-        _ = _alternatives.Add(_alternative);
-
+        _chachars.AddRange([_nonRadicalChacharWithAlternative, _nonRadicalChacharWithoutAlternative]);
         _entityFormTestCommons.MockPostStatusCode(_radicalChachar, HttpStatusCode.OK);
         string? successMessage = null;
         _entityFormTestCommons.CaptureSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
-        Submit(_radicalChachar);
+        await SubmitAsync(_radicalChachar);
 
         CharacterCreatedSubmitDialogSuccessMessageTest(successMessage, _radicalChachar);
     }
 
     [Test]
-    public void NonRadicalChacharWithoutAlternativeSubmitOkTest()
+    public async Task NonRadicalChacharWithoutAlternativeSubmitOkTest()
     {
         _chachars.AddRange(_radicalChachars);
         _ = _chachars.Add(_nonRadicalChacharWithAlternative);
-        _ = _alternatives.Add(_alternative);
-
         _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithoutAlternative, HttpStatusCode.OK);
         string? successMessage = null;
         _entityFormTestCommons.CaptureSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
-        SelectRadical();
-        Submit(_nonRadicalChacharWithoutAlternative);
+        await SelectRadicalAsync();
+        await SubmitAsync(_nonRadicalChacharWithoutAlternative);
 
         CharacterCreatedSubmitDialogSuccessMessageTest(successMessage, _nonRadicalChacharWithoutAlternative);
     }
 
     [Test]
-    public void NonRadicalChacharWithAlternativeSubmitOkTest()
+    public async Task NonRadicalChacharWithAlternativeSubmitOkTest()
     {
         _chachars.AddRange(_radicalChachars);
         _ = _chachars.Add(_nonRadicalChacharWithoutAlternative);
-        _ = _alternatives.Add(_alternative);
-
         _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithAlternative, HttpStatusCode.OK);
         string? successMessage = null;
         _entityFormTestCommons.CaptureSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
-        SelectRadicalAndAlternative();
-        Submit(_nonRadicalChacharWithAlternative);
+        await SelectRadicalAndAlternativeAsync();
+        await SubmitAsync(_nonRadicalChacharWithAlternative);
 
         CharacterCreatedSubmitDialogSuccessMessageTest(successMessage, _nonRadicalChacharWithAlternative);
     }
 
-    private void SelectRadical()
+    private async Task SelectRadicalAsync()
     {
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_RADICAL_INPUT, CssClasses.BORDER_DANGER);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.SHOW);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_RADICAL);
-
         //Open radical selector
         var openRadicalSelectorButton = _chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_RADICAL_INPUT}");
         Assert.That(openRadicalSelectorButton, Is.Not.Null);
-        openRadicalSelectorButton.Click();
+        await openRadicalSelectorButton.ClickAsync(_mouseEventArgs);
 
         // Click on the first button in the selector
         var buttonDivs = _chacharFormComponent.FindAll("div").Where(div => div.ClassList.Contains(CssClasses.RADICAL_SELECTOR));
         Assert.That(buttonDivs.Count(), Is.EqualTo(_radicalChachars.Count));
         var radicalButtonDiv = buttonDivs.First();
-        radicalButtonDiv.Click();
+        await radicalButtonDiv.ClickAsync(_mouseEventArgs);
     }
 
-    private void SelectRadicalAndAlternative()
+    private async Task SelectRadicalAndAlternativeAsync()
     {
-        SelectRadical();
+        await SelectRadicalAsync();
 
-        //Open alternative selector
+        // Open alternative selector
         var openAlternativeSelectorButton = _chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_ALTERNATIVE_INPUT}");
         Assert.That(openAlternativeSelectorButton, Is.Not.Null);
-        openAlternativeSelectorButton.Click();
+        await openAlternativeSelectorButton.ClickAsync(_mouseEventArgs);
 
         // Click on the first button in the selector
+        // Alternatives must be mocked so that the first one in the list is the desired one
         var buttonDivs = _chacharFormComponent.FindAll("div").Where(div => div.ClassList.Contains(CssClasses.ALTERNATIVE_SELECTOR));
-        Assert.That(buttonDivs.Count(), Is.EqualTo(_alternatives.Count));
         var alternativeButtonDiv = buttonDivs.First();
-        alternativeButtonDiv.Click();
+        await alternativeButtonDiv.ClickAsync(_mouseEventArgs);
     }
 
-    private void Submit(Chachar chachar)
+    private async Task SubmitAsync(Chachar chachar)
     {
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT).SetResult(true);
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_PINYIN_INPUT).SetResult(true);
@@ -897,11 +938,11 @@ internal sealed class ChacharFormTest : IDisposable
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_TONE_INPUT).SetResult(true);
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_STROKES_INPUT).SetResult(true);
 
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, chachar.TheCharacter);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_PINYIN_INPUT, chachar.Pinyin);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_IPA_INPUT, chachar.Ipa);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_TONE_INPUT, chachar.Tone.ToString());
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_STROKES_INPUT, chachar.Strokes.ToString());
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, chachar.TheCharacter).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_PINYIN_INPUT, chachar.Pinyin).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_IPA_INPUT, chachar.Ipa).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_TONE_INPUT, chachar.Tone.ToString()).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_STROKES_INPUT, chachar.Strokes.ToString()).SetVoidResult();
 
         var theCharacterInput = _chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_THE_CHARACTER_INPUT}");
         var pinyinInput = _chacharFormComponent.Find($"#{IDs.CHACHAR_FORM_PINYIN_INPUT}");
@@ -918,7 +959,7 @@ internal sealed class ChacharFormTest : IDisposable
         toneInput.Input(chachar.Tone);
         strokesInput.Input(chachar.Strokes);
 
-        formSubmitButton.Click();
+        await formSubmitButton.ClickAsync(_mouseEventArgs);
     }
 
     private void CharacterAlreadyExistsSubmitDialogErrorMessageTest(string? errorMessage, Chachar chachar)

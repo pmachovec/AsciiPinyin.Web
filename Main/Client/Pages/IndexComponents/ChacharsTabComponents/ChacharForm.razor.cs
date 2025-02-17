@@ -109,44 +109,32 @@ public class ChacharFormBase : ComponentBase, IEntityForm
     public async Task CloseAsync(CancellationToken cancellationToken) =>
         await ModalCommons.CloseAsyncCommon(this, cancellationToken);
 
-    protected async Task OpenRadicalSelectorAsync(CancellationToken cancellationToken)
-    {
+    protected async Task OpenRadicalSelectorAsync(CancellationToken cancellationToken) =>
         await Task.WhenAll(
             JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
             RadicalSelector.OpenAsync(this, cancellationToken)
         );
-    }
 
-    protected async Task OpenAlternativeSelectorAsync(CancellationToken cancellationToken)
-    {
+    protected async Task OpenAlternativeSelectorAsync(CancellationToken cancellationToken) =>
         await Task.WhenAll(
             JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
             AlternativeSelector.OpenAsync(this, cancellationToken)
         );
-    }
 
     protected async Task SelectRadicalAsync(Chachar radicalChachar, CancellationToken cancellationToken)
     {
-        if (
-            RadicalCharacter != radicalChachar.TheCharacter
-            && RadicalPinyin != radicalChachar.Pinyin
-            && RadicalTone != radicalChachar.Tone
-        )
-        {
-            RadicalCharacter = radicalChachar.TheCharacter;
-            RadicalPinyin = radicalChachar.Pinyin;
-            RadicalTone = radicalChachar.Tone;
-            RadicalAlternativeCharacter = null;
+        RadicalCharacter = radicalChachar.TheCharacter;
+        RadicalPinyin = radicalChachar.Pinyin;
+        RadicalTone = radicalChachar.Tone;
+        RadicalAlternativeCharacter = null;
 
-            AvailableAlternatives = Index.Alternatives.Where(alternative =>
-                alternative.OriginalCharacter == radicalChachar.TheCharacter
-                && alternative.OriginalPinyin == radicalChachar.Pinyin
-                && alternative.OriginalTone == radicalChachar.Tone
-            );
+        AvailableAlternatives = Index.Alternatives.Where(alternative =>
+            alternative.OriginalCharacter == radicalChachar.TheCharacter
+            && alternative.OriginalPinyin == radicalChachar.Pinyin
+            && alternative.OriginalTone == radicalChachar.Tone
+        );
 
-            StateHasChanged();
-        }
-
+        StateHasChanged();
         await RadicalSelector.CloseAsync(cancellationToken);
     }
 

@@ -11,6 +11,9 @@ public static class IDs
     public const string ALTERNATIVE_FORM_THE_CHARACTER_ERROR = "alternative-form-the-character-error";
     public const string ALTERNATIVE_FORM_THE_CHARACTER_INPUT = "alternative-form-the-character-input";
     public const string CHACHAR_FORM_ALTERNATIVE_INPUT = "chachar-form-alternative-input";
+    public const string CHACHAR_FORM_ALTERNATIVE_LABEL = "chachar-form-alternative-label";
+    public const string CHACHAR_FORM_ALTERNATIVE_SELECTOR = "chachar-form-alternative-selector";
+    public const string CHACHAR_FORM_CLEAR_ALTERNATIVE = "chachar-form-clear-alternative";
     public const string CHACHAR_FORM_IPA_ERROR = "chachar-form-ipa-error";
     public const string CHACHAR_FORM_IPA_INPUT = "chachar-form-ipa-input";
     public const string CHACHAR_FORM_PINYIN_ERROR = "chachar-form-pinyin-error";

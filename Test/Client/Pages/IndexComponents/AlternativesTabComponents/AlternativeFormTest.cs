@@ -12,6 +12,7 @@ using AsciiPinyin.Web.Shared.Resources;
 using AsciiPinyin.Web.Shared.Test.Constants;
 using AsciiPinyin.Web.Shared.Utils;
 using Bunit;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Moq;
@@ -60,6 +61,7 @@ internal sealed class AlternativeFormTest : IDisposable
     private static readonly HashSet<Chachar> _radicalChachars = [_radicalChachar];
     private static readonly CompositeFormat _alternativeAlreadyInDb = CompositeFormat.Parse(ALTERNATIVE_ALREADY_IN_DB);
     private static readonly CompositeFormat _alternativeCreated = CompositeFormat.Parse(ALTERNATIVE_CREATED);
+    private static readonly MouseEventArgs _mouseEventArgs = new();
 
     private readonly Mock<IEntityClient> _entityClientMock = new();
     private readonly Mock<IIndex> _indexMock = new();
@@ -68,9 +70,9 @@ internal sealed class AlternativeFormTest : IDisposable
 
     private HashSet<Alternative> _alternatives = default!;
     private HashSet<Chachar> _chachars = default!;
-    private TestContext _testContext = default!;
-    private IRenderedComponent<AlternativeForm> _alternativeFormComponent = default!;
     private EntityFormTestCommons _entityFormTestCommons = default!;
+    private IRenderedComponent<AlternativeForm> _alternativeFormComponent = default!;
+    private TestContext _testContext = default!;
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
@@ -120,11 +122,12 @@ internal sealed class AlternativeFormTest : IDisposable
 
         _testContext = new TestContext();
 
-        _ = _testContext.Services.AddSingleton(_entityClientMock.Object);
-        _ = _testContext.Services.AddSingleton(_localizerMock.Object);
-        _ = _testContext.Services.AddSingleton<IEntityFormCommons, EntityFormCommons>();
-        _ = _testContext.Services.AddSingleton<IJSInteropDOM, JSInteropDOM>();
-        _ = _testContext.Services.AddSingleton<IModalCommons, ModalCommons>();
+        _ = _testContext.Services
+            .AddSingleton(_entityClientMock.Object)
+            .AddSingleton(_localizerMock.Object)
+            .AddSingleton<IEntityFormCommons, EntityFormCommons>()
+            .AddSingleton<IJSInteropDOM, JSInteropDOM>()
+            .AddSingleton<IModalCommons, ModalCommons>();
 
         _alternativeFormComponent = _testContext.RenderComponent<AlternativeForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock.Object));
 
@@ -421,14 +424,14 @@ internal sealed class AlternativeFormTest : IDisposable
     }
 
     [Test]
-    public void AlternativeAlreadyExistsSubmitTest()
+    public async Task AlternativeAlreadyExistsSubmitTest()
     {
         _chachars.AddRange(_radicalChachars);
         _ = _alternatives.Add(_alternative);
         string? errorMessage = null;
         _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
         SelectOriginal();
-        Submit(_alternative);
+        await SubmitAsync(_alternative);
 
         var expectedErrorMessage = string.Format(
             CultureInfo.InvariantCulture,
@@ -442,7 +445,7 @@ internal sealed class AlternativeFormTest : IDisposable
     }
 
     [Test]
-    public void AlternativeSubmitProcessingErrorTest()
+    public async Task AlternativeSubmitProcessingErrorTest()
     {
         _ = _chachars.Add(_radicalChachar);
 
@@ -450,13 +453,13 @@ internal sealed class AlternativeFormTest : IDisposable
         string? errorMessage = null;
         _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
         SelectOriginal();
-        Submit(_alternative);
+        await SubmitAsync(_alternative);
 
         _entityFormTestCommons.SubmitDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
     }
 
     [Test]
-    public void AlternativeSubmitOkTest()
+    public async Task AlternativeSubmitOkTest()
     {
         _ = _chachars.Add(_radicalChachar);
 
@@ -464,7 +467,7 @@ internal sealed class AlternativeFormTest : IDisposable
         string? successMessage = null;
         _entityFormTestCommons.CaptureSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
         SelectOriginal();
-        Submit(_alternative);
+        await SubmitAsync(_alternative);
 
         var expectedSuccessMessage = string.Format(
             CultureInfo.InvariantCulture,
@@ -495,7 +498,7 @@ internal sealed class AlternativeFormTest : IDisposable
         originalButtonDiv.Click();
     }
 
-    private void Submit(Alternative alternative)
+    private async Task SubmitAsync(Alternative alternative)
     {
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT).SetResult(true);
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.ALTERNATIVE_FORM_STROKES_INPUT).SetResult(true);
@@ -510,7 +513,7 @@ internal sealed class AlternativeFormTest : IDisposable
         theCharacterInput.Input(alternative.TheCharacter);
         strokesInput.Input(alternative.Strokes);
 
-        formSubmitButton.Click();
+        await formSubmitButton.ClickAsync(_mouseEventArgs);
     }
 
     public void Dispose() => _testContext?.Dispose();

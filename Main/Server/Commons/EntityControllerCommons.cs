@@ -162,7 +162,7 @@ public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinConte
         {
             errorMessage = Errors.MISSING;
         }
-        else if (strokes is < 1 or > 99)
+        else if (strokes is < ByteConstants.MIN_STROKES or > ByteConstants.MAX_STROKES)
         {
             // As the type is unsigned byte, API doesn't allow to pass any invalid value like strings, negative numbers etc.
             errorMessage = Errors.ONE_TO_NINETY_NINE;
@@ -199,7 +199,7 @@ public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinConte
         {
             errorMessage = Errors.MISSING;
         }
-        else if (tone > 4)
+        else if (tone > ByteConstants.MAX_TONE)
         {
             // As the type is unsigned byte, API doesn't allow to pass any invalid value like strings, negative numbers etc.
             errorMessage = Errors.ZERO_TO_FOUR;
