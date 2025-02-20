@@ -1,96 +1,116 @@
+using Asciipinyin.Web.Server.Test.Constants;
 using AsciiPinyin.Web.Server.Commons;
 using AsciiPinyin.Web.Server.Controllers;
 using AsciiPinyin.Web.Server.Data;
+using AsciiPinyin.Web.Server.Middleware;
 using AsciiPinyin.Web.Server.Test.Constants;
-using AsciiPinyin.Web.Shared.DTO;
 using AsciiPinyin.Web.Shared.Models;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using System.Net;
+using System.Net.Http.Json;
 
 namespace AsciiPinyin.Web.Server.Test.Commons;
 
-internal static class EntityControllerTestCommons
+[
+    System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Performance",
+        "CA1822:Mark members as static",
+        Justification = "With static calls, each would need to explicitly specify generic types. With the current instance approach, generics are fixed per instance."
+    ),
+    System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "CodeQuality",
+        "IDE0079:Remove unnecessary suppression",
+        Justification = "When the CA1822 is applied to the whole class, it's marked as unnecessary, which is not true."
+    )
+]
+internal class EntityControllerTestCommons<T1, T2>(
+    string _path,
+    string _pathDelete,
+    Mock<AsciiPinyinContext> _asciiPinyinContextMock
+) where T1 : ControllerBase, IEntityController where T2 : IEntity
 {
-    public static T GetNoUserAgentHeaderController<T>(ServiceProvider serviceProvider) where T : ControllerBase, IEntityController
-    {
-        var controller = serviceProvider.GetRequiredService<T>();
+    private const string TEST = "test";
+    private const string TEST_DB = "test_db";
 
-        controller.ControllerContext = new ControllerContext
+    private readonly Mock<ILogger<T1>> _entityControllerLoggerMock = new();
+    private readonly Mock<ILogger<VerifyUserAgentMiddleware>> _userAgentVerifierLoggerMock = new();
+    private readonly Mock<DatabaseFacade> _databaseFacadeMock = new(_asciiPinyinContextMock.Object);
+    private readonly Mock<IDbContextTransaction> _dbContextTransactionMock = new();
+
+    public async Task<IHost> SetUpHost()
+    {
+        _ = _databaseFacadeMock.Setup(m => m.BeginTransaction()).Returns(_dbContextTransactionMock.Object);
+        var testCategory = TestContext.CurrentContext.Test?.Properties["Category"].FirstOrDefault();
+        IHost host;
+
+        switch (testCategory)
         {
-            HttpContext = new DefaultHttpContext()
-        };
+            case TestCategories.DB_CONTEXT_MOCK:
+                _ = _asciiPinyinContextMock.Setup(context => context.Database).Returns(_databaseFacadeMock.Object);
+                MockChacharsDbSet(_asciiPinyinContextMock);
+                MockAlternativesDbSet(_asciiPinyinContextMock);
+                host = await GetHostAsync(_asciiPinyinContextMock.Object, CancellationToken.None);
+                break;
 
-        return controller;
+            case TestCategories.DB_CONTEXT_MOCK_ERROR_ALTERNATIVES:
+                _ = _asciiPinyinContextMock.Setup(context => context.Database).Returns(_databaseFacadeMock.Object);
+                _ = _asciiPinyinContextMock.Setup(asciiPinyinContext => asciiPinyinContext.Alternatives).Throws(new InvalidOperationException());
+                MockChacharsDbSet(_asciiPinyinContextMock);
+                host = await GetHostAsync(_asciiPinyinContextMock.Object, CancellationToken.None);
+                break;
+
+            case TestCategories.DB_CONTEXT_MOCK_ERROR_CHACHARS:
+                _ = _asciiPinyinContextMock.Setup(context => context.Database).Returns(_databaseFacadeMock.Object);
+                _ = _asciiPinyinContextMock.Setup(asciiPinyinContext => asciiPinyinContext.Chachars).Throws(new InvalidOperationException());
+                MockAlternativesDbSet(_asciiPinyinContextMock);
+                host = await GetHostAsync(_asciiPinyinContextMock.Object, CancellationToken.None);
+                break;
+
+            default:
+                host = await GetHostAsync(CancellationToken.None);
+                break;
+        }
+
+        return host;
     }
 
-    public static ChacharsController GetChacharsErrorChacharsController(
-        IEntityControllerCommons entityControllerCommons,
-        Mock<AsciiPinyinContext> asciiPinyinContextMock,
-        Mock<ILogger<ChacharsController>> loggerMock
-    )
+    public void TearDown(AsciiPinyinContext asciiPinyinContext, IHost host)
     {
-        _ = asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
-        return GetErrorChacharsController(entityControllerCommons, loggerMock);
+        _asciiPinyinContextMock.Reset();
+        _ = asciiPinyinContext.Database?.EnsureDeleted();
+        host.Dispose();
     }
 
-    public static ChacharsController GetAlternativesErrorChacharsController(
-        IEntityControllerCommons entityControllerCommons,
-        Mock<AsciiPinyinContext> asciiPinyinContextMock,
-        Mock<ILogger<ChacharsController>> loggerMock
-    )
+    public async Task<HttpResponseMessage> GetAsync(IHost host, CancellationToken cancellationToken) =>
+        await GetTestClient(host).GetAsync(_path, cancellationToken);
+
+    public async Task<HttpResponseMessage> PostAsync(IHost host, T2 entity, CancellationToken cancellationToken) =>
+        await GetTestClient(host).PostAsJsonAsync(_path, entity, cancellationToken: cancellationToken);
+
+    public async Task<HttpResponseMessage> PostDeleteAsync(IHost host, T2 entity, CancellationToken cancellationToken) =>
+        await GetTestClient(host).PostAsJsonAsync(_pathDelete, entity, cancellationToken: cancellationToken);
+
+    public async Task<IHost> GetHostAsync(AsciiPinyinContext asciiPinyinContext, CancellationToken cancellationToken)
     {
-        MockChacharsDbSet(asciiPinyinContextMock);
-        _ = asciiPinyinContextMock.Setup(context => context.Alternatives).Throws(new InvalidOperationException());
-        return GetErrorChacharsController(entityControllerCommons, loggerMock);
+        var hostBuilder = GetHostBuilder();
+        _ = hostBuilder.ConfigureServices(services => services.AddScoped(_ => asciiPinyinContext));
+        return await hostBuilder.StartAsync(cancellationToken);
     }
 
-    public static ChacharsController GetSaveErrorChacharsController(
-        IEntityControllerCommons entityControllerCommons,
-        Mock<AsciiPinyinContext> asciiPinyinContextMock,
-        Mock<ILogger<ChacharsController>> loggerMock
-    )
-    {
-        _ = asciiPinyinContextMock.Setup(context => context.SaveChanges()).Throws(new InvalidOperationException());
-        return GetErrorChacharsController(entityControllerCommons, loggerMock);
-    }
-
-    public static AlternativesController GetChacharsErrorAlternativesController(
-        IEntityControllerCommons entityControllerCommons,
-        Mock<AsciiPinyinContext> asciiPinyinContextMock,
-        Mock<ILogger<AlternativesController>> loggerMock
-    )
-    {
-        _ = asciiPinyinContextMock.Setup(context => context.Chachars).Throws(new InvalidOperationException());
-        return GetErrorAlternativesController(entityControllerCommons, loggerMock);
-    }
-
-    public static AlternativesController GetAlternativesErrorAlternativesController(
-        IEntityControllerCommons entityControllerCommons,
-        Mock<AsciiPinyinContext> asciiPinyinContextMock,
-        Mock<ILogger<AlternativesController>> loggerMock
-    )
-    {
-        MockChacharsDbSet(asciiPinyinContextMock);
-        _ = asciiPinyinContextMock.Setup(context => context.Alternatives).Throws(new InvalidOperationException());
-        return GetErrorAlternativesController(entityControllerCommons, loggerMock);
-    }
-
-    public static AlternativesController GetSaveErrorAlternativesController(
-        IEntityControllerCommons entityControllerCommons,
-        Mock<AsciiPinyinContext> asciiPinyinContextMock,
-        Mock<ILogger<AlternativesController>> loggerMock
-    )
-    {
-        _ = asciiPinyinContextMock.Setup(context => context.SaveChanges()).Throws(new InvalidOperationException());
-        return GetErrorAlternativesController(entityControllerCommons, loggerMock);
-    }
-
-    public static void AddToContext(
+    public void AddToContextAndSave(
         AsciiPinyinContext asciiPinyinContext,
         params IEntity[] entities
     )
@@ -103,39 +123,36 @@ internal static class EntityControllerTestCommons
         _ = asciiPinyinContext.SaveChanges();
     }
 
-    public static void NoUserAgentHeaderTest<T>(ActionResult<T>? result)
+    public async Task NoUserAgentHeaderTestAsync(HttpResponseMessage? response)
     {
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result!.Result, Is.Not.Null);
-        Assert.That(result.Result, Is.InstanceOf<BadRequestObjectResult>());
-        Assert.That((result.Result as BadRequestObjectResult)!.Value, Is.EqualTo(Errors.USER_AGENT_MISSING));
+        Assert.That(response, Is.Not.Null);
+        Assert.That(response!.StatusCode, Is.Not.Null);
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        Assert.That(response.Content, Is.Not.Null);
+        Assert.That(await response.Content.ReadAsStringAsync(), Is.EqualTo(Errors.USER_AGENT_MISSING));
     }
 
-    public static void InternalServerErrorTest<T>(ActionResult<T>? result)
+    public void InternalServerErrorTest(HttpResponseMessage? response)
     {
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result!.Result, Is.Not.Null);
-        Assert.That(result.Result!, Is.InstanceOf<StatusCodeResult>());
-
-        var statusCodeResult = result.Result as StatusCodeResult;
-        Assert.That(statusCodeResult!.StatusCode, Is.EqualTo(500));
+        Assert.That(response, Is.Not.Null);
+        Assert.That(response!.StatusCode, Is.Not.Null);
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
     }
 
-    public static void GetAllEntitiesOkTest<T>(
-        ActionResult<IEnumerable<T>>? result,
-        params T[] expectedEntities
-    ) where T : IEntity
+    public async Task GetAllEntitiesOkTestAsync(
+        HttpResponseMessage? response,
+        params T2[] expectedEntities
+    )
     {
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result!.Result, Is.Not.Null);
-        Assert.That(result.Result!, Is.InstanceOf<OkObjectResult>());
+        Assert.That(response, Is.Not.Null);
+        Assert.That(response!.StatusCode, Is.Not.Null);
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        Assert.That(response.Content, Is.Not.Null);
 
-        var value = (result.Result as OkObjectResult)!.Value;
-        Assert.That(value, Is.Not.Null);
-        Assert.That(value!, Is.InstanceOf<IEnumerable<T>>());
+        var entities = await response.Content.ReadFromJsonAsync<ISet<T2>>();
 
-        var entities = (value as IEnumerable<T>)!;
-        Assert.That(entities.Count, Is.EqualTo(expectedEntities.Length));
+        Assert.That(entities, Is.Not.Null);
+        Assert.That(entities!.Count, Is.EqualTo(expectedEntities.Length));
 
         foreach (var expectedEntity in expectedEntities)
         {
@@ -143,213 +160,160 @@ internal static class EntityControllerTestCommons
         }
     }
 
-    public static void PostFieldWrongTest(
-        ActionResult<IErrorsContainer>? result,
-        string fieldName,
-        object? fieldValue,
-        string expectedErrorMessage
-    ) => PostFieldsWrongTest(result, expectedErrorMessage, (fieldName, fieldValue));
-
-    public static void PostFieldsWrongTest(
-        ActionResult<IErrorsContainer>? result,
-        string expectedErrorMessage,
-        params (string, object?)[] fieldData
-    )
+    public void PostBadRequestTest(HttpResponseMessage? response)
     {
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result!.Result, Is.Not.Null);
-        Assert.That(result.Result!, Is.InstanceOf<BadRequestObjectResult>());
-
-        var badRequestObjectResult = result.Result as BadRequestObjectResult;
-        Assert.That(badRequestObjectResult!.Value, Is.Not.Null);
-        Assert.That(badRequestObjectResult.Value, Is.InstanceOf<EntityFieldsErrorsContainer>());
-
-        var fieldsErrorsContainer = badRequestObjectResult.Value as EntityFieldsErrorsContainer;
-        Assert.That(fieldsErrorsContainer!.Errors.Count, Is.EqualTo(1));
-
-        var fieldsErrors = fieldsErrorsContainer!.Errors.First();
-
-        foreach ((var fieldName, var fieldValue) in fieldData)
-        {
-            var error = fieldsErrors!.FieldErrors.FirstOrDefault(e => e.FieldName == fieldName);
-
-            Assert.That(error, Is.Not.Null);
-            Assert.That(error!.FieldValue, Is.EqualTo(fieldValue));
-            Assert.That(error!.ErrorMessage, Is.EqualTo(expectedErrorMessage));
-        }
+        Assert.That(response, Is.Not.Null);
+        Assert.That(response!.StatusCode, Is.Not.Null);
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        Assert.That(response.Content, Is.Not.Null);
     }
 
-    public static void PostDatabaseSingleIntegrityErrorTest(
-        ActionResult<IErrorsContainer>? result,
-        string expectedEntityType,
-        IEntity expectedEntity,
-        string expectedErrorMessage,
-        params ConflictEntity[] expectedConflictEntities
-    ) =>
-        PostDatabaseIntegrityErrorsTest(
-            result,
-            (expectedEntityType, expectedEntity, expectedErrorMessage, expectedConflictEntities)
-        );
-
-    public static void PostDatabaseIntegrityErrorsTest(
-        ActionResult<IErrorsContainer>? result,
-        params (
-            string ExpectedEntityType,
-            IEntity ExpectedEntity,
-            string ExpectedErrorMessage,
-            ConflictEntity[] ExpectedConflictEntities
-        )[] expectedDatabaseIntegrityErrorsData
-    )
+    public void PostOkTest(HttpResponseMessage? response)
     {
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result!.Result, Is.Not.Null);
-        Assert.That(result.Result!, Is.InstanceOf<BadRequestObjectResult>());
-
-        var badRequestObjectResult = result.Result as BadRequestObjectResult;
-        Assert.That(badRequestObjectResult!.Value, Is.Not.Null);
-        Assert.That(badRequestObjectResult.Value, Is.InstanceOf<DatabaseIntegrityErrorsContainer>());
-
-        var databaseIntegrityErrorsContainer = badRequestObjectResult.Value as DatabaseIntegrityErrorsContainer;
-        Assert.That(databaseIntegrityErrorsContainer!.Errors.Count, Is.EqualTo(expectedDatabaseIntegrityErrorsData.Length));
-
-        // For each error in the container, verify that there's a matching entry among expected errors data
-        foreach (var error in databaseIntegrityErrorsContainer.Errors)
-        {
-            Assert.That(expectedDatabaseIntegrityErrorsData.Any(expectedData => error.EntityType == expectedData.ExpectedEntityType));
-            Assert.That(expectedDatabaseIntegrityErrorsData.Any(expectedData => error.Entity == expectedData.ExpectedEntity));
-            Assert.That(expectedDatabaseIntegrityErrorsData.Any(expectedData => error.ErrorMessage == expectedData.ExpectedErrorMessage));
-
-            // Verify that, for the actual error, there's an entry with matching conflict entities among expected errors data:
-            // * The length of conflict entities of the error must match the length of expected conflict entities in the entry.
-            // * For each conflict entity from the actual error, there must be a matching expected conflict entity among those in the entry.
-            Assert.That(expectedDatabaseIntegrityErrorsData.Any(expectedData =>
-                error.ConflictEntities.Count() == expectedData.ExpectedConflictEntities.Length
-                && error.ConflictEntities.All(confilctEntity =>
-                    expectedData.ExpectedConflictEntities.Any(expectedConflictEntity =>
-                        confilctEntity.EntityType == expectedConflictEntity.EntityType
-                        && confilctEntity.Entity == expectedConflictEntity.Entity
-                    )
-                )
-            ));
-        }
+        Assert.That(response, Is.Not.Null);
+        Assert.That(response!.StatusCode, Is.Not.Null);
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
     }
 
-    public static void PostOkTest(ActionResult<IErrorsContainer>? result)
-    {
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result!.Result, Is.Not.Null);
-        Assert.That(result.Result!, Is.InstanceOf<OkResult>());
-    }
-
-    public static string GetEntityUnknownErrorMessage(string entityType, params string[] fieldNames) =>
+    public string GetEntityUnknownErrorMessage(string entityType, params string[] fieldNames) =>
         $"combination of fields '{string.Join(" + ", fieldNames)}' does not identify an existing {entityType}";
-
-    public static string GetEntityExistsErrorMessage(string entityType, params string[] fieldNames) =>
-        $"combination of fields '{string.Join(" + ", fieldNames)}' identifies an already existing {entityType}";
-
-    public static string GetNoRadicalErrorMessage(params string[] fieldNames) =>
-        $"combination of fields '{string.Join(" + ", fieldNames)}' identifies a chachar, which is not radical";
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Style",
         "IDE0046:Convert to conditional expression",
         Justification = "Conditional expression looks terrible on that 'if' statement."
     )]
-    public static void MockChacharsDbSet(
-        Mock<AsciiPinyinContext> asciiPinyinContextMock,
-        Chachar? chachar = null
-    )
+    private void MockChacharsDbSet(Mock<AsciiPinyinContext> asciiPinyinContextMock)
     {
-        IEnumerable<Chachar> chacharInCollection = chachar is null ? [] : [chachar];
-        var dataQueryable = chacharInCollection.AsQueryable();
+        var data = new HashSet<Chachar>();
         var chacharsDbSetMock = new Mock<DbSet<Chachar>>();
 
         _ = chacharsDbSetMock
             .Setup(chacharsDbSet => chacharsDbSet.Find(It.IsAny<object[]>()))
-            .Returns(
-                (object[] parameters) =>
+            .Returns((object[] parameters) =>
+            {
+                if (
+                    parameters.Length == 3
+                    && parameters[0] is string theCharacter
+                    && parameters[1] is string pinyin
+                    && parameters[2] is byte tone
+                )
                 {
-                    if (chachar is null)
-                    {
-                        return null;
-                    }
-
-                    if (
-                        parameters.Length == 3
-                        && parameters[0] is string theCharacter
-                        && parameters[1] is string pinyin
-                        && parameters[2] is byte tone
-                        && theCharacter == chachar.TheCharacter
-                        && pinyin == chachar.Pinyin
-                        && tone == chachar.Tone
-                    )
-                    {
-                        return chachar;
-                    }
-
-                    return null;
+                    return data.FirstOrDefault(d =>
+                        d.TheCharacter == theCharacter
+                        && d.Pinyin == pinyin
+                        && d.Tone == tone
+                    );
                 }
-            );
 
-        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.Provider).Returns(dataQueryable.Provider);
-        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.Expression).Returns(dataQueryable.Expression);
-        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.ElementType).Returns(dataQueryable.ElementType);
-        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.GetEnumerator()).Returns(dataQueryable.GetEnumerator);
-        _ = asciiPinyinContextMock.Setup(context => context.Chachars).Returns(chacharsDbSetMock.Object);
+                return null;
+            });
+
+        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.Provider).Returns(data.AsQueryable().Provider);
+        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.Expression).Returns(data.AsQueryable().Expression);
+        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.ElementType).Returns(data.AsQueryable().ElementType);
+        _ = chacharsDbSetMock.As<IQueryable<Chachar>>().Setup(m => m.GetEnumerator()).Returns(data.AsQueryable().GetEnumerator);
+
+        _ = asciiPinyinContextMock
+            .Setup(asciiPinyinContext => asciiPinyinContext.Chachars)
+            .Returns(chacharsDbSetMock.Object);
+
+        _ = asciiPinyinContextMock
+            .Setup(asciiPinyinContext => asciiPinyinContext.Add(It.IsAny<Chachar>()))
+            .Callback((Chachar chachar) => data.Add(chachar));
     }
 
-    public static void MockAlternativesDbSet(
-        Mock<AsciiPinyinContext> asciiPinyinContextMock,
-        Alternative? alternative = null
-    )
+    // Forget about unification, you can't create DbSet with a generic type.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Style",
+        "IDE0046:Convert to conditional expression",
+        Justification = "Conditional expression looks terrible on that 'if' statement."
+    )]
+    private void MockAlternativesDbSet(Mock<AsciiPinyinContext> asciiPinyinContextMock)
     {
-        IEnumerable<Alternative> alternativeInCollection = alternative is null ? [] : [alternative];
-        var dataQueryable = alternativeInCollection.AsQueryable();
+        var data = new HashSet<Alternative>();
         var alternativesDbSetMock = new Mock<DbSet<Alternative>>();
-        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.Provider).Returns(dataQueryable.Provider);
-        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.Expression).Returns(dataQueryable.Expression);
-        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.ElementType).Returns(dataQueryable.ElementType);
-        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.GetEnumerator()).Returns(dataQueryable.GetEnumerator);
-        _ = asciiPinyinContextMock.Setup(context => context.Alternatives).Returns(alternativesDbSetMock.Object);
-    }
 
-    private static ChacharsController GetErrorChacharsController(
-        IEntityControllerCommons entityControllerCommons,
-        Mock<ILogger<ChacharsController>> loggerMock
-    )
-    {
-        var httpContext = new DefaultHttpContext();
-        httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
-
-        return new ChacharsController(
-            entityControllerCommons,
-            loggerMock.Object
-        )
-        {
-            ControllerContext = new ControllerContext
+        _ = alternativesDbSetMock
+            .Setup(alternativesDbSet => alternativesDbSet.Find(It.IsAny<object[]>()))
+            .Returns((object[] parameters) =>
             {
-                HttpContext = httpContext
-            }
-        };
+                if (
+                    parameters.Length == 4
+                    && parameters[0] is string theCharacter
+                    && parameters[1] is string originalCharacter
+                    && parameters[2] is string originalPinyin
+                    && parameters[3] is byte originalTone
+                )
+                {
+                    return data.FirstOrDefault(d =>
+                        d.TheCharacter == theCharacter
+                        && d.OriginalCharacter == originalCharacter
+                        && d.OriginalPinyin == originalPinyin
+                        && d.OriginalTone == originalTone
+                    );
+                }
+
+                return null;
+            });
+
+        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.Provider).Returns(data.AsQueryable().Provider);
+        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.Expression).Returns(data.AsQueryable().Expression);
+        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.ElementType).Returns(data.AsQueryable().ElementType);
+        _ = alternativesDbSetMock.As<IQueryable<Alternative>>().Setup(m => m.GetEnumerator()).Returns(data.AsQueryable().GetEnumerator);
+
+        _ = asciiPinyinContextMock
+            .Setup(asciiPinyinContext => asciiPinyinContext.Alternatives)
+            .Returns(alternativesDbSetMock.Object);
+
+        _ = asciiPinyinContextMock
+            .Setup(asciiPinyinContext => asciiPinyinContext.Add(It.IsAny<Alternative>()))
+            .Callback((Alternative alternative) => data.Add(alternative));
     }
 
-    private static AlternativesController GetErrorAlternativesController(
-        IEntityControllerCommons entityControllerCommons,
-        Mock<ILogger<AlternativesController>> loggerMock
-    )
+    private HttpClient GetTestClient(IHost host)
     {
-        var httpContext = new DefaultHttpContext();
-        httpContext.Request.Headers[RequestHeaderKeys.USER_AGENT] = "test";
-
-        return new AlternativesController(
-            entityControllerCommons,
-            loggerMock.Object
-        )
-        {
-            ControllerContext = new ControllerContext
-            {
-                HttpContext = httpContext
-            }
-        };
+        var client = host.GetTestClient();
+        client.DefaultRequestHeaders.Add(RequestHeaderKeys.USER_AGENT, TEST);
+        return client;
     }
+
+    private async Task<IHost> GetHostAsync(CancellationToken cancellationToken)
+    {
+        var hostBuilder = GetHostBuilder();
+
+        _ = hostBuilder.ConfigureServices(services =>
+            services.AddDbContext<AsciiPinyinContext>(optionsBuilder =>
+                optionsBuilder
+                    .UseInMemoryDatabase(TEST_DB)
+                    .ConfigureWarnings(warningsConfigurationBuilder => warningsConfigurationBuilder.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            )
+        );
+
+        return await hostBuilder.StartAsync(cancellationToken);
+    }
+
+    private IHostBuilder GetHostBuilder() =>
+        new HostBuilder().ConfigureWebHost(webBuilder =>
+        {
+            _ = webBuilder
+                .UseTestServer()
+                .ConfigureServices(services =>
+                {
+                    _ = services
+                        .AddControllers()
+                        .AddApplicationPart(typeof(T1).Assembly);
+
+                    _ = services
+                        .AddSingleton(_entityControllerLoggerMock.Object)
+                        .AddSingleton(_userAgentVerifierLoggerMock.Object)
+                        .AddScoped<IEntityControllerCommons, EntityControllerCommons>();
+                })
+                .Configure(app =>
+                    _ = app
+                        .UseMiddleware<VerifyUserAgentMiddleware>()
+                        .UseRouting()
+                        .UseEndpoints(endpoints => endpoints.MapControllers())
+                );
+        });
 }

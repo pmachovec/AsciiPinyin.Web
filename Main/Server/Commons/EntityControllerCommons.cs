@@ -21,14 +21,6 @@ public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinConte
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity
     {
         LogCommons.LogHttpMethodInfo(logger, HttpMethod.Get, action);
-
-        if (!entityController.Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
-        {
-            LogCommons.LogUserAgentMissingError(logger);
-            return entityController.BadRequest(Errors.USER_AGENT_MISSING);
-        }
-
-        LogCommons.LogUserAgentInfo(logger, userAgent!);
         LogCommons.LogActionInDbInfo(logger, DbActions.SELECT, action);
 
         try
@@ -58,14 +50,6 @@ public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinConte
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity
     {
         LogCommons.LogHttpMethodInfo(logger, HttpMethod.Post, action);
-
-        if (!entityController.Request.Headers.TryGetValue(RequestHeaderKeys.USER_AGENT, out var userAgent))
-        {
-            LogCommons.LogUserAgentMissingError(logger);
-            return entityController.BadRequest(Errors.USER_AGENT_MISSING);
-        }
-
-        LogCommons.LogUserAgentInfo(logger, userAgent!);
         LogCommons.LogEntityInfo(logger, nameof(T2), entity);
         LogCommons.LogInitialIntegrityVerificationDebug(logger);
 
@@ -113,6 +97,8 @@ public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinConte
 
         try
         {
+            // Do not use asynchronous methods for DB alterations, synchronous have better performance.
+            // Even Microsoft recommends to use the synchronous approach.
             using var dbContextTransaction = _asciiPinyinContext.Database.BeginTransaction();
             dynamic contextAlterCollectionMethod = _asciiPinyinContext.GetType().GetMethod(alterDbMethodName, [typeof(T2)])!;
             _ = contextAlterCollectionMethod!.Invoke(_asciiPinyinContext, (T2[])[entity]);

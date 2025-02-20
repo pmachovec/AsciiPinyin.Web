@@ -50,10 +50,4 @@ internal static partial class LogCommons
 
     [LoggerMessage(LogLevel.Error, "Invalid value; value: {errorValue}, property: {fieldJsonPropertyName}, error: {errorMessage}")]
     public static partial void LogInvalidValueError(ILogger logger, object? errorValue, string fieldJsonPropertyName, string errorMessage);
-
-    [LoggerMessage(LogLevel.Information, "User agent: {userAgent}")]
-    public static partial void LogUserAgentInfo(ILogger logger, string userAgent);
-
-    [LoggerMessage(LogLevel.Error, Errors.USER_AGENT_MISSING)]
-    public static partial void LogUserAgentMissingError(ILogger logger);
 }

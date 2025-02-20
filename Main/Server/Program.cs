@@ -1,6 +1,7 @@
 using AsciiPinyin.Web.Server.Commons;
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Server.Locals;
+using AsciiPinyin.Web.Server.Middleware;
 using AsciiPinyin.Web.Server.Pages;
 using AsciiPinyin.Web.Shared.Constants;
 using Microsoft.AspNetCore.Localization;
@@ -88,7 +89,8 @@ app.UseRequestLocalization(options =>
 
 _ = app.UseHttpsRedirection()
     .UseStaticFiles()
-    .UseAntiforgery();
+    .UseAntiforgery()
+    .UseMiddleware<VerifyUserAgentMiddleware>();
 
 _ = app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
