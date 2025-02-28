@@ -1,5 +1,4 @@
 using AsciiPinyin.Web.Server.Commons;
-using AsciiPinyin.Web.Server.Constants;
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.DTO;
@@ -27,14 +26,11 @@ public sealed class AlternativesController(
 
     [HttpPost]
     public ActionResult<IErrorsContainer> Post(Alternative alternative) =>
-        _entityControllerCommons.ThePost(
+        _entityControllerCommons.Post(
             this,
             alternative,
             _logger,
             TableNames.ALTERNATIVE,
-            Actions.CREATE_NEW_ALTERNATIVE,
-            DbActions.INSERT,
-            AlterDbMethods.ADD,
             GetPostDatabaseIntegrityErrorsContainer,
             GetTheCharacterError,
             GetStrokesError,
@@ -45,14 +41,11 @@ public sealed class AlternativesController(
 
     [HttpPost(ApiNames.DELETE)]
     public ActionResult<IErrorsContainer> PostDelete(Alternative alternative) =>
-        _entityControllerCommons.ThePost(
+        _entityControllerCommons.PostDelete(
             this,
             alternative,
             _logger,
             TableNames.ALTERNATIVE,
-            Actions.DELETE_ALTERNATIVE,
-            DbActions.DELETE,
-            AlterDbMethods.REMOVE,
             GetPostDeleteDatabaseIntegrityErrorsContainer,
             GetTheCharacterError,
             GetOriginalCharacterError,

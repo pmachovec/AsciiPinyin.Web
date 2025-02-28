@@ -8,6 +8,7 @@ using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace AsciiPinyin.Web.Server.Commons;
 
@@ -37,84 +38,45 @@ public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinConte
         }
     }
 
-    public ActionResult<IErrorsContainer> ThePost<T1, T2>(
+    public ActionResult<IErrorsContainer> Post<T1, T2>(
         T1 entityController,
         T2 entity,
         ILogger<T1> logger,
         string tableName,
-        string action,
-        string dbAction,
-        string alterDbMethodName,
         Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDatabaseIntegrityErrorsContainer,
         params Func<T2, FieldError?>[] getFieldErrorMethods
-    ) where T1 : ControllerBase, IEntityController where T2 : IEntity
-    {
-        LogCommons.LogHttpMethodInfo(logger, HttpMethod.Post, action);
-        LogCommons.LogEntityInfo(logger, nameof(T2), entity);
-        LogCommons.LogInitialIntegrityVerificationDebug(logger);
-
-        var postInitialDataErrorsContainer = GetPostInitialDataErrorsContainer(
-            tableName,
+    ) where T1 : ControllerBase, IEntityController where T2 : IEntity =>
+        PostCommon(
+            entityController,
             entity,
+            logger,
+            tableName,
+            $"create new {nameof(T2)}",
+            "INSERT",
+            _asciiPinyinContext.Add,
+            getPostDatabaseIntegrityErrorsContainer,
             getFieldErrorMethods
         );
 
-        if (postInitialDataErrorsContainer is not null)
-        {
-            LogCommons.LogFieldsErrorsContainerError(logger, postInitialDataErrorsContainer);
-            return entityController.BadRequest(postInitialDataErrorsContainer);
-        }
-
-        LogCommons.LogDatabaseIntegrityVerificationDebug(logger);
-        DbSet<Chachar>? knownChachars;
-        DbSet<Alternative>? knownAlternatives;
-
-        try
-        {
-            knownChachars = _asciiPinyinContext.Chachars;
-            knownAlternatives = _asciiPinyinContext.Alternatives;
-        }
-        catch (Exception e)
-        {
-            LogCommons.LogError(logger, e.ToString());
-            return entityController.StatusCode(StatusCodes.Status500InternalServerError);
-        }
-
-        var postDatabaseIntegrityErrorsContainer = getPostDatabaseIntegrityErrorsContainer(
+    public ActionResult<IErrorsContainer> PostDelete<T1, T2>(
+        T1 entityController,
+        T2 entity,
+        ILogger<T1> logger,
+        string tableName,
+        Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDeleteDatabaseIntegrityErrorsContainer,
+        params Func<T2, FieldError?>[] getFieldErrorMethods
+    ) where T1 : ControllerBase, IEntityController where T2 : IEntity =>
+        PostCommon(
+            entityController,
             entity,
-            knownChachars,
-            knownAlternatives
+            logger,
+            tableName,
+            $"delete {nameof(T2)}",
+            "DELETE",
+            _asciiPinyinContext.Remove,
+            getPostDeleteDatabaseIntegrityErrorsContainer,
+            getFieldErrorMethods
         );
-
-        if (postDatabaseIntegrityErrorsContainer is not null)
-        {
-            LogCommons.LogDatabaseIntegrityErrorsContainerError(logger, postDatabaseIntegrityErrorsContainer);
-            return entityController.BadRequest(postDatabaseIntegrityErrorsContainer);
-        }
-
-        LogCommons.LogIntegrityVerificationSuccessDebug(logger);
-        LogCommons.LogActionInDbInfo(logger, dbAction, action);
-
-        try
-        {
-            // Do not use asynchronous methods for DB alterations, synchronous have better performance.
-            // Even Microsoft recommends to use the synchronous approach.
-            using var dbContextTransaction = _asciiPinyinContext.Database.BeginTransaction();
-            dynamic contextAlterCollectionMethod = _asciiPinyinContext.GetType().GetMethod(alterDbMethodName, [typeof(T2)])!;
-            _ = contextAlterCollectionMethod!.Invoke(_asciiPinyinContext, (T2[])[entity]);
-            _ = _asciiPinyinContext.SaveChanges();
-            dbContextTransaction.Commit();
-        }
-        catch (Exception e)
-        {
-            LogCommons.LogActionInDbFailedError(logger, dbAction);
-            LogCommons.LogError(logger, e.ToString());
-            return entityController.StatusCode(StatusCodes.Status500InternalServerError);
-        }
-
-        LogCommons.LogActionInDbSuccessInfo(logger, dbAction);
-        return entityController.Ok();
-    }
 
     public string? GetTheCharacterErrorMessage(string? theCharacter)
     {
@@ -219,6 +181,84 @@ public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinConte
         }
 
         return null;
+    }
+
+    private ActionResult<IErrorsContainer> PostCommon<T1, T2>(
+        T1 entityController,
+        T2 entity,
+        ILogger<T1> logger,
+        string tableName,
+        string actionForLog,
+        string dbActionForLog,
+        Func<object, EntityEntry> alterDb,
+        Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDatabaseIntegrityErrorsContainer,
+        params Func<T2, FieldError?>[] getFieldErrorMethods
+    ) where T1 : ControllerBase, IEntityController where T2 : IEntity
+    {
+        LogCommons.LogHttpMethodInfo(logger, HttpMethod.Post, actionForLog);
+        LogCommons.LogEntityInfo(logger, nameof(T2), entity);
+        LogCommons.LogInitialIntegrityVerificationDebug(logger);
+
+        var postInitialDataErrorsContainer = GetPostInitialDataErrorsContainer(
+            tableName,
+            entity,
+            getFieldErrorMethods
+        );
+
+        if (postInitialDataErrorsContainer is not null)
+        {
+            LogCommons.LogFieldsErrorsContainerError(logger, postInitialDataErrorsContainer);
+            return entityController.BadRequest(postInitialDataErrorsContainer);
+        }
+
+        LogCommons.LogDatabaseIntegrityVerificationDebug(logger);
+        DbSet<Chachar>? knownChachars;
+        DbSet<Alternative>? knownAlternatives;
+
+        try
+        {
+            knownChachars = _asciiPinyinContext.Chachars;
+            knownAlternatives = _asciiPinyinContext.Alternatives;
+        }
+        catch (Exception e)
+        {
+            LogCommons.LogError(logger, e.ToString());
+            return entityController.StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
+        var postDatabaseIntegrityErrorsContainer = getPostDatabaseIntegrityErrorsContainer(
+            entity,
+            knownChachars,
+            knownAlternatives
+        );
+
+        if (postDatabaseIntegrityErrorsContainer is not null)
+        {
+            LogCommons.LogDatabaseIntegrityErrorsContainerError(logger, postDatabaseIntegrityErrorsContainer);
+            return entityController.BadRequest(postDatabaseIntegrityErrorsContainer);
+        }
+
+        LogCommons.LogIntegrityVerificationSuccessDebug(logger);
+        LogCommons.LogActionInDbInfo(logger, dbActionForLog, actionForLog);
+
+        try
+        {
+            // Do not use asynchronous methods for DB alterations, synchronous have better performance.
+            // Even Microsoft recommends to use the synchronous approach.
+            using var dbContextTransaction = _asciiPinyinContext.Database.BeginTransaction();
+            _ = alterDb(entity);
+            _ = _asciiPinyinContext.SaveChanges();
+            dbContextTransaction.Commit();
+        }
+        catch (Exception e)
+        {
+            LogCommons.LogActionInDbFailedError(logger, dbActionForLog);
+            LogCommons.LogError(logger, e.ToString());
+            return entityController.StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
+        LogCommons.LogActionInDbSuccessInfo(logger, dbActionForLog);
+        return entityController.Ok();
     }
 
     private static EntityFieldsErrorsContainer? GetPostInitialDataErrorsContainer<T>(

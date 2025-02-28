@@ -1,5 +1,4 @@
 using AsciiPinyin.Web.Server.Commons;
-using AsciiPinyin.Web.Server.Constants;
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Shared.Commons;
 using AsciiPinyin.Web.Shared.Constants;
@@ -29,14 +28,11 @@ public sealed class ChacharsController(
 
     [HttpPost]
     public ActionResult<IErrorsContainer> Post(Chachar chachar) =>
-        _entityControllerCommons.ThePost(
+        _entityControllerCommons.Post(
             this,
             chachar,
             _logger,
             TableNames.CHACHAR,
-            Actions.CREATE_NEW_CHACHAR,
-            DbActions.INSERT,
-            AlterDbMethods.ADD,
             GetPostDatabaseIntegrityErrorsContainer,
             GetTheCharacterError,
             GetStrokesError,
@@ -52,14 +48,11 @@ public sealed class ChacharsController(
 
     [HttpPost(ApiNames.DELETE)]
     public ActionResult<IErrorsContainer> PostDelete(Chachar chachar) =>
-        _entityControllerCommons.ThePost(
+        _entityControllerCommons.PostDelete(
             this,
             chachar,
             _logger,
             TableNames.CHACHAR,
-            Actions.DELETE_CHACHAR,
-            DbActions.DELETE,
-            AlterDbMethods.REMOVE,
             GetPostDeleteDatabaseIntegrityErrorsContainer,
             GetTheCharacterError,
             GetPinyinError,

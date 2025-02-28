@@ -16,16 +16,21 @@ public interface IEntityControllerCommons
         string contextCollectionName
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity;
 
-    // No warning about a reserved keyword 'Post' in VS, but using 'ThePost' to stay consistent with 'TheGet'.
-    ActionResult<IErrorsContainer> ThePost<T1, T2>(
+    ActionResult<IErrorsContainer> Post<T1, T2>(
         T1 entityController,
         T2 entity,
         ILogger<T1> logger,
         string tableName,
-        string action,
-        string dbAction,
-        string alterDbMethodName,
         Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDatabaseIntegrityErrorsContainer,
+        params Func<T2, FieldError?>[] getFieldErrorMethods
+    ) where T1 : ControllerBase, IEntityController where T2 : IEntity;
+
+    ActionResult<IErrorsContainer> PostDelete<T1, T2>(
+        T1 entityController,
+        T2 entity,
+        ILogger<T1> logger,
+        string tableName,
+        Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDeleteDatabaseIntegrityErrorsContainer,
         params Func<T2, FieldError?>[] getFieldErrorMethods
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity;
 
