@@ -30,13 +30,7 @@ public sealed class AlternativesController(
             this,
             alternative,
             _logger,
-            TableNames.ALTERNATIVE,
-            GetPostDatabaseIntegrityErrorsContainer,
-            GetTheCharacterError,
-            GetStrokesError,
-            GetOriginalCharacterError,
-            GetOriginalPinyinError,
-            GetOriginalToneError
+            GetPostDatabaseIntegrityErrorsContainer
         );
 
     [HttpPost(ApiNames.DELETE)]
@@ -45,52 +39,7 @@ public sealed class AlternativesController(
             this,
             alternative,
             _logger,
-            TableNames.ALTERNATIVE,
-            GetPostDeleteDatabaseIntegrityErrorsContainer,
-            GetTheCharacterError,
-            GetOriginalCharacterError,
-            GetOriginalPinyinError,
-            GetOriginalToneError
-        );
-
-    private FieldError? GetTheCharacterError(Alternative alternative) =>
-        _entityControllerCommons.GetInvalidValueFieldError(
-            _logger,
-            alternative.TheCharacter,
-            JsonPropertyNames.THE_CHARACTER,
-            _entityControllerCommons.GetTheCharacterErrorMessage
-        );
-
-    private FieldError? GetStrokesError(Alternative alternative) =>
-        _entityControllerCommons.GetInvalidValueFieldError(
-            _logger,
-            alternative.Strokes,
-            JsonPropertyNames.STROKES,
-            _entityControllerCommons.GetStrokesErrorMessage
-        );
-
-    private FieldError? GetOriginalCharacterError(Alternative alternative) =>
-        _entityControllerCommons.GetInvalidValueFieldError(
-            _logger,
-            alternative.OriginalCharacter,
-            JsonPropertyNames.ORIGINAL_CHARACTER,
-            _entityControllerCommons.GetTheCharacterErrorMessage
-        );
-
-    private FieldError? GetOriginalPinyinError(Alternative alternative) =>
-        _entityControllerCommons.GetInvalidValueFieldError(
-            _logger,
-            alternative.OriginalPinyin,
-            JsonPropertyNames.ORIGINAL_PINYIN,
-            _entityControllerCommons.GetPinyinErrorMessage
-        );
-
-    private FieldError? GetOriginalToneError(Alternative alternative) =>
-        _entityControllerCommons.GetInvalidValueFieldError(
-            _logger,
-            alternative.OriginalTone,
-            JsonPropertyNames.ORIGINAL_TONE,
-            _entityControllerCommons.GetToneErrorMessage
+            GetPostDeleteDatabaseIntegrityErrorsContainer
         );
 
     private DatabaseIntegrityErrorsContainer? GetPostDatabaseIntegrityErrorsContainer(

@@ -1,10 +1,13 @@
 using AsciiPinyin.Web.Server.Commons;
+using AsciiPinyin.Web.Server.Controllers.ActionFilters;
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Server.Locals;
 using AsciiPinyin.Web.Server.Middleware;
 using AsciiPinyin.Web.Server.Pages;
+using AsciiPinyin.Web.Server.Validation;
 using AsciiPinyin.Web.Shared.Constants;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NLog.Extensions.Logging;
 using NLog.Web;
@@ -27,17 +30,19 @@ _ = builder.Configuration.AddYamlFile(
 );
 
 _ = builder.Services
+    .AddDbContext<AsciiPinyinContext>(optionsBuilder => optionsBuilder.UseSqlite("Data Source=Data/asciipinyin.sqlite"))
+    .AddLocalization()
+    .AddScoped<IEntityControllerCommons, EntityControllerCommons>() // Doesn't work as singleton, must be scoped, because the consumed DB context is also scoped.
     .AddSingleton<ILocals>(_ => new Locals(nLogConfigYamlPath))
-    .AddRazorComponents()
+    .Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true); // Replaced by AsciiPinyinModelStateInvalidFilter (further injected)
+
+_ = builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
 _ = builder.Services
-    .AddLocalization()
-    .AddEntityFrameworkSqlite()
-    .AddScoped<IEntityControllerCommons, EntityControllerCommons>() // Doesn't work as singleton, must be scoped, because the consumed DB context is also scoped.
-    .AddDbContext<AsciiPinyinContext>(optionsBuilder => optionsBuilder.UseSqlite("Data Source=Data/asciipinyin.sqlite"))
-    .AddControllers();
+    .AddControllers(options => options.Filters.Add<ModelStateInvalidFilter>())
+    .AddMvcOptions(options => options.ModelMetadataDetailsProviders.Add(new ControllerValidationMetadataProvider()));
 
 var app = builder.Build();
 _ = app.UsePathBase($"/{ApiNames.BASE}");
@@ -90,6 +95,7 @@ app.UseRequestLocalization(options =>
 _ = app.UseHttpsRedirection()
     .UseStaticFiles()
     .UseAntiforgery()
+    .UseMiddleware<LogRequestMiddleware>()
     .UseMiddleware<VerifyUserAgentMiddleware>();
 
 _ = app.MapRazorComponents<App>()

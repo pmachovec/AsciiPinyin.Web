@@ -1,10 +1,8 @@
 using AsciiPinyin.Web.Server.Commons;
 using AsciiPinyin.Web.Server.Data;
-using AsciiPinyin.Web.Shared.Commons;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.DTO;
 using AsciiPinyin.Web.Shared.Models;
-using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,17 +30,7 @@ public sealed class ChacharsController(
             this,
             chachar,
             _logger,
-            TableNames.CHACHAR,
-            GetPostDatabaseIntegrityErrorsContainer,
-            GetTheCharacterError,
-            GetStrokesError,
-            GetPinyinError,
-            GetToneError,
-            GetIpaError,
-            GetRadicalCharacterError,
-            GetRadicalPinyinError,
-            GetRadicalToneError,
-            GetRadicalAlternativeCharacterError
+            GetPostDatabaseIntegrityErrorsContainer
         );
 
 
@@ -52,196 +40,8 @@ public sealed class ChacharsController(
             this,
             chachar,
             _logger,
-            TableNames.CHACHAR,
-            GetPostDeleteDatabaseIntegrityErrorsContainer,
-            GetTheCharacterError,
-            GetPinyinError,
-            GetToneError
+            GetPostDeleteDatabaseIntegrityErrorsContainer
         );
-
-    private FieldError? GetTheCharacterError(Chachar chachar) =>
-        _entityControllerCommons.GetInvalidValueFieldError(
-            _logger,
-            chachar.TheCharacter,
-            JsonPropertyNames.THE_CHARACTER,
-            _entityControllerCommons.GetTheCharacterErrorMessage
-        );
-
-    private FieldError? GetStrokesError(Chachar chachar) =>
-        _entityControllerCommons.GetInvalidValueFieldError(
-            _logger,
-            chachar.Strokes,
-            JsonPropertyNames.STROKES,
-            _entityControllerCommons.GetStrokesErrorMessage
-        );
-
-    private FieldError? GetPinyinError(Chachar chachar) =>
-        _entityControllerCommons.GetInvalidValueFieldError(
-            _logger,
-            chachar.Pinyin,
-            JsonPropertyNames.PINYIN,
-            _entityControllerCommons.GetPinyinErrorMessage
-        );
-
-    private FieldError? GetToneError(Chachar chachar) =>
-        _entityControllerCommons.GetInvalidValueFieldError(
-            _logger,
-            chachar.Tone,
-            JsonPropertyNames.TONE,
-            _entityControllerCommons.GetToneErrorMessage
-        );
-
-    private FieldError? GetIpaError(Chachar chachar)
-    {
-        string? errorMessage = null;
-
-        if (chachar.Ipa is null)
-        {
-            errorMessage = Errors.MISSING;
-        }
-        else if (chachar.Ipa!.Length == 0)
-        {
-            errorMessage = Errors.EMPTY;
-        }
-        else if (!TextUtils.IsOnlyIpaCharacters(chachar.Ipa!))
-        {
-            errorMessage = Errors.NO_IPA;
-        }
-
-        if (errorMessage is not null)
-        {
-            LogCommons.LogInvalidValueError(_logger, chachar.Ipa, JsonPropertyNames.IPA, errorMessage);
-            return new FieldError(JsonPropertyNames.IPA, chachar.Ipa, errorMessage);
-        }
-
-        return null;
-    }
-
-    private FieldError? GetRadicalCharacterError(Chachar chachar)
-    {
-        string? errorMessage = null;
-
-        if (
-            chachar.RadicalCharacter is null
-            && (chachar.RadicalPinyin is not null || chachar.RadicalTone is not null || chachar.RadicalAlternativeCharacter is not null)
-        )
-        {
-            errorMessage = Errors.MISSING;
-        }
-
-        if (chachar.RadicalCharacter is { } radicalCharacter)
-        {
-            if (radicalCharacter.Length == 0)
-            {
-                errorMessage = Errors.EMPTY;
-            }
-            else if (TextUtils.GetStringRealLength(radicalCharacter) > 1)
-            {
-                errorMessage = Errors.ONLY_ONE_CHARACTER_ALLOWED;
-            }
-            else if (!TextUtils.IsOnlyChineseCharacters(radicalCharacter))
-            {
-                errorMessage = Errors.NO_SINGLE_CHINESE;
-            }
-        }
-
-        if (errorMessage is not null)
-        {
-            LogCommons.LogInvalidValueError(_logger, chachar.RadicalCharacter, JsonPropertyNames.RADICAL_CHARACTER, errorMessage);
-            return new FieldError(JsonPropertyNames.RADICAL_CHARACTER, chachar.RadicalCharacter, errorMessage);
-        }
-
-        return null;
-    }
-
-    private FieldError? GetRadicalPinyinError(Chachar chachar)
-    {
-        string? errorMessage = null;
-
-        if (
-            chachar.RadicalPinyin is null
-            && (chachar.RadicalCharacter is not null || chachar.RadicalTone is not null || chachar.RadicalAlternativeCharacter is not null)
-        )
-        {
-            errorMessage = Errors.MISSING;
-        }
-
-        if (chachar.RadicalPinyin is { } radicalPinyin)
-        {
-            if (radicalPinyin.Length == 0)
-            {
-                errorMessage = Errors.EMPTY;
-            }
-            else if (!Regexes.AsciiLettersRegex().IsMatch(radicalPinyin))
-            {
-                errorMessage = Errors.NO_ASCII;
-            }
-        }
-
-        if (errorMessage is not null)
-        {
-            LogCommons.LogInvalidValueError(_logger, chachar.RadicalPinyin, JsonPropertyNames.RADICAL_PINYIN, errorMessage);
-            return new FieldError(JsonPropertyNames.RADICAL_PINYIN, chachar.RadicalPinyin, errorMessage);
-        }
-
-        return null;
-    }
-
-    private FieldError? GetRadicalToneError(Chachar chachar)
-    {
-        string? errorMessage = null;
-
-        if (
-            chachar.RadicalTone is null
-            && (chachar.RadicalCharacter is not null || chachar.RadicalPinyin is not null || chachar.RadicalAlternativeCharacter is not null)
-        )
-        {
-            errorMessage = Errors.MISSING;
-        }
-
-        if (chachar.RadicalTone is { } radicalTone && radicalTone > 4)
-        {
-            // As the type is unsigned byte, API doesn't allow to pass any invalid value like strings, negative numbers etc.
-            errorMessage = Errors.ZERO_TO_FOUR;
-        }
-
-        if (errorMessage is not null)
-        {
-            LogCommons.LogInvalidValueError(_logger, chachar.RadicalTone, JsonPropertyNames.RADICAL_TONE, errorMessage);
-            return new FieldError(JsonPropertyNames.RADICAL_TONE, chachar.RadicalTone, errorMessage);
-        }
-
-        return null;
-    }
-
-    private FieldError? GetRadicalAlternativeCharacterError(Chachar chachar)
-    {
-        if (chachar.RadicalAlternativeCharacter is { } radicalAlternativeCharacter)
-        {
-            string? errorMessage = null;
-
-            if (radicalAlternativeCharacter.Length == 0)
-            {
-                errorMessage = Errors.EMPTY;
-            }
-            else if (TextUtils.GetStringRealLength(radicalAlternativeCharacter) > 1)
-            {
-                errorMessage = Errors.ONLY_ONE_CHARACTER_ALLOWED;
-            }
-            else if (!TextUtils.IsOnlyChineseCharacters(radicalAlternativeCharacter))
-            {
-                errorMessage = Errors.NO_SINGLE_CHINESE;
-            }
-
-            if (errorMessage is not null)
-            {
-                LogCommons.LogInvalidValueError(_logger, chachar.RadicalAlternativeCharacter, JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER, errorMessage);
-                return new FieldError(JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER, chachar.RadicalAlternativeCharacter, errorMessage);
-            }
-        }
-
-        return null;
-    }
 
     private DatabaseIntegrityErrorsContainer? GetPostDatabaseIntegrityErrorsContainer(
         Chachar chachar,

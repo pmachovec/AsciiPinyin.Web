@@ -20,27 +20,15 @@ public interface IEntityControllerCommons
         T1 entityController,
         T2 entity,
         ILogger<T1> logger,
-        string tableName,
-        Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDatabaseIntegrityErrorsContainer,
-        params Func<T2, FieldError?>[] getFieldErrorMethods
+        Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDatabaseIntegrityErrorsContainer
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity;
 
     ActionResult<IErrorsContainer> PostDelete<T1, T2>(
         T1 entityController,
         T2 entity,
         ILogger<T1> logger,
-        string tableName,
-        Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDeleteDatabaseIntegrityErrorsContainer,
-        params Func<T2, FieldError?>[] getFieldErrorMethods
+        Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDeleteDatabaseIntegrityErrorsContainer
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity;
-
-    string? GetTheCharacterErrorMessage(string? theCharacter);
-
-    string? GetStrokesErrorMessage(byte? strokes);
-
-    string? GetPinyinErrorMessage(string? pinyin);
-
-    string? GetToneErrorMessage(byte? tone);
 
     string GetEntityUnknownErrorMessage(string entityType, params string[] fieldNames);
 

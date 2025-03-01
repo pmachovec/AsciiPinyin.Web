@@ -1,11 +1,8 @@
 using AsciiPinyin.Web.Server.Constants;
 using AsciiPinyin.Web.Server.Controllers;
 using AsciiPinyin.Web.Server.Data;
-using AsciiPinyin.Web.Shared.Commons;
-using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.DTO;
 using AsciiPinyin.Web.Shared.Models;
-using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -21,7 +18,6 @@ public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinConte
         string contextCollectionName
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity
     {
-        LogCommons.LogHttpMethodInfo(logger, HttpMethod.Get, action);
         LogCommons.LogActionInDbInfo(logger, DbActions.SELECT, action);
 
         try
@@ -42,119 +38,33 @@ public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinConte
         T1 entityController,
         T2 entity,
         ILogger<T1> logger,
-        string tableName,
-        Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDatabaseIntegrityErrorsContainer,
-        params Func<T2, FieldError?>[] getFieldErrorMethods
+        Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDatabaseIntegrityErrorsContainer
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity =>
         PostCommon(
             entityController,
             entity,
             logger,
-            tableName,
             $"create new {nameof(T2)}",
             "INSERT",
             _asciiPinyinContext.Add,
-            getPostDatabaseIntegrityErrorsContainer,
-            getFieldErrorMethods
+            getPostDatabaseIntegrityErrorsContainer
         );
 
     public ActionResult<IErrorsContainer> PostDelete<T1, T2>(
         T1 entityController,
         T2 entity,
         ILogger<T1> logger,
-        string tableName,
-        Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDeleteDatabaseIntegrityErrorsContainer,
-        params Func<T2, FieldError?>[] getFieldErrorMethods
+        Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDeleteDatabaseIntegrityErrorsContainer
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity =>
         PostCommon(
             entityController,
             entity,
             logger,
-            tableName,
             $"delete {nameof(T2)}",
             "DELETE",
             _asciiPinyinContext.Remove,
-            getPostDeleteDatabaseIntegrityErrorsContainer,
-            getFieldErrorMethods
+            getPostDeleteDatabaseIntegrityErrorsContainer
         );
-
-    public string? GetTheCharacterErrorMessage(string? theCharacter)
-    {
-        string? errorMessage = null;
-
-        if (theCharacter is null)
-        {
-            errorMessage = Errors.MISSING;
-        }
-        else if (theCharacter!.Length == 0)
-        {
-            errorMessage = Errors.EMPTY;
-        }
-        else if (TextUtils.GetStringRealLength(theCharacter!) > 1)
-        {
-            errorMessage = Errors.ONLY_ONE_CHARACTER_ALLOWED;
-        }
-        else if (!TextUtils.IsOnlyChineseCharacters(theCharacter!))
-        {
-            errorMessage = Errors.NO_SINGLE_CHINESE;
-        }
-
-        return errorMessage;
-    }
-
-    public string? GetStrokesErrorMessage(byte? strokes)
-    {
-        string? errorMessage = null;
-
-        if (strokes is null)
-        {
-            errorMessage = Errors.MISSING;
-        }
-        else if (strokes is < ByteConstants.MIN_STROKES or > ByteConstants.MAX_STROKES)
-        {
-            // As the type is unsigned byte, API doesn't allow to pass any invalid value like strings, negative numbers etc.
-            errorMessage = Errors.ONE_TO_NINETY_NINE;
-        }
-
-        return errorMessage;
-    }
-
-    public string? GetPinyinErrorMessage(string? pinyin)
-    {
-        string? errorMessage = null;
-
-        if (pinyin is null)
-        {
-            errorMessage = Errors.MISSING;
-        }
-        else if (pinyin!.Length == 0)
-        {
-            errorMessage = Errors.EMPTY;
-        }
-        else if (!Regexes.AsciiLettersRegex().IsMatch(pinyin!))
-        {
-            errorMessage = Errors.NO_ASCII;
-        }
-
-        return errorMessage;
-    }
-
-    public string? GetToneErrorMessage(byte? tone)
-    {
-        string? errorMessage = null;
-
-        if (tone is null)
-        {
-            errorMessage = Errors.MISSING;
-        }
-        else if (tone > ByteConstants.MAX_TONE)
-        {
-            // As the type is unsigned byte, API doesn't allow to pass any invalid value like strings, negative numbers etc.
-            errorMessage = Errors.ZERO_TO_FOUR;
-        }
-
-        return errorMessage;
-    }
 
     public string GetEntityUnknownErrorMessage(string entityType, params string[] fieldNames) =>
         $"combination of fields '{string.Join(" + ", fieldNames)}' does not identify an existing {entityType}";
@@ -187,30 +97,13 @@ public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinConte
         T1 entityController,
         T2 entity,
         ILogger<T1> logger,
-        string tableName,
         string actionForLog,
         string dbActionForLog,
         Func<object, EntityEntry> alterDb,
-        Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDatabaseIntegrityErrorsContainer,
-        params Func<T2, FieldError?>[] getFieldErrorMethods
+        Func<T2, DbSet<Chachar>, DbSet<Alternative>, DatabaseIntegrityErrorsContainer?> getPostDatabaseIntegrityErrorsContainer
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity
     {
-        LogCommons.LogHttpMethodInfo(logger, HttpMethod.Post, actionForLog);
         LogCommons.LogEntityInfo(logger, nameof(T2), entity);
-        LogCommons.LogInitialIntegrityVerificationDebug(logger);
-
-        var postInitialDataErrorsContainer = GetPostInitialDataErrorsContainer(
-            tableName,
-            entity,
-            getFieldErrorMethods
-        );
-
-        if (postInitialDataErrorsContainer is not null)
-        {
-            LogCommons.LogFieldsErrorsContainerError(logger, postInitialDataErrorsContainer);
-            return entityController.BadRequest(postInitialDataErrorsContainer);
-        }
-
         LogCommons.LogDatabaseIntegrityVerificationDebug(logger);
         DbSet<Chachar>? knownChachars;
         DbSet<Alternative>? knownAlternatives;
@@ -259,37 +152,5 @@ public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinConte
 
         LogCommons.LogActionInDbSuccessInfo(logger, dbActionForLog);
         return entityController.Ok();
-    }
-
-    private static EntityFieldsErrorsContainer? GetPostInitialDataErrorsContainer<T>(
-        string entityType,
-        T entity,
-        params Func<T, FieldError?>[] getFieldErrorMethods
-    ) where T : IEntity
-    {
-        var fieldsErrors = GetFieldsErrors(
-            entity,
-            getFieldErrorMethods
-        );
-
-        return fieldsErrors.Count > 0 ? new EntityFieldsErrorsContainer(entityType, [.. fieldsErrors]) : null;
-    }
-
-    private static List<FieldError> GetFieldsErrors<T>(
-        T entity,
-        params Func<T, FieldError?>[] getFieldErrorMethods
-    ) where T : IEntity
-    {
-        var fieldsErrors = new List<FieldError>();
-
-        foreach (var getFieldError in getFieldErrorMethods)
-        {
-            if (getFieldError(entity) is { } error)
-            {
-                fieldsErrors.Add(error);
-            }
-        }
-
-        return fieldsErrors;
     }
 }

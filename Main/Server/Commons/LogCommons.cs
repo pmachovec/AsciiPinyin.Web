@@ -1,4 +1,3 @@
-using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.DTO;
 using AsciiPinyin.Web.Shared.Models;
 
@@ -14,6 +13,9 @@ internal static partial class LogCommons
 
     [LoggerMessage(LogLevel.Information, "{dbAction} successfully performed in the database")]
     public static partial void LogActionInDbSuccessInfo(ILogger logger, string dbAction);
+
+    [LoggerMessage(LogLevel.Debug, "Body: {bodyString}")]
+    public static partial void LogBodyDebug(ILogger logger, string bodyString);
 
     [LoggerMessage(LogLevel.Error, "{databaseIntegrityErrorsContainer}")]
     public static partial void LogDatabaseIntegrityErrorsContainerError(ILogger logger, DatabaseIntegrityErrorsContainer databaseIntegrityErrorsContainer);
@@ -33,21 +35,24 @@ internal static partial class LogCommons
     [LoggerMessage(LogLevel.Error, "{message}")]
     public static partial void LogError(ILogger logger, string message);
 
-    [LoggerMessage(LogLevel.Error, "{fieldsErrorsContainer}")]
-    public static partial void LogFieldsErrorsContainerError(ILogger logger, EntityFieldsErrorsContainer fieldsErrorsContainer);
-
-    [LoggerMessage(LogLevel.Information, "GET nlog.config; User-Agent: {userAgent}")]
-    public static partial void LogGetInfo(ILogger logger, string userAgent);
-
-    [LoggerMessage(LogLevel.Information, "HTTP method received: {method}; action: {action}")]
-    public static partial void LogHttpMethodInfo(ILogger logger, HttpMethod method, string action);
-
-    [LoggerMessage(LogLevel.Debug, "Initial data integrity verification")]
-    public static partial void LogInitialIntegrityVerificationDebug(ILogger logger);
+    [LoggerMessage(LogLevel.Debug, "Headers: [{headersString}]")]
+    public static partial void LogHeadersDebug(ILogger logger, string headersString);
 
     [LoggerMessage(LogLevel.Debug, "Integrity verification successful")]
     public static partial void LogIntegrityVerificationSuccessDebug(ILogger logger);
 
     [LoggerMessage(LogLevel.Error, "Invalid value; value: {errorValue}, property: {fieldJsonPropertyName}, error: {errorMessage}")]
     public static partial void LogInvalidValueError(ILogger logger, object? errorValue, string fieldJsonPropertyName, string errorMessage);
+
+    [LoggerMessage(LogLevel.Debug, "Method: {method}")]
+    public static partial void LogMethodDebug(ILogger logger, string method);
+
+    [LoggerMessage(LogLevel.Error, "Field error - {fieldName}: [{valuesString}]")]
+    public static partial void LogFieldErrors(ILogger logger, string fieldName, string valuesString);
+
+    [LoggerMessage(LogLevel.Debug, "HTTP request received")]
+    public static partial void LogRequestReceivedDebug(ILogger logger);
+
+    [LoggerMessage(LogLevel.Debug, "URL: {url}")]
+    public static partial void LogUrlDebug(ILogger logger, string url);
 }
