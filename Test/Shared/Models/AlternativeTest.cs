@@ -100,7 +100,7 @@ internal sealed partial class AlternativeTest
             OriginalCharacter = _alternative.OriginalCharacter,
             OriginalPinyin = _alternative.OriginalPinyin,
             OriginalTone = _alternative.OriginalTone,
-            Strokes = (byte)(_alternative.Strokes! + 1)
+            Strokes = (short)(_alternative.Strokes! + 1)
         };
 
         Assert.That(alternativeClone, Is.EqualTo(_alternative));
@@ -115,7 +115,7 @@ internal sealed partial class AlternativeTest
             TheCharacter = _alternative.TheCharacter,
             OriginalCharacter = _alternative.OriginalCharacter,
             OriginalPinyin = _alternative.OriginalPinyin,
-            OriginalTone = (byte)(_alternative.OriginalTone! + 1),
+            OriginalTone = (short)(_alternative.OriginalTone! + 1),
             Strokes = _alternative.Strokes
         };
 

@@ -504,7 +504,7 @@ internal sealed class AlternativeFormTest : IDisposable
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.ALTERNATIVE_FORM_STROKES_INPUT).SetResult(true);
 
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, alternative.TheCharacter);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.ALTERNATIVE_FORM_STROKES_INPUT, alternative.Strokes.ToString());
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.ALTERNATIVE_FORM_STROKES_INPUT, alternative.Strokes?.ToString(CultureInfo.InvariantCulture));
 
         var theCharacterInput = _alternativeFormComponent.Find($"#{IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT}");
         var strokesInput = _alternativeFormComponent.Find($"#{IDs.ALTERNATIVE_FORM_STROKES_INPUT}");

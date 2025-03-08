@@ -12,14 +12,7 @@
             <h2 class="card-title fw-bold">@(entity.TheCharacter ?? string.Empty)</h2>
         </div>
         <div class="card-footer bg-transparent fw-bold">
-            @if (entity is Chachar chachar)
-            {
-                @(chachar.RealPinyin ?? string.Empty)
-            }
-            else if (entity is Alternative alternative)
-            {
-                @(alternative.OriginalCharacter ?? string.Empty)
-            }
+            @GetFooterText(entity)
         </div>
         <div
             class="stretched-link @SelectorClass"

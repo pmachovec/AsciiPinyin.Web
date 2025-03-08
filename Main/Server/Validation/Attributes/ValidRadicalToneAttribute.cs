@@ -21,7 +21,7 @@ internal sealed class ValidRadicalToneAttribute : ValidationAttribute
 
         // The value is null or string at this point.
         // As the API doesn't allow any invalid value like strings, negative numbers etc., this is the only condition to verify.
-        return value is byte radicalTone && radicalTone > ByteConstants.MAX_TONE
+        return value is short radicalTone && radicalTone > NumberConstants.MAX_TONE
             ? new ValidationResult(Errors.ZERO_TO_FOUR)
             : ValidationResult.Success!;
     }

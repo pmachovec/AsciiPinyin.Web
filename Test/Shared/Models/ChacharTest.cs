@@ -137,7 +137,7 @@ internal sealed partial class ChacharTest
             Strokes = _nonRadicalChacharWithAlternative.Strokes,
             RadicalCharacter = _nonRadicalChacharWithAlternative.RadicalCharacter,
             RadicalPinyin = _nonRadicalChacharWithAlternative.RadicalPinyin,
-            RadicalTone = (byte?)(_nonRadicalChacharWithAlternative.RadicalTone + 1),
+            RadicalTone = (short?)(_nonRadicalChacharWithAlternative.RadicalTone + 1),
             RadicalAlternativeCharacter = _nonRadicalChacharWithAlternative.RadicalAlternativeCharacter
         };
 
@@ -152,7 +152,7 @@ internal sealed partial class ChacharTest
         {
             TheCharacter = _nonRadicalChacharWithAlternative.TheCharacter,
             Pinyin = _nonRadicalChacharWithAlternative.Pinyin,
-            Tone = (byte)(_nonRadicalChacharWithAlternative.Tone! + 1),
+            Tone = (short)(_nonRadicalChacharWithAlternative.Tone! + 1),
             Ipa = _nonRadicalChacharWithAlternative.Ipa,
             Strokes = _nonRadicalChacharWithAlternative.Strokes,
             RadicalCharacter = _nonRadicalChacharWithAlternative.RadicalCharacter,

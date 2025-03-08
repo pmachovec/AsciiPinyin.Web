@@ -455,8 +455,8 @@ internal sealed class ChacharsControllerTest
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostToneWrongTest)} - null")]
     [TestCase(5, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostToneWrongTest)} - five")]
     [TestCase(55, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostToneWrongTest)} - fifty-five")]
-    [TestCase(byte.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostToneWrongTest)} - byte max value")]
-    public async Task PostToneWrongTest(byte? tone, string expectedErrorMessage)
+    [TestCase(short.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostToneWrongTest)} - short max value")]
+    public async Task PostToneWrongTest(short? tone, string expectedErrorMessage)
     {
         // Unsigned byte numbers are only reachable inputs.
         var chachar = new Chachar()
@@ -580,8 +580,8 @@ internal sealed class ChacharsControllerTest
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostStrokesWrongTest)} - null")]
     [TestCase(0, Errors.ONE_TO_NINETY_NINE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostStrokesWrongTest)} - zero")]
     [TestCase(100, Errors.ONE_TO_NINETY_NINE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostStrokesWrongTest)} - one hundred")]
-    [TestCase(byte.MaxValue, Errors.ONE_TO_NINETY_NINE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostStrokesWrongTest)} - byte max value")]
-    public async Task PostStrokesWrongTest(byte? strokes, string expectedErrorMessage)
+    [TestCase(short.MaxValue, Errors.ONE_TO_NINETY_NINE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostStrokesWrongTest)} - short max value")]
+    public async Task PostStrokesWrongTest(short? strokes, string expectedErrorMessage)
     {
         // Unsigned byte numbers are only reachable inputs.
         var chachar = new Chachar()
@@ -815,8 +815,8 @@ internal sealed class ChacharsControllerTest
 
     [TestCase(5, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalToneWrongTest)} - five")]
     [TestCase(55, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalToneWrongTest)} - fifty-five")]
-    [TestCase(byte.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalToneWrongTest)} - byte max value")]
-    public async Task PostRadicalToneWrongTest(byte? radicalTone, string expectedErrorMessage)
+    [TestCase(short.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalToneWrongTest)} - short max value")]
+    public async Task PostRadicalToneWrongTest(short? radicalTone, string expectedErrorMessage)
     {
         // Unsigned byte numbers are only reachable inputs.
         var chachar = new Chachar()
@@ -1250,8 +1250,8 @@ internal sealed class ChacharsControllerTest
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteToneWrongTest)} - null")]
     [TestCase(5, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteToneWrongTest)} - five")]
     [TestCase(55, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteToneWrongTest)} - fifty-five")]
-    [TestCase(byte.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteToneWrongTest)} - byte max value")]
-    public async Task PostDeleteToneWrongTest(byte? tone, string expectedErrorMessage)
+    [TestCase(short.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteToneWrongTest)} - short max value")]
+    public async Task PostDeleteToneWrongTest(short? tone, string expectedErrorMessage)
     {
         // Unsigned byte numbers are only reachable inputs.
         var chachar = new Chachar()

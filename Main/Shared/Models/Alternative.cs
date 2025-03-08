@@ -9,10 +9,6 @@ namespace AsciiPinyin.Web.Shared.Models;
 [Table(TableNames.ALTERNATIVE)]
 public sealed class Alternative : IEntity
 {
-    /*
-     * The string type must be used even for single characters.
-     * The char type tends to malfunction when sent over HTTP requests.
-     */
     [
         Column(JsonPropertyNames.THE_CHARACTER),
         DisplayName(JsonPropertyNames.THE_CHARACTER),
@@ -39,14 +35,14 @@ public sealed class Alternative : IEntity
         DisplayName(JsonPropertyNames.ORIGINAL_TONE),
         JsonPropertyName(JsonPropertyNames.ORIGINAL_TONE)
     ]
-    public byte? OriginalTone { get; set; }
+    public short? OriginalTone { get; set; }
 
     [
         Column(JsonPropertyNames.STROKES),
         DisplayName(JsonPropertyNames.STROKES),
         JsonPropertyName(JsonPropertyNames.STROKES)
     ]
-    public byte? Strokes { get; set; }
+    public short? Strokes { get; set; }
 
     // To be replaced by conversion to showing tones by diacritics.
     [JsonIgnore]

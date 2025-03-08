@@ -3,6 +3,7 @@
 @using AsciiPinyin.Web.Shared.Constants
 @using AsciiPinyin.Web.Shared.Models
 @using AsciiPinyin.Web.Shared.Resources
+@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Web;
 
 @inherits ChacharFormBase
@@ -18,115 +19,80 @@
                 <h4 class="modal-title fw-bold ms-3" id="theCharacter">@Localizer[Resource.CreateNewCharacter]</h4>
                 <CloseButton CloseAsync="@CloseAsync" CancellationToken="@CancellationToken.None" />
             </div>
-            <div class="modal-body m-3">
-                <form>
+            <EditForm EditContext="EditContext" OnValidSubmit="async _ => await CheckAndSubmitAsync(CancellationToken.None)">
+                <div class="modal-body m-3">
+                    <DataAnnotationsValidator />
                     <div class="form-input">
-                        <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.ChineseCharacter]</div>
-                        <div class="input-group">
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="@IDs.CHACHAR_FORM_THE_CHARACTER_INPUT"
-                                @oninput="async changeEventArgs => await PreventMultipleCharactersAsync(changeEventArgs, CancellationToken.None)"
-                                @onmousedown="async _ => await ClearWrongInputAsync(
-                                    IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
-                                    IDs.CHACHAR_FORM_THE_CHARACTER_ERROR,
-                                    CancellationToken.None
-                                )">
-                        </div>
-                        <div
-                            class="error-label form-text mx-1 mt-0 text-danger d-inline"
-                            id="@IDs.CHACHAR_FORM_THE_CHARACTER_ERROR">
-                        </div>
+                        <label class="form-text" for="@IDs.CHACHAR_FORM_THE_CHARACTER_INPUT">@Localizer[Resource.ChineseCharacter]</label>
+                        <InputText
+                            class="form-control"
+                            id="@IDs.CHACHAR_FORM_THE_CHARACTER_INPUT"
+                            @bind-Value="Chachar.TheCharacter"
+                            @onfocus="() => ClearError(nameof(Chachar.TheCharacter))"
+                            @oninput="async changeEventArgs => await PreventMultipleCharactersAsync(changeEventArgs, CancellationToken.None)" />
+                        <span class="validation-message form-text text-danger">
+                            <ValidationMessage For="() => Chachar!.TheCharacter" />
+                        </span>
                     </div>
                     <div class="form-input">
-                        <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Pinyin]</div>
-                        <div class="input-group">
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="@IDs.CHACHAR_FORM_PINYIN_INPUT"
-                                @bind-value="Pinyin"
-                                @onmousedown="async _ => await ClearWrongInputAsync(
-                                    IDs.CHACHAR_FORM_PINYIN_INPUT,
-                                    IDs.CHACHAR_FORM_PINYIN_ERROR,
-                                    CancellationToken.None
-                                )">
-                        </div>
-                        <div
-                            class="error-label form-text mx-1 mt-0 text-danger"
-                            id="@IDs.CHACHAR_FORM_PINYIN_ERROR">
-                        </div>
+                        <label class="form-text" for="@IDs.CHACHAR_FORM_PINYIN_INPUT">@Localizer[Resource.Pinyin]</label>
+                        <InputText
+                            class="form-control"
+                            id="@IDs.CHACHAR_FORM_PINYIN_INPUT"
+                            @bind-Value="Chachar.Pinyin"
+                            @onfocus="() => ClearError(nameof(Chachar.Pinyin))" />
+                        <span class="validation-message form-text text-danger">
+                            <ValidationMessage For="() => Chachar!.Pinyin" />
+                        </span>
                     </div>
                     <div class="form-input">
-                        <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Ipa]</div>
-                        <div class="input-group">
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="@IDs.CHACHAR_FORM_IPA_INPUT"
-                                @bind-value="Ipa"
-                                @onmousedown="async _ => await ClearWrongInputAsync(
-                                    IDs.CHACHAR_FORM_IPA_INPUT,
-                                    IDs.CHACHAR_FORM_IPA_ERROR,
-                                    CancellationToken.None
-                                )">
-                        </div>
-                        <div
-                            class="error-label form-text mx-1 mt-0 text-danger"
-                            id="@IDs.CHACHAR_FORM_IPA_ERROR">
-                        </div>
+                        <label class="form-text" for="@IDs.CHACHAR_FORM_IPA_INPUT">@Localizer[Resource.Ipa]</label>
+                        <InputText
+                            class="form-control"
+                            id="@IDs.CHACHAR_FORM_IPA_INPUT"
+                            @bind-Value="Chachar.Ipa"
+                            @onfocus="() => ClearError(nameof(Chachar.Ipa))" />
+                        <span class="validation-message form-text text-danger">
+                            <ValidationMessage For="() => Chachar!.Ipa" />
+                        </span>
                     </div>
                     <div class="form-input">
-                        <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Tone]</div>
-                        <div class="input-group">
-                            <input
-                                type="number"
-                                class="form-control"
-                                min="@ByteConstants.MIN_TONE"
-                                max="@ByteConstants.MAX_TONE"
-                                id="@IDs.CHACHAR_FORM_TONE_INPUT"
-                                @oninput="async changeEventArgs => await PreventToneInvalidAsync(changeEventArgs, CancellationToken.None)"
-                                @onmousedown="async _ => await ClearWrongInputAsync(
-                                    IDs.CHACHAR_FORM_TONE_INPUT,
-                                    IDs.CHACHAR_FORM_TONE_ERROR,
-                                    CancellationToken.None
-                                )">
-                        </div>
-                        <div
-                            class="error-label form-text mx-1 mt-0 text-danger"
-                            id="@IDs.CHACHAR_FORM_TONE_ERROR">
-                        </div>
+                        <label class="form-text" for="@IDs.CHACHAR_FORM_TONE_INPUT">@Localizer[Resource.Tone]</label>
+                        <InputNumber
+                            class="form-control"
+                            min="@NumberConstants.MIN_TONE"
+                            max="@NumberConstants.MAX_TONE"
+                            id="@IDs.CHACHAR_FORM_TONE_INPUT"
+                            @bind-Value="Chachar.Tone"
+                            @onfocus="() => ClearError(nameof(Chachar.Tone))"
+                            @oninput="async changeEventArgs => await PreventToneInvalidAsync(changeEventArgs, CancellationToken.None)" />
+                        <span class="validation-message form-text text-danger">
+                            <ValidationMessage For="() => Chachar!.Tone" />
+                        </span>
                     </div>
                     <div class="form-input">
-                        <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.NumberOfStrokes]</div>
-                        <div class="input-group">
-                            <input
-                                type="number"
-                                class="form-control"
-                                min="@ByteConstants.MIN_STROKES"
-                                max="@ByteConstants.MAX_STROKES"
-                                id="@IDs.CHACHAR_FORM_STROKES_INPUT"
-                                @oninput="async changeEventArgs => await PreventStrokesInvalidAsync(changeEventArgs, CancellationToken.None)"
-                                @onmousedown="async _ => await ClearWrongInputAsync(
-                                    IDs.CHACHAR_FORM_STROKES_INPUT,
-                                    IDs.CHACHAR_FORM_STROKES_ERROR,
-                                    CancellationToken.None
-                                )">
-                        </div>
-                        <div
-                            class="error-label form-text mx-1 mt-0 text-danger"
-                            id="@IDs.CHACHAR_FORM_STROKES_ERROR"></div>
+                        <label class="form-text" for="@IDs.CHACHAR_FORM_STROKES_INPUT">@Localizer[Resource.NumberOfStrokes]</label>
+                        <InputNumber
+                            class="form-control"
+                            min="@NumberConstants.MIN_STROKES"
+                            max="@NumberConstants.MAX_STROKES"
+                            id="@IDs.CHACHAR_FORM_STROKES_INPUT"
+                            @bind-Value="Chachar.Strokes"
+                            @onfocus="() => ClearError(nameof(Chachar.Strokes))"
+                            @oninput="async changeEventArgs => await PreventStrokesInvalidAsync(changeEventArgs, CancellationToken.None)" />
+                        <span class="validation-message form-text text-danger">
+                            <ValidationMessage For="() => Chachar!.Strokes" />
+                        </span>
                     </div>
                     <div class="form-input">
-                        <div class="form-text mx-1 @CssClasses.TEXT_DARK">@Localizer[Resource.Radical]</div>
+                        <label class="form-text" for="@IDs.CHACHAR_FORM_RADICAL_INPUT">@Localizer[Resource.Radical]</label>
                         <div class="input-group">
                             <button
                                 type="button"
                                 class="btn-input-text form-control"
                                 id="@IDs.CHACHAR_FORM_RADICAL_INPUT"
                                 @onclick="async _ => await OpenRadicalSelectorAsync(CancellationToken.None)">
-                                @RadicalCharacter
+                                @Chachar.RadicalCharacter
                             </button>
                             <button
                                 type="button"
@@ -137,18 +103,14 @@
                         </div>
                     </div>
                     <div class="form-input">
-                        <div
-                            class="form-text mx-1"
-                            id="@IDs.CHACHAR_FORM_ALTERNATIVE_LABEL">
-                            @Localizer[Resource.RadicalAlternative]
-                        </div>
+                        <label class="form-text" for="@IDs.CHACHAR_FORM_ALTERNATIVE_INPUT">@Localizer[Resource.RadicalAlternative]</label>
                         <div class="input-group">
                             <button
                                 type="button"
                                 class="btn-input-text form-control"
                                 id="@IDs.CHACHAR_FORM_ALTERNATIVE_INPUT"
                                 @onclick="async _ => await OpenAlternativeSelectorAsync(CancellationToken.None)">
-                                @RadicalAlternativeCharacter
+                                @Chachar.RadicalAlternativeCharacter
                             </button>
                             <button
                                 type="button"
@@ -159,17 +121,15 @@
                             </button>
                         </div>
                     </div>
-                </form>
-            </div>
-            <div class="border-0 modal-footer">
-                <button
-                    type="button"
-                    class="btn btn-modal btn-primary"
-                    id="@IDs.CHACHAR_FORM_SUBMIT_BUTTON"
-                    @onclick="async _ => await CheckAndSubmitAsync(CancellationToken.None)">
-                    <span>@Localizer[Resource.Save]</span>
-                </button>
-            </div>
+                </div>
+                <div class="border-0 modal-footer">
+                    <button
+                        type="submit"
+                        class="btn btn-modal btn-primary">
+                        @Localizer[Resource.Save]
+                    </button>
+                </div>
+            </EditForm>
         </div>
     </div>
 </div>

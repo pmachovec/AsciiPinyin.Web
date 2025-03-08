@@ -30,7 +30,7 @@ public sealed class ModalCommons(
         }
         else
         {
-            await LowerAllZIndexesAsync(modal.ModalLowerLevel!, ByteConstants.INDEX_BACKDROP_Z, cancellationToken);
+            await LowerAllZIndexesAsync(modal.ModalLowerLevel!, NumberConstants.INDEX_BACKDROP_Z, cancellationToken);
         }
 
         await _jSInteropDOM.None2BlockAsync(modal.RootId, cancellationToken);
@@ -65,7 +65,7 @@ public sealed class ModalCommons(
         else
         {
             await _jSInteropDOM.SetTitleAsync(modal.ModalLowerLevel!.HtmlTitle, cancellationToken);
-            await IncreaseAllZIndexesAsync(modal.ModalLowerLevel!, ByteConstants.INDEX_BACKDROP_Z, cancellationToken);
+            await IncreaseAllZIndexesAsync(modal.ModalLowerLevel!, NumberConstants.INDEX_BACKDROP_Z, cancellationToken);
         }
 
         await CloseAsyncCommonCommon(modal, cancellationToken);
@@ -94,7 +94,7 @@ public sealed class ModalCommons(
         }
     }
 
-    public async Task PostAsync<T>(
+    public async Task<bool> PostAsync<T>(
         IModal modal,
         T entity,
         IIndex index,
@@ -125,15 +125,19 @@ public sealed class ModalCommons(
 
             _ = indexAlterCollection(entity);
             index.StateHasChangedPublic();
+            return true;
         }
         else
         {
             LogCommons.LogHttpMethodFailedError(logger, HttpMethod.Post);
+
             await index.SubmitDialog.SetErrorAsync(
                 modal,
                 _localizer[Resource.ProcessingError],
                 cancellationToken
             );
+
+            return false;
         }
     }
 

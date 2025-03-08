@@ -9,10 +9,6 @@ namespace AsciiPinyin.Web.Shared.Models;
 [Table(TableNames.CHACHAR)]
 public sealed class Chachar : IEntity
 {
-    /*
-     * The string type must be used even for single characters.
-     * The char type tends to malfunction when sent over HTTP requests.
-     */
     [
         Column(JsonPropertyNames.THE_CHARACTER),
         DisplayName(JsonPropertyNames.THE_CHARACTER),
@@ -32,7 +28,7 @@ public sealed class Chachar : IEntity
         DisplayName(JsonPropertyNames.TONE),
         JsonPropertyName(JsonPropertyNames.TONE)
     ]
-    public byte? Tone { get; set; }
+    public short? Tone { get; set; }
 
     [
         Column(JsonPropertyNames.IPA),
@@ -41,16 +37,12 @@ public sealed class Chachar : IEntity
     ]
     public string? Ipa { get; set; }
 
-    /*
-     * The number of strokes can't be lower than 1 => using unsigned type is possible.
-     * Highest theoretically possible value is 99 => byte is enough (byte is unsigned, signed would be sbyte).
-     */
     [
         Column(JsonPropertyNames.STROKES),
         DisplayName(JsonPropertyNames.STROKES),
         JsonPropertyName(JsonPropertyNames.STROKES)
     ]
-    public byte? Strokes { get; set; }
+    public short? Strokes { get; set; }
 
     [
         Column(JsonPropertyNames.RADICAL_CHARACTER),
@@ -71,7 +63,7 @@ public sealed class Chachar : IEntity
         DisplayName(JsonPropertyNames.RADICAL_TONE),
         JsonPropertyName(JsonPropertyNames.RADICAL_TONE)
     ]
-    public byte? RadicalTone { get; set; }
+    public short? RadicalTone { get; set; }
 
     [
         Column(JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER),

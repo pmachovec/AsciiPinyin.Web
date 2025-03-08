@@ -17,6 +17,11 @@ a, .btn-link {
     color: #0071c1;
 }
 
+/* Remove the default green border on valid Blazor inputs */
+input:focus:not(.invalid), input.valid {
+    outline: none !important;
+}
+
 .btn {
     font-weight: bold !important;
 }
@@ -70,10 +75,6 @@ a, .btn-link {
     justify-content: space-between;
 }
 
-.error-label {
-    display: inline;
-}
-
 .form-input {
     min-height: 85px;
 }
@@ -115,7 +116,11 @@ a, .btn-link {
 }
 
 .validation-message {
-    color: red;
+    visibility: hidden;
+}
+
+.validation-message:not(:empty) {
+    visibility: visible; /* Show text when there’s an error */
 }
 
 #blazor-error-ui {

@@ -486,8 +486,8 @@ internal sealed class AlternativesControllerTest
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalToneWrongTest)} - null")]
     [TestCase(5, Errors.ZERO_TO_FOUR, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalToneWrongTest)} - five")]
     [TestCase(55, Errors.ZERO_TO_FOUR, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalToneWrongTest)} - fifty-five")]
-    [TestCase(byte.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalToneWrongTest)} - byte max value")]
-    public async Task PostOriginalToneWrongTest(byte? originalTone, string expectedErrorMessage)
+    [TestCase(short.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalToneWrongTest)} - short max value")]
+    public async Task PostOriginalToneWrongTest(short? originalTone, string expectedErrorMessage)
     {
         // Unsigned byte numbers are only reachable inputs.
         var alternative = new Alternative()
@@ -503,8 +503,8 @@ internal sealed class AlternativesControllerTest
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostStrokesWrongTest)} - null")]
     [TestCase(0, Errors.ONE_TO_NINETY_NINE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostStrokesWrongTest)} - zero")]
     [TestCase(100, Errors.ONE_TO_NINETY_NINE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostStrokesWrongTest)} - one hundred")]
-    [TestCase(byte.MaxValue, Errors.ONE_TO_NINETY_NINE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostStrokesWrongTest)} - byte max value")]
-    public async Task PostStrokesWrongTest(byte? strokes, string expectedErrorMessage)
+    [TestCase(short.MaxValue, Errors.ONE_TO_NINETY_NINE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostStrokesWrongTest)} - short max value")]
+    public async Task PostStrokesWrongTest(short? strokes, string expectedErrorMessage)
     {
         // Unsigned byte numbers are only reachable inputs.
         var alternative = new Alternative()
@@ -923,8 +923,8 @@ internal sealed class AlternativesControllerTest
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalToneWrongTest)} - null")]
     [TestCase(5, Errors.ZERO_TO_FOUR, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalToneWrongTest)} - five")]
     [TestCase(55, Errors.ZERO_TO_FOUR, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalToneWrongTest)} - fifty-five")]
-    [TestCase(byte.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalToneWrongTest)} - byte max value")]
-    public async Task PostDeleteOriginalToneWrongTest(byte? originalTone, string expectedErrorMessage)
+    [TestCase(short.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalToneWrongTest)} - short max value")]
+    public async Task PostDeleteOriginalToneWrongTest(short? originalTone, string expectedErrorMessage)
     {
         // Unsigned byte numbers are only reachable inputs.
         var alternative = new Alternative()

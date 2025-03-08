@@ -3,11 +3,12 @@ using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.HttpClients;
 using AsciiPinyin.Web.Client.JSInterop;
+using AsciiPinyin.Web.Client.Validation;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
-using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Localization;
 using System.Globalization;
 
@@ -17,11 +18,9 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 {
     protected EntitySelector<Chachar> OriginalSelector { get; set; } = default!;
 
-    protected string? OriginalCharacter { get; set; }
+    protected Alternative Alternative { get; set; } = new();
 
-    protected string? OriginalPinyin { get; set; }
-
-    protected byte? OriginalTone { get; set; }
+    protected EditContext EditContext = default!;
 
     public string RootId { get; } = IDs.ALTERNATIVE_FORM_ROOT;
 
@@ -30,10 +29,6 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     public IModal? ModalLowerLevel { get; private set; }
 
     public string HtmlTitle { get; private set; } = string.Empty;
-
-    public byte? Strokes { get; set; }
-
-    public string? TheCharacter { get; set; }
 
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
@@ -56,8 +51,12 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     [Parameter, EditorRequired]
     public required IIndex Index { get; init; }
 
-    protected override void OnInitialized() =>
+    protected override void OnInitialized()
+    {
         HtmlTitle = Localizer[Resource.CreateNewAlternative];
+        SetUpEditContext();
+        EditContext.OnValidationRequested += async (_, _) => await ValidateAdditionalAsync(CancellationToken.None);
+    }
 
     public async Task OpenAsync(IPage page, CancellationToken cancellationToken)
     {
@@ -71,36 +70,43 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
     protected async Task OpenOriginalSelectorAsync(CancellationToken cancellationToken) =>
         await Task.WhenAll(
-            ClearWrongInputAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR, cancellationToken),
-            JSInteropDOM.SetZIndexAsync(IDs.ALTERNATIVE_FORM_ROOT, ByteConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
-            OriginalSelector.OpenAsync(this, cancellationToken)
+            ClearOriginalAsync(cancellationToken),
+            JSInteropDOM.SetZIndexAsync(
+                IDs.ALTERNATIVE_FORM_ROOT,
+                NumberConstants.INDEX_BACKDROP_Z - 1,
+                cancellationToken
+            ),
+            OriginalSelector.OpenAsync(
+                this,
+                cancellationToken
+            )
         );
 
     protected async Task SelectOriginalAsync(Chachar originalChachar, CancellationToken cancellationToken)
     {
-        OriginalCharacter = originalChachar.TheCharacter;
-        OriginalPinyin = originalChachar.Pinyin;
-        OriginalTone = originalChachar.Tone;
+        Alternative.OriginalCharacter = originalChachar.TheCharacter;
+        Alternative.OriginalPinyin = originalChachar.Pinyin;
+        Alternative.OriginalTone = originalChachar.Tone;
         StateHasChanged();
         await OriginalSelector.CloseAsync(cancellationToken);
     }
 
     protected async Task ClearOriginalAsync(CancellationToken cancellationToken)
     {
+        ClearError(nameof(Alternative.OriginalCharacter));
+
         await Task.WhenAll(
-            JSInteropDOM.RemoveClassAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.BORDER_DANGER, cancellationToken),
-            JSInteropDOM.RemoveTextAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR, cancellationToken)
+            JSInteropDOM.RemoveClassAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.INVALID, cancellationToken),
+            JSInteropDOM.RemoveClassAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_CLEAR, CssClasses.INVALID, cancellationToken)
         );
 
-        OriginalCharacter = null;
-        OriginalPinyin = null;
-        OriginalTone = null;
-        StateHasChanged();
+        Alternative.OriginalCharacter = null;
+        Alternative.OriginalPinyin = null;
+        Alternative.OriginalTone = null;
     }
 
     protected async Task PreventMultipleCharactersAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken) =>
         await EntityFormCommons.PreventMultipleCharactersAsync(
-            this,
             IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT,
             changeEventArgs,
             cancellationToken
@@ -108,105 +114,38 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
     protected async Task PreventStrokesInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken) =>
         await EntityFormCommons.PreventStrokesInvalidAsync(
-            this,
             IDs.ALTERNATIVE_FORM_STROKES_INPUT,
             changeEventArgs,
+            Alternative.Strokes,
             cancellationToken
         );
 
-    protected async Task ClearWrongInputAsync(string inputId, string errorId, CancellationToken cancellationToken) =>
-        await EntityFormCommons.ClearWrongInputAsync(inputId, errorId, cancellationToken);
-
-    protected async Task CheckAndSubmitAsync(CancellationToken cancellationToken)
+    protected void ClearError(string fieldName)
     {
-        LogCommons.LogHttpMethodInfo(Logger, HttpMethod.Post, Actions.CREATE_NEW_ALTERNATIVE);
-        LogCommons.LogInitialIntegrityVerificationDebug(Logger);
+        var fieldIdentifier = new FieldIdentifier(Alternative, fieldName);
+        EditContext.NotifyFieldChanged(fieldIdentifier);
+    }
 
-        var areAllInputsValid = await EntityFormCommons.CheckInputsAsync(
-            cancellationToken,
-            (IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, IDs.ALTERNATIVE_FORM_THE_CHARACTER_ERROR, GetTheCharacterErrorText),
-            (IDs.ALTERNATIVE_FORM_STROKES_INPUT, IDs.ALTERNATIVE_FORM_STROKES_ERROR, GetStrokesErrorText),
-            (IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR, GetOriginalErrorText)
-        );
+    protected async Task ValidateAdditionalAsync(CancellationToken cancellationToken)
+    {
+        var originalFiled = new FieldIdentifier(Alternative, nameof(Alternative.OriginalCharacter));
 
-        if (areAllInputsValid)
+        if (EditContext.GetValidationMessages(originalFiled).Any())
         {
-            await CheckIntegrityAndSubmitAsync(
-                TheCharacter!,
-                OriginalCharacter!,
-                OriginalPinyin!,
-                (byte)OriginalTone!,
-                (byte)Strokes!,
-                cancellationToken
+            await Task.WhenAll(
+                JSInteropDOM.AddClassAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.INVALID, cancellationToken),
+                JSInteropDOM.AddClassAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_CLEAR, CssClasses.INVALID, cancellationToken)
             );
         }
     }
 
-    private string? GetTheCharacterErrorText()
-    {
-        if (string.IsNullOrEmpty(TheCharacter))
-        {
-            LogCommons.LogInvalidFormValueError(Logger, TheCharacter, IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, Errors.EMPTY);
-            return Localizer[Resource.CompulsoryValue];
-        }
-        else if (!TextUtils.IsOnlyChineseCharacters(TheCharacter))
-        {
-            LogCommons.LogInvalidFormValueError(Logger, TheCharacter, IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, Errors.NO_SINGLE_CHINESE);
-            return Localizer[Resource.MustBeChineseCharacter];
-        }
-
-        // Multi-character inputs are unreachable thanks to PreventMultipleCharacters, no need to handle this case.
-
-        return null;
-    }
-
-    // Null strokes is the only reachable wrong input.
-    // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to handle this case.
-    private string? GetStrokesErrorText()
-    {
-        if (Strokes is null)
-        {
-            LogCommons.LogInvalidFormValueError(Logger, Strokes, IDs.ALTERNATIVE_FORM_STROKES_INPUT, Errors.EMPTY);
-            return Localizer[Resource.CompulsoryValue];
-        }
-
-        return null;
-    }
-
-    private string? GetOriginalErrorText()
-    {
-        if (OriginalCharacter is null)
-        {
-            LogCommons.LogInvalidFormValueError(Logger, OriginalCharacter, IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, Errors.EMPTY);
-            return Localizer[Resource.CompulsoryValue];
-        }
-
-        return null;
-    }
-
-    private async Task CheckIntegrityAndSubmitAsync(
-        string theCharacter,
-        string originalCharacter,
-        string originalPinyin,
-        byte originalTone,
-        byte strokes,
-        CancellationToken cancellationToken
-    )
+    protected async Task CheckAndSubmitAsync(CancellationToken cancellationToken)
     {
         await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
-
-        var alternative = new Alternative()
-        {
-            OriginalCharacter = originalCharacter,
-            OriginalPinyin = originalPinyin,
-            OriginalTone = originalTone,
-            Strokes = strokes,
-            TheCharacter = theCharacter
-        };
-
-        LogCommons.LogFormDataInfo(Logger, alternative);
+        LogCommons.LogFormSubmittedDebug(Logger, nameof(Alternative));
+        LogCommons.LogFormDataDebug(Logger, nameof(Alternative), Alternative);
         LogCommons.LogDatabaseIntegrityVerificationDebug(Logger);
-        var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(alternative);
+        var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(Alternative);
 
         if (databseIntegrityErrorText is not null)
         {
@@ -218,9 +157,9 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         }
         else
         {
-            await ModalCommons.PostAsync(
+            var isPostSuccessful = await ModalCommons.PostAsync(
                 this,
-                alternative,
+                Alternative,
                 Index,
                 EntityClient.PostEntityAsync,
                 ApiNames.ALTERNATIVES,
@@ -228,10 +167,15 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
                 Index.Alternatives.Add,
                 Resource.AlternativeCreated,
                 cancellationToken,
-                alternative.TheCharacter!,
-                alternative.OriginalCharacter!,
-                alternative.OriginalRealPinyin!
+                Alternative.TheCharacter!,
+                Alternative.OriginalCharacter!,
+                Alternative.OriginalRealPinyin!
             );
+
+            if (isPostSuccessful)
+            {
+                ClearForm();
+            }
         }
     }
 
@@ -251,5 +195,17 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         }
 
         return null;
+    }
+
+    private void ClearForm()
+    {
+        Alternative = new();
+        SetUpEditContext();
+    }
+
+    private void SetUpEditContext()
+    {
+        EditContext = new(Alternative);
+        _ = new FormValidationHandler<AlternativeForm>(Logger, Localizer, EditContext);
     }
 }

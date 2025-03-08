@@ -1,4 +1,3 @@
-using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using Microsoft.AspNetCore.Components;
 
 namespace AsciiPinyin.Web.Client.Commons;
@@ -6,23 +5,22 @@ namespace AsciiPinyin.Web.Client.Commons;
 public interface IEntityFormCommons
 {
     Task PreventMultipleCharactersAsync(
-        IEntityForm entityForm,
         string inputId,
         ChangeEventArgs changeEventArgs,
         CancellationToken cancellationToken
     );
 
     Task PreventStrokesInvalidAsync(
-        IEntityForm entityForm,
         string inputId,
         ChangeEventArgs changeEventArgs,
+        short? originalValue,
         CancellationToken cancellationToken
     );
 
-    Task<byte?> GetCorrectNumberInputValueAsync(
+    Task<short?> GetCorrectNumberInputValueAsync(
         string inputId,
         object? changeEventArgsValue,
-        byte? originalValue,
+        short? originalValue,
         CancellationToken cancellationToken
     );
 

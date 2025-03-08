@@ -130,7 +130,7 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
     {
         await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
 
-        await ModalCommons.PostAsync(
+        _ = await ModalCommons.PostAsync(
             this,
             Alternative!,
             Index,

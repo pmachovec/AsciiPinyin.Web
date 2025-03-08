@@ -140,7 +140,7 @@ public class ChacharViewDialogBase : ComponentBase, IModal
     {
         await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
 
-        await ModalCommons.PostAsync(
+        _ = await ModalCommons.PostAsync(
             this,
             Chachar!,
             Index,

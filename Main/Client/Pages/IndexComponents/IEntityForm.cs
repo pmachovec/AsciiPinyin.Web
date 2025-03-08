@@ -6,7 +6,4 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public interface IEntityForm : IModal
 {
-    byte? Strokes { get; set; }
-
-    string? TheCharacter { get; set; }
 }

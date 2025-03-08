@@ -5,6 +5,7 @@ using AsciiPinyin.Web.Shared.Resources;
 using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
+using System.Globalization;
 
 namespace AsciiPinyin.Web.Client.Commons;
 
@@ -14,47 +15,47 @@ public sealed class EntityFormCommons(
 ) : IEntityFormCommons
 {
     public async Task PreventMultipleCharactersAsync(
-        IEntityForm entityForm,
         string inputId,
         ChangeEventArgs changeEventArgs,
         CancellationToken cancellationToken
     )
     {
-        if (changeEventArgs.Value is string theCharacter)
+        if (
+            changeEventArgs.Value is string theCharacter
+            && theCharacter.Length > 1
+            && TextUtils.GetStringRealLength(theCharacter) > 1
+        )
         {
-            if (theCharacter.Length <= 1 || TextUtils.GetStringRealLength(theCharacter) <= 1)
-            {
-                entityForm.TheCharacter = theCharacter;
-            }
-            else
-            {
-                var theCharacterStart = TextUtils.GetStringFirstCharacterAsString(theCharacter);
-                entityForm.TheCharacter = theCharacterStart;
-                await _jSInteropDOM.SetValueAsync(inputId, theCharacterStart, cancellationToken);
-            }
+            var theCharacterStart = TextUtils.GetStringFirstCharacterAsString(theCharacter);
+            await _jSInteropDOM.SetValueAsync(inputId, theCharacterStart, cancellationToken);
         }
     }
 
     public async Task PreventStrokesInvalidAsync(
-        IEntityForm entityForm,
         string inputId,
         ChangeEventArgs changeEventArgs,
+        short? originalValue,
         CancellationToken cancellationToken
     )
     {
-        entityForm.Strokes = await GetCorrectNumberInputValueAsync(
+        var correctStrokes = await GetCorrectNumberInputValueAsync(
             inputId,
             changeEventArgs.Value,
-            entityForm.Strokes,
+            originalValue,
             cancellationToken
         );
-        await _jSInteropDOM.SetValueAsync(inputId, entityForm.Strokes.ToString()!, cancellationToken);
+
+        await _jSInteropDOM.SetValueAsync(
+            inputId,
+            correctStrokes?.ToString(CultureInfo.InvariantCulture)!,
+            cancellationToken
+        );
     }
 
-    public async Task<byte?> GetCorrectNumberInputValueAsync(
+    public async Task<short?> GetCorrectNumberInputValueAsync(
         string inputId,
         object? changeEventArgsValue,
-        byte? originalValue,
+        short? originalValue,
         CancellationToken cancellationToken
     )
     {
@@ -77,7 +78,7 @@ public sealed class EntityFormCommons(
             return (
                 isInputValid
                 && changeEventArgsValue is string inputNumberAsString
-                && byte.TryParse(inputNumberAsString.AsSpan(0, Math.Max(1, inputNumberAsString.Length)), out var inputNumber)
+                && short.TryParse(inputNumberAsString.AsSpan(0, Math.Max(1, inputNumberAsString.Length)), out var inputNumber)
             )
             ? inputNumber : originalValue;
         }
