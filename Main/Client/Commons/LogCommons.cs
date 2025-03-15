@@ -24,9 +24,6 @@ internal static partial class LogCommons
     [LoggerMessage(LogLevel.Information, "CREATE {entityClassName}: {entity}")]
     public static partial void LogCreateInfo(ILogger logger, Type entityClassName, IEntity entity);
 
-    [LoggerMessage(LogLevel.Debug, "Database integrity verification")]
-    public static partial void LogDatabaseIntegrityVerificationDebug(ILogger logger);
-
     [LoggerMessage(LogLevel.Information, "DELETE {entityClassName}: {entity}")]
     public static partial void LogDeleteInfo(ILogger logger, Type entityClassName, IEntity entity);
 

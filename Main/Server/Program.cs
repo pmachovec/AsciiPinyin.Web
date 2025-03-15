@@ -32,7 +32,12 @@ _ = builder.Configuration.AddYamlFile(
 _ = builder.Services
     .AddDbContext<AsciiPinyinContext>(optionsBuilder => optionsBuilder.UseSqlite("Data Source=Data/asciipinyin.sqlite"))
     .AddLocalization()
-    .AddScoped<IEntityControllerCommons, EntityControllerCommons>() // Doesn't work as singleton, must be scoped, because the consumed DB context is also scoped.
+    .AddScoped<AlternativePostFilter>()
+    .AddScoped<AlternativePostDeleteFilter>()
+    .AddScoped<ChacharPostFilter>()
+    .AddScoped<ChacharPostDeleteFilter>()
+    .AddScoped<IPostFilterCommons, PostFilterCommons>() // Doesn't work as singleton, must be scoped, because the consumed DB context is also scoped.
+    .AddScoped<IEntityControllerCommons, EntityControllerCommons>()
     .AddSingleton<ILocals>(_ => new Locals(nLogConfigYamlPath))
     .Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true); // Replaced by AsciiPinyinModelStateInvalidFilter (further injected)
 

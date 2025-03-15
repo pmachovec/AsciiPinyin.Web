@@ -144,7 +144,6 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
         LogCommons.LogFormSubmittedDebug(Logger, nameof(Alternative));
         LogCommons.LogFormDataDebug(Logger, nameof(Alternative), Alternative);
-        LogCommons.LogDatabaseIntegrityVerificationDebug(Logger);
         var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(Alternative);
 
         if (databseIntegrityErrorText is not null)

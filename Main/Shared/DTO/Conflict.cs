@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace AsciiPinyin.Web.Shared.DTO;
 
-public sealed class ConflictEntity(
+public sealed class Conflict(
     string _entityType,
     IEntity _entity
 )

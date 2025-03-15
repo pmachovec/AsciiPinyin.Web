@@ -192,7 +192,6 @@ public class ChacharFormBase : ComponentBase, IEntityForm
         await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
         LogCommons.LogFormSubmittedDebug(Logger, nameof(Chachar));
         LogCommons.LogFormDataDebug(Logger, nameof(Chachar), Chachar);
-        LogCommons.LogDatabaseIntegrityVerificationDebug(Logger);
         var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(Chachar);
 
         if (databseIntegrityErrorText is not null)
