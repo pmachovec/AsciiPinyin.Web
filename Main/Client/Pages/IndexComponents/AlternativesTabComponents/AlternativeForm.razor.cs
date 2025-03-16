@@ -7,10 +7,12 @@ using AsciiPinyin.Web.Client.Validation;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
+using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Localization;
 using System.Globalization;
+using System.Threading;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
@@ -105,20 +107,37 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         Alternative.OriginalTone = null;
     }
 
-    protected async Task PreventMultipleCharactersAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken) =>
-        await EntityFormCommons.PreventMultipleCharactersAsync(
-            IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT,
-            changeEventArgs,
-            cancellationToken
-        );
+    protected async Task PreventMultipleCharactersAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
+    {
+        if (
+            changeEventArgs.Value is string theCharacter
+            && theCharacter.Length > 1
+            && TextUtils.GetStringRealLength(theCharacter) > 1
+        )
+        {
+            var theCharacterStart = TextUtils.GetStringFirstCharacterAsString(theCharacter);
+            Alternative.TheCharacter = theCharacterStart;
+            await JSInteropDOM.SetValueAsync(IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT, theCharacterStart, cancellationToken);
+        }
+    }
 
-    protected async Task PreventStrokesInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken) =>
-        await EntityFormCommons.PreventStrokesInvalidAsync(
+    protected async Task PreventStrokesInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
+    {
+        var correctStrokes = await EntityFormCommons.GetCorrectNumberInputValueAsync(
             IDs.ALTERNATIVE_FORM_STROKES_INPUT,
-            changeEventArgs,
+            changeEventArgs.Value,
             Alternative.Strokes,
             cancellationToken
         );
+
+        Alternative.Strokes = correctStrokes;
+
+        await JSInteropDOM.SetValueAsync(
+            IDs.ALTERNATIVE_FORM_STROKES_INPUT,
+            correctStrokes,
+            cancellationToken
+        );
+    }
 
     protected void ClearError(string fieldName)
     {
@@ -128,9 +147,9 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
     protected async Task ValidateAdditionalAsync(CancellationToken cancellationToken)
     {
-        var originalFiled = new FieldIdentifier(Alternative, nameof(Alternative.OriginalCharacter));
+        var originalField = new FieldIdentifier(Alternative, nameof(Alternative.OriginalCharacter));
 
-        if (EditContext.GetValidationMessages(originalFiled).Any())
+        if (EditContext.GetValidationMessages(originalField).Any())
         {
             await Task.WhenAll(
                 JSInteropDOM.AddClassAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.INVALID, cancellationToken),

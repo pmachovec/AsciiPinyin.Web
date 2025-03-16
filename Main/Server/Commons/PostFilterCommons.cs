@@ -1,6 +1,7 @@
 using AsciiPinyin.Web.Server.Controllers.ActionFilters;
 using AsciiPinyin.Web.Server.Data;
-using AsciiPinyin.Web.Shared.DTO;
+using AsciiPinyin.Web.Server.Delegates;
+using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -14,7 +15,7 @@ internal sealed class PostFilterCommons(AsciiPinyinContext _asciiPinyinContext) 
         ActionExecutingContext context,
         string tableName,
         ILogger<T1> logger,
-        Func<T2, DbSet<Chachar>, DbSet<Alternative>, IEnumerable<DatabaseIntegrityError>> getDatabaseIntegrityErrors
+        AreConflictDbItegrityErrors<T2> areConflictDbItegrityErrors
     ) where T1 : IPostFilter where T2 : IEntity
     {
         if (
@@ -24,54 +25,41 @@ internal sealed class PostFilterCommons(AsciiPinyinContext _asciiPinyinContext) 
         {
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
-        else
+        else if (areConflictDbItegrityErrors(chachar, knownChachars, knownAlternatives, out var errors))
         {
-            var databaseIntegrityErrors = getDatabaseIntegrityErrors(chachar, knownChachars, knownAlternatives);
-
-            if (databaseIntegrityErrors.Any())
-            {
-                // if none of errors contains conflicts, return BadRequest response
-                //     if there's only one error, set its message as the response content
-                //     else set array with error messages as content
-                // else return Conflict response
-                //     if there's only one error, set it as response content
-                //     else set array with errors as content
-                return databaseIntegrityErrors.All(error => !error.Conflicts.Any())
-                    ? databaseIntegrityErrors.Count() == 1
-                        ? new BadRequestObjectResult(databaseIntegrityErrors.First().Error)
-                        : new BadRequestObjectResult(databaseIntegrityErrors.Select(error => error.Error))
-                    : databaseIntegrityErrors.Count() == 1
-                        ? new ConflictObjectResult(databaseIntegrityErrors.First())
-                        : new ConflictObjectResult(databaseIntegrityErrors);
-            }
+            return new ConflictObjectResult(new Dictionary<string, IEnumerable<string>> { { JsonPropertyNames.ERRORS, errors } });
+        }
+        else if (errors.Any())
+        {
+            return new BadRequestObjectResult(new Dictionary<string, IEnumerable<string>> { { JsonPropertyNames.ERRORS, errors } });
         }
 
         return null;
     }
 
-    private bool GetEntityFromContext<T1, T2>(
+    private static bool GetEntityFromContext<T1, T2>(
         ActionExecutingContext context,
         string tableName,
         ILogger<T1> logger,
         out T2 entity
     ) where T1 : IPostFilter where T2 : IEntity
     {
-        var chacharObject = context.ActionArguments[tableName];
+        var entityObject = context.ActionArguments[tableName];
 
-        if (chacharObject is null)
+        if (entityObject is null)
         {
-            LogCommons.LogEntityNullError(logger, nameof(T2));
+            LogCommons.LogEntityNullError(logger, typeof(T2).Name);
             entity = default!;
             return false;
         }
-        else if (chacharObject is not Chachar)
+        else if (entityObject is not Chachar and not Alternative)
         {
-            LogCommons.LogEntityMismatchError(logger, nameof(T2), chacharObject.GetType().Name);
+            LogCommons.LogEntityMismatchError(logger, entityObject.GetType().Name);
             entity = default!;
             return false;
         }
 
-        entity = (T2)chacharObject;
+        entity = (T2)entityObject;
         return true;
     }
 

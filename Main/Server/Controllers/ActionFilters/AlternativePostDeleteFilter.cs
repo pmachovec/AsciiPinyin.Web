@@ -1,6 +1,6 @@
 using AsciiPinyin.Web.Server.Commons;
+using AsciiPinyin.Web.Server.Constants;
 using AsciiPinyin.Web.Shared.Constants;
-using AsciiPinyin.Web.Shared.DTO;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +14,13 @@ internal sealed class AlternativePostDeleteFilter(
 {
     public override void OnActionExecuting(ActionExecutingContext context)
     {
+        LogCommons.LogPostActionInitiatedInfo(_logger, Actions.CREATE, TableNames.ALTERNATIVE);
+
         var errorActionResult = _postFilterCommons.GetErrorActionResult<AlternativePostDeleteFilter, Alternative>(
             context,
-            TableNames.CHACHAR,
+            TableNames.ALTERNATIVE,
             _logger,
-            GetDatabaseIntegrityErrors
+            AreConflictDbIntegrityErrors
         );
 
         if (errorActionResult is not null)
@@ -27,19 +29,21 @@ internal sealed class AlternativePostDeleteFilter(
         }
     }
 
-    private List<DatabaseIntegrityError> GetDatabaseIntegrityErrors(
+    private bool AreConflictDbIntegrityErrors(
         Alternative alternative,
         DbSet<Chachar> knownChachars,
-        DbSet<Alternative> knownAlternatives
+        DbSet<Alternative> knownAlternatives,
+        out IEnumerable<string> errors
     )
     {
+        LogCommons.LogEntityInfo(_logger, TableNames.ALTERNATIVE, alternative);
+
         if (!knownAlternatives.Contains(alternative))
         {
-            LogCommons.LogEntityError(_logger, Errors.ALTERNATIVE_UNKNOWN, TableNames.ALTERNATIVE, alternative);
-            return [new(Errors.ALTERNATIVE_UNKNOWN, [])];
+            LogCommons.LogError(_logger, Errors.ALTERNATIVE_UNKNOWN);
+            errors = [Errors.ALTERNATIVE_UNKNOWN];
+            return false;
         }
-
-        List<DatabaseIntegrityError> databaseIntegrityErrors = [];
 
         var chacharsWithThis = knownChachars.Where(knownChachar =>
             knownChachar.RadicalAlternativeCharacter == alternative.TheCharacter
@@ -50,17 +54,13 @@ internal sealed class AlternativePostDeleteFilter(
 
         if (chacharsWithThis.Any())
         {
-            LogCommons.LogEntityError(
-                _logger,
-                Errors.IS_ALTERNATIVE_FOR_CHACHARS,
-                TableNames.ALTERNATIVE,
-                alternative,
-                $"conflict chachars: [{string.Join(",", chacharsWithThis)}]"
-            );
-
-            return [new(Errors.IS_ALTERNATIVE_FOR_CHACHARS, chacharsWithThis.Select(chachar => new Conflict(TableNames.CHACHAR, chachar)))];
+            LogCommons.LogError(_logger, Errors.IS_ALTERNATIVE_FOR_CHACHARS);
+            LogCommons.LogConflictsError(_logger, TableNames.CHACHAR, $"[{string.Join(",", chacharsWithThis)}]");
+            errors = [Errors.IS_ALTERNATIVE_FOR_CHACHARS];
+            return true;
         }
 
-        return [];
+        errors = [];
+        return false;
     }
 }

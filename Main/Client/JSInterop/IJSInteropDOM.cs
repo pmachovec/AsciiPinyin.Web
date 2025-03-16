@@ -71,7 +71,7 @@ public interface IJSInteropDOM
     /// <param name="value">The value to be set.</param>
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
     /// <returns></returns>
-    Task SetValueAsync(string elementId, string value, CancellationToken cancellationToken);
+    Task SetValueAsync<T>(string elementId, T value, CancellationToken cancellationToken);
 
     /// <summary>
     /// Decides if the given element contains an invalid input value by the EcmaScript definition of 'validity.badInput'.

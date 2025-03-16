@@ -14,12 +14,14 @@ public sealed class AlternativesController(
     ILogger<AlternativesController> _logger
 ) : ControllerBase, IEntityController
 {
-    [HttpGet]
+    [
+        HttpGet,
+        ServiceFilter(typeof(AlternativeGetFilter))
+    ]
     public ActionResult<IEnumerable<Alternative>> Get() =>
         _entityControllerCommons.TheGet<AlternativesController, Alternative>(
             this,
             _logger,
-            Actions.GET_ALL_ALTERNATIVES,
             nameof(AsciiPinyinContext.Alternatives)
         );
 
@@ -31,6 +33,7 @@ public sealed class AlternativesController(
         _entityControllerCommons.Post(
             this,
             alternative,
+            TableNames.ALTERNATIVE,
             _logger
         );
 
@@ -42,6 +45,7 @@ public sealed class AlternativesController(
         _entityControllerCommons.PostDelete(
             this,
             alternative,
+            TableNames.ALTERNATIVE,
             _logger
         );
 }

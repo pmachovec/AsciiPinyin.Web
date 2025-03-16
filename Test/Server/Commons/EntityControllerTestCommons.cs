@@ -1,10 +1,13 @@
 using Asciipinyin.Web.Server.Test.Constants;
 using AsciiPinyin.Web.Server.Commons;
 using AsciiPinyin.Web.Server.Controllers;
+using AsciiPinyin.Web.Server.Controllers.ActionFilters;
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Server.Middleware;
 using AsciiPinyin.Web.Server.Test.Constants;
+using AsciiPinyin.Web.Server.Validation;
 using AsciiPinyin.Web.Shared.Models;
+using AsciiPinyin.Web.Shared.Test.Constants;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +24,7 @@ using Moq;
 using NUnit.Framework;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json.Nodes;
 
 namespace AsciiPinyin.Web.Server.Test.Commons;
 
@@ -103,13 +107,6 @@ internal class EntityControllerTestCommons<T1, T2>(
     public async Task<HttpResponseMessage> PostDeleteAsync(IHost host, T2 entity, CancellationToken cancellationToken) =>
         await GetTestClient(host).PostAsJsonAsync(_pathDelete, entity, cancellationToken: cancellationToken);
 
-    public async Task<IHost> GetHostAsync(AsciiPinyinContext asciiPinyinContext, CancellationToken cancellationToken)
-    {
-        var hostBuilder = GetHostBuilder();
-        _ = hostBuilder.ConfigureServices(services => services.AddScoped(_ => asciiPinyinContext));
-        return await hostBuilder.StartAsync(cancellationToken);
-    }
-
     public void AddToContextAndSave(
         AsciiPinyinContext asciiPinyinContext,
         params IEntity[] entities
@@ -144,29 +141,37 @@ internal class EntityControllerTestCommons<T1, T2>(
         params T2[] expectedEntities
     )
     {
-        Assert.That(response, Is.Not.Null);
-        Assert.That(response!.StatusCode, Is.Not.Null);
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-        Assert.That(response.Content, Is.Not.Null);
+        TestResponseStatusCode(response, HttpStatusCode.OK);
 
-        var entities = await response.Content.ReadFromJsonAsync<ISet<T2>>();
-
+        var entities = await response!.Content.ReadFromJsonAsync<IEnumerable<T2>>();
         Assert.That(entities, Is.Not.Null);
-        Assert.That(entities!.Count, Is.EqualTo(expectedEntities.Length));
-
-        foreach (var expectedEntity in expectedEntities)
-        {
-            Assert.That(entities.Contains(expectedEntity), Is.True);
-        }
+        Assert.That(entities, Is.EquivalentTo(expectedEntities));
     }
 
-    public void PostBadRequestTest(HttpResponseMessage? response)
+    public async Task PostWrongFieldTestAsync(
+        HttpResponseMessage? response,
+        string fieldName,
+        CancellationToken cancellationToken,
+        params string[] expectedErrors
+    )
     {
-        Assert.That(response, Is.Not.Null);
-        Assert.That(response!.StatusCode, Is.Not.Null);
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-        Assert.That(response.Content, Is.Not.Null);
+        var contentObject = await TestAndGetContentObjectAsync(response, HttpStatusCode.BadRequest, cancellationToken);
+        var fieldErrors = contentObject[JsonPropertyNames.ERRORS]?[fieldName]?.AsArray()?.Select(e => e!.GetValue<string>());
+        Assert.That(fieldErrors, Is.Not.Null);
+        Assert.That(fieldErrors, Is.EquivalentTo(expectedErrors));
     }
+
+    public async Task PostBadRequestTestAsync(
+        HttpResponseMessage? response,
+        CancellationToken cancellationToken,
+        params string[] expectedErrors
+    ) => await TestErrorsArrayAsync(response, HttpStatusCode.BadRequest, expectedErrors, cancellationToken);
+
+    public async Task PostConflictTestAsync(
+        HttpResponseMessage? response,
+        CancellationToken cancellationToken,
+        params string[] expectedErrors
+    ) => await TestErrorsArrayAsync(response, HttpStatusCode.Conflict, expectedErrors, cancellationToken);
 
     public void PostOkTest(HttpResponseMessage? response)
     {
@@ -196,7 +201,7 @@ internal class EntityControllerTestCommons<T1, T2>(
                     parameters.Length == 3
                     && parameters[0] is string theCharacter
                     && parameters[1] is string pinyin
-                    && parameters[2] is byte tone
+                    && parameters[2] is short tone
                 )
                 {
                     return data.FirstOrDefault(d =>
@@ -243,7 +248,7 @@ internal class EntityControllerTestCommons<T1, T2>(
                     && parameters[0] is string theCharacter
                     && parameters[1] is string originalCharacter
                     && parameters[2] is string originalPinyin
-                    && parameters[3] is byte originalTone
+                    && parameters[3] is short originalTone
                 )
                 {
                     return data.FirstOrDefault(d =>
@@ -278,6 +283,17 @@ internal class EntityControllerTestCommons<T1, T2>(
         return client;
     }
 
+    private async Task<IHost> GetHostAsync(AsciiPinyinContext asciiPinyinContext, CancellationToken cancellationToken)
+    {
+        var hostBuilder = GetHostBuilder();
+
+        _ = hostBuilder.ConfigureServices(services =>
+            services.AddScoped(_ => asciiPinyinContext)
+        );
+
+        return await hostBuilder.StartAsync(cancellationToken);
+    }
+
     private async Task<IHost> GetHostAsync(CancellationToken cancellationToken)
     {
         var hostBuilder = GetHostBuilder();
@@ -301,13 +317,20 @@ internal class EntityControllerTestCommons<T1, T2>(
                 .ConfigureServices(services =>
                 {
                     _ = services
-                        .AddControllers()
-                        .AddApplicationPart(typeof(T1).Assembly);
-
-                    _ = services
                         .AddSingleton(_entityControllerLoggerMock.Object)
                         .AddSingleton(_userAgentVerifierLoggerMock.Object)
-                        .AddScoped<IEntityControllerCommons, EntityControllerCommons>();
+                        .AddScoped<AlternativeGetFilter>()
+                        .AddScoped<AlternativePostFilter>()
+                        .AddScoped<AlternativePostDeleteFilter>()
+                        .AddScoped<ChacharGetFilter>()
+                        .AddScoped<ChacharPostFilter>()
+                        .AddScoped<ChacharPostDeleteFilter>()
+                        .AddScoped<IPostFilterCommons, PostFilterCommons>()
+                        .AddScoped<IEntityControllerCommons, EntityControllerCommons>()
+                        .Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true)
+                        .AddControllers(options => options.Filters.Add<ModelStateInvalidFilter>())
+                        .AddMvcOptions(options => options.ModelMetadataDetailsProviders.Add(new ControllerValidationMetadataProvider()))
+                        .AddApplicationPart(typeof(T1).Assembly);
                 })
                 .Configure(app =>
                     _ = app
@@ -316,4 +339,45 @@ internal class EntityControllerTestCommons<T1, T2>(
                         .UseEndpoints(endpoints => endpoints.MapControllers())
                 );
         });
+
+    private async Task TestErrorsArrayAsync(
+        HttpResponseMessage? response,
+        HttpStatusCode expectedStatusCode,
+        string[] expectedErrors,
+        CancellationToken cancellationToken
+    )
+    {
+        var contentObject = await TestAndGetContentObjectAsync(response, expectedStatusCode, cancellationToken);
+        var errors = contentObject[JsonPropertyNames.ERRORS]?.AsArray()?.Select(e => e!.GetValue<string>());
+        Assert.That(errors, Is.Not.Null);
+        Assert.That(errors, Is.EquivalentTo(expectedErrors));
+    }
+
+    private async Task<JsonObject> TestAndGetContentObjectAsync(
+        HttpResponseMessage? response,
+        HttpStatusCode expectedStatusCode,
+        CancellationToken cancellationToken
+    )
+    {
+        TestResponseStatusCode(response, expectedStatusCode);
+
+        var contentString = await response!.Content.ReadAsStringAsync(cancellationToken);
+        Assert.That(contentString, Is.Not.Null);
+        Assert.That(contentString.Length, Is.GreaterThan(0));
+
+        var contentObject = JsonNode.Parse(contentString)!.AsObject();
+        Assert.That(contentObject, Is.Not.Null);
+        return contentObject;
+    }
+
+    private void TestResponseStatusCode(
+        HttpResponseMessage? response,
+        HttpStatusCode expectedStatusCode
+    )
+    {
+        Assert.That(response, Is.Not.Null);
+        Assert.That(response!.StatusCode, Is.Not.Null);
+        Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
+        Assert.That(response.Content, Is.Not.Null);
+    }
 }

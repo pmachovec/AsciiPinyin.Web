@@ -1,6 +1,6 @@
 using AsciiPinyin.Web.Server.Commons;
+using AsciiPinyin.Web.Server.Constants;
 using AsciiPinyin.Web.Shared.Constants;
-using AsciiPinyin.Web.Shared.DTO;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +14,13 @@ internal sealed class AlternativePostFilter(
 {
     public override void OnActionExecuting(ActionExecutingContext context)
     {
+        LogCommons.LogPostActionInitiatedInfo(_logger, Actions.CREATE, TableNames.ALTERNATIVE);
+
         var errorActionResult = _postFilterCommons.GetErrorActionResult<AlternativePostFilter, Alternative>(
             context,
             TableNames.ALTERNATIVE,
             _logger,
-            GetDatabaseIntegrityErrors
+            AreConflictDbIntegrityErrors
         );
 
         if (errorActionResult is not null)
@@ -27,12 +29,15 @@ internal sealed class AlternativePostFilter(
         }
     }
 
-    private IEnumerable<DatabaseIntegrityError> GetDatabaseIntegrityErrors(
+    private bool AreConflictDbIntegrityErrors(
         Alternative alternative,
         DbSet<Chachar> knownChachars,
-        DbSet<Alternative> knownAlternatives
+        DbSet<Alternative> knownAlternatives,
+        out IEnumerable<string> errors
     )
     {
+        LogCommons.LogEntityInfo(_logger, TableNames.ALTERNATIVE, alternative);
+
         var originalChachar = knownChachars.Find(
             alternative.OriginalCharacter,
             alternative.OriginalPinyin,
@@ -41,14 +46,17 @@ internal sealed class AlternativePostFilter(
 
         if (originalChachar is null)
         {
-            LogCommons.LogEntityError(_logger, Errors.ORIGINAL_UNKNOWN, TableNames.ALTERNATIVE, alternative);
-            return [new(Errors.ORIGINAL_UNKNOWN)];
+            LogCommons.LogError(_logger, Errors.ORIGINAL_UNKNOWN);
+            errors = [Errors.ORIGINAL_UNKNOWN];
+            return false;
         }
 
         if (!originalChachar.IsRadical)
         {
-            LogCommons.LogEntityError(_logger, Errors.ORIGINAL_NOT_RADICAL, TableNames.ALTERNATIVE, alternative, $"conflict chachar: {originalChachar}");
-            return [new(Errors.ORIGINAL_NOT_RADICAL, [new(TableNames.ALTERNATIVE, originalChachar)])];
+            LogCommons.LogError(_logger, Errors.ORIGINAL_NOT_RADICAL);
+            LogCommons.LogConflictError(_logger, TableNames.CHACHAR, originalChachar);
+            errors = [Errors.ORIGINAL_NOT_RADICAL];
+            return true;
         }
 
         var existingAlternative = knownAlternatives.Find(
@@ -60,10 +68,13 @@ internal sealed class AlternativePostFilter(
 
         if (existingAlternative is not null)
         {
-            LogCommons.LogEntityError(_logger, Errors.ALTERNATIVE_EXISTS, TableNames.ALTERNATIVE, alternative, $"conflict alternative: {existingAlternative}");
-            return [new(Errors.ALTERNATIVE_EXISTS, [new(TableNames.ALTERNATIVE, existingAlternative)])];
+            LogCommons.LogError(_logger, Errors.ALTERNATIVE_EXISTS);
+            LogCommons.LogConflictError(_logger, TableNames.ALTERNATIVE, existingAlternative);
+            errors = [Errors.ALTERNATIVE_EXISTS];
+            return true;
         }
 
-        return [];
+        errors = [];
+        return false;
     }
 }

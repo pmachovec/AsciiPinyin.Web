@@ -1,6 +1,6 @@
 namespace AsciiPinyin.Web.Shared.Test.Constants;
 
-internal static class TableNames
+public static class TableNames
 {
     public const string ALTERNATIVE = "alternative";
     public const string CHACHAR = "chachar";

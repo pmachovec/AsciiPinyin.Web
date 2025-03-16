@@ -84,13 +84,11 @@ public sealed class Chachar : IEntity
 
     public static bool operator !=(Chachar left, Chachar right) => !(left == right);
 
-    public override bool Equals(object? obj)
-    {
-        return obj is Chachar otherChachar
+    public override bool Equals(object? obj) =>
+        obj is Chachar otherChachar
             && otherChachar.TheCharacter == TheCharacter
             && otherChachar.Pinyin == Pinyin
             && otherChachar.Tone == Tone;
-    }
 
     public override int GetHashCode() => HashCode.Combine(TheCharacter, Pinyin, Tone);
 

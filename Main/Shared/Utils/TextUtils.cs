@@ -96,6 +96,7 @@ public static class TextUtils
         0x257,
         0x258,
         0x259,
+        0x25A,
         0x25B,
         0x25C,
         0x25E,

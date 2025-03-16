@@ -10,19 +10,20 @@ public interface IEntityControllerCommons
     ActionResult<IEnumerable<T2>> TheGet<T1, T2>(
         T1 entityController,
         ILogger<T1> logger,
-        string action,
         string contextCollectionName
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity;
 
     ActionResult Post<T1, T2>(
         T1 entityController,
         T2 entity,
+        string tableName,
         ILogger<T1> logger
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity;
 
     ActionResult PostDelete<T1, T2>(
         T1 entityController,
         T2 entity,
+        string tableName,
         ILogger<T1> logger
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity;
 }

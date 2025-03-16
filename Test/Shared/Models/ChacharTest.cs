@@ -92,9 +92,25 @@ internal sealed partial class ChacharTest
         Assert.That(_newChachar.ToString(), Does.Match(Regexes.AllNullChacharStringRegex()));
 
     [Test]
-    public void ChacharEqualsFullCloneTest()
+    public void RadicalChacharEqualsFullCloneTest()
     {
-        var chacharClone = new Chachar
+        var radicalChacharClone = new Chachar
+        {
+            TheCharacter = _radicalChachar.TheCharacter,
+            Pinyin = _radicalChachar.Pinyin,
+            Tone = _radicalChachar.Tone,
+            Ipa = _radicalChachar.Ipa,
+            Strokes = _radicalChachar.Strokes
+        };
+
+        Assert.That(radicalChacharClone, Is.EqualTo(_radicalChachar));
+        Assert.That(radicalChacharClone == _radicalChachar, Is.True);
+    }
+
+    [Test]
+    public void NonRadicalChacharEqualsFullCloneTest()
+    {
+        var nonRadicalChacharClone = new Chachar
         {
             TheCharacter = _nonRadicalChacharWithAlternative.TheCharacter,
             Pinyin = _nonRadicalChacharWithAlternative.Pinyin,
@@ -107,48 +123,30 @@ internal sealed partial class ChacharTest
             RadicalAlternativeCharacter = _nonRadicalChacharWithAlternative.RadicalAlternativeCharacter
         };
 
-        Assert.That(chacharClone, Is.EqualTo(_nonRadicalChacharWithAlternative));
-        Assert.That(chacharClone == _nonRadicalChacharWithAlternative, Is.True);
+        Assert.That(nonRadicalChacharClone, Is.EqualTo(_nonRadicalChacharWithAlternative));
+        Assert.That(nonRadicalChacharClone == _nonRadicalChacharWithAlternative, Is.True);
     }
 
     [Test]
-    public void ChacharEqualsMinimalCloneTest()
+    public void RadicalChacharEqualsKeyFieldDiffersTest()
     {
-        var chacharClone = new Chachar
+        var radicalChacharClone = new Chachar
         {
-            TheCharacter = _nonRadicalChacharWithAlternative.TheCharacter,
-            Pinyin = _nonRadicalChacharWithAlternative.Pinyin,
-            Tone = _nonRadicalChacharWithAlternative.Tone
+            TheCharacter = _radicalChachar.TheCharacter,
+            Pinyin = _radicalChachar.Pinyin,
+            Tone = (short)(_radicalChachar.Tone! + 1),
+            Ipa = _radicalChachar.Ipa,
+            Strokes = _radicalChachar.Strokes
         };
 
-        Assert.That(chacharClone, Is.EqualTo(_nonRadicalChacharWithAlternative));
-        Assert.That(chacharClone == _nonRadicalChacharWithAlternative, Is.True);
+        Assert.That(radicalChacharClone, Is.Not.EqualTo(_radicalChachar));
+        Assert.That(radicalChacharClone == _radicalChachar, Is.False);
     }
 
     [Test]
-    public void ChacharEqualsNonKeyFieldDiffersTest()
+    public void NonRadicalChacharEqualsKeyFieldDiffersTest()
     {
-        var chacharClone = new Chachar
-        {
-            TheCharacter = _nonRadicalChacharWithAlternative.TheCharacter,
-            Pinyin = _nonRadicalChacharWithAlternative.Pinyin,
-            Tone = _nonRadicalChacharWithAlternative.Tone,
-            Ipa = _nonRadicalChacharWithAlternative.Ipa,
-            Strokes = _nonRadicalChacharWithAlternative.Strokes,
-            RadicalCharacter = _nonRadicalChacharWithAlternative.RadicalCharacter,
-            RadicalPinyin = _nonRadicalChacharWithAlternative.RadicalPinyin,
-            RadicalTone = (short?)(_nonRadicalChacharWithAlternative.RadicalTone + 1),
-            RadicalAlternativeCharacter = _nonRadicalChacharWithAlternative.RadicalAlternativeCharacter
-        };
-
-        Assert.That(chacharClone, Is.EqualTo(_nonRadicalChacharWithAlternative));
-        Assert.That(chacharClone == _nonRadicalChacharWithAlternative, Is.True);
-    }
-
-    [Test]
-    public void ChacharEqualsKeyFieldDiffersTest()
-    {
-        var chacharClone = new Chachar
+        var nonRadicalChacharClone = new Chachar
         {
             TheCharacter = _nonRadicalChacharWithAlternative.TheCharacter,
             Pinyin = _nonRadicalChacharWithAlternative.Pinyin,
@@ -161,7 +159,43 @@ internal sealed partial class ChacharTest
             RadicalAlternativeCharacter = _nonRadicalChacharWithAlternative.RadicalAlternativeCharacter
         };
 
-        Assert.That(chacharClone, Is.Not.EqualTo(_nonRadicalChacharWithAlternative));
-        Assert.That(chacharClone != _nonRadicalChacharWithAlternative, Is.True);
+        Assert.That(nonRadicalChacharClone, Is.Not.EqualTo(_nonRadicalChacharWithAlternative));
+        Assert.That(nonRadicalChacharClone == _nonRadicalChacharWithAlternative, Is.False);
+    }
+
+    [Test]
+    public void RadicalChacharEqualsNonKeyFieldDiffersTest()
+    {
+        var radicalChacharClone = new Chachar
+        {
+            TheCharacter = _radicalChachar.TheCharacter,
+            Pinyin = _radicalChachar.Pinyin,
+            Tone = _radicalChachar.Tone,
+            Ipa = _radicalChachar.Ipa,
+            Strokes = (short)(_radicalChachar.Strokes! + 1)
+        };
+
+        Assert.That(radicalChacharClone, Is.EqualTo(_radicalChachar));
+        Assert.That(radicalChacharClone == _radicalChachar, Is.True);
+    }
+
+    [Test]
+    public void NonRadicalChacharEqualsNonKeyFieldDiffersTest()
+    {
+        var nonRadicalChacharClone = new Chachar
+        {
+            TheCharacter = _nonRadicalChacharWithAlternative.TheCharacter,
+            Pinyin = _nonRadicalChacharWithAlternative.Pinyin,
+            Tone = _nonRadicalChacharWithAlternative.Tone,
+            Ipa = _nonRadicalChacharWithAlternative.Ipa,
+            Strokes = _nonRadicalChacharWithAlternative.Strokes,
+            RadicalCharacter = _nonRadicalChacharWithAlternative.RadicalCharacter,
+            RadicalPinyin = _nonRadicalChacharWithAlternative.RadicalPinyin,
+            RadicalTone = (short?)(_nonRadicalChacharWithAlternative.RadicalTone + 1),
+            RadicalAlternativeCharacter = _nonRadicalChacharWithAlternative.RadicalAlternativeCharacter
+        };
+
+        Assert.That(nonRadicalChacharClone, Is.EqualTo(_nonRadicalChacharWithAlternative));
+        Assert.That(nonRadicalChacharClone == _nonRadicalChacharWithAlternative, Is.True);
     }
 }

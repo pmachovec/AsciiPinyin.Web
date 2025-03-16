@@ -7,6 +7,7 @@ using AsciiPinyin.Web.Client.Validation;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
+using AsciiPinyin.Web.Shared.Utils;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Localization;
@@ -150,12 +151,19 @@ public class ChacharFormBase : ComponentBase, IEntityForm
         StateHasChanged();
     }
 
-    protected async Task PreventMultipleCharactersAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken) =>
-        await EntityFormCommons.PreventMultipleCharactersAsync(
-            IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
-            changeEventArgs,
-            cancellationToken
-        );
+    protected async Task PreventMultipleCharactersAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
+    {
+        if (
+            changeEventArgs.Value is string theCharacter
+            && theCharacter.Length > 1
+            && TextUtils.GetStringRealLength(theCharacter) > 1
+        )
+        {
+            var theCharacterStart = TextUtils.GetStringFirstCharacterAsString(theCharacter);
+            Chachar.TheCharacter = theCharacterStart;
+            await JSInteropDOM.SetValueAsync(IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, theCharacterStart, cancellationToken);
+        }
+    }
 
     protected async Task PreventToneInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
     {
@@ -166,20 +174,32 @@ public class ChacharFormBase : ComponentBase, IEntityForm
             cancellationToken
         );
 
+        Chachar.Tone = correctTone;
+
         await JSInteropDOM.SetValueAsync(
             IDs.CHACHAR_FORM_TONE_INPUT,
-            correctTone?.ToString(CultureInfo.InvariantCulture)!,
+            correctTone,
             cancellationToken
         );
     }
 
-    protected async Task PreventStrokesInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken) =>
-        await EntityFormCommons.PreventStrokesInvalidAsync(
+    protected async Task PreventStrokesInvalidAsync(ChangeEventArgs changeEventArgs, CancellationToken cancellationToken)
+    {
+        var correctStrokes = await EntityFormCommons.GetCorrectNumberInputValueAsync(
             IDs.CHACHAR_FORM_STROKES_INPUT,
-            changeEventArgs,
+            changeEventArgs.Value,
             Chachar.Strokes,
             cancellationToken
         );
+
+        Chachar.Strokes = correctStrokes;
+
+        await JSInteropDOM.SetValueAsync(
+            IDs.CHACHAR_FORM_STROKES_INPUT,
+            correctStrokes,
+            cancellationToken
+        );
+    }
 
     protected void ClearError(string fieldName)
     {

@@ -12,7 +12,7 @@ using Moq;
 using NUnit.Framework;
 using System.Net;
 using System.Net.Http.Json;
-using Errors = AsciiPinyin.Web.Server.Test.Constants.Errors;
+using Errors = AsciiPinyin.Web.Shared.Test.Constants.Errors;
 
 namespace Asciipinyin.Web.Server.Test.Controllers;
 
@@ -250,7 +250,7 @@ internal sealed class AlternativesControllerTest
     [TestCase("r̻̝", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 2")]
     [TestCase("r̝̊", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 3")]
     [TestCase("ɼ", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostTheCharacterWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
-    public async Task PostTheCharacterWrongTest(string? theCharacter, string expectedErrorMessage)
+    public async Task PostTheCharacterWrongTest(string? theCharacter, string expectedError)
     {
         var alternative = new Alternative()
         {
@@ -258,7 +258,7 @@ internal sealed class AlternativesControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostAsync(_host, alternative, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.THE_CHARACTER, CancellationToken.None, expectedError);
         Assert.That(_asciiPinyinContext.Alternatives, Does.Not.Contain(alternative));
     }
 
@@ -357,7 +357,7 @@ internal sealed class AlternativesControllerTest
     [TestCase("r̻̝", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalCharacterWrongTest)} - Czech 'Ř' in IPA - version 2")]
     [TestCase("r̝̊", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalCharacterWrongTest)} - Czech 'Ř' in IPA - version 3")]
     [TestCase("ɼ", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalCharacterWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
-    public async Task PostOriginalCharacterWrongTest(string? originalCharacter, string expectedErrorMessage)
+    public async Task PostOriginalCharacterWrongTest(string? originalCharacter, string expectedError)
     {
         var alternative = new Alternative()
         {
@@ -365,7 +365,7 @@ internal sealed class AlternativesControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostAsync(_host, alternative, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.ORIGINAL_CHARACTER, CancellationToken.None, expectedError);
         Assert.That(_asciiPinyinContext.Alternatives, Does.Not.Contain(alternative));
     }
 
@@ -471,7 +471,7 @@ internal sealed class AlternativesControllerTest
     [TestCase("𫇂\t𫟖\t𬩽", Errors.NO_ASCII, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
     [TestCase("𫇂\n𫟖\t𬩽 ", Errors.NO_ASCII, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
     [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", Errors.NO_ASCII, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalPinyinWrongTest)} - crazy combination of 40 characters, symbols and whitespaces")]
-    public async Task PostOriginalPinyinWrongTest(string? originalPinyin, string expectedErrorMessage)
+    public async Task PostOriginalPinyinWrongTest(string? originalPinyin, string expectedError)
     {
         var alternative = new Alternative()
         {
@@ -479,7 +479,7 @@ internal sealed class AlternativesControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostAsync(_host, alternative, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.ORIGINAL_PINYIN, CancellationToken.None, expectedError);
         Assert.That(_asciiPinyinContext.Alternatives, Does.Not.Contain(alternative));
     }
 
@@ -487,7 +487,7 @@ internal sealed class AlternativesControllerTest
     [TestCase(5, Errors.ZERO_TO_FOUR, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalToneWrongTest)} - five")]
     [TestCase(55, Errors.ZERO_TO_FOUR, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalToneWrongTest)} - fifty-five")]
     [TestCase(short.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostOriginalToneWrongTest)} - short max value")]
-    public async Task PostOriginalToneWrongTest(short? originalTone, string expectedErrorMessage)
+    public async Task PostOriginalToneWrongTest(short? originalTone, string expectedError)
     {
         // Unsigned byte numbers are only reachable inputs.
         var alternative = new Alternative()
@@ -496,7 +496,7 @@ internal sealed class AlternativesControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostAsync(_host, alternative, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.ORIGINAL_TONE, CancellationToken.None, expectedError);
         Assert.That(_asciiPinyinContext.Alternatives, Does.Not.Contain(alternative));
     }
 
@@ -504,7 +504,7 @@ internal sealed class AlternativesControllerTest
     [TestCase(0, Errors.ONE_TO_NINETY_NINE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostStrokesWrongTest)} - zero")]
     [TestCase(100, Errors.ONE_TO_NINETY_NINE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostStrokesWrongTest)} - one hundred")]
     [TestCase(short.MaxValue, Errors.ONE_TO_NINETY_NINE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostStrokesWrongTest)} - short max value")]
-    public async Task PostStrokesWrongTest(short? strokes, string expectedErrorMessage)
+    public async Task PostStrokesWrongTest(short? strokes, string expectedError)
     {
         // Unsigned byte numbers are only reachable inputs.
         var alternative = new Alternative()
@@ -513,7 +513,7 @@ internal sealed class AlternativesControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostAsync(_host, alternative, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.STROKES, CancellationToken.None, expectedError);
         Assert.That(_asciiPinyinContext.Alternatives, Does.Not.Contain(alternative));
     }
 
@@ -532,10 +532,10 @@ internal sealed class AlternativesControllerTest
     }
 
     [Test]
-    public async Task PostRadicalUnknownTest()
+    public async Task PostOriginalUnknownTest()
     {
         var response = await _entityControllerTestCommons.PostAsync(_host, _alternative11, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.ORIGINAL_UNKNOWN);
         Assert.That(_asciiPinyinContext.Alternatives, Does.Not.Contain(_alternative11));
     }
 
@@ -554,7 +554,13 @@ internal sealed class AlternativesControllerTest
 
         _entityControllerTestCommons.AddToContextAndSave(_asciiPinyinContext, radicalNotRadical);
         var response = await _entityControllerTestCommons.PostAsync(_host, _alternative11, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.ORIGINAL_NOT_RADICAL
+        );
+
         Assert.That(_asciiPinyinContext.Alternatives, Does.Not.Contain(_alternative11));
     }
 
@@ -563,7 +569,13 @@ internal sealed class AlternativesControllerTest
     {
         _entityControllerTestCommons.AddToContextAndSave(_asciiPinyinContext, _radicalChachar1, _alternative11);
         var response = await _entityControllerTestCommons.PostAsync(_host, _alternative11, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.ALTERNATIVE_EXISTS
+        );
+
         Assert.That(_asciiPinyinContext.Alternatives, Does.Contain(_alternative11));
     }
 
@@ -690,7 +702,7 @@ internal sealed class AlternativesControllerTest
     [TestCase("r̻̝", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 2")]
     [TestCase("r̝̊", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 3")]
     [TestCase("ɼ", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteTheCharacterWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
-    public async Task PostDeleteTheCharacterWrongTest(string? theCharacter, string expectedErrorMessage)
+    public async Task PostDeleteTheCharacterWrongTest(string? theCharacter, string expectedError)
     {
         var alternative = new Alternative()
         {
@@ -698,7 +710,7 @@ internal sealed class AlternativesControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, alternative, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.THE_CHARACTER, CancellationToken.None, expectedError);
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalCharacterWrongTest)} - null")]
@@ -796,7 +808,7 @@ internal sealed class AlternativesControllerTest
     [TestCase("r̻̝", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalCharacterWrongTest)} - Czech 'Ř' in IPA - version 2")]
     [TestCase("r̝̊", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalCharacterWrongTest)} - Czech 'Ř' in IPA - version 3")]
     [TestCase("ɼ", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalCharacterWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
-    public async Task PostDeleteOriginalCharacterWrongTest(string? originalCharacter, string expectedErrorMessage)
+    public async Task PostDeleteOriginalCharacterWrongTest(string? originalCharacter, string expectedError)
     {
         var alternative = new Alternative()
         {
@@ -804,7 +816,7 @@ internal sealed class AlternativesControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, alternative, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.ORIGINAL_CHARACTER, CancellationToken.None, expectedError);
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalPinyinWrongTest)} - null")]
@@ -909,7 +921,7 @@ internal sealed class AlternativesControllerTest
     [TestCase("𫇂\t𫟖\t𬩽", Errors.NO_ASCII, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
     [TestCase("𫇂\n𫟖\t𬩽 ", Errors.NO_ASCII, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
     [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", Errors.NO_ASCII, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalPinyinWrongTest)} - crazy combination of 40 characters, symbols and whitespaces")]
-    public async Task PostDeleteOriginalPinyinWrongTest(string? originalPinyin, string expectedErrorMessage)
+    public async Task PostDeleteOriginalPinyinWrongTest(string? originalPinyin, string expectedError)
     {
         var alternative = new Alternative()
         {
@@ -917,14 +929,14 @@ internal sealed class AlternativesControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, alternative, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.ORIGINAL_PINYIN, CancellationToken.None, expectedError);
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalToneWrongTest)} - null")]
     [TestCase(5, Errors.ZERO_TO_FOUR, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalToneWrongTest)} - five")]
     [TestCase(55, Errors.ZERO_TO_FOUR, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalToneWrongTest)} - fifty-five")]
     [TestCase(short.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(AlternativesControllerTest)}.{nameof(PostDeleteOriginalToneWrongTest)} - short max value")]
-    public async Task PostDeleteOriginalToneWrongTest(short? originalTone, string expectedErrorMessage)
+    public async Task PostDeleteOriginalToneWrongTest(short? originalTone, string expectedError)
     {
         // Unsigned byte numbers are only reachable inputs.
         var alternative = new Alternative()
@@ -933,7 +945,7 @@ internal sealed class AlternativesControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, alternative, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.ORIGINAL_TONE, CancellationToken.None, expectedError);
     }
 
     [Test, Category(TestCategories.DB_CONTEXT_MOCK_ERROR_CHACHARS)]
@@ -954,7 +966,7 @@ internal sealed class AlternativesControllerTest
     public async Task PostDeleteAlternativeDoesNotExistTest()
     {
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _alternative11, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.ALTERNATIVE_UNKNOWN);
         Assert.That(_asciiPinyinContext.Alternatives, Does.Not.Contain(_alternative11));
     }
 
@@ -969,7 +981,13 @@ internal sealed class AlternativesControllerTest
         );
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _alternative11, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.IS_ALTERNATIVE_FOR_CHACHARS
+        );
+
         Assert.That(_asciiPinyinContext.Alternatives, Does.Contain(_alternative11));
     }
 
@@ -986,7 +1004,13 @@ internal sealed class AlternativesControllerTest
         );
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _alternative11, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.IS_ALTERNATIVE_FOR_CHACHARS
+        );
+
         Assert.That(_asciiPinyinContext.Alternatives, Does.Contain(_alternative11));
     }
 

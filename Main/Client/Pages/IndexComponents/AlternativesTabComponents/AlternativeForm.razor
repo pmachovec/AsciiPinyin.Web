@@ -30,7 +30,9 @@
                             @onfocus="() => ClearError(nameof(Alternative.TheCharacter))"
                             @oninput="async changeEventArgs => await PreventMultipleCharactersAsync(changeEventArgs, CancellationToken.None)" />
                         <span class="validation-message form-text text-danger">
-                            <ValidationMessage For="() => Alternative!.TheCharacter" />
+                            <ValidationMessage
+                                For="() => Alternative!.TheCharacter"
+                                id="@IDs.ALTERNATIVE_FORM_THE_CHARACTER_VALIDATION_MESSAGE" />
                         </span>
                     </div>
                     <div class="form-input">
@@ -44,7 +46,9 @@
                             @onfocus="() => ClearError(nameof(Alternative.Strokes))"
                             @oninput="async changeEventArgs => await PreventStrokesInvalidAsync(changeEventArgs, CancellationToken.None)" />
                         <span class="validation-message form-text text-danger">
-                            <ValidationMessage For="() => Alternative!.Strokes" />
+                            <ValidationMessage
+                                For="() => Alternative!.Strokes"
+                                id="@IDs.ALTERNATIVE_FORM_STROKES_VALIDATION_MESSAGE" />
                         </span>
                     </div>
                     <div class="form-input">
@@ -60,20 +64,23 @@
                             <button
                                 type="button"
                                 class="btn @CssClasses.BTN_OUTLINE_PRIMARY"
-                                    id="@IDs.ALTERNATIVE_FORM_ORIGINAL_CLEAR"
+                                id="@IDs.ALTERNATIVE_FORM_ORIGINAL_CLEAR"
                                 @onclick="async _ => await ClearOriginalAsync(CancellationToken.None)">
                                 &#x2715;
                             </button>
                         </div>
                         <span class="validation-message form-text text-danger">
-                            <ValidationMessage For="() => Alternative!.OriginalCharacter" />
+                            <ValidationMessage
+                                For="() => Alternative!.OriginalCharacter"
+                                id="@IDs.ALTERNATIVE_FORM_ORIGINAL_VALIDATION_MESSAGE" />
                         </span>
                     </div>
                 </div>
                 <div class="border-0 modal-footer">
                     <button
                         type="submit"
-                        class="btn btn-modal btn-primary">
+                        class="btn btn-modal btn-primary"
+                        id="@IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON">
                         @Localizer[Resource.Save]
                     </button>
                 </div>

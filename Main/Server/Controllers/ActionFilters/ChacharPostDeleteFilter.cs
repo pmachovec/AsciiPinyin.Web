@@ -1,6 +1,6 @@
 using AsciiPinyin.Web.Server.Commons;
+using AsciiPinyin.Web.Server.Constants;
 using AsciiPinyin.Web.Shared.Constants;
-using AsciiPinyin.Web.Shared.DTO;
 using AsciiPinyin.Web.Shared.Models;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +14,13 @@ internal sealed class ChacharPostDeleteFilter(
 {
     public override void OnActionExecuting(ActionExecutingContext context)
     {
+        LogCommons.LogPostActionInitiatedInfo(_logger, Actions.DELETE, TableNames.CHACHAR);
+
         var errorActionResult = _postFilterCommons.GetErrorActionResult<ChacharPostDeleteFilter, Chachar>(
             context,
             TableNames.CHACHAR,
             _logger,
-            GetDatabaseIntegrityErrors
+            AreConflictDbIntegrityErrors
         );
 
         if (errorActionResult is not null)
@@ -27,19 +29,23 @@ internal sealed class ChacharPostDeleteFilter(
         }
     }
 
-    private List<DatabaseIntegrityError> GetDatabaseIntegrityErrors(
+    private bool AreConflictDbIntegrityErrors(
         Chachar chachar,
         DbSet<Chachar> knownChachars,
-        DbSet<Alternative> knownAlternatives
+        DbSet<Alternative> knownAlternatives,
+        out IEnumerable<string> errors
     )
     {
+        LogCommons.LogEntityInfo(_logger, TableNames.CHACHAR, chachar);
+
         if (!knownChachars.Contains(chachar))
         {
-            LogCommons.LogEntityError(_logger, Errors.CHACHAR_UNKNOWN, TableNames.CHACHAR, chachar);
-            return [new(Errors.CHACHAR_UNKNOWN, [])];
+            LogCommons.LogError(_logger, Errors.CHACHAR_UNKNOWN);
+            errors = [Errors.CHACHAR_UNKNOWN];
+            return false;
         }
 
-        List<DatabaseIntegrityError> databaseIntegrityErrors = [];
+        List<string> errorList = [];
 
         if (chachar.IsRadical)
         {
@@ -51,20 +57,9 @@ internal sealed class ChacharPostDeleteFilter(
 
             if (chacharsWithThisAsRadical.Any())
             {
-                LogCommons.LogEntityError(
-                    _logger,
-                    Errors.IS_RADICAL_FOR_OTHERS,
-                    TableNames.CHACHAR,
-                    chachar,
-                    $"conflict chachars: [{string.Join(",", chacharsWithThisAsRadical)}]"
-                );
-
-                databaseIntegrityErrors.Add(
-                    new(
-                        Errors.IS_RADICAL_FOR_OTHERS,
-                        chacharsWithThisAsRadical.Select(chacharWithThisAsRadical => new Conflict(TableNames.CHACHAR, chacharWithThisAsRadical))
-                    )
-                );
+                LogCommons.LogError(_logger, Errors.IS_RADICAL_FOR_OTHERS);
+                LogCommons.LogConflictsError(_logger, TableNames.CHACHAR, $"[{string.Join(",", chacharsWithThisAsRadical)}]");
+                errorList.Add(Errors.IS_RADICAL_FOR_OTHERS);
             }
         }
 
@@ -76,22 +71,12 @@ internal sealed class ChacharPostDeleteFilter(
 
         if (alternativesOfThis.Any())
         {
-            LogCommons.LogEntityError(
-                _logger,
-                Errors.HAS_ALTERNATIVES,
-                TableNames.CHACHAR,
-                chachar,
-                $"conflict alternatives: [{string.Join(",", alternativesOfThis)}]"
-            );
-
-            databaseIntegrityErrors.Add(
-                new DatabaseIntegrityError(
-                    Errors.HAS_ALTERNATIVES,
-                    alternativesOfThis.Select(alternative => new Conflict(TableNames.ALTERNATIVE, alternative))
-                )
-            );
+            LogCommons.LogError(_logger, Errors.HAS_ALTERNATIVES);
+            LogCommons.LogConflictsError(_logger, TableNames.ALTERNATIVE, $"[{string.Join(",", alternativesOfThis)}]");
+            errorList.Add(Errors.HAS_ALTERNATIVES);
         }
 
-        return databaseIntegrityErrors;
+        errors = errorList;
+        return errors.Any();
     }
 }

@@ -32,22 +32,23 @@ _ = builder.Configuration.AddYamlFile(
 _ = builder.Services
     .AddDbContext<AsciiPinyinContext>(optionsBuilder => optionsBuilder.UseSqlite("Data Source=Data/asciipinyin.sqlite"))
     .AddLocalization()
+    .AddScoped<AlternativeGetFilter>()
     .AddScoped<AlternativePostFilter>()
     .AddScoped<AlternativePostDeleteFilter>()
+    .AddScoped<ChacharGetFilter>()
     .AddScoped<ChacharPostFilter>()
     .AddScoped<ChacharPostDeleteFilter>()
     .AddScoped<IPostFilterCommons, PostFilterCommons>() // Doesn't work as singleton, must be scoped, because the consumed DB context is also scoped.
     .AddScoped<IEntityControllerCommons, EntityControllerCommons>()
     .AddSingleton<ILocals>(_ => new Locals(nLogConfigYamlPath))
-    .Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true); // Replaced by AsciiPinyinModelStateInvalidFilter (further injected)
-
-_ = builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents()
-    .AddInteractiveWebAssemblyComponents();
-
-_ = builder.Services
+    .Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true) // Replaced by AsciiPinyinModelStateInvalidFilter.
     .AddControllers(options => options.Filters.Add<ModelStateInvalidFilter>())
     .AddMvcOptions(options => options.ModelMetadataDetailsProviders.Add(new ControllerValidationMetadataProvider()));
+
+_ = builder.Services
+    .AddRazorComponents()
+    .AddInteractiveServerComponents()
+    .AddInteractiveWebAssemblyComponents();
 
 var app = builder.Build();
 _ = app.UsePathBase($"/{ApiNames.BASE}");

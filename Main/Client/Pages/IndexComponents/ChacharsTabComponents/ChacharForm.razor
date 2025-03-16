@@ -31,7 +31,9 @@
                             @onfocus="() => ClearError(nameof(Chachar.TheCharacter))"
                             @oninput="async changeEventArgs => await PreventMultipleCharactersAsync(changeEventArgs, CancellationToken.None)" />
                         <span class="validation-message form-text text-danger">
-                            <ValidationMessage For="() => Chachar!.TheCharacter" />
+                            <ValidationMessage
+                                For="() => Chachar!.TheCharacter"
+                                id="@IDs.CHACHAR_FORM_THE_CHARACTER_VALIDATION_MESSAGE" />
                         </span>
                     </div>
                     <div class="form-input">
@@ -42,7 +44,9 @@
                             @bind-Value="Chachar.Pinyin"
                             @onfocus="() => ClearError(nameof(Chachar.Pinyin))" />
                         <span class="validation-message form-text text-danger">
-                            <ValidationMessage For="() => Chachar!.Pinyin" />
+                            <ValidationMessage
+                                For="() => Chachar!.Pinyin"
+                                id="@IDs.CHACHAR_FORM_PINYIN_VALIDATION_MESSAGE" />
                         </span>
                     </div>
                     <div class="form-input">
@@ -53,7 +57,9 @@
                             @bind-Value="Chachar.Ipa"
                             @onfocus="() => ClearError(nameof(Chachar.Ipa))" />
                         <span class="validation-message form-text text-danger">
-                            <ValidationMessage For="() => Chachar!.Ipa" />
+                            <ValidationMessage
+                                For="() => Chachar!.Ipa"
+                                id="@IDs.CHACHAR_FORM_IPA_VALIDATION_MESSAGE" />
                         </span>
                     </div>
                     <div class="form-input">
@@ -67,7 +73,9 @@
                             @onfocus="() => ClearError(nameof(Chachar.Tone))"
                             @oninput="async changeEventArgs => await PreventToneInvalidAsync(changeEventArgs, CancellationToken.None)" />
                         <span class="validation-message form-text text-danger">
-                            <ValidationMessage For="() => Chachar!.Tone" />
+                            <ValidationMessage
+                                For="() => Chachar!.Tone"
+                                id="@IDs.CHACHAR_FORM_TONE_VALIDATION_MESSAGE" />
                         </span>
                     </div>
                     <div class="form-input">
@@ -81,7 +89,9 @@
                             @onfocus="() => ClearError(nameof(Chachar.Strokes))"
                             @oninput="async changeEventArgs => await PreventStrokesInvalidAsync(changeEventArgs, CancellationToken.None)" />
                         <span class="validation-message form-text text-danger">
-                            <ValidationMessage For="() => Chachar!.Strokes" />
+                            <ValidationMessage
+                                For="() => Chachar!.Strokes"
+                                id="@IDs.CHACHAR_FORM_STROKES_VALIDATION_MESSAGE" />
                         </span>
                     </div>
                     <div class="form-input">
@@ -125,7 +135,8 @@
                 <div class="border-0 modal-footer">
                     <button
                         type="submit"
-                        class="btn btn-modal btn-primary">
+                        class="btn btn-modal btn-primary"
+                        id="@IDs.CHACHAR_FORM_SUBMIT_BUTTON">
                         @Localizer[Resource.Save]
                     </button>
                 </div>

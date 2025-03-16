@@ -12,16 +12,15 @@ public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinConte
     public ActionResult<IEnumerable<T2>> TheGet<T1, T2>(
         T1 entityController,
         ILogger<T1> logger,
-        string action,
         string contextCollectionName
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity
     {
-        LogCommons.LogActionInDbInfo(logger, DbActions.SELECT, action);
+        LogCommons.LogActionInDbDebug(logger, DbActions.SELECT);
 
         try
         {
             dynamic contextCollection = _asciiPinyinContext.GetType().GetProperty(contextCollectionName)!.GetValue(_asciiPinyinContext)!;
-            LogCommons.LogActionInDbSuccessInfo(logger, DbActions.SELECT);
+            LogCommons.LogActionInDbSuccessDebug(logger, DbActions.SELECT);
             return entityController.Ok(contextCollection);
         }
         catch (Exception e)
@@ -35,41 +34,58 @@ public sealed class EntityControllerCommons(AsciiPinyinContext _asciiPinyinConte
     public ActionResult Post<T1, T2>(
         T1 entityController,
         T2 entity,
+        string tableName,
         ILogger<T1> logger
-    ) where T1 : ControllerBase, IEntityController where T2 : IEntity =>
-        PostCommon(
+    ) where T1 : ControllerBase, IEntityController where T2 : IEntity
+    {
+        var result = PostCommon(
             entityController,
             entity,
             logger,
-            $"create new {nameof(T2)}",
-            "INSERT",
+            DbActions.INSERT,
             _asciiPinyinContext.Add
         );
+
+        if (result is OkResult)
+        {
+            LogCommons.LogEntityCreatedInfo(logger, tableName);
+        }
+
+        return result;
+    }
 
     public ActionResult PostDelete<T1, T2>(
         T1 entityController,
         T2 entity,
+        string tableName,
         ILogger<T1> logger
-    ) where T1 : ControllerBase, IEntityController where T2 : IEntity =>
-        PostCommon(
+    ) where T1 : ControllerBase, IEntityController where T2 : IEntity
+    {
+        var result = PostCommon(
             entityController,
             entity,
             logger,
-            $"delete {nameof(T2)}",
-            "DELETE",
+            DbActions.DELETE,
             _asciiPinyinContext.Remove
         );
+
+        if (result is OkResult)
+        {
+            LogCommons.LogEntityDeletedInfo(logger, tableName);
+        }
+
+        return result;
+    }
 
     private ActionResult PostCommon<T1, T2>(
         T1 entityController,
         T2 entity,
         ILogger<T1> logger,
-        string actionForLog,
         string dbActionForLog,
         Func<object, EntityEntry> alterDb
     ) where T1 : ControllerBase, IEntityController where T2 : IEntity
     {
-        LogCommons.LogActionInDbInfo(logger, dbActionForLog, actionForLog);
+        LogCommons.LogActionInDbInfo(logger, dbActionForLog);
 
         try
         {

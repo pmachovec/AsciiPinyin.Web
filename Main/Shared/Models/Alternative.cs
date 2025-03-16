@@ -53,14 +53,12 @@ public sealed class Alternative : IEntity
 
     public static bool operator !=(Alternative left, Alternative right) => !(left == right);
 
-    public override bool Equals(object? obj)
-    {
-        return obj is Alternative otherAlternative
+    public override bool Equals(object? obj) =>
+        obj is Alternative otherAlternative
             && otherAlternative.TheCharacter == TheCharacter
             && otherAlternative.OriginalCharacter == OriginalCharacter
             && otherAlternative.OriginalPinyin == OriginalPinyin
             && otherAlternative.OriginalTone == OriginalTone;
-    }
 
     public override int GetHashCode() => HashCode.Combine(TheCharacter, OriginalCharacter, OriginalPinyin);
 

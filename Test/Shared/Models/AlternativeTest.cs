@@ -77,18 +77,19 @@ internal sealed partial class AlternativeTest
     }
 
     [Test]
-    public void AlternativeEqualsMinimalCloneTest()
+    public void AlternativeEqualsKeyFieldDiffersTest()
     {
         var alternativeClone = new Alternative
         {
             TheCharacter = _alternative.TheCharacter,
             OriginalCharacter = _alternative.OriginalCharacter,
             OriginalPinyin = _alternative.OriginalPinyin,
-            OriginalTone = _alternative.OriginalTone
+            OriginalTone = (short)(_alternative.OriginalTone! + 1),
+            Strokes = _alternative.Strokes
         };
 
-        Assert.That(alternativeClone, Is.EqualTo(_alternative));
-        Assert.That(alternativeClone == _alternative, Is.True);
+        Assert.That(alternativeClone, Is.Not.EqualTo(_alternative));
+        Assert.That(alternativeClone == _alternative, Is.False);
     }
 
     [Test]
@@ -105,21 +106,5 @@ internal sealed partial class AlternativeTest
 
         Assert.That(alternativeClone, Is.EqualTo(_alternative));
         Assert.That(alternativeClone == _alternative, Is.True);
-    }
-
-    [Test]
-    public void AlternativeEqualsKeyFieldDiffersTest()
-    {
-        var alternativeClone = new Alternative
-        {
-            TheCharacter = _alternative.TheCharacter,
-            OriginalCharacter = _alternative.OriginalCharacter,
-            OriginalPinyin = _alternative.OriginalPinyin,
-            OriginalTone = (short)(_alternative.OriginalTone! + 1),
-            Strokes = _alternative.Strokes
-        };
-
-        Assert.That(alternativeClone, Is.Not.EqualTo(_alternative));
-        Assert.That(alternativeClone != _alternative, Is.True);
     }
 }

@@ -14,12 +14,14 @@ public sealed class ChacharsController(
     ILogger<ChacharsController> _logger
 ) : ControllerBase, IEntityController
 {
-    [HttpGet]
+    [
+        HttpGet,
+        ServiceFilter(typeof(ChacharGetFilter))
+    ]
     public ActionResult<IEnumerable<Chachar>> Get() =>
         _entityControllerCommons.TheGet<ChacharsController, Chachar>(
             this,
             _logger,
-            Actions.GET_ALL_CHACHARS,
             nameof(AsciiPinyinContext.Chachars)
         );
 
@@ -31,6 +33,7 @@ public sealed class ChacharsController(
         _entityControllerCommons.Post(
             this,
             chachar,
+            TableNames.CHACHAR,
             _logger
         );
 
@@ -43,6 +46,7 @@ public sealed class ChacharsController(
         _entityControllerCommons.PostDelete(
             this,
             chachar,
+            TableNames.CHACHAR,
             _logger
         );
 }

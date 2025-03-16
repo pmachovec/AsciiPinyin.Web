@@ -7,7 +7,6 @@ public static class CssClasses
     public const string BG_DANGER = "bg-danger";
     public const string BG_PRIMARY = "bg-primary";
     public const string BG_WARNING = "bg-warning";
-    public const string BORDER_DANGER = "border-danger";
     public const string BTN_OUTLINE_PRIMARY = "btn-outline-primary";
     public const string BTN_OUTLINE_SECONDARY = "btn-outline-secondary";
     public const string CHACHAR_SELECTOR = "chachar-selector";

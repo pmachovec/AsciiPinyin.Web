@@ -2,15 +2,7 @@ namespace AsciiPinyin.Web.Shared.Test.Constants;
 
 public static class JsonPropertyNames
 {
-    public const string CONFLICT_ENTITIES = "conflict_entities";
-    public const string DATABASE_INTEGRITY_ERRORS = "database_integrity_errors";
-    public const string ENTITY = "entity";
-    public const string ENTITY_TYPE = "entity_type";
-    public const string ENTITY_FIELDS_ERRORS = "entity_fields_errors";
-    public const string ERROR_MESSAGE = "error_message";
-    public const string FIELD_ERRORS = "field_errors";
-    public const string FIELD_NAME = "field_name";
-    public const string FIELD_VALUE = "field_value";
+    public const string ERRORS = "errors";
     public const string IPA = "ipa";
     public const string ORIGINAL_CHARACTER = "original_character";
     public const string ORIGINAL_PINYIN = "original_pinyin";

@@ -40,7 +40,7 @@ internal sealed class AlternativeFormTest : IDisposable
         IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT
     ];
 
-    private static readonly Chachar _radicalChachar = new()
+    private static readonly Chachar _radicalChachar1 = new()
     {
         TheCharacter = "雨",
         Pinyin = "yu",
@@ -49,7 +49,7 @@ internal sealed class AlternativeFormTest : IDisposable
         Strokes = 8
     };
 
-    private static readonly Alternative _alternative = new()
+    private static readonly Alternative _alternative11 = new()
     {
         TheCharacter = "⻗",
         OriginalCharacter = "雨",
@@ -58,7 +58,7 @@ internal sealed class AlternativeFormTest : IDisposable
         Strokes = 8
     };
 
-    private static readonly HashSet<Chachar> _radicalChachars = [_radicalChachar];
+    private static readonly HashSet<Chachar> _radicalChachars1 = [_radicalChachar1];
     private static readonly CompositeFormat _alternativeAlreadyInDb = CompositeFormat.Parse(ALTERNATIVE_ALREADY_IN_DB);
     private static readonly CompositeFormat _alternativeCreated = CompositeFormat.Parse(ALTERNATIVE_CREATED);
     private static readonly MouseEventArgs _mouseEventArgs = new();
@@ -289,12 +289,12 @@ internal sealed class AlternativeFormTest : IDisposable
     {
         // Multi-character inputs are unreachable thanks to PreventMultipleCharacters, no need to test this case.
 
-        _entityFormTestCommons.WrongSubmitOnInputTest(
+        _entityFormTestCommons.InvalidInputSubmitTest(
             inputValue,
             expectedError,
             IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT,
-            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
-            IDs.ALTERNATIVE_FORM_THE_CHARACTER_ERROR
+            IDs.ALTERNATIVE_FORM_THE_CHARACTER_VALIDATION_MESSAGE,
+            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON
         );
     }
 
@@ -320,32 +320,32 @@ internal sealed class AlternativeFormTest : IDisposable
             TextUtils.GetStringFirstCharacterAsString(inputValue)
          );
 
-        _entityFormTestCommons.CorrectSubmitOnInputTest(
+        _entityFormTestCommons.ValidInputSubmitTest(
             inputValue,
             IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT,
-            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
-            IDs.ALTERNATIVE_FORM_THE_CHARACTER_ERROR
+            IDs.ALTERNATIVE_FORM_THE_CHARACTER_VALIDATION_MESSAGE,
+            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON
         );
     }
 
-    [TestCase("", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value empty string")]
-    [TestCase("0", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value zero")]
-    [TestCase("1", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value one")]
-    [TestCase("9", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value nine")]
-    [TestCase("13", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value thirteen")]
-    [TestCase("66", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value sixty-six")]
-    [TestCase("99", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value ninety-nine")]
-    public void StrokesOnInputAdjustedTest(string previousValidInput) =>
+    [TestCase(null, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value empty string")]
+    [TestCase(0, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value zero")]
+    [TestCase(1, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value one")]
+    [TestCase(9, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value nine")]
+    [TestCase(13, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value thirteen")]
+    [TestCase(66, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value sixty-six")]
+    [TestCase(99, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputAdjustedTest)} - previous value ninety-nine")]
+    public void StrokesOnInputAdjustedTest(short? previousValidInput) =>
         _entityFormTestCommons.NumberInputAdjustedTest(previousValidInput, IDs.ALTERNATIVE_FORM_STROKES_INPUT);
 
-    [TestCase("", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - empty string")]
-    [TestCase("0", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - zero")]
-    [TestCase("1", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - one")]
-    [TestCase("9", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - nine")]
-    [TestCase("13", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - thirteen")]
-    [TestCase("66", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - sixty-six")]
-    [TestCase("99", TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - ninety-nine")]
-    public void StrokesOnInputUnchangedTest(string inputValue) =>
+    [TestCase(null, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - empty string")]
+    [TestCase(0, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - zero")]
+    [TestCase(1, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - one")]
+    [TestCase(9, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - nine")]
+    [TestCase(13, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - thirteen")]
+    [TestCase(66, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - sixty-six")]
+    [TestCase(99, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesOnInputUnchangedTest)} - ninety-nine")]
+    public void StrokesOnInputUnchangedTest(short? inputValue) =>
         _entityFormTestCommons.NumberInputUnchangedTest(inputValue, IDs.ALTERNATIVE_FORM_STROKES_INPUT);
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(AlternativeFormTest)}.{nameof(StrokesWrongSubmitTest)} - empty string")]
@@ -356,12 +356,12 @@ internal sealed class AlternativeFormTest : IDisposable
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.ALTERNATIVE_FORM_STROKES_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.ALTERNATIVE_FORM_STROKES_INPUT, inputValue);
 
-        _entityFormTestCommons.WrongSubmitOnInputTest(
+        _entityFormTestCommons.InvalidInputSubmitTest(
             inputValue,
             expectedError,
             IDs.ALTERNATIVE_FORM_STROKES_INPUT,
-            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
-            IDs.ALTERNATIVE_FORM_STROKES_ERROR
+            IDs.ALTERNATIVE_FORM_STROKES_VALIDATION_MESSAGE,
+            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON
         );
     }
 
@@ -376,69 +376,83 @@ internal sealed class AlternativeFormTest : IDisposable
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.ALTERNATIVE_FORM_STROKES_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.ALTERNATIVE_FORM_STROKES_INPUT, inputValue);
 
-        _entityFormTestCommons.CorrectSubmitOnInputTest(
+        _entityFormTestCommons.ValidInputSubmitTest(
             inputValue,
             IDs.ALTERNATIVE_FORM_STROKES_INPUT,
-            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
-            IDs.ALTERNATIVE_FORM_STROKES_ERROR
+            IDs.ALTERNATIVE_FORM_STROKES_VALIDATION_MESSAGE,
+            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON
         );
     }
 
-    [TestCase(TestName = $"{nameof(AlternativeFormTest)}.{nameof(OriginalWrongSubmitTest)} - original not selected")]
-    public void OriginalWrongSubmitTest()
-    {
-        var (addBorderDangerClassHandler, setErrorTextInvocationHandler, alternativeFormSubmitButton) = _entityFormTestCommons.MockInputFormElements(
-            IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
-            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
-            IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR,
-            COMPULSORY_VALUE
-        );
-
-        alternativeFormSubmitButton.Click();
-
-        EntityFormTestCommons.WrongSubmitVerifications(
+    [TestCase(TestName = $"{nameof(AlternativeFormTest)}.{nameof(OriginalInvalidSubmitTest)} - original not selected")]
+    public void OriginalInvalidSubmitTest() =>
+        _entityFormTestCommons.InvalidButtonInputSubmitTest(
             COMPULSORY_VALUE,
             IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
-            IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR,
-            addBorderDangerClassHandler,
-            setErrorTextInvocationHandler
+            IDs.ALTERNATIVE_FORM_ORIGINAL_VALIDATION_MESSAGE,
+            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON
         );
-    }
 
-    [TestCase(TestName = $"{nameof(AlternativeFormTest)}.{nameof(OriginalCorrectSubmitTest)} - original selected")]
-    public void OriginalCorrectSubmitTest()
+    [TestCase(TestName = $"{nameof(AlternativeFormTest)}.{nameof(OriginalValidSubmitTest)} - original selected")]
+    public void OriginalValidSubmitTest()
     {
-        _chachars.AddRange(_radicalChachars);
-        _entityFormTestCommons.MockOtherInputsBorderDanger(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT);
-
-        var (addBorderDangerClassHandler, setErrorTextInvocationHandler, alternativeFormSubmitButton) = _entityFormTestCommons.MockInputFormElements(
-            IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
-            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON,
-            IDs.ALTERNATIVE_FORM_ORIGINAL_ERROR
-        );
-
+        _chachars.AddRange(_radicalChachars1);
         SelectOriginal();
-        alternativeFormSubmitButton.Click();
 
-        EntityFormTestCommons.CorrectSubmitVerifications(addBorderDangerClassHandler, setErrorTextInvocationHandler);
+        _entityFormTestCommons.ValidButtonInputSubmitTest(
+            IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
+            IDs.ALTERNATIVE_FORM_ORIGINAL_VALIDATION_MESSAGE,
+            IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON
+        );
     }
 
     [Test]
     public async Task AlternativeAlreadyExistsSubmitTest()
     {
-        _chachars.AddRange(_radicalChachars);
-        _ = _alternatives.Add(_alternative);
+        _chachars.AddRange(_radicalChachars1);
+        _ = _alternatives.Add(_alternative11);
         string? errorMessage = null;
         _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
         SelectOriginal();
-        await SubmitAsync(_alternative);
+        await SubmitAsync(_alternative11);
 
         var expectedErrorMessage = string.Format(
             CultureInfo.InvariantCulture,
             _alternativeAlreadyInDb,
-            _alternative.TheCharacter,
-            _alternative.OriginalCharacter,
-            _alternative.OriginalRealPinyin
+            _alternative11.TheCharacter,
+            _alternative11.OriginalCharacter,
+            _alternative11.OriginalRealPinyin
+        );
+
+        _entityFormTestCommons.SubmitDialogErrorMessageTest(errorMessage, expectedErrorMessage);
+    }
+
+    [Test]
+    public async Task AlternativeAlreadyExistsNonKeyFieldsDifferSubmitTest()
+    {
+        _chachars.AddRange(_radicalChachars1);
+        _ = _alternatives.Add(_alternative11);
+
+        var alternativeClone = new Alternative
+        {
+            TheCharacter = _alternative11.TheCharacter,
+            OriginalCharacter = _alternative11.OriginalCharacter,
+            OriginalPinyin = _alternative11.OriginalPinyin,
+            OriginalTone = _alternative11.OriginalTone,
+            Strokes = (short)(_alternative11.Strokes! + 1)
+        };
+
+        string? errorMessage = null;
+        _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
+        SelectOriginal();
+        await SubmitAsync(alternativeClone);
+
+        var expectedErrorMessage = string.Format(
+            CultureInfo.InvariantCulture,
+            _alternativeAlreadyInDb,
+            _alternative11.TheCharacter,
+            _alternative11.OriginalCharacter,
+            _alternative11.OriginalRealPinyin
         );
 
         _entityFormTestCommons.SubmitDialogErrorMessageTest(errorMessage, expectedErrorMessage);
@@ -447,13 +461,13 @@ internal sealed class AlternativeFormTest : IDisposable
     [Test]
     public async Task AlternativeSubmitProcessingErrorTest()
     {
-        _ = _chachars.Add(_radicalChachar);
+        _ = _chachars.Add(_radicalChachar1);
 
-        _entityFormTestCommons.MockPostStatusCode(_alternative, HttpStatusCode.InternalServerError);
+        _entityFormTestCommons.MockPostStatusCode(_alternative11, HttpStatusCode.InternalServerError);
         string? errorMessage = null;
         _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
         SelectOriginal();
-        await SubmitAsync(_alternative);
+        await SubmitAsync(_alternative11);
 
         _entityFormTestCommons.SubmitDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
     }
@@ -461,20 +475,20 @@ internal sealed class AlternativeFormTest : IDisposable
     [Test]
     public async Task AlternativeSubmitOkTest()
     {
-        _ = _chachars.Add(_radicalChachar);
+        _ = _chachars.Add(_radicalChachar1);
 
-        _entityFormTestCommons.MockPostStatusCode(_alternative, HttpStatusCode.OK);
+        _entityFormTestCommons.MockPostStatusCode(_alternative11, HttpStatusCode.OK);
         string? successMessage = null;
         _entityFormTestCommons.CaptureSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
         SelectOriginal();
-        await SubmitAsync(_alternative);
+        await SubmitAsync(_alternative11);
 
         var expectedSuccessMessage = string.Format(
             CultureInfo.InvariantCulture,
             _alternativeCreated,
-            _alternative.TheCharacter,
-            _alternative.OriginalCharacter,
-            _alternative.OriginalRealPinyin
+            _alternative11.TheCharacter,
+            _alternative11.OriginalCharacter,
+            _alternative11.OriginalRealPinyin
         );
 
         _entityFormTestCommons.SubmitDialogSuccessMessageTest(successMessage, expectedSuccessMessage);
@@ -482,20 +496,10 @@ internal sealed class AlternativeFormTest : IDisposable
 
     private void SelectOriginal()
     {
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.BORDER_DANGER);
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.INVALID);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.ALTERNATIVE_FORM_ORIGINAL_SELECTOR, CssClasses.SHOW);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_ALTERNATIVE);
-
-        // Open original selector
-        var openOriginalSelectorButton = _alternativeFormComponent.Find($"#{IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT}");
-        Assert.That(openOriginalSelectorButton, Is.Not.Null);
-        openOriginalSelectorButton.Click();
-
-        // Click on the first button in the selector
-        var buttonDivs = _alternativeFormComponent.FindAll("div").Where(div => div.ClassList.Contains(CssClasses.ORIGINAL_SELECTOR));
-        Assert.That(buttonDivs.Count(), Is.EqualTo(_radicalChachars.Count));
-        var originalButtonDiv = buttonDivs.First();
-        originalButtonDiv.Click();
+        _entityFormTestCommons.ClickFirstInSelector(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.ORIGINAL_SELECTOR);
     }
 
     private async Task SubmitAsync(Alternative alternative)
@@ -510,8 +514,8 @@ internal sealed class AlternativeFormTest : IDisposable
         var strokesInput = _alternativeFormComponent.Find($"#{IDs.ALTERNATIVE_FORM_STROKES_INPUT}");
         var formSubmitButton = _alternativeFormComponent.Find($"#{IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON}");
 
-        theCharacterInput.Input(alternative.TheCharacter);
-        strokesInput.Input(alternative.Strokes);
+        theCharacterInput.Change(alternative.TheCharacter);
+        strokesInput.Change(alternative.Strokes);
 
         await formSubmitButton.ClickAsync(_mouseEventArgs);
     }

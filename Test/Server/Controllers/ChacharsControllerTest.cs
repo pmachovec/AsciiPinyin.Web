@@ -12,7 +12,7 @@ using Moq;
 using NUnit.Framework;
 using System.Net;
 using System.Net.Http.Json;
-using Errors = AsciiPinyin.Web.Server.Test.Constants.Errors;
+using Errors = AsciiPinyin.Web.Shared.Test.Constants.Errors;
 
 namespace Asciipinyin.Web.Server.Test.Controllers;
 
@@ -326,7 +326,7 @@ internal sealed class ChacharsControllerTest
     [TestCase("r̻̝", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 2")]
     [TestCase("r̝̊", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 3")]
     [TestCase("ɼ", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostTheCharacterWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
-    public async Task PostTheCharacterWrongTest(string? theCharacter, string expectedErrorMessage)
+    public async Task PostTheCharacterWrongTest(string? theCharacter, string expectedError)
     {
         var chachar = new Chachar()
         {
@@ -334,7 +334,7 @@ internal sealed class ChacharsControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostAsync(_host, chachar, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.THE_CHARACTER, CancellationToken.None, expectedError);
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
@@ -440,7 +440,7 @@ internal sealed class ChacharsControllerTest
     [TestCase("𫇂\t𫟖\t𬩽", Errors.NO_ASCII, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
     [TestCase("𫇂\n𫟖\t𬩽 ", Errors.NO_ASCII, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
     [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", Errors.NO_ASCII, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostPinyinWrongTest)} - crazy combination of 40 characters, symbols and whitespaces")]
-    public async Task PostPinyinWrongTest(string? pinyin, string expectedErrorMessage)
+    public async Task PostPinyinWrongTest(string? pinyin, string expectedError)
     {
         var chachar = new Chachar()
         {
@@ -448,7 +448,7 @@ internal sealed class ChacharsControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostAsync(_host, chachar, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.PINYIN, CancellationToken.None, expectedError);
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
@@ -456,7 +456,7 @@ internal sealed class ChacharsControllerTest
     [TestCase(5, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostToneWrongTest)} - five")]
     [TestCase(55, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostToneWrongTest)} - fifty-five")]
     [TestCase(short.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostToneWrongTest)} - short max value")]
-    public async Task PostToneWrongTest(short? tone, string expectedErrorMessage)
+    public async Task PostToneWrongTest(short? tone, string expectedError)
     {
         // Unsigned byte numbers are only reachable inputs.
         var chachar = new Chachar()
@@ -465,7 +465,7 @@ internal sealed class ChacharsControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostAsync(_host, chachar, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.TONE, CancellationToken.None, expectedError);
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
@@ -565,7 +565,7 @@ internal sealed class ChacharsControllerTest
     [TestCase("𫇂\t𫟖\t𬩽", Errors.NO_IPA, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostIpaWrongTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
     [TestCase("𫇂\n𫟖\t𬩽 ", Errors.NO_IPA, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostIpaWrongTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
     [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", Errors.NO_IPA, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostIpaWrongTest)} - crazy combination of 40 characters, symbols and whitespaces")]
-    public async Task PostIpaWrongTest(string? ipa, string expectedErrorMessage)
+    public async Task PostIpaWrongTest(string? ipa, string expectedError)
     {
         var chachar = new Chachar()
         {
@@ -573,7 +573,7 @@ internal sealed class ChacharsControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostAsync(_host, chachar, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.IPA, CancellationToken.None, expectedError);
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
@@ -581,7 +581,7 @@ internal sealed class ChacharsControllerTest
     [TestCase(0, Errors.ONE_TO_NINETY_NINE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostStrokesWrongTest)} - zero")]
     [TestCase(100, Errors.ONE_TO_NINETY_NINE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostStrokesWrongTest)} - one hundred")]
     [TestCase(short.MaxValue, Errors.ONE_TO_NINETY_NINE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostStrokesWrongTest)} - short max value")]
-    public async Task PostStrokesWrongTest(short? strokes, string expectedErrorMessage)
+    public async Task PostStrokesWrongTest(short? strokes, string expectedError)
     {
         // Unsigned byte numbers are only reachable inputs.
         var chachar = new Chachar()
@@ -590,7 +590,7 @@ internal sealed class ChacharsControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostAsync(_host, chachar, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.STROKES, CancellationToken.None, expectedError);
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
@@ -688,7 +688,7 @@ internal sealed class ChacharsControllerTest
     [TestCase("r̻̝", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalCharacterWrongTest)} - Czech 'Ř' in IPA - version 2")]
     [TestCase("r̝̊", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalCharacterWrongTest)} - Czech 'Ř' in IPA - version 3")]
     [TestCase("ɼ", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalCharacterWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
-    public async Task PostRadicalCharacterWrongTest(string? radicalCharacter, string expectedErrorMessage)
+    public async Task PostRadicalCharacterWrongTest(string? radicalCharacter, string expectedError)
     {
         var chachar = new Chachar()
         {
@@ -696,7 +696,7 @@ internal sealed class ChacharsControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostAsync(_host, chachar, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.RADICAL_CHARACTER, CancellationToken.None, expectedError);
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
@@ -801,7 +801,7 @@ internal sealed class ChacharsControllerTest
     [TestCase("𫇂\t𫟖\t𬩽", Errors.NO_ASCII, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
     [TestCase("𫇂\n𫟖\t𬩽 ", Errors.NO_ASCII, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
     [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", Errors.NO_ASCII, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalPinyinWrongTest)} - crazy combination of 40 characters, symbols and whitespaces")]
-    public async Task PostRadicalPinyinWrongTest(string? radicalPinyin, string expectedErrorMessage)
+    public async Task PostRadicalPinyinWrongTest(string? radicalPinyin, string expectedError)
     {
         var chachar = new Chachar()
         {
@@ -809,14 +809,14 @@ internal sealed class ChacharsControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostAsync(_host, chachar, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.RADICAL_PINYIN, CancellationToken.None, expectedError);
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
     [TestCase(5, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalToneWrongTest)} - five")]
     [TestCase(55, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalToneWrongTest)} - fifty-five")]
     [TestCase(short.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalToneWrongTest)} - short max value")]
-    public async Task PostRadicalToneWrongTest(short? radicalTone, string expectedErrorMessage)
+    public async Task PostRadicalToneWrongTest(short? radicalTone, string expectedError)
     {
         // Unsigned byte numbers are only reachable inputs.
         var chachar = new Chachar()
@@ -825,7 +825,7 @@ internal sealed class ChacharsControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostAsync(_host, chachar, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.RADICAL_TONE, CancellationToken.None, expectedError);
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
@@ -923,7 +923,7 @@ internal sealed class ChacharsControllerTest
     [TestCase("r̻̝", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalAlternativeCharacterWrongTest)} - Czech 'Ř' in IPA - version 2")]
     [TestCase("r̝̊", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalAlternativeCharacterWrongTest)} - Czech 'Ř' in IPA - version 3")]
     [TestCase("ɼ", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostRadicalAlternativeCharacterWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
-    public async Task PostRadicalAlternativeCharacterWrongTest(string? radicalAlternativeCharacter, string expectedErrorMessage)
+    public async Task PostRadicalAlternativeCharacterWrongTest(string? radicalAlternativeCharacter, string expectedError)
     {
         var chachar = new Chachar()
         {
@@ -931,7 +931,7 @@ internal sealed class ChacharsControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostAsync(_host, chachar, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.RADICAL_ALTERNATIVE_CHARACTER, CancellationToken.None, expectedError);
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(chachar));
     }
 
@@ -953,7 +953,7 @@ internal sealed class ChacharsControllerTest
     public async Task PostRadicalUnknownTest()
     {
         var response = await _entityControllerTestCommons.PostAsync(_host, _nonRadicalChacharWithAlternative11, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.RADICAL_UNKNOWN);
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_nonRadicalChacharWithAlternative11));
     }
 
@@ -967,11 +967,20 @@ internal sealed class ChacharsControllerTest
             Ipa = _radicalChachar1.Ipa,
             Tone = _radicalChachar1.Tone,
             Strokes = _radicalChachar1.Strokes,
-            RadicalCharacter = _radicalChachar1.TheCharacter
+            RadicalCharacter = _nonRadicalChacharWithoutAlternative21.TheCharacter,
+            RadicalPinyin = _nonRadicalChacharWithoutAlternative21.Pinyin,
+            RadicalTone = _nonRadicalChacharWithoutAlternative21.Tone
         };
 
+        _entityControllerTestCommons.AddToContextAndSave(_asciiPinyinContext, _radicalChachar2, _nonRadicalChacharWithoutAlternative21);
         var response = await _entityControllerTestCommons.PostAsync(_host, radicalNotRadical, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.RADICAL_NOT_RADICAL
+        );
+
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(radicalNotRadical));
     }
 
@@ -980,7 +989,7 @@ internal sealed class ChacharsControllerTest
     {
         _entityControllerTestCommons.AddToContextAndSave(_asciiPinyinContext, _radicalChachar1);
         var response = await _entityControllerTestCommons.PostAsync(_host, _nonRadicalChacharWithAlternative11, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.ALTERNATIVE_UNKNOWN);
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_nonRadicalChacharWithAlternative11));
     }
 
@@ -989,7 +998,13 @@ internal sealed class ChacharsControllerTest
     {
         _entityControllerTestCommons.AddToContextAndSave(_asciiPinyinContext, _radicalChachar1);
         var response = await _entityControllerTestCommons.PostAsync(_host, _radicalChachar1, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.CHACHAR_EXISTS
+        );
+
         Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
     }
 
@@ -1123,7 +1138,7 @@ internal sealed class ChacharsControllerTest
     [TestCase("r̻̝", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 2")]
     [TestCase("r̝̊", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 3")]
     [TestCase("ɼ", Errors.NO_SINGLE_CHINESE, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteTheCharacterWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
-    public async Task PostDeleteTheCharacterWrongTest(string? theCharacter, string expectedErrorMessage)
+    public async Task PostDeleteTheCharacterWrongTest(string? theCharacter, string expectedError)
     {
         var chachar = new Chachar()
         {
@@ -1131,7 +1146,7 @@ internal sealed class ChacharsControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, chachar, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.THE_CHARACTER, CancellationToken.None, expectedError);
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeletePinyinWrongTest)} - null")]
@@ -1236,7 +1251,7 @@ internal sealed class ChacharsControllerTest
     [TestCase("𫇂\t𫟖\t𬩽", Errors.NO_ASCII, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeletePinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
     [TestCase("𫇂\n𫟖\t𬩽 ", Errors.NO_ASCII, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeletePinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
     [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", Errors.NO_ASCII, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeletePinyinWrongTest)} - crazy combination of 40 characters, symbols and whitespaces")]
-    public async Task PostDeletePinyinWrongTest(string? pinyin, string expectedErrorMessage)
+    public async Task PostDeletePinyinWrongTest(string? pinyin, string expectedError)
     {
         var chachar = new Chachar()
         {
@@ -1244,14 +1259,14 @@ internal sealed class ChacharsControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, chachar, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.PINYIN, CancellationToken.None, expectedError);
     }
 
     [TestCase(null, Errors.MISSING, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteToneWrongTest)} - null")]
     [TestCase(5, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteToneWrongTest)} - five")]
     [TestCase(55, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteToneWrongTest)} - fifty-five")]
     [TestCase(short.MaxValue, Errors.ZERO_TO_FOUR, TestName = $"{nameof(ChacharsControllerTest)}.{nameof(PostDeleteToneWrongTest)} - short max value")]
-    public async Task PostDeleteToneWrongTest(short? tone, string expectedErrorMessage)
+    public async Task PostDeleteToneWrongTest(short? tone, string expectedError)
     {
         // Unsigned byte numbers are only reachable inputs.
         var chachar = new Chachar()
@@ -1260,7 +1275,7 @@ internal sealed class ChacharsControllerTest
         };
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, chachar, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostWrongFieldTestAsync(response, JsonPropertyNames.TONE, CancellationToken.None, expectedError);
     }
 
     [Test, Category(TestCategories.DB_CONTEXT_MOCK_ERROR_CHACHARS)]
@@ -1281,23 +1296,8 @@ internal sealed class ChacharsControllerTest
     public async Task PostDeleteChacharDoesNotExistTest()
     {
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _radicalChachar1, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.CHACHAR_UNKNOWN);
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_radicalChachar1));
-    }
-
-    [Test]
-    public async Task PostDeleteMinimalChacharDoesNotExistTest()
-    {
-        var minimalChachar = new Chachar
-        {
-            TheCharacter = _radicalChachar1.TheCharacter,
-            Pinyin = _radicalChachar1.Pinyin,
-            Tone = _radicalChachar1.Tone
-        };
-
-        var response = await _entityControllerTestCommons.PostDeleteAsync(_host, minimalChachar, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
-        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(minimalChachar));
     }
 
     [Test]
@@ -1310,7 +1310,13 @@ internal sealed class ChacharsControllerTest
         );
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _radicalChachar2, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.IS_RADICAL_FOR_OTHERS
+        );
+
         Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar2));
     }
 
@@ -1326,7 +1332,13 @@ internal sealed class ChacharsControllerTest
         );
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _radicalChachar2, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.IS_RADICAL_FOR_OTHERS
+        );
+
         Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar2));
     }
 
@@ -1340,7 +1352,13 @@ internal sealed class ChacharsControllerTest
         );
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _radicalChachar3, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.HAS_ALTERNATIVES
+        );
+
         Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar3));
     }
 
@@ -1356,7 +1374,13 @@ internal sealed class ChacharsControllerTest
         );
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _radicalChachar3, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.HAS_ALTERNATIVES
+        );
+
         Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar3));
     }
 
@@ -1371,7 +1395,15 @@ internal sealed class ChacharsControllerTest
         );
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _radicalChachar1, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.IS_RADICAL_FOR_OTHERS,
+            Errors.HAS_ALTERNATIVES
+        );
+
+
         Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
     }
 
@@ -1388,7 +1420,15 @@ internal sealed class ChacharsControllerTest
         );
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _radicalChachar3, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.IS_RADICAL_FOR_OTHERS,
+            Errors.HAS_ALTERNATIVES
+        );
+
+
         Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar3));
     }
 
@@ -1405,7 +1445,14 @@ internal sealed class ChacharsControllerTest
         );
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _radicalChachar3, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.IS_RADICAL_FOR_OTHERS,
+            Errors.HAS_ALTERNATIVES
+        );
+
         Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar3));
     }
 
@@ -1424,7 +1471,14 @@ internal sealed class ChacharsControllerTest
         );
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _radicalChachar3, CancellationToken.None);
-        _entityControllerTestCommons.PostBadRequestTest(response);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.IS_RADICAL_FOR_OTHERS,
+            Errors.HAS_ALTERNATIVES
+        );
+
         Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar3));
     }
 
