@@ -17,13 +17,6 @@
             AlternativesTab="AlternativesTab"
             ChacharsTab="ChacharsTab"
             SelectTabAsync="SelectTabAsync" />
-
-        <div id="@IDs.INDEX_ENTITIES_TABS_LOADING">
-            <Loading
-                Id="@IDs.INDEX_LOADING"
-                TextResource="@Resource.Loading" />
-        </div>
-
         <AlternativesTab @ref="AlternativesTab" Index="@this" />
         <ChacharsTab @ref="ChacharsTab" Index="@this" />
     </main>

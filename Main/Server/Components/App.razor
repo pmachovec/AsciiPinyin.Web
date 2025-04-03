@@ -22,20 +22,25 @@
         <HeadOutlet @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
     </head>
     <body>
-        @* Must be at the very beginning of the body. Otherwise, Index is appended before it. *@
         <div class="mt-3 text-center">
             <h1 class="display-1 fw-bolder">@(StringConstants.ASCII)&nbsp;@(StringConstants.PINYIN_CHINESE)</h1>
         </div>
 
         <Routes @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
+        @* Index is appended here - at the place of the Routes component. *@
+
         <script src="/@(ApiNames.BASE)/js/JSInteropConsole.js"></script>
         <script src="/@(ApiNames.BASE)/js/JSInteropDOM.js"></script>
         <script src="/@(ApiNames.BASE)/js/lib/jquery-3.6.0.min.js"></script>
         <script src="/@(ApiNames.BASE)/_framework/blazor.web.js"></script>
 
-        <div id="@IDs.LOADING_SPLASH">
+        <div id="@IDs.LOADING_SPLASH_NAVBAR">
             <div class="container pb-3">
                 <NavBar />
+            </div>
+        </div>
+        <div id="@IDs.LOADING_SPLASH_WHEEL">
+            <div class="container pb-3">
                 <div>
                     <Loading
                         Id="@IDs.APP_LOADING"
@@ -43,7 +48,6 @@
                 </div>
             </div>
         </div>
-        @* Index is appended here. *@
 
         <footer class="border-top footer text-muted">
             <div class="container">&copy;&nbsp;2025&nbsp;&ndash;&nbsp;@(StringConstants.ASCII)&nbsp;@(StringConstants.PINYIN)</div>

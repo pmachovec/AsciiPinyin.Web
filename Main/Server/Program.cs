@@ -1,9 +1,9 @@
 using AsciiPinyin.Web.Server.Commons;
+using AsciiPinyin.Web.Server.Components;
 using AsciiPinyin.Web.Server.Controllers.ActionFilters;
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Server.Locals;
 using AsciiPinyin.Web.Server.Middleware;
-using AsciiPinyin.Web.Server.Pages;
 using AsciiPinyin.Web.Server.Validation;
 using AsciiPinyin.Web.Shared.Constants;
 using Microsoft.AspNetCore.Localization;

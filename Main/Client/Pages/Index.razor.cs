@@ -4,9 +4,7 @@ using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Shared.ComponentInterfaces;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
-using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Localization;
 using NLog;
 
 namespace AsciiPinyin.Web.Client.Pages;
@@ -40,9 +38,6 @@ public class IndexBase : ComponentBase, IIndex
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
-    [Inject]
-    protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
-
     public void StateHasChangedPublic() => StateHasChanged();
 
     protected override async Task OnInitializedAsync()
@@ -52,7 +47,7 @@ public class IndexBase : ComponentBase, IIndex
 
         await Task.WhenAll(
             JSInteropDOM.SetTitleAsync(StringConstants.ASCII_PINYIN, CancellationToken.None),
-            JSInteropDOM.HideElementAsync(IDs.LOADING_SPLASH, CancellationToken.None)
+            JSInteropDOM.HideElementAsync(IDs.LOADING_SPLASH_NAVBAR, CancellationToken.None)
         );
     }
 
@@ -64,7 +59,7 @@ public class IndexBase : ComponentBase, IIndex
             Chachars = await EntityClient.GetEntitiesAsync<Chachar>(ApiNames.CHARACTERS, CancellationToken.None);
             await Task.WhenAll(
                 SelectTabAsync(ChacharsTab, CancellationToken.None),
-                JSInteropDOM.HideElementAsync(IDs.INDEX_ENTITIES_TABS_LOADING, CancellationToken.None)
+                JSInteropDOM.HideElementAsync(IDs.LOADING_SPLASH_WHEEL, CancellationToken.None)
             );
         }
     }
