@@ -29,6 +29,9 @@ public sealed class JSInteropDOM(IJSRuntime jsRuntime) : IJSInteropDOM
     public async Task SetTitleAsync(string title, CancellationToken cancellationToken) =>
         await _jsRuntime.InvokeVoidAsync(DOMFunctions.SET_TITLE, cancellationToken, title);
 
+    public async Task<string> GetTextAsync(string elementId, CancellationToken cancellationToken) =>
+        await _jsRuntime.InvokeAsync<string>(DOMFunctions.GET_TEXT, cancellationToken, elementId);
+
     public async Task SetTextAsync(string elementId, string text, CancellationToken cancellationToken) =>
         await _jsRuntime.InvokeVoidAsync(DOMFunctions.SET_TEXT, cancellationToken, elementId, text);
 

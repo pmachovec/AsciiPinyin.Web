@@ -56,6 +56,14 @@ public interface IJSInteropDOM
     Task RemoveClassAsync(string elementId, string theClass, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Gets text content of the given element.
+    /// </summary>
+    /// <param name="elementId">ID of the element whose text should be got.</param>
+    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
+    /// <returns></returns>
+    Task<string> GetTextAsync(string elementId, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Sets the given text to the given element.
     /// </summary>
     /// <param name="elementId">ID of the elemet for to which the text should be set.</param>

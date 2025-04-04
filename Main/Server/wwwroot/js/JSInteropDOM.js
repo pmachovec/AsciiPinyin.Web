@@ -10,6 +10,8 @@ addClass = (elementId, theClass) => { $(`#${elementId}`).addClass(theClass); }
 
 removeClass = (elementId, theClass) => { $(`#${elementId}`).removeClass(theClass); }
 
+getText = (elementId) => { return $(`#${elementId}`).text(); }
+
 setText = (elementId, text) => { $(`#${elementId}`).text(text); }
 
 setValue = (elementId, value) => { $(`#${elementId}`).val(value); };

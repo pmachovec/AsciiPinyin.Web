@@ -14,6 +14,8 @@ public static class IDs
     public const string ALTERNATIVE_FORM_THE_CHARACTER_VALIDATION_MESSAGE = "alternative-form-the-character-validation-message";
     public const string ALTERNATIVE_VIEW_DIALOG_ROOT = "alternative-view-dialog-root";
     public const string ALTERNATIVES_TAB_BUTTON = "alternatives-tab-button";
+    public const string APP_ALTERNATIVES_PRELOAD = "app-alternatives-preload";
+    public const string APP_CHACHARS_PRELOAD = "app-chachars-preload";
     public const string APP_LOADING = "app-loading";
     public const string CHACHAR_FORM_ALTERNATIVE_INPUT = "chachar-form-alternative-input";
     public const string CHACHAR_FORM_ALTERNATIVE_LABEL = "chachar-form-alternative-label";

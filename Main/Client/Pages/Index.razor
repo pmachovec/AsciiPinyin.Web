@@ -17,6 +17,9 @@
             AlternativesTab="AlternativesTab"
             ChacharsTab="ChacharsTab"
             SelectTabAsync="SelectTabAsync" />
+
+        @* No matter in passing entities separately as cascading parameters. *@
+        @* You need to pass Index down anyway, so it's OK to keep entities embedded in Index. *@
         <AlternativesTab @ref="AlternativesTab" Index="@this" />
         <ChacharsTab @ref="ChacharsTab" Index="@this" />
     </main>
