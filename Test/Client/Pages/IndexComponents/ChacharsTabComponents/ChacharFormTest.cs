@@ -127,7 +127,7 @@ internal sealed class ChacharFormTest : IDisposable
 
     private readonly Mock<IEntityClient> _entityClientMock = new();
     private readonly Mock<IIndex> _indexMock = new();
-    private readonly Mock<ISubmitDialog> _submitDialogMock = new();
+    private readonly Mock<IProcessDialog> _processDialogMock = new();
     private readonly Mock<IStringLocalizer<Resource>> _localizerMock = new();
 
     private HashSet<Chachar> _chachars = default!;
@@ -139,8 +139,8 @@ internal sealed class ChacharFormTest : IDisposable
     public void OneTimeSetUp()
     {
         _ = _indexMock
-            .Setup(index => index.SubmitDialog)
-            .Returns(_submitDialogMock.Object);
+            .Setup(index => index.ProcessDialog)
+            .Returns(_processDialogMock.Object);
 
         _ = _localizerMock
             .Setup(localizer => localizer[Resource.CharacterAlreadyInDb])
@@ -239,19 +239,23 @@ internal sealed class ChacharFormTest : IDisposable
             .AddSingleton<IJSInteropDOM, JSInteropDOM>()
             .AddSingleton<IModalCommons, ModalCommons>();
 
-        _chacharFormComponent = _testContext.RenderComponent<ChacharForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock.Object));
+        _chacharFormComponent = _testContext.RenderComponent<ChacharForm>(
+            parameters => parameters.Add(parameter => parameter.Index, _indexMock.Object)
+        );
 
         _entityFormTestCommons = new(
             _testContext,
             _chacharFormComponent,
             _entityClientMock,
-            _submitDialogMock,
+            _processDialogMock,
             _inputIds
         );
     }
 
     [TearDown]
-    public void TearDown() => _testContext.Dispose();
+    public void TearDown() => Dispose();
+
+    public void Dispose() => _testContext.Dispose();
 
     [TestCase("-1", "-", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - single digit negative integer")]
     [TestCase("123", "1", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - multiple digits positive integer")]
@@ -795,7 +799,7 @@ internal sealed class ChacharFormTest : IDisposable
         _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
         await SubmitAsync(_radicalChachar1);
 
-        CharacterAlreadyExistsSubmitDialogErrorMessageTest(errorMessage, _radicalChachar1);
+        CharacterAlreadyExistsProcessDialogErrorMessageTest(errorMessage, _radicalChachar1);
     }
 
     [Test]
@@ -819,7 +823,7 @@ internal sealed class ChacharFormTest : IDisposable
         _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
         await SubmitAsync(radicalChacharClone);
 
-        CharacterAlreadyExistsSubmitDialogErrorMessageTest(errorMessage, _radicalChachar1);
+        CharacterAlreadyExistsProcessDialogErrorMessageTest(errorMessage, _radicalChachar1);
     }
 
     [Test]
@@ -835,7 +839,7 @@ internal sealed class ChacharFormTest : IDisposable
         SelectRadical();
         await SubmitAsync(_nonRadicalChacharWithoutAlternative31);
 
-        CharacterAlreadyExistsSubmitDialogErrorMessageTest(errorMessage, _nonRadicalChacharWithoutAlternative31);
+        CharacterAlreadyExistsProcessDialogErrorMessageTest(errorMessage, _nonRadicalChacharWithoutAlternative31);
     }
 
     [Test]
@@ -851,7 +855,7 @@ internal sealed class ChacharFormTest : IDisposable
         SelectRadicalAndAlternative();
         await SubmitAsync(_nonRadicalChacharWithAlternative11);
 
-        CharacterAlreadyExistsSubmitDialogErrorMessageTest(errorMessage, _nonRadicalChacharWithAlternative11);
+        CharacterAlreadyExistsProcessDialogErrorMessageTest(errorMessage, _nonRadicalChacharWithAlternative11);
     }
 
     [Test]
@@ -863,7 +867,7 @@ internal sealed class ChacharFormTest : IDisposable
         _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
         await SubmitAsync(_radicalChachar1);
 
-        _entityFormTestCommons.SubmitDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
+        _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
     }
 
     [Test]
@@ -877,7 +881,7 @@ internal sealed class ChacharFormTest : IDisposable
         SelectRadical();
         await SubmitAsync(_nonRadicalChacharWithoutAlternative31);
 
-        _entityFormTestCommons.SubmitDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
+        _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
     }
 
     [Test]
@@ -891,7 +895,7 @@ internal sealed class ChacharFormTest : IDisposable
         SelectRadicalAndAlternative();
         await SubmitAsync(_nonRadicalChacharWithAlternative11);
 
-        _entityFormTestCommons.SubmitDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
+        _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
     }
 
     [Test]
@@ -903,7 +907,7 @@ internal sealed class ChacharFormTest : IDisposable
         _entityFormTestCommons.CaptureSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
         await SubmitAsync(_radicalChachar1);
 
-        CharacterCreatedSubmitDialogSuccessMessageTest(successMessage, _radicalChachar1);
+        CharacterCreatedProcessDialogSuccessMessageTest(successMessage, _radicalChachar1);
     }
 
     [Test]
@@ -917,7 +921,7 @@ internal sealed class ChacharFormTest : IDisposable
         SelectRadical();
         await SubmitAsync(_nonRadicalChacharWithoutAlternative31);
 
-        CharacterCreatedSubmitDialogSuccessMessageTest(successMessage, _nonRadicalChacharWithoutAlternative31);
+        CharacterCreatedProcessDialogSuccessMessageTest(successMessage, _nonRadicalChacharWithoutAlternative31);
     }
 
     [Test]
@@ -931,7 +935,7 @@ internal sealed class ChacharFormTest : IDisposable
         SelectRadicalAndAlternative();
         await SubmitAsync(_nonRadicalChacharWithAlternative11);
 
-        CharacterCreatedSubmitDialogSuccessMessageTest(successMessage, _nonRadicalChacharWithAlternative11);
+        CharacterCreatedProcessDialogSuccessMessageTest(successMessage, _nonRadicalChacharWithAlternative11);
     }
 
     private void SelectRadical() =>
@@ -973,7 +977,7 @@ internal sealed class ChacharFormTest : IDisposable
         await formSubmitButton.ClickAsync(_mouseEventArgs);
     }
 
-    private void CharacterAlreadyExistsSubmitDialogErrorMessageTest(string? errorMessage, Chachar chachar)
+    private void CharacterAlreadyExistsProcessDialogErrorMessageTest(string? errorMessage, Chachar chachar)
     {
         var expectedErrorMessage = string.Format(
             CultureInfo.InvariantCulture,
@@ -982,10 +986,10 @@ internal sealed class ChacharFormTest : IDisposable
             chachar.RealPinyin
         );
 
-        _entityFormTestCommons.SubmitDialogErrorMessageTest(errorMessage, expectedErrorMessage);
+        _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, expectedErrorMessage);
     }
 
-    private void CharacterCreatedSubmitDialogSuccessMessageTest(string? successMessage, Chachar chachar)
+    private void CharacterCreatedProcessDialogSuccessMessageTest(string? successMessage, Chachar chachar)
     {
         var expectedSuccessMessage = string.Format(
             CultureInfo.InvariantCulture,
@@ -994,8 +998,6 @@ internal sealed class ChacharFormTest : IDisposable
             chachar.RealPinyin
         );
 
-        _entityFormTestCommons.SubmitDialogSuccessMessageTest(successMessage, expectedSuccessMessage);
+        _entityFormTestCommons.ProcessDialogSuccessMessageTest(successMessage, expectedSuccessMessage);
     }
-
-    public void Dispose() => TearDown();
 }

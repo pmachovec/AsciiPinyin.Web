@@ -62,17 +62,17 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
 
     protected async Task InitiateDeleteAsync(CancellationToken cancellationToken)
     {
-        await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
+        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
         var databaseIntegrityErrorMessages = GetDeleteDatabaseIntegrityErrorMessages();
 
         if (databaseIntegrityErrorMessages.Count != 0)
         {
             var errorMessageFormatted = GetErrorMessageFormatted(databaseIntegrityErrorMessages);
-            await Index.SubmitDialog.SetErrorAsync(this, errorMessageFormatted, cancellationToken);
+            await Index.ProcessDialog.SetErrorAsync(this, errorMessageFormatted, cancellationToken);
         }
         else
         {
-            await Index.SubmitDialog.SetWarningAsync(
+            await Index.ProcessDialog.SetWarningAsync(
                 this,
                 string.Format(
                     CultureInfo.InvariantCulture,
@@ -128,7 +128,7 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
 
     private async Task SubmitDeleteAsync(CancellationToken cancellationToken)
     {
-        await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
+        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
 
         _ = await ModalCommons.PostAsync(
             this,

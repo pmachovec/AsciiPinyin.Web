@@ -8,7 +8,7 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
-public class SubmitDialogBase : ComponentBase, ISubmitDialog
+public class ProcessDialogBase : ComponentBase, IProcessDialog
 {
     protected string HeaderText { get; private set; } = string.Empty;
 

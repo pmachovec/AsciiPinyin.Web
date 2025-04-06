@@ -2,7 +2,7 @@ using AsciiPinyin.Web.Client.ComponentInterfaces;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
-public interface ISubmitDialog : IModal
+public interface IProcessDialog : IModal
 {
     Task SetProcessingAsync(IModal modalLowerLevel, CancellationToken cancellationToken);
 

@@ -113,7 +113,7 @@ public sealed class ModalCommons(
         {
             LogCommons.LogHttpMethodSuccessInfo(logger, HttpMethod.Post);
 
-            await index.SubmitDialog.SetSuccessAsync(
+            await index.ProcessDialog.SetSuccessAsync(
                 modal,
                 string.Format(
                     CultureInfo.InvariantCulture,
@@ -131,7 +131,7 @@ public sealed class ModalCommons(
         {
             LogCommons.LogHttpMethodFailedError(logger, HttpMethod.Post);
 
-            await index.SubmitDialog.SetErrorAsync(
+            await index.ProcessDialog.SetErrorAsync(
                 modal,
                 _localizer[Resource.ProcessingError],
                 cancellationToken

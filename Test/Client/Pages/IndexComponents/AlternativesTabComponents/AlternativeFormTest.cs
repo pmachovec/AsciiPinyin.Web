@@ -65,7 +65,7 @@ internal sealed class AlternativeFormTest : IDisposable
 
     private readonly Mock<IEntityClient> _entityClientMock = new();
     private readonly Mock<IIndex> _indexMock = new();
-    private readonly Mock<ISubmitDialog> _submitDialogMock = new();
+    private readonly Mock<IProcessDialog> _processDialogMock = new();
     private readonly Mock<IStringLocalizer<Resource>> _localizerMock = new();
 
     private HashSet<Alternative> _alternatives = default!;
@@ -78,8 +78,8 @@ internal sealed class AlternativeFormTest : IDisposable
     public void OneTimeSetUp()
     {
         _ = _indexMock
-           .Setup(index => index.SubmitDialog)
-           .Returns(_submitDialogMock.Object);
+           .Setup(index => index.ProcessDialog)
+           .Returns(_processDialogMock.Object);
 
         _ = _localizerMock
             .Setup(localizer => localizer[Resource.AlternativeAlreadyInDb])
@@ -135,13 +135,15 @@ internal sealed class AlternativeFormTest : IDisposable
             _testContext,
             _alternativeFormComponent,
             _entityClientMock,
-            _submitDialogMock,
+            _processDialogMock,
             _inputIds
         );
     }
 
     [TearDown]
     public void TearDown() => Dispose();
+
+    public void Dispose() => _testContext.Dispose();
 
     [TestCase("-1", "-", TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - single digit negative integer")]
     [TestCase("123", "1", TestName = $"{nameof(AlternativeFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - multiple digits positive integer")]
@@ -424,7 +426,7 @@ internal sealed class AlternativeFormTest : IDisposable
             _alternative11.OriginalRealPinyin
         );
 
-        _entityFormTestCommons.SubmitDialogErrorMessageTest(errorMessage, expectedErrorMessage);
+        _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, expectedErrorMessage);
     }
 
     [Test]
@@ -455,7 +457,7 @@ internal sealed class AlternativeFormTest : IDisposable
             _alternative11.OriginalRealPinyin
         );
 
-        _entityFormTestCommons.SubmitDialogErrorMessageTest(errorMessage, expectedErrorMessage);
+        _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, expectedErrorMessage);
     }
 
     [Test]
@@ -469,7 +471,7 @@ internal sealed class AlternativeFormTest : IDisposable
         SelectOriginal();
         await SubmitAsync(_alternative11);
 
-        _entityFormTestCommons.SubmitDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
+        _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
     }
 
     [Test]
@@ -491,7 +493,7 @@ internal sealed class AlternativeFormTest : IDisposable
             _alternative11.OriginalRealPinyin
         );
 
-        _entityFormTestCommons.SubmitDialogSuccessMessageTest(successMessage, expectedSuccessMessage);
+        _entityFormTestCommons.ProcessDialogSuccessMessageTest(successMessage, expectedSuccessMessage);
     }
 
     private void SelectOriginal()
@@ -519,6 +521,4 @@ internal sealed class AlternativeFormTest : IDisposable
 
         await formSubmitButton.ClickAsync(_mouseEventArgs);
     }
-
-    public void Dispose() => _testContext?.Dispose();
 }

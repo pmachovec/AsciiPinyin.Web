@@ -159,14 +159,14 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
 
     protected async Task CheckAndSubmitAsync(CancellationToken cancellationToken)
     {
-        await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
+        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
         LogCommons.LogFormSubmittedDebug(Logger, nameof(Alternative));
         LogCommons.LogFormDataDebug(Logger, nameof(Alternative), Alternative);
         var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(Alternative);
 
         if (databseIntegrityErrorText is not null)
         {
-            await Index.SubmitDialog.SetErrorAsync(
+            await Index.ProcessDialog.SetErrorAsync(
                 this,
                 databseIntegrityErrorText,
                 cancellationToken

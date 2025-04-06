@@ -209,14 +209,14 @@ public class ChacharFormBase : ComponentBase, IEntityForm
 
     protected async Task CheckAndSubmitAsync(CancellationToken cancellationToken)
     {
-        await Index.SubmitDialog.SetProcessingAsync(this, cancellationToken);
+        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
         LogCommons.LogFormSubmittedDebug(Logger, nameof(Chachar));
         LogCommons.LogFormDataDebug(Logger, nameof(Chachar), Chachar);
         var databseIntegrityErrorText = GetDatabaseIntegrityErrorText(Chachar);
 
         if (databseIntegrityErrorText is not null)
         {
-            await Index.SubmitDialog.SetErrorAsync(
+            await Index.ProcessDialog.SetErrorAsync(
                 this,
                 databseIntegrityErrorText,
                 cancellationToken

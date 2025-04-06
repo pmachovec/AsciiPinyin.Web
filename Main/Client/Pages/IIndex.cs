@@ -7,7 +7,7 @@ namespace AsciiPinyin.Web.Client.Pages;
 
 public interface IIndex : IPage
 {
-    ISubmitDialog SubmitDialog { get; }
+    IProcessDialog ProcessDialog { get; }
 
     IEntityTab SelectedTab { get; }
 

@@ -17,7 +17,7 @@ internal sealed class EntityFormTestCommons(
     TestContext _testContext,
     IRenderedComponent<IComponent> _formComponent,
     Mock<IEntityClient> _entityClientMock,
-    Mock<ISubmitDialog> _submitDialogMock,
+    Mock<IProcessDialog> _processDialogMock,
     IEnumerable<string> _inputIds
 )
 {
@@ -231,9 +231,9 @@ internal sealed class EntityFormTestCommons(
 
     public void CaptureErrorMessage(Action<string?> captureErrorMessage)
     {
-        _ = _submitDialogMock
-            .Setup(submitDialog =>
-                submitDialog.SetErrorAsync(
+        _ = _processDialogMock
+            .Setup(processDialog =>
+                processDialog.SetErrorAsync(
                     (IEntityForm)_formComponent.Instance, // Yes, the cast is necessary and it works.
                     It.IsAny<string>(),
                     It.IsAny<CancellationToken>()
@@ -244,9 +244,9 @@ internal sealed class EntityFormTestCommons(
 
     public void CaptureSuccessMessage(Action<string?> captureSuccessMessage)
     {
-        _ = _submitDialogMock
-            .Setup(submitDialog =>
-                submitDialog.SetSuccessAsync(
+        _ = _processDialogMock
+            .Setup(processDialog =>
+                processDialog.SetSuccessAsync(
                     (IEntityForm)_formComponent.Instance, // Yes, the cast is necessary and it works.
                     It.IsAny<string>(),
                     It.IsAny<CancellationToken>()
@@ -255,13 +255,13 @@ internal sealed class EntityFormTestCommons(
             .Callback((IModal _, string successMessage, CancellationToken _) => captureSuccessMessage(successMessage));
     }
 
-    public void SubmitDialogErrorMessageTest(string? errorMessage, string expectedErrorMessage)
+    public void ProcessDialogErrorMessageTest(string? errorMessage, string expectedErrorMessage)
     {
         Assert.That(errorMessage, Is.Not.Null);
         Assert.That(errorMessage, Is.EqualTo(expectedErrorMessage));
 
-        _submitDialogMock.Verify(submitDialog =>
-            submitDialog.SetErrorAsync(
+        _processDialogMock.Verify(processDialog =>
+            processDialog.SetErrorAsync(
                 (IEntityForm)_formComponent.Instance, // Yes, the cast is necessary and it works.
                 expectedErrorMessage,
                 It.IsAny<CancellationToken>()
@@ -270,13 +270,13 @@ internal sealed class EntityFormTestCommons(
         );
     }
 
-    public void SubmitDialogSuccessMessageTest(string? successMessage, string expectedSuccessMessage)
+    public void ProcessDialogSuccessMessageTest(string? successMessage, string expectedSuccessMessage)
     {
         Assert.That(successMessage, Is.Not.Null);
         Assert.That(successMessage, Is.EqualTo(expectedSuccessMessage));
 
-        _submitDialogMock.Verify(submitDialog =>
-            submitDialog.SetSuccessAsync(
+        _processDialogMock.Verify(processDialog =>
+            processDialog.SetSuccessAsync(
                 (IEntityForm)_formComponent.Instance, // Yes, the cast is necessary and it works.
                 expectedSuccessMessage,
                 It.IsAny<CancellationToken>()
