@@ -25,6 +25,8 @@ public class ChacharViewDialogBase : ComponentBase, IModal
 
     protected string DisableDeleteCss { get; private set; } = string.Empty;
 
+    protected string DeleteTitle { get; private set; } = string.Empty;
+
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
 
@@ -46,6 +48,8 @@ public class ChacharViewDialogBase : ComponentBase, IModal
         CancellationToken cancellationToken
     )
     {
+        var databaseIntegrityErrorMessages = new List<string>();
+        DeleteTitle = string.Empty;
         DisableDeleteCss = string.Empty;
         ModalLowerLevel = null;
         Page = page;
@@ -66,9 +70,8 @@ public class ChacharViewDialogBase : ComponentBase, IModal
 
             if (chacharsWithThisAsRadical.Any())
             {
+                databaseIntegrityErrorMessages.Add(Localizer[Resource.CharacterIsRadicalForOthers]);
                 DisableDeleteCss = $"{CssClasses.DISABLED} {CssClasses.OPACITY_25}";
-                // Display GetErrorMessageFormatted(Localizer[Resource.CharacterIsRadicalForOthers]) somewhere
-                StateHasChanged();
             }
         }
 
@@ -80,8 +83,13 @@ public class ChacharViewDialogBase : ComponentBase, IModal
 
         if (alternativesOfThis.Any())
         {
+            databaseIntegrityErrorMessages.Add(Localizer[Resource.AlternativesExistForCharacter]);
             DisableDeleteCss = $"{CssClasses.DISABLED} {CssClasses.OPACITY_25}";
-            // Display GetErrorMessageFormatted(Localizer[Resource.AlternativesExistForCharacter]) somewhere
+        }
+
+        if (databaseIntegrityErrorMessages.Count > 0)
+        {
+            DeleteTitle = GetErrorMessageFormatted(databaseIntegrityErrorMessages);
             StateHasChanged();
         }
 
@@ -114,18 +122,18 @@ public class ChacharViewDialogBase : ComponentBase, IModal
 
     private string GetErrorMessageFormatted(IEnumerable<string> databaseIntegrityErrorMessages)
     {
-        var errorMessageBuilder = new StringBuilder(
-            string.Format(
-                CultureInfo.InvariantCulture,
-                Localizer[Resource.CharacterCannotBeDeleted],
-                Chachar!.TheCharacter!,
-                Chachar.RealPinyin!
-            )
-        );
+        var errorMessageBuilder = new StringBuilder(Localizer[Resource.CannotBeDeleted]);
 
-        foreach (var errorMessage in databaseIntegrityErrorMessages)
+        if (databaseIntegrityErrorMessages.Count() > 1)
         {
-            _ = errorMessageBuilder.Append(Html.BR).Append(errorMessage);
+            foreach (var errorMessage in databaseIntegrityErrorMessages)
+            {
+                _ = errorMessageBuilder.Append(Html.BR).Append(Html.BULLET).Append(Html.NBSP).Append(errorMessage);
+            }
+        }
+        else
+        {
+            _ = errorMessageBuilder.Append(' ').Append(databaseIntegrityErrorMessages.First());
         }
 
         return errorMessageBuilder.ToString();

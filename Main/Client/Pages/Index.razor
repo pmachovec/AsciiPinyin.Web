@@ -10,19 +10,17 @@
 <IndexBackdrop />
 
 <div
-    class="container"
+    class="container pb-5"
     id="@IDs.INDEX_ROOT">
-    <main class="pb-3">
-        <NavBar
-            AlternativesTab="AlternativesTab"
-            ChacharsTab="ChacharsTab"
-            SelectTabAsync="SelectTabAsync" />
+    <NavBar
+        AlternativesTab="AlternativesTab"
+        ChacharsTab="ChacharsTab"
+        SelectTabAsync="SelectTabAsync" />
 
-        @* No matter in passing entities separately as cascading parameters. *@
-        @* You need to pass Index down anyway, so it's OK to keep entities embedded in Index. *@
-        <AlternativesTab @ref="AlternativesTab" Index="@this" />
-        <ChacharsTab @ref="ChacharsTab" Index="@this" />
-    </main>
+    @* No point in passing entities separately as cascading parameters. *@
+    @* You need to pass Index down anyway, so it's OK to keep entities embedded in Index. *@
+    <AlternativesTab @ref="AlternativesTab" Index="@this" />
+    <ChacharsTab @ref="ChacharsTab" Index="@this" />
 </div>
 
 <ProcessDialog @ref="ProcessDialog" />

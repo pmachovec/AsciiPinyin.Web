@@ -8,7 +8,6 @@ using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System.Globalization;
-using System.Text;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
@@ -25,6 +24,8 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
     public string HtmlTitle { get; private set; } = string.Empty;
 
     protected string DisableDeleteCss { get; private set; } = string.Empty;
+
+    protected string DeleteTitle { get; private set; } = string.Empty;
 
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
@@ -47,6 +48,7 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
         CancellationToken cancellationToken
     )
     {
+        DeleteTitle = string.Empty;
         DisableDeleteCss = string.Empty;
         ModalLowerLevel = null;
         Page = page;
@@ -67,7 +69,7 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
         if (chacharsWithThis.Any())
         {
             DisableDeleteCss = $"{CssClasses.DISABLED} {CssClasses.OPACITY_25}";
-            // Display GetErrorMessageFormatted(Localizer[Resource.AlternativeUsedByCharactersInDb]) somewhere
+            DeleteTitle = $"{Localizer[Resource.CannotBeDeleted]} {Localizer[Resource.AlternativeUsedByCharactersInDb]}";
             StateHasChanged();
         }
 
@@ -97,26 +99,6 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
             SubmitDeleteAsync,
             cancellationToken
         );
-    }
-
-    private string GetErrorMessageFormatted(IEnumerable<string> databaseIntegrityErrorMessages)
-    {
-        var errorMessageBuilder = new StringBuilder(
-            string.Format(
-                CultureInfo.InvariantCulture,
-                Localizer[Resource.AlternativeCannotBeDeleted],
-                Alternative!.TheCharacter!,
-                Alternative.OriginalCharacter!,
-                Alternative.OriginalRealPinyin!
-            )
-        );
-
-        foreach (var errorMessage in databaseIntegrityErrorMessages)
-        {
-            _ = errorMessageBuilder.Append(Html.BR).Append(errorMessage);
-        }
-
-        return errorMessageBuilder.ToString();
     }
 
     private async Task SubmitDeleteAsync(CancellationToken cancellationToken)

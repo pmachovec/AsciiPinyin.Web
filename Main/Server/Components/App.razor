@@ -14,9 +14,15 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <base href="/@(ApiNames.BASE)/" />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+        <link href="_content/Blazor.Bootstrap/blazor.bootstrap.css" rel="stylesheet" />
         <link rel="shortcut icon" href="#" /> <!-- Icon in the page tab. When no icon, without this a favicon.ico missing 404 error is logged. -->
         <link rel="stylesheet" href="/@(ApiNames.BASE)/css/app.css" />
-        <link rel="stylesheet" href="/@(ApiNames.BASE)/css/bootstrap/bootstrap.min.css" />
         <link rel="stylesheet" href="/@(ApiNames.BASE)/AsciiPinyin.Web.Server.styles.css" />
         <title>@StringConstants.ASCII_PINYIN</title>
         <HeadOutlet @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
@@ -29,10 +35,16 @@
         <Routes @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
         @* Index is appended here - at the place of the Routes component. *@
 
+        <script src="/@(ApiNames.BASE)/_framework/blazor.web.js"></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous">
+        </script>
+        <script src="_content/Blazor.Bootstrap/blazor.bootstrap.js"></script>
         <script src="/@(ApiNames.BASE)/js/JSInteropConsole.js"></script>
         <script src="/@(ApiNames.BASE)/js/JSInteropDOM.js"></script>
         <script src="/@(ApiNames.BASE)/js/lib/jquery-3.6.0.min.js"></script>
-        <script src="/@(ApiNames.BASE)/_framework/blazor.web.js"></script>
 
         <div id="@IDs.LOADING_SPLASH_NAVBAR">
             <div class="container pb-3">

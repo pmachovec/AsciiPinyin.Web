@@ -249,8 +249,8 @@
   <data name="AlternativeWillBeDeleted" xml:space="preserve">
     <value>Alternativa &lt;b&gt;{0}&lt;/b&gt; pro znak &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; bude smazána z databáze. Tato operace je nevratná. Pokračovat?</value>
   </data>
-  <data name="CharacterCannotBeDeleted" xml:space="preserve">
-    <value>Znak &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; nelze smazat.</value>
+  <data name="CannotBeDeleted" xml:space="preserve">
+    <value>Nelze smazat.</value>
   </data>
   <data name="CharacterIsRadicalForOthers" xml:space="preserve">
     <value>Znak je radikál pro jiné znaky v databázi.</value>
@@ -258,10 +258,7 @@
   <data name="AlternativesExistForCharacter" xml:space="preserve">
     <value>Pro znak existují v databázi alternativy.</value>
   </data>
-  <data name="AlternativeCannotBeDeleted" xml:space="preserve">
-    <value>Alternativu &lt;b&gt;{0}&lt;/b&gt; pro znak &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; nelze smazat.</value>
-  </data>
   <data name="AlternativeUsedByCharactersInDb" xml:space="preserve">
-    <value>Alternativu využívají existující znaky v databázi.</value>
+    <value>V darabázi existují znaky s touto alternativou jako radikálem.</value>
   </data>
 </root>

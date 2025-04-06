@@ -30,6 +30,7 @@ _ = builder.Configuration.AddYamlFile(
 );
 
 _ = builder.Services
+    .AddBlazorBootstrap()
     .AddDbContext<AsciiPinyinContext>(optionsBuilder => optionsBuilder.UseSqlite("Data Source=Data/asciipinyin.sqlite"))
     .AddLocalization()
     .AddScoped<AlternativeGetFilter>()

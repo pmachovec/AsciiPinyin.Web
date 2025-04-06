@@ -1,6 +1,7 @@
 <Project>
 
     <ItemGroup>
+        <PackageVersion Include="Blazor.Bootstrap" Version="3.3.1" />
         <PackageVersion Include="bunit" Version="1.28.9" />
         <PackageVersion Include="coverlet.collector" Version="6.0.3" />
         <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="8.0.2" />

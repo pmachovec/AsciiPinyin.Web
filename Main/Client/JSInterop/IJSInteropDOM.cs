@@ -24,7 +24,6 @@ public interface IJSInteropDOM
     /// </summary>
     /// <param name="elementId">ID of the element to be enabled.</param>
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    /// <returns></returns>
     Task EnableAsync(string elementId, CancellationToken cancellationToken);
 
     /// <summary>
@@ -32,7 +31,6 @@ public interface IJSInteropDOM
     /// </summary>
     /// <param name="elementId">ID of the element to be disabled.</param>
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    /// <returns></returns>
     Task DisableAsync(string elementId, CancellationToken cancellationToken);
 
     /// <summary>
@@ -42,7 +40,6 @@ public interface IJSInteropDOM
     /// <param name="elementId">ID of the element for which the class should be added.</param>
     /// <param name="theClass">The name of the class.</param>
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    /// <returns></returns>
     Task AddClassAsync(string elementId, string theClass, CancellationToken cancellationToken);
 
     /// <summary>
@@ -52,7 +49,6 @@ public interface IJSInteropDOM
     /// <param name="elementId">ID of the element from which the class should be removed.</param>
     /// <param name="theClass">The name of the class.</param>
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    /// <returns></returns>
     Task RemoveClassAsync(string elementId, string theClass, CancellationToken cancellationToken);
 
     /// <summary>
@@ -60,7 +56,7 @@ public interface IJSInteropDOM
     /// </summary>
     /// <param name="elementId">ID of the element whose text should be got.</param>
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    /// <returns></returns>
+    /// <returns>Text content of the element.</returns>
     Task<string> GetTextAsync(string elementId, CancellationToken cancellationToken);
 
     /// <summary>
@@ -69,7 +65,6 @@ public interface IJSInteropDOM
     /// <param name="elementId">ID of the elemet for to which the text should be set.</param>
     /// <param name="text">The text to be set.</param>
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    /// <returns></returns>
     Task SetTextAsync(string elementId, string text, CancellationToken cancellationToken);
 
     /// <summary>
@@ -78,15 +73,14 @@ public interface IJSInteropDOM
     /// <param name="elementId">ID of the elemet for to which the value should be set.</param>
     /// <param name="value">The value to be set.</param>
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    /// <returns></returns>
     Task SetValueAsync<T>(string elementId, T value, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Decides if the given element contains an invalid input value by the EcmaScript definition of 'validity.badInput'.
+    /// Decides if the given element contains a valid input value by the EcmaScript definition of 'validity.badInput'.
     /// </summary>
     /// <param name="elementId">The element whose input value is to be checked.</param>
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    /// <returns></returns>
+    /// <returns>True if the element contains a valid input value, false otherwise.</returns>
     Task<bool> IsValidInputAsync(string elementId, CancellationToken cancellationToken);
 
     /// <summary>
@@ -94,7 +88,6 @@ public interface IJSInteropDOM
     /// </summary>
     /// <param name="elementId">ID of the element for which the text should be set to null.</param>
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    /// <returns></returns>
     Task RemoveTextAsync(string elementId, CancellationToken cancellationToken);
 
     /// <summary>
@@ -110,34 +103,30 @@ public interface IJSInteropDOM
     /// <param name="elementId">ID of the element to set the Z index to.</param>
     /// <param name="value">The value of the set Z index.</param>
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    /// <returns></returns>
     Task SetZIndexAsync(string elementId, int value, CancellationToken cancellationToken);
 
     /// <summary>
     /// Removes all but "d-none" display css classes from the given element.
     /// Adds "d-none" css class to the given element.
     /// </summary>
-    /// <param name="elementId"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="elementId">ID of the element to adjust css classes of.</param>
+    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
     Task Display2NoneAsync(string elementId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Removes "d-none" css class from the given element, if the element has the class.
     /// Adds "d-block" css class to the given element.
     /// </summary>
-    /// <param name="elementId"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="elementId">ID of the element to adjust css classes of.</param>
+    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
     Task None2BlockAsync(string elementId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Removes "d-none" css class from the given element, if the element has the class.
     /// Adds "d-flex" css class to the given element.
     /// </summary>
-    /// <param name="elementId"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="elementId">ID of the element to adjust css classes of.</param>
+    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
     Task None2FlexAsync(string elementId, CancellationToken cancellationToken);
 
     /// <summary>
@@ -145,9 +134,8 @@ public interface IJSInteropDOM
     /// If the element already has the class, nothing happens.
     /// If the element has other 'bg' classes, they are removed from the element
     /// </summary>
-    /// <param name="elementId"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="elementId">ID of the element to adjust css classes of.</param>
+    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
     Task SetBgPrimaryAsync(string elementId, CancellationToken cancellationToken);
 
     /// <summary>
@@ -155,9 +143,8 @@ public interface IJSInteropDOM
     /// If the element already has the class, nothing happens.
     /// If the element has other 'bg' classes, they are removed from the element
     /// </summary>
-    /// <param name="elementId"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="elementId">ID of the element to adjust css classes of.</param>
+    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
     Task SetBgWarningAsync(string elementId, CancellationToken cancellationToken);
 
     /// <summary>
@@ -165,8 +152,7 @@ public interface IJSInteropDOM
     /// If the element already has the class, nothing happens.
     /// If the element has other 'bg' classes, they are removed from the element
     /// </summary>
-    /// <param name="elementId"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="elementId">ID of the element to adjust css classes of.</param>
+    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
     Task SetBgDangerAsync(string elementId, CancellationToken cancellationToken);
 }

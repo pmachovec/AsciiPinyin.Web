@@ -1,6 +1,7 @@
 @using AsciiPinyin.Web.Client.Components
 @using AsciiPinyin.Web.Shared.Constants
 @using AsciiPinyin.Web.Shared.Resources
+@using BlazorBootstrap;
 @using Microsoft.AspNetCore.Components.Web
 
 @inherits ChacharViewDialogBase
@@ -29,15 +30,20 @@
                 </p>
             </div>
             <div class="modal-footer border-0">
+                <Tooltip
+                    Class="d-inline-block"
+                    IsHtml="true"
+                    Title="@DeleteTitle">
+                    <button
+                        type="button"
+                        class="btn btn-modal btn-danger @DisableDeleteCss"
+                        @onclick="async _ => await InitiateDeleteAsync(CancellationToken.None)">
+                        <span>@Localizer[Resource.Delete]</span>
+                    </button>
+                </Tooltip>
                 <button
                     type="button"
-                    class="btn btn-modal btn-danger @DisableDeleteCss"
-                    @onclick="async _ => await InitiateDeleteAsync(CancellationToken.None)">
-                    <span>@Localizer[Resource.Delete]</span>
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-modal btn-primary">
+                    class="btn btn-modal btn-primary ms-3">
                     <span>@Localizer[Resource.Edit]</span>
                 </button>
             </div>
