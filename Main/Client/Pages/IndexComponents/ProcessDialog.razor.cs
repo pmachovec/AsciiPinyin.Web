@@ -136,6 +136,9 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         );
     }
 
+    public async Task CloseAsync(CancellationToken cancellationToken) =>
+        await ModalCommons.CloseAsyncCommon(this, cancellationToken);
+
     protected async Task CloseAllAsync(CancellationToken cancellationToken)
         => await ModalCommons.CloseAllAsyncCommon(this, cancellationToken);
 }

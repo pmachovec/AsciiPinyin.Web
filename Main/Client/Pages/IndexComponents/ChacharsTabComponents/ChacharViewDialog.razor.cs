@@ -23,6 +23,8 @@ public class ChacharViewDialogBase : ComponentBase, IModal
 
     public string HtmlTitle { get; private set; } = string.Empty;
 
+    protected string DisableDeleteCss { get; private set; } = string.Empty;
+
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
 
@@ -44,12 +46,46 @@ public class ChacharViewDialogBase : ComponentBase, IModal
         CancellationToken cancellationToken
     )
     {
+        DisableDeleteCss = string.Empty;
         ModalLowerLevel = null;
         Page = page;
         HtmlTitle = $"{StringConstants.ASCII_PINYIN} - {chachar.TheCharacter}";
         Chachar = chachar;
-        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
         StateHasChanged();
+
+        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
+        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
+
+        if (chachar.IsRadical)
+        {
+            var chacharsWithThisAsRadical = Index.Chachars.Where(chachar =>
+                chachar.RadicalCharacter == Chachar.TheCharacter
+                && chachar.RadicalPinyin == Chachar.Pinyin
+                && chachar.RadicalTone == Chachar.Tone
+            );
+
+            if (chacharsWithThisAsRadical.Any())
+            {
+                DisableDeleteCss = $"{CssClasses.DISABLED} {CssClasses.OPACITY_25}";
+                // Display GetErrorMessageFormatted(Localizer[Resource.CharacterIsRadicalForOthers]) somewhere
+                StateHasChanged();
+            }
+        }
+
+        var alternativesOfThis = Index.Alternatives.Where(alternative =>
+            alternative.OriginalCharacter == Chachar!.TheCharacter
+            && alternative.OriginalPinyin == Chachar.Pinyin
+            && alternative.OriginalTone == Chachar.Tone
+        );
+
+        if (alternativesOfThis.Any())
+        {
+            DisableDeleteCss = $"{CssClasses.DISABLED} {CssClasses.OPACITY_25}";
+            // Display GetErrorMessageFormatted(Localizer[Resource.AlternativesExistForCharacter]) somewhere
+            StateHasChanged();
+        }
+
+        await Index.ProcessDialog.CloseAsync(cancellationToken);
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken)
@@ -62,59 +98,18 @@ public class ChacharViewDialogBase : ComponentBase, IModal
     protected async Task InitiateDeleteAsync(CancellationToken cancellationToken)
     {
         await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
-        var databaseIntegrityErrorMessages = GetDeleteDatabaseIntegrityErrorMessages();
 
-        if (databaseIntegrityErrorMessages.Count != 0)
-        {
-            var errorMessageFormatted = GetErrorMessageFormatted(databaseIntegrityErrorMessages);
-            await Index.ProcessDialog.SetErrorAsync(this, errorMessageFormatted, cancellationToken);
-        }
-        else
-        {
-            await Index.ProcessDialog.SetWarningAsync(
-                this,
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    Localizer[Resource.CharacterWillBeDeleted],
-                    Chachar!.TheCharacter!,
-                    Chachar.RealPinyin!
-                ),
-                SubmitDeleteAsync,
-                cancellationToken
-            );
-        }
-    }
-
-    private List<string> GetDeleteDatabaseIntegrityErrorMessages()
-    {
-        List<string> databaseIntegrityErrorMessages = [];
-
-        if (Chachar!.IsRadical)
-        {
-            var chacharsWithThisAsRadical = Index.Chachars.Where(chachar =>
-                chachar.RadicalCharacter == Chachar.TheCharacter
-                && chachar.RadicalPinyin == Chachar.Pinyin
-                && chachar.RadicalTone == Chachar.Tone
-            );
-
-            if (chacharsWithThisAsRadical.Any())
-            {
-                databaseIntegrityErrorMessages.Add(Localizer[Resource.CharacterIsRadicalForOthers]);
-            }
-        }
-
-        var alternativesOfThis = Index.Alternatives.Where(alternative =>
-            alternative.OriginalCharacter == Chachar!.TheCharacter
-            && alternative.OriginalPinyin == Chachar.Pinyin
-            && alternative.OriginalTone == Chachar.Tone
+        await Index.ProcessDialog.SetWarningAsync(
+            this,
+            string.Format(
+                CultureInfo.InvariantCulture,
+                Localizer[Resource.CharacterWillBeDeleted],
+                Chachar!.TheCharacter!,
+                Chachar.RealPinyin!
+            ),
+            SubmitDeleteAsync,
+            cancellationToken
         );
-
-        if (alternativesOfThis.Any())
-        {
-            databaseIntegrityErrorMessages.Add(Localizer[Resource.AlternativesExistForCharacter]);
-        }
-
-        return databaseIntegrityErrorMessages;
     }
 
     private string GetErrorMessageFormatted(IEnumerable<string> databaseIntegrityErrorMessages)

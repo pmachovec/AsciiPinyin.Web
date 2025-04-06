@@ -13,7 +13,9 @@ public static class CssClasses
     public const string D_BLOCK = "d-block";
     public const string D_FLEX = "d-flex";
     public const string D_NONE = "d-none";
+    public const string DISABLED = "disabled";
     public const string INVALID = "invalid";
+    public const string OPACITY_25 = "opacity-25";
     public const string ORIGINAL_SELECTOR = "original-selector";
     public const string RADICAL_SELECTOR = "radical-selector";
     public const string SHOW = "show";

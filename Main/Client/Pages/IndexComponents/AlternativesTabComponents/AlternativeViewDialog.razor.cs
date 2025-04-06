@@ -24,6 +24,8 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
 
     public string HtmlTitle { get; private set; } = string.Empty;
 
+    protected string DisableDeleteCss { get; private set; } = string.Empty;
+
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
 
@@ -45,12 +47,31 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
         CancellationToken cancellationToken
     )
     {
+        DisableDeleteCss = string.Empty;
         ModalLowerLevel = null;
         Page = page;
         HtmlTitle = $"{StringConstants.ASCII_PINYIN} - {alternative.TheCharacter}";
         Alternative = alternative;
-        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
         StateHasChanged();
+
+        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
+        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
+
+        var chacharsWithThis = Index.Chachars.Where(chachar =>
+            chachar.RadicalAlternativeCharacter == Alternative!.TheCharacter
+            && chachar.RadicalCharacter == Alternative.OriginalCharacter
+            && chachar.RadicalPinyin == Alternative.OriginalPinyin
+            && chachar.RadicalTone == Alternative.OriginalTone
+        );
+
+        if (chacharsWithThis.Any())
+        {
+            DisableDeleteCss = $"{CssClasses.DISABLED} {CssClasses.OPACITY_25}";
+            // Display GetErrorMessageFormatted(Localizer[Resource.AlternativeUsedByCharactersInDb]) somewhere
+            StateHasChanged();
+        }
+
+        await Index.ProcessDialog.CloseAsync(cancellationToken);
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken)
@@ -63,47 +84,19 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
     protected async Task InitiateDeleteAsync(CancellationToken cancellationToken)
     {
         await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
-        var databaseIntegrityErrorMessages = GetDeleteDatabaseIntegrityErrorMessages();
 
-        if (databaseIntegrityErrorMessages.Count != 0)
-        {
-            var errorMessageFormatted = GetErrorMessageFormatted(databaseIntegrityErrorMessages);
-            await Index.ProcessDialog.SetErrorAsync(this, errorMessageFormatted, cancellationToken);
-        }
-        else
-        {
-            await Index.ProcessDialog.SetWarningAsync(
-                this,
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    Localizer[Resource.AlternativeWillBeDeleted],
-                    Alternative!.TheCharacter!,
-                    Alternative.OriginalCharacter!,
-                    Alternative.OriginalRealPinyin!
-                ),
-                SubmitDeleteAsync,
-                cancellationToken
-            );
-        }
-    }
-
-    private List<string> GetDeleteDatabaseIntegrityErrorMessages()
-    {
-        List<string> databaseIntegrityErrorMessages = [];
-
-        var chacharsWithThis = Index.Chachars.Where(chachar =>
-            chachar.RadicalAlternativeCharacter == Alternative!.TheCharacter
-            && chachar.RadicalCharacter == Alternative.OriginalCharacter
-            && chachar.RadicalPinyin == Alternative.OriginalPinyin
-            && chachar.RadicalTone == Alternative.OriginalTone
+        await Index.ProcessDialog.SetWarningAsync(
+            this,
+            string.Format(
+                CultureInfo.InvariantCulture,
+                Localizer[Resource.AlternativeWillBeDeleted],
+                Alternative!.TheCharacter!,
+                Alternative.OriginalCharacter!,
+                Alternative.OriginalRealPinyin!
+            ),
+            SubmitDeleteAsync,
+            cancellationToken
         );
-
-        if (chacharsWithThis.Any())
-        {
-            databaseIntegrityErrorMessages.Add(Localizer[Resource.AlternativeUsedByCharactersInDb]);
-        }
-
-        return databaseIntegrityErrorMessages;
     }
 
     private string GetErrorMessageFormatted(IEnumerable<string> databaseIntegrityErrorMessages)
