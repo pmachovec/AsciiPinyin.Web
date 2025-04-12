@@ -56,9 +56,9 @@ internal sealed class ChacharsControllerTest
         Ipa = "liŋ",
         Tone = 2,
         Strokes = 13,
-        RadicalCharacter = "雨",
-        RadicalPinyin = "yu",
-        RadicalTone = 3,
+        RadicalCharacter = _radicalChachar1.TheCharacter,
+        RadicalPinyin = _radicalChachar1.Pinyin,
+        RadicalTone = _radicalChachar1.Tone,
         RadicalAlternativeCharacter = "⻗"
     };
 
@@ -69,9 +69,9 @@ internal sealed class ChacharsControllerTest
         Ipa = "sɹ̩",
         Tone = 4,
         Strokes = 5,
-        RadicalCharacter = "儿",
-        RadicalPinyin = "er",
-        RadicalTone = 2
+        RadicalCharacter = _radicalChachar2.TheCharacter,
+        RadicalPinyin = _radicalChachar2.Pinyin,
+        RadicalTone = _radicalChachar2.Tone
     };
 
     private static readonly Chachar _nonRadicalChacharWithoutAlternative22 = new()
@@ -81,9 +81,9 @@ internal sealed class ChacharsControllerTest
         Ipa = "ɕjɛn",
         Tone = 1,
         Strokes = 6,
-        RadicalCharacter = "儿",
-        RadicalPinyin = "er",
-        RadicalTone = 2
+        RadicalCharacter = _radicalChachar2.TheCharacter,
+        RadicalPinyin = _radicalChachar2.Pinyin,
+        RadicalTone = _radicalChachar2.Tone
     };
 
     private static readonly Chachar _nonRadicalChacharWithoutAlternative23 = new()
@@ -93,9 +93,9 @@ internal sealed class ChacharsControllerTest
         Ipa = "kwɑŋ",
         Tone = 1,
         Strokes = 6,
-        RadicalCharacter = "儿",
-        RadicalPinyin = "er",
-        RadicalTone = 2
+        RadicalCharacter = _radicalChachar2.TheCharacter,
+        RadicalPinyin = _radicalChachar2.Pinyin,
+        RadicalTone = _radicalChachar2.Tone
     };
 
     private static readonly Chachar _nonRadicalChacharWithAlternative31 = new()
@@ -105,9 +105,9 @@ internal sealed class ChacharsControllerTest
         Ipa = "dʐə",
         Tone = 4,
         Strokes = 7,
-        RadicalCharacter = "辵",
-        RadicalPinyin = "chuo",
-        RadicalTone = 4,
+        RadicalCharacter = _radicalChachar3.TheCharacter,
+        RadicalPinyin = _radicalChachar3.Pinyin,
+        RadicalTone = _radicalChachar3.Tone,
         RadicalAlternativeCharacter = "⻌"
     };
 
@@ -118,9 +118,9 @@ internal sealed class ChacharsControllerTest
         Ipa = "kuɔ",
         Tone = 1,
         Strokes = 6,
-        RadicalCharacter = "辵",
-        RadicalPinyin = "chuo",
-        RadicalTone = 4,
+        RadicalCharacter = _radicalChachar3.TheCharacter,
+        RadicalPinyin = _radicalChachar3.Pinyin,
+        RadicalTone = _radicalChachar3.Tone,
         RadicalAlternativeCharacter = "⻌"
     };
 
@@ -131,45 +131,45 @@ internal sealed class ChacharsControllerTest
         Ipa = "taʊ",
         Tone = 4,
         Strokes = 12,
-        RadicalCharacter = "辵",
-        RadicalPinyin = "chuo",
-        RadicalTone = 4,
+        RadicalCharacter = _radicalChachar3.TheCharacter,
+        RadicalPinyin = _radicalChachar3.Pinyin,
+        RadicalTone = _radicalChachar3.Tone,
         RadicalAlternativeCharacter = "⻌"
     };
 
     private static readonly Alternative _alternative11 = new()
     {
         TheCharacter = "⻗",
-        OriginalCharacter = "雨",
-        OriginalPinyin = "yu",
-        OriginalTone = 3,
+        OriginalCharacter = _radicalChachar1.TheCharacter,
+        OriginalPinyin = _radicalChachar1.Pinyin,
+        OriginalTone = _radicalChachar1.Tone,
         Strokes = 8
     };
 
     private static readonly Alternative _alternative31 = new()
     {
         TheCharacter = "⻌",
-        OriginalCharacter = "辵",
-        OriginalPinyin = "chuo",
-        OriginalTone = 4,
+        OriginalCharacter = _radicalChachar3.TheCharacter,
+        OriginalPinyin = _radicalChachar3.Pinyin,
+        OriginalTone = _radicalChachar3.Tone,
         Strokes = 3
     };
 
     private static readonly Alternative _alternative32 = new()
     {
         TheCharacter = "⻍",
-        OriginalCharacter = "辵",
-        OriginalPinyin = "chuo",
-        OriginalTone = 4,
+        OriginalCharacter = _radicalChachar3.TheCharacter,
+        OriginalPinyin = _radicalChachar3.Pinyin,
+        OriginalTone = _radicalChachar3.Tone,
         Strokes = 4
     };
 
     private static readonly Alternative _alternative33 = new()
     {
         TheCharacter = "⻎",
-        OriginalCharacter = "辵",
-        OriginalPinyin = "chuo",
-        OriginalTone = 4,
+        OriginalCharacter = _radicalChachar3.TheCharacter,
+        OriginalPinyin = _radicalChachar3.Pinyin,
+        OriginalTone = _radicalChachar3.Tone,
         Strokes = 3
     };
 
@@ -972,7 +972,12 @@ internal sealed class ChacharsControllerTest
             RadicalTone = _nonRadicalChacharWithoutAlternative21.Tone
         };
 
-        _entityControllerTestCommons.AddToContextAndSave(_asciiPinyinContext, _radicalChachar2, _nonRadicalChacharWithoutAlternative21);
+        _entityControllerTestCommons.AddToContextAndSave(
+            _asciiPinyinContext,
+            _radicalChachar2,
+            _nonRadicalChacharWithoutAlternative21
+        );
+
         var response = await _entityControllerTestCommons.PostAsync(_host, radicalNotRadical, CancellationToken.None);
 
         await _entityControllerTestCommons.PostConflictTestAsync(
@@ -990,11 +995,12 @@ internal sealed class ChacharsControllerTest
         _entityControllerTestCommons.AddToContextAndSave(_asciiPinyinContext, _radicalChachar1);
         var response = await _entityControllerTestCommons.PostAsync(_host, _nonRadicalChacharWithAlternative11, CancellationToken.None);
         await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.ALTERNATIVE_UNKNOWN);
+
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_nonRadicalChacharWithAlternative11));
     }
 
     [Test]
-    public async Task PostChacharAlreadyExistsTest()
+    public async Task PostRadicalChacharAlreadyExistsTest()
     {
         _entityControllerTestCommons.AddToContextAndSave(_asciiPinyinContext, _radicalChachar1);
         var response = await _entityControllerTestCommons.PostAsync(_host, _radicalChachar1, CancellationToken.None);
@@ -1006,6 +1012,89 @@ internal sealed class ChacharsControllerTest
         );
 
         Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
+    }
+
+    [Test]
+    public async Task PostNonKeyFieldDiffersRadicalChacharAlreadyExistsTest()
+    {
+        var radicalChacharClone = new Chachar
+        {
+            TheCharacter = _radicalChachar1.TheCharacter,
+            Pinyin = _radicalChachar1.Pinyin,
+            Tone = _radicalChachar1.Tone,
+            Ipa = _radicalChachar1.Ipa,
+            Strokes = (short)(_radicalChachar1.Strokes! + 1)
+        };
+
+        _entityControllerTestCommons.AddToContextAndSave(_asciiPinyinContext, _radicalChachar1);
+        var response = await _entityControllerTestCommons.PostAsync(_host, radicalChacharClone, CancellationToken.None);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.CHACHAR_EXISTS
+        );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(radicalChacharClone));
+        // The clone is not in the database, but the presence is decided only by key fields. This is expected state.
+    }
+
+    [Test]
+    public async Task PostNonRadicalChacharAlreadyExistsTest()
+    {
+        _entityControllerTestCommons.AddToContextAndSave(
+            _asciiPinyinContext,
+            _radicalChachar1,
+            _nonRadicalChacharWithAlternative11,
+            _alternative11
+        );
+
+        var response = await _entityControllerTestCommons.PostAsync(_host, _nonRadicalChacharWithAlternative11, CancellationToken.None);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.CHACHAR_EXISTS
+        );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_nonRadicalChacharWithAlternative11));
+    }
+
+    [Test]
+    public async Task PostNonKeyFieldDiffersNonRadicalChacharAlreadyExistsTest()
+    {
+        var nonRadicalChacharWithAlternativeClone = new Chachar
+        {
+            TheCharacter = _nonRadicalChacharWithAlternative11.TheCharacter,
+            Pinyin = _nonRadicalChacharWithAlternative11.Pinyin,
+            Tone = _nonRadicalChacharWithAlternative11.Tone,
+            Ipa = _nonRadicalChacharWithAlternative11.Ipa,
+            Strokes = (short)(_nonRadicalChacharWithAlternative11.Strokes! + 1),
+            RadicalCharacter = _nonRadicalChacharWithAlternative11.RadicalCharacter,
+            RadicalPinyin = _nonRadicalChacharWithAlternative11.RadicalPinyin,
+            RadicalTone = _nonRadicalChacharWithAlternative11.RadicalTone,
+            RadicalAlternativeCharacter = _nonRadicalChacharWithAlternative11.RadicalAlternativeCharacter
+        };
+
+        _entityControllerTestCommons.AddToContextAndSave(
+            _asciiPinyinContext,
+            _radicalChachar1,
+            _nonRadicalChacharWithAlternative11,
+            _alternative11
+        );
+
+        var response = await _entityControllerTestCommons.PostAsync(_host, nonRadicalChacharWithAlternativeClone, CancellationToken.None);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.CHACHAR_EXISTS
+        );
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(nonRadicalChacharWithAlternativeClone));
+        // The clone is not in the database, but the presence is decided only by key fields. This is expected state.
     }
 
     [Test, Category(TestCategories.DB_CONTEXT_MOCK)]
@@ -1293,11 +1382,248 @@ internal sealed class ChacharsControllerTest
     }
 
     [Test]
-    public async Task PostDeleteChacharDoesNotExistTest()
+    public async Task PostDeleteRadicalChacharDoesNotExistTest()
     {
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _radicalChachar1, CancellationToken.None);
         await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.CHACHAR_UNKNOWN);
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_radicalChachar1));
+    }
+
+    [Test]
+    public async Task PostDeleteIpaDiffersRadicalChacharDoesNotExistTest()
+    {
+        var radicalChacharClone = new Chachar
+        {
+            TheCharacter = _radicalChachar1.TheCharacter,
+            Pinyin = _radicalChachar1.Pinyin,
+            Tone = _radicalChachar1.Tone,
+            Ipa = _radicalChachar2.Ipa,
+            Strokes = _radicalChachar1.Strokes
+        };
+
+        _entityControllerTestCommons.AddToContextAndSave(_asciiPinyinContext, _radicalChachar1);
+        var response = await _entityControllerTestCommons.PostDeleteAsync(_host, radicalChacharClone, CancellationToken.None);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.CHACHAR_UNKNOWN);
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(radicalChacharClone));
+        // The clone is not in the database, but the presence is decided only by key fields. This is expected state.
+    }
+
+    [Test]
+    public async Task PostDeleteStrokesDifferRadicalChacharDoesNotExistTest()
+    {
+        var radicalChacharClone = new Chachar
+        {
+            TheCharacter = _radicalChachar1.TheCharacter,
+            Pinyin = _radicalChachar1.Pinyin,
+            Tone = _radicalChachar1.Tone,
+            Ipa = _radicalChachar1.Ipa,
+            Strokes = (short)(_radicalChachar1.Strokes! + 1)
+        };
+
+        _entityControllerTestCommons.AddToContextAndSave(_asciiPinyinContext, _radicalChachar1);
+        var response = await _entityControllerTestCommons.PostDeleteAsync(_host, radicalChacharClone, CancellationToken.None);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.CHACHAR_UNKNOWN);
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(radicalChacharClone));
+        // The clone is not in the database, but the presence is decided only by key fields. This is expected state.
+    }
+
+    [Test]
+    public async Task PostDeleteNonRadicalChacharDoesNotExistTest()
+    {
+        _entityControllerTestCommons.AddToContextAndSave(_asciiPinyinContext, _radicalChachar1, _alternative11);
+        var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _nonRadicalChacharWithAlternative11, CancellationToken.None);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.CHACHAR_UNKNOWN);
+        Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_nonRadicalChacharWithAlternative11));
+    }
+
+    [Test]
+    public async Task PostDeleteIpaDiffersNonRadicalChacharDoesNotExistTest()
+    {
+        var nonRadicalChacharWithAlternativeClone = new Chachar
+        {
+            TheCharacter = _nonRadicalChacharWithAlternative11.TheCharacter,
+            Pinyin = _nonRadicalChacharWithAlternative11.Pinyin,
+            Tone = _nonRadicalChacharWithAlternative11.Tone,
+            Ipa = _radicalChachar2.Ipa,
+            Strokes = _nonRadicalChacharWithAlternative11.Strokes,
+            RadicalCharacter = _nonRadicalChacharWithAlternative11.RadicalCharacter,
+            RadicalPinyin = _nonRadicalChacharWithAlternative11.RadicalPinyin,
+            RadicalTone = _nonRadicalChacharWithAlternative11.RadicalTone,
+            RadicalAlternativeCharacter = _nonRadicalChacharWithAlternative11.RadicalAlternativeCharacter
+        };
+
+        _entityControllerTestCommons.AddToContextAndSave(
+            _asciiPinyinContext,
+            _radicalChachar1,
+            _nonRadicalChacharWithAlternative11,
+            _alternative11
+        );
+
+        var response = await _entityControllerTestCommons.PostDeleteAsync(_host, nonRadicalChacharWithAlternativeClone, CancellationToken.None);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.CHACHAR_UNKNOWN);
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_nonRadicalChacharWithAlternative11));
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(nonRadicalChacharWithAlternativeClone));
+        // The clone is not in the database, but the presence is decided only by key fields. This is expected state.
+    }
+
+    [Test]
+    public async Task PostDeleteStrokesDifferNonRadicalChacharDoesNotExistTest()
+    {
+        var nonRadicalChacharWithAlternativeClone = new Chachar
+        {
+            TheCharacter = _nonRadicalChacharWithAlternative11.TheCharacter,
+            Pinyin = _nonRadicalChacharWithAlternative11.Pinyin,
+            Tone = _nonRadicalChacharWithAlternative11.Tone,
+            Ipa = _nonRadicalChacharWithAlternative11.Ipa,
+            Strokes = (short)(_nonRadicalChacharWithAlternative11.Strokes! + 1),
+            RadicalCharacter = _nonRadicalChacharWithAlternative11.RadicalCharacter,
+            RadicalPinyin = _nonRadicalChacharWithAlternative11.RadicalPinyin,
+            RadicalTone = _nonRadicalChacharWithAlternative11.RadicalTone,
+            RadicalAlternativeCharacter = _nonRadicalChacharWithAlternative11.RadicalAlternativeCharacter
+        };
+
+        _entityControllerTestCommons.AddToContextAndSave(
+            _asciiPinyinContext,
+            _radicalChachar1,
+            _nonRadicalChacharWithAlternative11,
+            _alternative11
+        );
+
+        var response = await _entityControllerTestCommons.PostDeleteAsync(_host, nonRadicalChacharWithAlternativeClone, CancellationToken.None);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.CHACHAR_UNKNOWN);
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_nonRadicalChacharWithAlternative11));
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(nonRadicalChacharWithAlternativeClone));
+        // The clone is not in the database, but the presence is decided only by key fields. This is expected state.
+    }
+
+    [Test]
+    public async Task PostDeleteRadicalCharacterDiffersNonRadicalChacharDoesNotExistTest()
+    {
+        var nonRadicalChacharWithAlternativeClone = new Chachar
+        {
+            TheCharacter = _nonRadicalChacharWithAlternative11.TheCharacter,
+            Pinyin = _nonRadicalChacharWithAlternative11.Pinyin,
+            Tone = _nonRadicalChacharWithAlternative11.Tone,
+            Ipa = _nonRadicalChacharWithAlternative11.Ipa,
+            Strokes = _nonRadicalChacharWithAlternative11.Strokes,
+            RadicalCharacter = _radicalChachar2.TheCharacter,
+            RadicalPinyin = _nonRadicalChacharWithAlternative11.RadicalPinyin,
+            RadicalTone = _nonRadicalChacharWithAlternative11.RadicalTone,
+            RadicalAlternativeCharacter = _nonRadicalChacharWithAlternative11.RadicalAlternativeCharacter
+        };
+
+        _entityControllerTestCommons.AddToContextAndSave(
+            _asciiPinyinContext,
+            _radicalChachar1,
+            _nonRadicalChacharWithAlternative11,
+            _alternative11
+        );
+
+        var response = await _entityControllerTestCommons.PostDeleteAsync(_host, nonRadicalChacharWithAlternativeClone, CancellationToken.None);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.CHACHAR_UNKNOWN);
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_nonRadicalChacharWithAlternative11));
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(nonRadicalChacharWithAlternativeClone));
+        // The clone is not in the database, but the presence is decided only by key fields. This is expected state.
+    }
+
+    [Test]
+    public async Task PostDeleteRadicalPinyinDiffersNonRadicalChacharDoesNotExistTest()
+    {
+        var nonRadicalChacharWithAlternativeClone = new Chachar
+        {
+            TheCharacter = _nonRadicalChacharWithAlternative11.TheCharacter,
+            Pinyin = _nonRadicalChacharWithAlternative11.Pinyin,
+            Tone = _nonRadicalChacharWithAlternative11.Tone,
+            Ipa = _nonRadicalChacharWithAlternative11.Ipa,
+            Strokes = _nonRadicalChacharWithAlternative11.Strokes,
+            RadicalCharacter = _nonRadicalChacharWithAlternative11.RadicalCharacter,
+            RadicalPinyin = _radicalChachar2.Pinyin,
+            RadicalTone = _nonRadicalChacharWithAlternative11.RadicalTone,
+            RadicalAlternativeCharacter = _nonRadicalChacharWithAlternative11.RadicalAlternativeCharacter
+        };
+
+        _entityControllerTestCommons.AddToContextAndSave(
+            _asciiPinyinContext,
+            _radicalChachar1,
+            _nonRadicalChacharWithAlternative11,
+            _alternative11
+        );
+
+        var response = await _entityControllerTestCommons.PostDeleteAsync(_host, nonRadicalChacharWithAlternativeClone, CancellationToken.None);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.CHACHAR_UNKNOWN);
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_nonRadicalChacharWithAlternative11));
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(nonRadicalChacharWithAlternativeClone));
+        // The clone is not in the database, but the presence is decided only by key fields. This is expected state.
+    }
+
+    [Test]
+    public async Task PostDeleteRadicalToneDiffersNonRadicalChacharDoesNotExistTest()
+    {
+        var nonRadicalChacharWithAlternativeClone = new Chachar
+        {
+            TheCharacter = _nonRadicalChacharWithAlternative11.TheCharacter,
+            Pinyin = _nonRadicalChacharWithAlternative11.Pinyin,
+            Tone = _nonRadicalChacharWithAlternative11.Tone,
+            Ipa = _nonRadicalChacharWithAlternative11.Ipa,
+            Strokes = _nonRadicalChacharWithAlternative11.Strokes,
+            RadicalCharacter = _nonRadicalChacharWithAlternative11.RadicalCharacter,
+            RadicalPinyin = _nonRadicalChacharWithAlternative11.RadicalPinyin,
+            RadicalTone = _radicalChachar2.Tone,
+            RadicalAlternativeCharacter = _nonRadicalChacharWithAlternative11.RadicalAlternativeCharacter
+        };
+
+        _entityControllerTestCommons.AddToContextAndSave(
+            _asciiPinyinContext,
+            _radicalChachar1,
+            _nonRadicalChacharWithAlternative11,
+            _alternative11
+        );
+
+        var response = await _entityControllerTestCommons.PostDeleteAsync(_host, nonRadicalChacharWithAlternativeClone, CancellationToken.None);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.CHACHAR_UNKNOWN);
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_nonRadicalChacharWithAlternative11));
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(nonRadicalChacharWithAlternativeClone));
+        // The clone is not in the database, but the presence is decided only by key fields. This is expected state.
+    }
+
+    [Test]
+    public async Task PostDeleteRadicalAlternativeCharacterDiffersNonRadicalChacharDoesNotExistTest()
+    {
+        var nonRadicalChacharWithAlternativeClone = new Chachar
+        {
+            TheCharacter = _nonRadicalChacharWithAlternative11.TheCharacter,
+            Pinyin = _nonRadicalChacharWithAlternative11.Pinyin,
+            Tone = _nonRadicalChacharWithAlternative11.Tone,
+            Ipa = _nonRadicalChacharWithAlternative11.Ipa,
+            Strokes = _nonRadicalChacharWithAlternative11.Strokes,
+            RadicalCharacter = _nonRadicalChacharWithAlternative11.RadicalCharacter,
+            RadicalPinyin = _nonRadicalChacharWithAlternative11.RadicalPinyin,
+            RadicalTone = _nonRadicalChacharWithAlternative11.RadicalTone,
+            RadicalAlternativeCharacter = _alternative31.TheCharacter
+        };
+
+        _entityControllerTestCommons.AddToContextAndSave(
+            _asciiPinyinContext,
+            _radicalChachar1,
+            _nonRadicalChacharWithAlternative11,
+            _alternative11
+        );
+
+        var response = await _entityControllerTestCommons.PostDeleteAsync(_host, nonRadicalChacharWithAlternativeClone, CancellationToken.None);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.CHACHAR_UNKNOWN);
+
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_nonRadicalChacharWithAlternative11));
+        Assert.That(_asciiPinyinContext.Chachars, Does.Contain(nonRadicalChacharWithAlternativeClone));
+        // The clone is not in the database, but the presence is decided only by key fields. This is expected state.
     }
 
     [Test]
@@ -1403,7 +1729,6 @@ internal sealed class ChacharsControllerTest
             Errors.HAS_ALTERNATIVES
         );
 
-
         Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
     }
 
@@ -1427,7 +1752,6 @@ internal sealed class ChacharsControllerTest
             Errors.IS_RADICAL_FOR_OTHERS,
             Errors.HAS_ALTERNATIVES
         );
-
 
         Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar3));
     }
@@ -1501,6 +1825,7 @@ internal sealed class ChacharsControllerTest
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _radicalChachar1, CancellationToken.None);
         _entityControllerTestCommons.PostOkTest(response);
+
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_radicalChachar1));
     }
 
@@ -1516,6 +1841,7 @@ internal sealed class ChacharsControllerTest
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _nonRadicalChacharWithAlternative11, CancellationToken.None);
         _entityControllerTestCommons.PostOkTest(response);
+
         Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
         Assert.That(_asciiPinyinContext.Chachars, Does.Not.Contain(_nonRadicalChacharWithAlternative11));
         Assert.That(_asciiPinyinContext.Alternatives, Does.Contain(_alternative11));

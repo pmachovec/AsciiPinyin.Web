@@ -52,9 +52,9 @@ internal sealed class AlternativeFormTest : IDisposable
     private static readonly Alternative _alternative11 = new()
     {
         TheCharacter = "⻗",
-        OriginalCharacter = "雨",
-        OriginalPinyin = "yu",
-        OriginalTone = 3,
+        OriginalCharacter = _radicalChachar1.TheCharacter,
+        OriginalPinyin = _radicalChachar1.Pinyin,
+        OriginalTone = _radicalChachar1.Tone,
         Strokes = 8
     };
 
@@ -430,7 +430,7 @@ internal sealed class AlternativeFormTest : IDisposable
     }
 
     [Test]
-    public async Task AlternativeAlreadyExistsNonKeyFieldsDifferSubmitTest()
+    public async Task AlternativeAlreadyExistsNonKeyFieldDiffersSubmitTest()
     {
         _chachars.AddRange(_radicalChachars1);
         _ = _alternatives.Add(_alternative11);

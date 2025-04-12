@@ -38,7 +38,12 @@ internal sealed class ChacharPostDeleteFilter(
     {
         LogCommons.LogEntityInfo(_logger, TableNames.CHACHAR, chachar);
 
-        if (!knownChachars.Contains(chachar))
+        var chacharExists = knownChachars
+            .AsNoTracking()
+            .AsEnumerable()
+            .Any(knownChachar => knownChachar.AreAllFieldsEqual(chachar));
+
+        if (!chacharExists)
         {
             LogCommons.LogError(_logger, Errors.CHACHAR_UNKNOWN);
             errors = [Errors.CHACHAR_UNKNOWN];

@@ -49,16 +49,21 @@ public sealed class Alternative : IEntity
     public string? OriginalRealPinyin =>
         OriginalPinyin is null || OriginalTone is null ? null : OriginalPinyin + OriginalTone;
 
+    public bool AreAllFieldsEqual(object? obj) =>
+        obj is Alternative otherAlternative
+        && Equals(otherAlternative)
+        && otherAlternative.Strokes == Strokes;
+
     public static bool operator ==(Alternative left, Alternative right) => Comparator.EqualsForOperator(left, right);
 
     public static bool operator !=(Alternative left, Alternative right) => !(left == right);
 
     public override bool Equals(object? obj) =>
         obj is Alternative otherAlternative
-            && otherAlternative.TheCharacter == TheCharacter
-            && otherAlternative.OriginalCharacter == OriginalCharacter
-            && otherAlternative.OriginalPinyin == OriginalPinyin
-            && otherAlternative.OriginalTone == OriginalTone;
+        && otherAlternative.TheCharacter == TheCharacter
+        && otherAlternative.OriginalCharacter == OriginalCharacter
+        && otherAlternative.OriginalPinyin == OriginalPinyin
+        && otherAlternative.OriginalTone == OriginalTone;
 
     public override int GetHashCode() => HashCode.Combine(TheCharacter, OriginalCharacter, OriginalPinyin);
 

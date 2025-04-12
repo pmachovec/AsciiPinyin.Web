@@ -31,6 +31,15 @@ internal sealed class AlternativesControllerTest
         Strokes = 8
     };
 
+    private static readonly Chachar _radicalChachar2 = new()
+    {
+        TheCharacter = "丿",
+        Pinyin = "pie",
+        Ipa = "pʰie",
+        Tone = 3,
+        Strokes = 1
+    };
+
     private static readonly Chachar _nonRadicalChacharWithAlternative11 = new()
     {
         TheCharacter = "零",
@@ -38,9 +47,9 @@ internal sealed class AlternativesControllerTest
         Ipa = "liŋ",
         Tone = 2,
         Strokes = 13,
-        RadicalCharacter = "雨",
-        RadicalPinyin = "yu",
-        RadicalTone = 3,
+        RadicalCharacter = _radicalChachar1.TheCharacter,
+        RadicalPinyin = _radicalChachar1.Pinyin,
+        RadicalTone = _radicalChachar1.Tone,
         RadicalAlternativeCharacter = "⻗"
     };
 
@@ -51,9 +60,9 @@ internal sealed class AlternativesControllerTest
         Ipa = "na",
         Tone = 3,
         Strokes = 11,
-        RadicalCharacter = "雨",
-        RadicalPinyin = "yu",
-        RadicalTone = 3,
+        RadicalCharacter = _radicalChachar1.TheCharacter,
+        RadicalPinyin = _radicalChachar1.Pinyin,
+        RadicalTone = _radicalChachar1.Tone,
         RadicalAlternativeCharacter = "⻗"
     };
 
@@ -64,36 +73,36 @@ internal sealed class AlternativesControllerTest
         Ipa = "na",
         Tone = 3,
         Strokes = 11,
-        RadicalCharacter = "雨",
-        RadicalPinyin = "yu",
-        RadicalTone = 3,
+        RadicalCharacter = _radicalChachar1.TheCharacter,
+        RadicalPinyin = _radicalChachar1.Pinyin,
+        RadicalTone = _radicalChachar1.Tone,
         RadicalAlternativeCharacter = "⻗"
     };
 
     private static readonly Alternative _alternative11 = new()
     {
         TheCharacter = "⻗",
-        OriginalCharacter = "雨",
-        OriginalPinyin = "yu",
-        OriginalTone = 3,
+        OriginalCharacter = _radicalChachar1.TheCharacter,
+        OriginalPinyin = _radicalChachar1.Pinyin,
+        OriginalTone = _radicalChachar1.Tone,
         Strokes = 8
     };
 
     private static readonly Alternative _alternative21 = new()
     {
         TheCharacter = "乁",
-        OriginalCharacter = "丿",
-        OriginalPinyin = "pie",
-        OriginalTone = 3,
+        OriginalCharacter = _radicalChachar2.TheCharacter,
+        OriginalPinyin = _radicalChachar2.Pinyin,
+        OriginalTone = _radicalChachar2.Tone,
         Strokes = 1
     };
 
-    private static readonly Alternative _alternative31 = new()
+    private static readonly Alternative _alternative22 = new()
     {
         TheCharacter = "乀",
-        OriginalCharacter = "丿",
-        OriginalPinyin = "pie",
-        OriginalTone = 3,
+        OriginalCharacter = _radicalChachar2.TheCharacter,
+        OriginalPinyin = _radicalChachar2.Pinyin,
+        OriginalTone = _radicalChachar2.Tone,
         Strokes = 1
     };
 
@@ -134,7 +143,7 @@ internal sealed class AlternativesControllerTest
             _asciiPinyinContext,
             _alternative11,
             _alternative21,
-            _alternative31
+            _alternative22
         );
 
         var response = await _entityControllerTestCommons.GetAsync(_host, CancellationToken.None);
@@ -143,7 +152,7 @@ internal sealed class AlternativesControllerTest
             response,
             _alternative11,
             _alternative21,
-            _alternative31
+            _alternative22
         );
     }
 
@@ -579,6 +588,32 @@ internal sealed class AlternativesControllerTest
         Assert.That(_asciiPinyinContext.Alternatives, Does.Contain(_alternative11));
     }
 
+    [Test]
+    public async Task PostNonKeyFieldDiffersAlternativeAlreadyExistsTest()
+    {
+        var alternativeClone = new Alternative
+        {
+            TheCharacter = _alternative11.TheCharacter,
+            OriginalCharacter = _alternative11.OriginalCharacter,
+            OriginalPinyin = _alternative11.OriginalPinyin,
+            OriginalTone = _alternative11.OriginalTone,
+            Strokes = (short)(_alternative11.Strokes! + 1)
+        };
+
+        _entityControllerTestCommons.AddToContextAndSave(_asciiPinyinContext, _radicalChachar1, _alternative11);
+        var response = await _entityControllerTestCommons.PostAsync(_host, alternativeClone, CancellationToken.None);
+
+        await _entityControllerTestCommons.PostConflictTestAsync(
+            response,
+            CancellationToken.None,
+            Errors.ALTERNATIVE_EXISTS
+        );
+
+        Assert.That(_asciiPinyinContext.Alternatives, Does.Contain(_alternative11));
+        Assert.That(_asciiPinyinContext.Alternatives, Does.Contain(alternativeClone));
+        // The clone is not in the database, but the presence is decided only by key fields. This is expected state.
+    }
+
     [Test, Category(TestCategories.DB_CONTEXT_MOCK)]
     public async Task PostAlternativeSaveFailedTest()
     {
@@ -971,6 +1006,27 @@ internal sealed class AlternativesControllerTest
     }
 
     [Test]
+    public async Task PostDeleteStrokesDifferAlternativeDoesNotExistTest()
+    {
+        var alternativeClone = new Alternative
+        {
+            TheCharacter = _alternative11.TheCharacter,
+            OriginalCharacter = _alternative11.OriginalCharacter,
+            OriginalPinyin = _alternative11.OriginalPinyin,
+            OriginalTone = _alternative11.OriginalTone,
+            Strokes = (short)(_alternative11.Strokes! + 1)
+        };
+
+        _entityControllerTestCommons.AddToContextAndSave(_asciiPinyinContext, _radicalChachar1, _alternative11);
+        var response = await _entityControllerTestCommons.PostDeleteAsync(_host, alternativeClone, CancellationToken.None);
+        await _entityControllerTestCommons.PostBadRequestTestAsync(response, CancellationToken.None, Errors.ALTERNATIVE_UNKNOWN);
+
+        Assert.That(_asciiPinyinContext.Alternatives, Does.Contain(_alternative11));
+        Assert.That(_asciiPinyinContext.Alternatives, Does.Contain(alternativeClone));
+        // The clone is not in the database, but the presence is decided only by key fields. This is expected state.
+    }
+
+    [Test]
     public async Task PostDeleteAlternativeForOneExistingChachar()
     {
         _entityControllerTestCommons.AddToContextAndSave(
@@ -1035,6 +1091,7 @@ internal sealed class AlternativesControllerTest
 
         var response = await _entityControllerTestCommons.PostDeleteAsync(_host, _alternative11, CancellationToken.None);
         _entityControllerTestCommons.PostOkTest(response);
+
         Assert.That(_asciiPinyinContext.Chachars, Does.Contain(_radicalChachar1));
         Assert.That(_asciiPinyinContext.Alternatives, Does.Not.Contain(_alternative11));
     }

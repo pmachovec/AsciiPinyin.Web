@@ -82,9 +82,9 @@ internal sealed class ChacharFormTest : IDisposable
         Ipa = "liŋ",
         Tone = 2,
         Strokes = 13,
-        RadicalCharacter = "雨",
-        RadicalPinyin = "yu",
-        RadicalTone = 3,
+        RadicalCharacter = _radicalChachar1.TheCharacter,
+        RadicalPinyin = _radicalChachar1.Pinyin,
+        RadicalTone = _radicalChachar1.Tone,
         RadicalAlternativeCharacter = "⻗"
     };
 
@@ -95,26 +95,26 @@ internal sealed class ChacharFormTest : IDisposable
         Ipa = "sɹ̩",
         Tone = 4,
         Strokes = 5,
-        RadicalCharacter = "儿",
-        RadicalPinyin = "er",
-        RadicalTone = 2
+        RadicalCharacter = _radicalChachar3.TheCharacter,
+        RadicalPinyin = _radicalChachar3.Pinyin,
+        RadicalTone = _radicalChachar3.Tone
     };
 
     private static readonly Alternative _alternative11 = new()
     {
         TheCharacter = "⻗",
-        OriginalCharacter = "雨",
-        OriginalPinyin = "yu",
-        OriginalTone = 3,
+        OriginalCharacter = _radicalChachar1.TheCharacter,
+        OriginalPinyin = _radicalChachar1.Pinyin,
+        OriginalTone = _radicalChachar1.Tone,
         Strokes = 8
     };
 
     private static readonly Alternative _anotherAlternative21 = new()
     {
         TheCharacter = "⻌",
-        OriginalCharacter = "辵",
-        OriginalPinyin = "chuo",
-        OriginalTone = 4,
+        OriginalCharacter = _radicalChachar2.TheCharacter,
+        OriginalPinyin = _radicalChachar2.Pinyin,
+        OriginalTone = _radicalChachar2.Tone,
         Strokes = 3
     };
 
@@ -803,7 +803,7 @@ internal sealed class ChacharFormTest : IDisposable
     }
 
     [Test]
-    public async Task RadicalChacharAlreadyExistsNonKeyFieldsDifferSubmitTest()
+    public async Task RadicalChacharAlreadyExistsNonKeyFieldDiffersSubmitTest()
     {
         _chachars.AddRange(
             _radicalChachars12

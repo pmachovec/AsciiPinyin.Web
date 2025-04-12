@@ -61,7 +61,7 @@ internal sealed partial class AlternativeTest
         Assert.That(_newAlternative.ToString(), Does.Match(Regexes.AllNullAlternativeStringRegex()));
 
     [Test]
-    public void AlternativeEqualsFullCloneTest()
+    public void AlternativeEqualsTest()
     {
         var alternativeClone = new Alternative
         {
@@ -77,7 +77,7 @@ internal sealed partial class AlternativeTest
     }
 
     [Test]
-    public void AlternativeEqualsKeyFieldDiffersTest()
+    public void AlternativeEqualsOriginalToneDiffersTest()
     {
         var alternativeClone = new Alternative
         {
@@ -93,7 +93,22 @@ internal sealed partial class AlternativeTest
     }
 
     [Test]
-    public void AlternativeEqualsNonKeyFieldDiffersTest()
+    public void AlternativeEqualsOriginalToneNullTest()
+    {
+        var alternativeClone = new Alternative
+        {
+            TheCharacter = _alternative.TheCharacter,
+            OriginalCharacter = _alternative.OriginalCharacter,
+            OriginalPinyin = _alternative.OriginalPinyin,
+            Strokes = _alternative.Strokes
+        };
+
+        Assert.That(alternativeClone, Is.Not.EqualTo(_alternative));
+        Assert.That(alternativeClone == _alternative, Is.False);
+    }
+
+    [Test]
+    public void AlternativeEqualsStrokesDifferTest()
     {
         var alternativeClone = new Alternative
         {
@@ -106,5 +121,66 @@ internal sealed partial class AlternativeTest
 
         Assert.That(alternativeClone, Is.EqualTo(_alternative));
         Assert.That(alternativeClone == _alternative, Is.True);
+    }
+
+    [Test]
+    public void AlternativeEqualsStrokesNullTest()
+    {
+        var alternativeClone = new Alternative
+        {
+            TheCharacter = _alternative.TheCharacter,
+            OriginalCharacter = _alternative.OriginalCharacter,
+            OriginalPinyin = _alternative.OriginalPinyin,
+            OriginalTone = _alternative.OriginalTone,
+            Strokes = (short)(_alternative.Strokes! + 1)
+        };
+
+        Assert.That(alternativeClone, Is.EqualTo(_alternative));
+        Assert.That(alternativeClone == _alternative, Is.True);
+    }
+
+    [Test]
+    public void AlternativeAreAllFieldsEqualTest()
+    {
+        var alternativeClone = new Alternative
+        {
+            TheCharacter = _alternative.TheCharacter,
+            OriginalCharacter = _alternative.OriginalCharacter,
+            OriginalPinyin = _alternative.OriginalPinyin,
+            OriginalTone = _alternative.OriginalTone,
+            Strokes = _alternative.Strokes
+        };
+
+        Assert.That(alternativeClone.AreAllFieldsEqual(_alternative), Is.True);
+    }
+
+    [Test]
+    public void AlternativeAreAllFieldsEqualStrokesDifferTest()
+    {
+        var alternativeClone = new Alternative
+        {
+            TheCharacter = _alternative.TheCharacter,
+            OriginalCharacter = _alternative.OriginalCharacter,
+            OriginalPinyin = _alternative.OriginalPinyin,
+            OriginalTone = _alternative.OriginalTone,
+            Strokes = (short)(_alternative.Strokes! + 1)
+        };
+
+        Assert.That(alternativeClone.AreAllFieldsEqual(_alternative), Is.False);
+    }
+
+    [Test]
+    public void AlternativeAreAllFieldsEqualStrokesNullTest()
+    {
+        var alternativeClone = new Alternative
+        {
+            TheCharacter = _alternative.TheCharacter,
+            OriginalCharacter = _alternative.OriginalCharacter,
+            OriginalPinyin = _alternative.OriginalPinyin,
+            OriginalTone = _alternative.OriginalTone,
+            Strokes = (short)(_alternative.Strokes! + 1)
+        };
+
+        Assert.That(alternativeClone.AreAllFieldsEqual(_alternative), Is.False);
     }
 }

@@ -13,4 +13,6 @@ public interface IEntity
     // Must use signed number types, because blazor client-side model validation doesn't work with unsigned numeric types.
     // The 'sbyte' would be enough in all situations, but the blazor client-side model validation doesn't work with it => must use 'short'.
     short? Strokes { get; set; }
+
+    bool AreAllFieldsEqual(object? obj);
 }

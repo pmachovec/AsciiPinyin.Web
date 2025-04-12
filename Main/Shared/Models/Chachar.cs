@@ -80,15 +80,25 @@ public sealed class Chachar : IEntity
     [JsonIgnore]
     public bool IsRadical => RadicalCharacter is null;
 
+    public bool AreAllFieldsEqual(object? obj) =>
+        obj is Chachar otherChachar
+        && Equals(otherChachar)
+        && otherChachar.Ipa == Ipa
+        && otherChachar.Strokes == Strokes
+        && otherChachar.RadicalCharacter == RadicalCharacter
+        && otherChachar.RadicalPinyin == RadicalPinyin
+        && otherChachar.RadicalTone == RadicalTone
+        && otherChachar.RadicalAlternativeCharacter == RadicalAlternativeCharacter;
+
     public static bool operator ==(Chachar left, Chachar right) => Comparator.EqualsForOperator(left, right);
 
     public static bool operator !=(Chachar left, Chachar right) => !(left == right);
 
     public override bool Equals(object? obj) =>
         obj is Chachar otherChachar
-            && otherChachar.TheCharacter == TheCharacter
-            && otherChachar.Pinyin == Pinyin
-            && otherChachar.Tone == Tone;
+        && otherChachar.TheCharacter == TheCharacter
+        && otherChachar.Pinyin == Pinyin
+        && otherChachar.Tone == Tone;
 
     public override int GetHashCode() => HashCode.Combine(TheCharacter, Pinyin, Tone);
 

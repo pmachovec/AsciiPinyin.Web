@@ -38,7 +38,12 @@ internal sealed class AlternativePostDeleteFilter(
     {
         LogCommons.LogEntityInfo(_logger, TableNames.ALTERNATIVE, alternative);
 
-        if (!knownAlternatives.Contains(alternative))
+        var alternativeExists = knownAlternatives
+            .AsNoTracking()
+            .AsEnumerable()
+            .Any(knownAlternative => knownAlternative.AreAllFieldsEqual(alternative));
+
+        if (!alternativeExists)
         {
             LogCommons.LogError(_logger, Errors.ALTERNATIVE_UNKNOWN);
             errors = [Errors.ALTERNATIVE_UNKNOWN];
