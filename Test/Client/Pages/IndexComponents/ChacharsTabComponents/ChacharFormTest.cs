@@ -1,6 +1,5 @@
-using AngleSharp.Common;
-using AngleSharp.Diffing.Extensions;
 using Asciipinyin.Web.Client.Test.Commons;
+using Asciipinyin.Web.Client.Test.Tools;
 using AsciiPinyin.Web.Client.Commons;
 using AsciiPinyin.Web.Client.HttpClients;
 using AsciiPinyin.Web.Client.JSInterop;
@@ -30,6 +29,7 @@ internal sealed class ChacharFormTest : IDisposable
 {
     private const string CHARACTER_ALREADY_IN_DB = "Character '{0}' - '{1}' already in DB";
     private const string CHARACTER_CREATED = "Character '{0}' - '{1}' created";
+
     private const string COMPULSORY_VALUE = nameof(COMPULSORY_VALUE);
     private const string CREATE_NEW_CHARACTER = nameof(CREATE_NEW_CHARACTER);
     private const string MUST_BE_CHINESE_CHARACTER = nameof(MUST_BE_CHINESE_CHARACTER);
@@ -75,17 +75,31 @@ internal sealed class ChacharFormTest : IDisposable
         Strokes = 2
     };
 
-    private static readonly Chachar _nonRadicalChacharWithAlternative11 = new()
+    private static readonly Chachar _radicalChachar4 = new()
     {
-        TheCharacter = "零",
-        Pinyin = "ling",
-        Ipa = "liŋ",
+        TheCharacter = "人",
+        Pinyin = "ren",
+        Ipa = "ɻən",
         Tone = 2,
-        Strokes = 13,
-        RadicalCharacter = _radicalChachar1.TheCharacter,
-        RadicalPinyin = _radicalChachar1.Pinyin,
-        RadicalTone = _radicalChachar1.Tone,
-        RadicalAlternativeCharacter = "⻗"
+        Strokes = 2
+    };
+
+    private static readonly Alternative _alternative11 = new()
+    {
+        TheCharacter = "⻗",
+        OriginalCharacter = _radicalChachar1.TheCharacter,
+        OriginalPinyin = _radicalChachar1.Pinyin,
+        OriginalTone = _radicalChachar1.Tone,
+        Strokes = 8
+    };
+
+    private static readonly Alternative _alternative21 = new()
+    {
+        TheCharacter = "⻌",
+        OriginalCharacter = _radicalChachar2.TheCharacter,
+        OriginalPinyin = _radicalChachar2.Pinyin,
+        OriginalTone = _radicalChachar2.Tone,
+        Strokes = 3
     };
 
     private static readonly Chachar _nonRadicalChacharWithoutAlternative31 = new()
@@ -100,39 +114,60 @@ internal sealed class ChacharFormTest : IDisposable
         RadicalTone = _radicalChachar3.Tone
     };
 
-    private static readonly Alternative _alternative11 = new()
+    private static readonly Chachar _nonRadicalChacharWithoutAlternative32 = new()
     {
-        TheCharacter = "⻗",
-        OriginalCharacter = _radicalChachar1.TheCharacter,
-        OriginalPinyin = _radicalChachar1.Pinyin,
-        OriginalTone = _radicalChachar1.Tone,
-        Strokes = 8
+        TheCharacter = "元",
+        Pinyin = "yuan",
+        Ipa = "ɥœn",
+        Tone = 2,
+        Strokes = 4,
+        RadicalCharacter = _radicalChachar3.TheCharacter,
+        RadicalPinyin = _radicalChachar3.Pinyin,
+        RadicalTone = _radicalChachar3.Tone
     };
 
-    private static readonly Alternative _anotherAlternative21 = new()
+    private static readonly Chachar _nonRadicalChacharWithAlternative11 = new()
     {
-        TheCharacter = "⻌",
-        OriginalCharacter = _radicalChachar2.TheCharacter,
-        OriginalPinyin = _radicalChachar2.Pinyin,
-        OriginalTone = _radicalChachar2.Tone,
-        Strokes = 3
+        TheCharacter = "零",
+        Pinyin = "ling",
+        Ipa = "liŋ",
+        Tone = 2,
+        Strokes = 13,
+        RadicalCharacter = _radicalChachar1.TheCharacter,
+        RadicalPinyin = _radicalChachar1.Pinyin,
+        RadicalTone = _radicalChachar1.Tone,
+        RadicalAlternativeCharacter = _alternative11.TheCharacter
     };
 
-    private static readonly HashSet<Chachar> _radicalChachars12 = [_radicalChachar1, _radicalChachar2];
-    private static readonly HashSet<Chachar> _radicalChachars31 = [_radicalChachar3, _radicalChachar1];
-    private static readonly HashSet<Alternative> _alternatives = [_alternative11, _anotherAlternative21];
+    private static readonly Chachar _nonRadicalChacharWithAlternative12 = new()
+    {
+        TheCharacter = "雫",
+        Pinyin = "na",
+        Ipa = "na",
+        Tone = 3,
+        Strokes = 11,
+        RadicalCharacter = _radicalChachar1.TheCharacter,
+        RadicalPinyin = _radicalChachar1.Pinyin,
+        RadicalTone = _radicalChachar1.Tone,
+        RadicalAlternativeCharacter = _alternative11.TheCharacter
+    };
+
+    private static readonly HashSet<Alternative> _alternatives = [_alternative11, _alternative21];
     private static readonly CompositeFormat _characterAlreadyInDb = CompositeFormat.Parse(CHARACTER_ALREADY_IN_DB);
     private static readonly CompositeFormat _characterCreated = CompositeFormat.Parse(CHARACTER_CREATED);
     private static readonly MouseEventArgs _mouseEventArgs = new();
 
-    private readonly Mock<IEntityClient> _entityClientMock = new();
-    private readonly Mock<IIndex> _indexMock = new();
-    private readonly Mock<IProcessDialog> _processDialogMock = new();
-    private readonly Mock<IStringLocalizer<Resource>> _localizerMock = new();
+    private static readonly Mock<IEntityClient> _entityClientMock = new();
+    private static readonly Mock<IIndex> _indexMock = new();
+    private static readonly Mock<IProcessDialog> _processDialogMock = new();
+    private static readonly Mock<IStringLocalizer<Resource>> _localizerMock = new();
+
+    private static readonly LocalizerMockSetter _localizerMockSetter = new(_localizerMock);
 
     private HashSet<Chachar> _chachars = default!;
     private EntityFormTestCommons _entityFormTestCommons = default!;
     private IRenderedComponent<ChacharForm> _chacharFormComponent = default!;
+    private JSInteropSetter _jsInteropSetter = default!;
     private TestContext _testContext = default!;
 
     [OneTimeSetUp]
@@ -142,51 +177,31 @@ internal sealed class ChacharFormTest : IDisposable
             .Setup(index => index.ProcessDialog)
             .Returns(_processDialogMock.Object);
 
-        _ = _localizerMock
-            .Setup(localizer => localizer[Resource.CharacterAlreadyInDb])
-            .Returns(new LocalizedString(CHARACTER_ALREADY_IN_DB, CHARACTER_ALREADY_IN_DB));
-
-        _ = _localizerMock
-            .Setup(localizer => localizer[Resource.CharacterCreated])
-            .Returns(new LocalizedString(CHARACTER_CREATED, CHARACTER_CREATED));
-
-        _ = _localizerMock
-            .Setup(localizer => localizer[Resource.CompulsoryValue])
-            .Returns(new LocalizedString(COMPULSORY_VALUE, COMPULSORY_VALUE));
-
-        _ = _localizerMock
-            .Setup(localizer => localizer[Resource.CreateNewCharacter])
-            .Returns(new LocalizedString(CREATE_NEW_CHARACTER, CREATE_NEW_CHARACTER));
-
-        _ = _localizerMock
-            .Setup(localizer => localizer[Resource.MustBeChineseCharacter])
-            .Returns(new LocalizedString(MUST_BE_CHINESE_CHARACTER, MUST_BE_CHINESE_CHARACTER));
-
-        _ = _localizerMock
-            .Setup(localizer => localizer[Resource.OnlyAsciiAllowed])
-            .Returns(new LocalizedString(ONLY_ASCII_ALLOWED, ONLY_ASCII_ALLOWED));
-
-        _ = _localizerMock
-            .Setup(localizer => localizer[Resource.OnlyIpaAllowed])
-            .Returns(new LocalizedString(ONLY_IPA_ALLOWED, ONLY_IPA_ALLOWED));
-
-        _ = _localizerMock
-            .Setup(localizer => localizer[Resource.ProcessingError])
-            .Returns(new LocalizedString(PROCESSING_ERROR, PROCESSING_ERROR));
-
-        _ = _localizerMock
-            .Setup(localizer => localizer[Resource.SelectRadical])
-            .Returns(new LocalizedString(SELECT_RADICAL, SELECT_RADICAL));
-
-        _ = _localizerMock
-            .Setup(localizer => localizer[Resource.SelectRadicalAlternative])
-            .Returns(new LocalizedString(SELECT_RADICAL_ALTERNATIVE, SELECT_RADICAL_ALTERNATIVE));
+        _localizerMockSetter.SetUpResources(
+            (Resource.CharacterAlreadyInDb, CHARACTER_ALREADY_IN_DB),
+            (Resource.CharacterCreated, CHARACTER_CREATED),
+            (Resource.CompulsoryValue, COMPULSORY_VALUE),
+            (Resource.CreateNewCharacter, CREATE_NEW_CHARACTER),
+            (Resource.MustBeChineseCharacter, MUST_BE_CHINESE_CHARACTER),
+            (Resource.OnlyAsciiAllowed, ONLY_ASCII_ALLOWED),
+            (Resource.OnlyIpaAllowed, ONLY_IPA_ALLOWED),
+            (Resource.ProcessingError, PROCESSING_ERROR),
+            (Resource.SelectRadical, SELECT_RADICAL),
+            (Resource.SelectRadicalAlternative, SELECT_RADICAL_ALTERNATIVE)
+         );
     }
 
     [SetUp]
     public void SetUp()
     {
-        _chachars = [];
+        _chachars =
+        [
+            _radicalChachar1,
+            _radicalChachar2,
+            _radicalChachar3,
+            _nonRadicalChacharWithAlternative11,
+            _nonRadicalChacharWithoutAlternative31
+        ];
 
         _ = _indexMock
             .Setup(index => index.Alternatives)
@@ -197,40 +212,55 @@ internal sealed class ChacharFormTest : IDisposable
             .Returns(_chachars);
 
         _testContext = new TestContext();
+        _jsInteropSetter = new(_testContext.JSInterop);
 
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_BLOCK).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_FLEX).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_NONE).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.SHOW).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_BLOCK).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_FLEX).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_NONE).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ADD_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.SHOW).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.DISABLE, IDs.CHACHAR_FORM_ALTERNATIVE_INPUT).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.DISABLE, IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ENABLE, IDs.CHACHAR_FORM_ALTERNATIVE_INPUT).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ENABLE, IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_BLOCK).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_FLEX).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_NONE).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.SHOW).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_BLOCK).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_FLEX).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_NONE).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.REMOVE_CLASS, IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.SHOW).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_RADICAL).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_RADICAL_ALTERNATIVE).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_Z_INDEX, IDs.CHACHAR_FORM_ROOT, 1).SetVoidResult();
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_Z_INDEX, IDs.CHACHAR_FORM_ROOT, 3).SetVoidResult();
+        _jsInteropSetter.SetUpDisable(
+            IDs.CHACHAR_FORM_ALTERNATIVE_INPUT,
+            IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE
+        );
+
+        _jsInteropSetter.SetUpEnable(
+            IDs.CHACHAR_FORM_ALTERNATIVE_INPUT,
+            IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE
+        );
+
+        _jsInteropSetter.SetUpAddClasses(
+            (IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50),
+            (IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK),
+            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_BLOCK),
+            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_FLEX),
+            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_NONE),
+            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.SHOW),
+            (IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY),
+            (IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY),
+            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_BLOCK),
+            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_FLEX),
+            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_NONE),
+            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.SHOW)
+        );
+
+        _jsInteropSetter.SetUpRemoveClasses(
+            (IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50),
+            (IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK),
+            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_BLOCK),
+            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_FLEX),
+            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_NONE),
+            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.SHOW),
+            (IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY),
+            (IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY),
+            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_BLOCK),
+            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_FLEX),
+            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_NONE),
+            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.SHOW)
+        );
+
+        _jsInteropSetter.SetUpSetTitles(
+            CREATE_NEW_CHARACTER,
+            SELECT_RADICAL,
+            SELECT_RADICAL_ALTERNATIVE
+        );
+
+        _jsInteropSetter.SetUpSetZIndex(IDs.CHACHAR_FORM_ROOT);
 
         _ = _testContext.Services
             .AddSingleton(_entityClientMock.Object)
@@ -322,7 +352,7 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("𫇂\n𫟖\t𬩽 ", "𫇂", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
     [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", "0", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterOnInputAdjustedTest)} - crazy combination of 40 characters, symbols and whitespaces")]
     public void TheCharacterOnInputAdjustedTest(string inputValue, string expectedContent) =>
-        _entityFormTestCommons.VerifyInputValueSet(inputValue, expectedContent, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT);
+        _entityFormTestCommons.InputValueSetTest(inputValue, expectedContent, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT);
 
     [TestCase("", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterOnInputUnchangedTest)} - empty string")]
     [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterOnInputUnchangedTest)} - zero")]
@@ -369,68 +399,69 @@ internal sealed class ChacharFormTest : IDisposable
     public void TheCharacterOnInputUnchangedTest(string inputValue) =>
         _entityFormTestCommons.StringInputUnchangedTest(inputValue, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT);
 
-    [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - empty string")]
-    [TestCase("0", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - zero")]
-    [TestCase("1", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - single digit positive integer")]
-    [TestCase(" ", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - space")]
-    [TestCase("\n", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - new line")]
-    [TestCase("\t", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - tabluar")]
-    [TestCase("\\", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - backslash")]
-    [TestCase("\'", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - apostrophe")]
-    [TestCase("\"", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - quotes")]
-    [TestCase("`", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - backtick")]
-    [TestCase(".", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - dot")]
-    [TestCase(":", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - colon")]
-    [TestCase(";", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - semicolon")]
-    [TestCase("@", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - at sign")]
-    [TestCase("#", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - hash sign")]
-    [TestCase("$", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - dollar sign")]
-    [TestCase("{", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - opening curly bracket")]
-    [TestCase("}", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - closing curly bracket")]
-    [TestCase("a", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - single ASCII character lowercase")]
-    [TestCase("A", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - single ASCII character uppercase")]
-    [TestCase("ā", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - single pinyin character lowercase")]
-    [TestCase("Ā", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - single pinyin character uppercase")]
-    [TestCase("ř", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - single Czech non-ASCII character lowercase")]
-    [TestCase("Ř", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - single Czech non-ASCII character uppercase")]
-    [TestCase("я", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - single Russian non-ASCII character lowercase")]
-    [TestCase("Я", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - single Russian non-ASCII character uppercase")]
-    [TestCase("r̝", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - Czech 'Ř' in IPA - version 1")]
-    [TestCase("r̻̝", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - Czech 'Ř' in IPA - version 2")]
-    [TestCase("r̝̊", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - Czech 'Ř' in IPA - version 3")]
-    [TestCase("ɼ", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterWrongSubmitTest)} - Czech 'Ř' in IPA - deprecated version")]
-    public void TheCharacterWrongSubmitTest(string inputValue, string expectedError)
-    {
+    [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - empty string")]
+    [TestCase("0", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - zero")]
+    [TestCase("1", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - single digit positive integer")]
+    [TestCase(" ", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - space")]
+    [TestCase("\n", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - new line")]
+    [TestCase("\t", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - tabluar")]
+    [TestCase("\\", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - backslash")]
+    [TestCase("\'", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - apostrophe")]
+    [TestCase("\"", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - quotes")]
+    [TestCase("`", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - backtick")]
+    [TestCase(".", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - dot")]
+    [TestCase(":", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - colon")]
+    [TestCase(";", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - semicolon")]
+    [TestCase("@", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - at sign")]
+    [TestCase("#", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - hash sign")]
+    [TestCase("$", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - dollar sign")]
+    [TestCase("{", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - opening curly bracket")]
+    [TestCase("}", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - closing curly bracket")]
+    [TestCase("a", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - single ASCII character lowercase")]
+    [TestCase("A", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - single ASCII character uppercase")]
+    [TestCase("ā", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - single pinyin character lowercase")]
+    [TestCase("Ā", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - single pinyin character uppercase")]
+    [TestCase("ř", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - single Czech non-ASCII character lowercase")]
+    [TestCase("Ř", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - single Czech non-ASCII character uppercase")]
+    [TestCase("я", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - single Russian non-ASCII character lowercase")]
+    [TestCase("Я", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - single Russian non-ASCII character uppercase")]
+    [TestCase("r̝", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 1")]
+    [TestCase("r̻̝", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 2")]
+    [TestCase("r̝̊", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 3")]
+    [TestCase("ɼ", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
+    public void SubmitTheCharacterWrongTest(string inputValue, string expectedError) =>
         // Multi-character inputs are unreachable thanks to PreventMultipleCharacters, no need to test this case.
-
-        _entityFormTestCommons.InvalidInputSubmitTest(
+        _entityFormTestCommons.SubmitInvalidInputTest(
             inputValue,
             expectedError,
             IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
             IDs.CHACHAR_FORM_THE_CHARACTER_VALIDATION_MESSAGE,
             IDs.CHACHAR_FORM_SUBMIT_BUTTON
         );
-    }
 
-    [TestCase("中", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - CJK unified ideographs")]
-    [TestCase("⺫", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - CJK radicals supplement")]
-    [TestCase("㆕", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - Kanbun")]
-    [TestCase("晴", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - CJK compatibility ideographs")]
-    [TestCase("輸", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - CJK compatibility ideographs supplement")]
-    [TestCase("㒡", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - CJK extension A")]
-    [TestCase("𥒯", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - CJK extension B")]
-    [TestCase("𫇂", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - CJK extension C")]
-    [TestCase("𫟖", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - CJK extension D")]
-    [TestCase("𬩽", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - CJK extension E")]
-    [TestCase("𭕄", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - CJK extension F")]
-    [TestCase("\U000310f9", TestName = $"{nameof(ChacharFormTest)}.{nameof(TheCharacterCorrectSubmitTest)} - single Chinese character - CJK extension G")]
-    public void TheCharacterCorrectSubmitTest(string inputValue)
+    [TestCase("中", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK unified ideographs")]
+    [TestCase("⺫", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK radicals supplement")]
+    [TestCase("㆕", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - Kanbun")]
+    [TestCase("晴", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK compatibility ideographs")]
+    [TestCase("輸", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK compatibility ideographs supplement")]
+    [TestCase("㒡", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK extension A")]
+    [TestCase("𥒯", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK extension B")]
+    [TestCase("𫇂", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK extension C")]
+    [TestCase("𫟖", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK extension D")]
+    [TestCase("𬩽", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK extension E")]
+    [TestCase("𭕄", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK extension F")]
+    [TestCase("\U000310f9", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK extension G")]
+    public void SubmitTheCharacterCorrectTest(string inputValue)
     {
         // Multi-character inputs are unreachable thanks to PreventMultipleCharacters, no need to test this case.
 
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT, TextUtils.GetStringFirstCharacterAsString(inputValue));
+        _ = _testContext.JSInterop.SetupVoid(
+            DOMFunctions.SET_VALUE,
+            IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
+            TextUtils.GetStringFirstCharacterAsString(inputValue)
+        ).SetVoidResult();
 
-        _entityFormTestCommons.ValidInputSubmitTest(
+        _entityFormTestCommons.SubmitValidInputTest(
             inputValue,
             IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
             IDs.CHACHAR_FORM_THE_CHARACTER_VALIDATION_MESSAGE,
@@ -438,109 +469,109 @@ internal sealed class ChacharFormTest : IDisposable
         );
     }
 
-    [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - empty string")]
-    [TestCase("0", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - zero")]
-    [TestCase("1", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single digit positive integer")]
-    [TestCase("-1", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single digit negative integer")]
-    [TestCase("123", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple digits positive integer")]
-    [TestCase("-123", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple digits negative integer")]
-    [TestCase("0.1", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - two digits positive float")]
-    [TestCase("-0.1", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - two digits negative float")]
-    [TestCase("123.456", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple digits positive float")]
-    [TestCase("-123.456", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple digits negative float")]
-    [TestCase(" ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - space")]
-    [TestCase("   ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple spaces")]
-    [TestCase("\n", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - new line")]
-    [TestCase("\n\n\n", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple new lines")]
-    [TestCase("\t", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - tabluar")]
-    [TestCase("\t\t\t", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple tabulars")]
-    [TestCase(" \n\t", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - space, new line and tabular together")]
-    [TestCase("\\", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - backslash")]
-    [TestCase("\'", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - apostrophe")]
-    [TestCase("\"", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - quotes")]
-    [TestCase("`", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - backtick")]
-    [TestCase(".", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - dot")]
-    [TestCase(":", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - colon")]
-    [TestCase(";", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - semicolon")]
-    [TestCase("@", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - at sign")]
-    [TestCase("#", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - hash sign")]
-    [TestCase("$", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - dollar sign")]
-    [TestCase("{", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - opening curly bracket")]
-    [TestCase("}", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - closing curly bracket")]
-    [TestCase("{0}", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - placeholder")]
-    [TestCase("${@}#\'\"\\ \n\t`.:;", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - ${{@}}#\\\'\\\"\\\\ \\n\\t`.:;")]
-    [TestCase("This is an ASCII text", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - ASCII text with spaces")]
-    [TestCase("This\nis\nan\nASCII\ntext", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - ASCII text with new lines")]
-    [TestCase("This\tis\tan\tASCII\ttext", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - ASCII text with tabulars")]
-    [TestCase("This\nis\tan ASCII text ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - ASCII text with new line, tabular and trailing space")]
-    [TestCase("ā", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single pinyin character lowercase")]
-    [TestCase("Ā", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single pinyin character uppercase")]
-    [TestCase("zhōng", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin single syllable lowercase")]
-    [TestCase("ZHŌNG", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin single syllable uppercase")]
-    [TestCase("ZhŌnG", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin single syllable case combination")]
-    [TestCase("dàkǎoyàn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables lowercase")]
-    [TestCase("DÀKǍOYÀN", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables uppercase")]
-    [TestCase("DàKǎOyÀn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables case combination")]
-    [TestCase("dà kǎo yàn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables lowercase with spaces")]
-    [TestCase("DÀ KǍO YÀN", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables uppercase with spaces")]
-    [TestCase("Dà KǎO yÀn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables case combination with spaces")]
-    [TestCase("Dà\nKǎo\nYàn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables with new lines")]
-    [TestCase("Dà\tKǎo\tYàn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables with tabulars")]
-    [TestCase("Dà\tKǎo\tYàn ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - pinyin multiple syllables with new line, tabular and space")]
-    [TestCase("ř", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Czech non-ASCII character lowercase")]
-    [TestCase("Ř", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Czech non-ASCII character uppercase")]
-    [TestCase("žščřďťň", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Czech non-ASCII characters lowercase")]
-    [TestCase("ŽŠČŘĎŤŇ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Czech non-ASCII characters uppercase")]
-    [TestCase("ŽšČřĎťŇ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Czech non-ASCII characters case combination")]
-    [TestCase("Příliš žluťoučký kůň úpěl ďábelské ódy", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Czech text with spaces")]
-    [TestCase("Příliš\nžluťoučký\nkůň\núpěl\nďábelské\nódy", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Czech text with new lines")]
-    [TestCase("Příliš\tžluťoučký\tkůň\túpěl\tďábelské\tódy", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Czech text with tabulars")]
-    [TestCase("Příliš\nžluťoučký\tkůň úpěl ďábelské ódy ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Czech text with new line, tabular and trailing space")]
-    [TestCase("я", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Russian non-ASCII character lowercase")]
-    [TestCase("Я", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Russian non-ASCII character uppercase")]
-    [TestCase("джлщыюя", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Russian non-ASCII characters lowercase")]
-    [TestCase("ДЖЛЩЫЮЯ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Russian non-ASCII characters uppercase")]
-    [TestCase("ДжЛщЫюЯ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Russian non-ASCII characters case combination")]
-    [TestCase("Слишком желтая лошадь ржала дьявольские оды", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Russian text with spaces")]
-    [TestCase("Слишком\nжелтая\nлошадь\nржала\nдьявольские\nоды", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Russian text with new lines")]
-    [TestCase("Слишком\tжелтая\tлошадь\tржала\tдьявольские\tоды", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Russian text with tabulars")]
-    [TestCase("Слишком\nжелтая\tлошадь ржала дьявольские оды ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Russian text with new line, tabular and trailing space")]
-    [TestCase("r̝", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Czech 'Ř' in IPA - version 1")]
-    [TestCase("r̻̝", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Czech 'Ř' in IPA - version 2")]
-    [TestCase("r̝̊", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Czech 'Ř' in IPA - version 3")]
-    [TestCase("ɼ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Czech 'Ř' in IPA - deprecated version")]
-    [TestCase("r̝r̻̝r̝̊", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Czech 'Ř' in IPA - versions 1, 2 and 3 together")]
-    [TestCase("ʈʂʊŋ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - '中' in IPA")]
-    [TestCase("pr̝i:liʃʒlucɔutʃki:ku:ɲu:pjɛlɟa:bɛlskɛ:ɔ:di", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Czech text in IPA")]
-    [TestCase("pr̝i:liʃ ʒlucɔutʃki: ku:ɲ u:pjɛl ɟa:bɛlskɛ: ɔ:di", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Czech text in IPA with spaces")]
-    [TestCase("pr̝i:liʃ\nʒlucɔutʃki:\nku:ɲ\nu:pjɛl\nɟa:bɛlskɛ:\nɔ:di", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Czech text in IPA with new lines")]
-    [TestCase("pr̝i:liʃ\tʒlucɔutʃki:\tku:ɲ\tu:pjɛl\tɟa:bɛlskɛ:\tɔ:di", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Czech text in IPA with tabulars")]
-    [TestCase("pr̝i:liʃ\nʒlucɔutʃki:\tku:ɲ u:pjɛl ɟa:bɛlskɛ: ɔ:di ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - Czech text in IPA with new line, tabular and trailing space")]
-    [TestCase("中", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK unified ideographs")]
-    [TestCase("⺫", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK radicals supplement")]
-    [TestCase("㆕", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - Kanbun")]
-    [TestCase("晴", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK compatibility ideographs")]
-    [TestCase("輸", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK compatibility ideographs supplement")]
-    [TestCase("㒡", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK extension A")]
-    [TestCase("𥒯", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK extension B")]
-    [TestCase("𫇂", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK extension C")]
-    [TestCase("𫟖", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK extension D")]
-    [TestCase("𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK extension E")]
-    [TestCase("𭕄", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK extension F")]
-    [TestCase("\U000310f9", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - single Chinese character - CJK extension G")]
-    [TestCase("大考验", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs")]
-    [TestCase("大 考 验", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs with spaces")]
-    [TestCase("大\n考\n验", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs with new lines")]
-    [TestCase("大\t考\t验", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs with tabulars")]
-    [TestCase("大\t考\t验 ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs with new line, tabular and space")]
-    [TestCase("𫇂𫟖𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination")]
-    [TestCase("𫇂 𫟖 𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with spaces")]
-    [TestCase("𫇂\n𫟖\n𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with new lines")]
-    [TestCase("𫇂\t𫟖\t𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
-    [TestCase("𫇂\n𫟖\t𬩽 ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
-    [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinWrongSubmitTest)} - crazy combination of 40 characters, symbols and whitespaces")]
-    public void PinyinWrongSubmitTest(string inputValue, string expectedError) =>
-        _entityFormTestCommons.InvalidInputSubmitTest(
+    [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - empty string")]
+    [TestCase("0", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - zero")]
+    [TestCase("1", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single digit positive integer")]
+    [TestCase("-1", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single digit negative integer")]
+    [TestCase("123", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple digits positive integer")]
+    [TestCase("-123", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple digits negative integer")]
+    [TestCase("0.1", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - two digits positive float")]
+    [TestCase("-0.1", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - two digits negative float")]
+    [TestCase("123.456", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple digits positive float")]
+    [TestCase("-123.456", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple digits negative float")]
+    [TestCase(" ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - space")]
+    [TestCase("   ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple spaces")]
+    [TestCase("\n", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - new line")]
+    [TestCase("\n\n\n", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple new lines")]
+    [TestCase("\t", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - tabluar")]
+    [TestCase("\t\t\t", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple tabulars")]
+    [TestCase(" \n\t", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - space, new line and tabular together")]
+    [TestCase("\\", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - backslash")]
+    [TestCase("\'", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - apostrophe")]
+    [TestCase("\"", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - quotes")]
+    [TestCase("`", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - backtick")]
+    [TestCase(".", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - dot")]
+    [TestCase(":", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - colon")]
+    [TestCase(";", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - semicolon")]
+    [TestCase("@", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - at sign")]
+    [TestCase("#", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - hash sign")]
+    [TestCase("$", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - dollar sign")]
+    [TestCase("{", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - opening curly bracket")]
+    [TestCase("}", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - closing curly bracket")]
+    [TestCase("{0}", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - placeholder")]
+    [TestCase("${@}#\'\"\\ \n\t`.:;", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - ${{@}}#\\\'\\\"\\\\ \\n\\t`.:;")]
+    [TestCase("This is an ASCII text", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - ASCII text with spaces")]
+    [TestCase("This\nis\nan\nASCII\ntext", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - ASCII text with new lines")]
+    [TestCase("This\tis\tan\tASCII\ttext", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - ASCII text with tabulars")]
+    [TestCase("This\nis\tan ASCII text ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - ASCII text with new line, tabular and trailing space")]
+    [TestCase("ā", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single pinyin character lowercase")]
+    [TestCase("Ā", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single pinyin character uppercase")]
+    [TestCase("zhōng", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - pinyin single syllable lowercase")]
+    [TestCase("ZHŌNG", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - pinyin single syllable uppercase")]
+    [TestCase("ZhŌnG", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - pinyin single syllable case combination")]
+    [TestCase("dàkǎoyàn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - pinyin multiple syllables lowercase")]
+    [TestCase("DÀKǍOYÀN", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - pinyin multiple syllables uppercase")]
+    [TestCase("DàKǎOyÀn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - pinyin multiple syllables case combination")]
+    [TestCase("dà kǎo yàn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - pinyin multiple syllables lowercase with spaces")]
+    [TestCase("DÀ KǍO YÀN", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - pinyin multiple syllables uppercase with spaces")]
+    [TestCase("Dà KǎO yÀn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - pinyin multiple syllables case combination with spaces")]
+    [TestCase("Dà\nKǎo\nYàn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - pinyin multiple syllables with new lines")]
+    [TestCase("Dà\tKǎo\tYàn", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - pinyin multiple syllables with tabulars")]
+    [TestCase("Dà\tKǎo\tYàn ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - pinyin multiple syllables with new line, tabular and space")]
+    [TestCase("ř", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Czech non-ASCII character lowercase")]
+    [TestCase("Ř", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Czech non-ASCII character uppercase")]
+    [TestCase("žščřďťň", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Czech non-ASCII characters lowercase")]
+    [TestCase("ŽŠČŘĎŤŇ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Czech non-ASCII characters uppercase")]
+    [TestCase("ŽšČřĎťŇ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Czech non-ASCII characters case combination")]
+    [TestCase("Příliš žluťoučký kůň úpěl ďábelské ódy", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Czech text with spaces")]
+    [TestCase("Příliš\nžluťoučký\nkůň\núpěl\nďábelské\nódy", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Czech text with new lines")]
+    [TestCase("Příliš\tžluťoučký\tkůň\túpěl\tďábelské\tódy", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Czech text with tabulars")]
+    [TestCase("Příliš\nžluťoučký\tkůň úpěl ďábelské ódy ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Czech text with new line, tabular and trailing space")]
+    [TestCase("я", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Russian non-ASCII character lowercase")]
+    [TestCase("Я", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Russian non-ASCII character uppercase")]
+    [TestCase("джлщыюя", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Russian non-ASCII characters lowercase")]
+    [TestCase("ДЖЛЩЫЮЯ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Russian non-ASCII characters uppercase")]
+    [TestCase("ДжЛщЫюЯ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Russian non-ASCII characters case combination")]
+    [TestCase("Слишком желтая лошадь ржала дьявольские оды", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Russian text with spaces")]
+    [TestCase("Слишком\nжелтая\nлошадь\nржала\nдьявольские\nоды", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Russian text with new lines")]
+    [TestCase("Слишком\tжелтая\tлошадь\tржала\tдьявольские\tоды", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Russian text with tabulars")]
+    [TestCase("Слишком\nжелтая\tлошадь ржала дьявольские оды ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Russian text with new line, tabular and trailing space")]
+    [TestCase("r̝", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Czech 'Ř' in IPA - version 1")]
+    [TestCase("r̻̝", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Czech 'Ř' in IPA - version 2")]
+    [TestCase("r̝̊", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Czech 'Ř' in IPA - version 3")]
+    [TestCase("ɼ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
+    [TestCase("r̝r̻̝r̝̊", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Czech 'Ř' in IPA - versions 1, 2 and 3 together")]
+    [TestCase("ʈʂʊŋ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - '中' in IPA")]
+    [TestCase("pr̝i:liʃʒlucɔutʃki:ku:ɲu:pjɛlɟa:bɛlskɛ:ɔ:di", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Czech text in IPA")]
+    [TestCase("pr̝i:liʃ ʒlucɔutʃki: ku:ɲ u:pjɛl ɟa:bɛlskɛ: ɔ:di", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Czech text in IPA with spaces")]
+    [TestCase("pr̝i:liʃ\nʒlucɔutʃki:\nku:ɲ\nu:pjɛl\nɟa:bɛlskɛ:\nɔ:di", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Czech text in IPA with new lines")]
+    [TestCase("pr̝i:liʃ\tʒlucɔutʃki:\tku:ɲ\tu:pjɛl\tɟa:bɛlskɛ:\tɔ:di", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Czech text in IPA with tabulars")]
+    [TestCase("pr̝i:liʃ\nʒlucɔutʃki:\tku:ɲ u:pjɛl ɟa:bɛlskɛ: ɔ:di ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - Czech text in IPA with new line, tabular and trailing space")]
+    [TestCase("中", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Chinese character - CJK unified ideographs")]
+    [TestCase("⺫", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Chinese character - CJK radicals supplement")]
+    [TestCase("㆕", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Chinese character - Kanbun")]
+    [TestCase("晴", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Chinese character - CJK compatibility ideographs")]
+    [TestCase("輸", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Chinese character - CJK compatibility ideographs supplement")]
+    [TestCase("㒡", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Chinese character - CJK extension A")]
+    [TestCase("𥒯", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Chinese character - CJK extension B")]
+    [TestCase("𫇂", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Chinese character - CJK extension C")]
+    [TestCase("𫟖", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Chinese character - CJK extension D")]
+    [TestCase("𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Chinese character - CJK extension E")]
+    [TestCase("𭕄", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Chinese character - CJK extension F")]
+    [TestCase("\U000310f9", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - single Chinese character - CJK extension G")]
+    [TestCase("大考验", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Chinese characters - CJK unified ideographs")]
+    [TestCase("大 考 验", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Chinese characters - CJK unified ideographs with spaces")]
+    [TestCase("大\n考\n验", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Chinese characters - CJK unified ideographs with new lines")]
+    [TestCase("大\t考\t验", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Chinese characters - CJK unified ideographs with tabulars")]
+    [TestCase("大\t考\t验 ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Chinese characters - CJK unified ideographs with new line, tabular and space")]
+    [TestCase("𫇂𫟖𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination")]
+    [TestCase("𫇂 𫟖 𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with spaces")]
+    [TestCase("𫇂\n𫟖\n𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with new lines")]
+    [TestCase("𫇂\t𫟖\t𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
+    [TestCase("𫇂\n𫟖\t𬩽 ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
+    [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - crazy combination of 40 characters, symbols and whitespaces")]
+    public void SubmitPinyinWrongTest(string inputValue, string expectedError) =>
+        _entityFormTestCommons.SubmitInvalidInputTest(
             inputValue,
             expectedError,
             IDs.CHACHAR_FORM_PINYIN_INPUT,
@@ -548,116 +579,116 @@ internal sealed class ChacharFormTest : IDisposable
             IDs.CHACHAR_FORM_SUBMIT_BUTTON
         );
 
-    [TestCase("a", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - single ASCII character lowercase")]
-    [TestCase("A", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - single ASCII character uppercase")]
-    [TestCase("abc", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - multiple ASCII characters lowercase")]
-    [TestCase("ABC", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - multiple ASCII characters uppercase")]
-    [TestCase("AbCdE", TestName = $"{nameof(ChacharFormTest)}.{nameof(PinyinCorrectSubmitTest)} - multiple ASCII characters case combination")]
-    public void PinyinCorrectSubmitTest(string inputValue) =>
-        _entityFormTestCommons.ValidInputSubmitTest(
+    [TestCase("a", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinCorrectTest)} - single ASCII character lowercase")]
+    [TestCase("A", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinCorrectTest)} - single ASCII character uppercase")]
+    [TestCase("abc", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinCorrectTest)} - multiple ASCII characters lowercase")]
+    [TestCase("ABC", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinCorrectTest)} - multiple ASCII characters uppercase")]
+    [TestCase("AbCdE", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinCorrectTest)} - multiple ASCII characters case combination")]
+    public void SubmitPinyinCorrectTest(string inputValue) =>
+        _entityFormTestCommons.SubmitValidInputTest(
             inputValue,
             IDs.CHACHAR_FORM_PINYIN_INPUT,
             IDs.CHACHAR_FORM_PINYIN_VALIDATION_MESSAGE,
             IDs.CHACHAR_FORM_SUBMIT_BUTTON
         );
 
-    [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - empty string")]
-    [TestCase("0", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - zero")]
-    [TestCase("1", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single digit positive integer")]
-    [TestCase("-1", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single digit negative integer")]
-    [TestCase("123", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple digits positive integer")]
-    [TestCase("-123", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple digits negative integer")]
-    [TestCase("0.1", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - two digits positive float")]
-    [TestCase("-0.1", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - two digits negative float")]
-    [TestCase("123.456", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple digits positive float")]
-    [TestCase("-123.456", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple digits negative float")]
-    [TestCase(" ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - space")]
-    [TestCase("   ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple spaces")]
-    [TestCase("\n", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - new line")]
-    [TestCase("\n\n\n", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple new lines")]
-    [TestCase("\t", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - tabluar")]
-    [TestCase("\t\t\t", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple tabulars")]
-    [TestCase(" \n\t", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - space, new line and tabular together")]
-    [TestCase("\\", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - backslash")]
-    [TestCase("\"", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - quotes")]
-    [TestCase("`", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - backtick")]
-    [TestCase(";", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - semicolon")]
-    [TestCase("@", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - at sign")]
-    [TestCase("#", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - hash sign")]
-    [TestCase("$", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - dollar sign")]
-    [TestCase("{", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - opening curly bracket")]
-    [TestCase("}", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - closing curly bracket")]
-    [TestCase("{0}", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - placeholder")]
-    [TestCase("${@}#\'\"\\ \n\t`.:;", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - ${{@}}#\\\'\\\"\\\\ \\n\\t`.:;")]
-    [TestCase("A", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single ASCII character uppercase")]
-    [TestCase("ABC", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple ASCII characters uppercase")]
-    [TestCase("AbCdE", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple ASCII characters case combination")]
-    [TestCase("This is an ASCII text", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - ASCII text with spaces")]
-    [TestCase("This\nis\nan\nASCII\ntext", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - ASCII text with new lines")]
-    [TestCase("This\tis\tan\tASCII\ttext", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - ASCII text with tabulars")]
-    [TestCase("This\nis\tan ASCII text ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - ASCII text with new line, tabular and trailing space")]
-    [TestCase("ā", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single pinyin character lowercase")]
-    [TestCase("Ā", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single pinyin character uppercase")]
-    [TestCase("zhōng", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - pinyin single syllable lowercase")]
-    [TestCase("ZHŌNG", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - pinyin single syllable uppercase")]
-    [TestCase("ZhŌnG", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - pinyin single syllable case combination")]
-    [TestCase("dàkǎoyàn", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - pinyin multiple syllables lowercase")]
-    [TestCase("DÀKǍOYÀN", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - pinyin multiple syllables uppercase")]
-    [TestCase("DàKǎOyÀn", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - pinyin multiple syllables case combination")]
-    [TestCase("dà kǎo yàn", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - pinyin multiple syllables lowercase with spaces")]
-    [TestCase("DÀ KǍO YÀN", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - pinyin multiple syllables uppercase with spaces")]
-    [TestCase("Dà KǎO yÀn", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - pinyin multiple syllables case combination with spaces")]
-    [TestCase("Dà\nKǎo\nYàn", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - pinyin multiple syllables with new lines")]
-    [TestCase("Dà\tKǎo\tYàn", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - pinyin multiple syllables with tabulars")]
-    [TestCase("Dà\tKǎo\tYàn ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - pinyin multiple syllables with new line, tabular and space")]
-    [TestCase("ř", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Czech non-ASCII character lowercase")]
-    [TestCase("Ř", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Czech non-ASCII character uppercase")]
-    [TestCase("žščřďťň", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Czech non-ASCII characters lowercase")]
-    [TestCase("ŽŠČŘĎŤŇ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Czech non-ASCII characters uppercase")]
-    [TestCase("ŽšČřĎťŇ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Czech non-ASCII characters case combination")]
-    [TestCase("Příliš žluťoučký kůň úpěl ďábelské ódy", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - Czech text with spaces")]
-    [TestCase("Příliš\nžluťoučký\nkůň\núpěl\nďábelské\nódy", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - Czech text with new lines")]
-    [TestCase("Příliš\tžluťoučký\tkůň\túpěl\tďábelské\tódy", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - Czech text with tabulars")]
-    [TestCase("Příliš\nžluťoučký\tkůň úpěl ďábelské ódy ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - Czech text with new line, tabular and trailing space")]
-    [TestCase("я", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Russian non-ASCII character lowercase")]
-    [TestCase("Я", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Russian non-ASCII character uppercase")]
-    [TestCase("джлщыюя", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Russian non-ASCII characters lowercase")]
-    [TestCase("ДЖЛЩЫЮЯ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Russian non-ASCII characters uppercase")]
-    [TestCase("ДжЛщЫюЯ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Russian non-ASCII characters case combination")]
-    [TestCase("Слишком желтая лошадь ржала дьявольские оды", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - Russian text with spaces")]
-    [TestCase("Слишком\nжелтая\nлошадь\nржала\nдьявольские\nоды", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - Russian text with new lines")]
-    [TestCase("Слишком\tжелтая\tлошадь\tржала\tдьявольские\tоды", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - Russian text with tabulars")]
-    [TestCase("Слишком\nжелтая\tлошадь ржала дьявольские оды ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - Russian text with new line, tabular and trailing space")]
-    [TestCase("ɼ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - Czech 'Ř' in IPA - deprecated version")]
-    [TestCase("pr̝i:liʃ ʒlucɔutʃki: ku:ɲ u:pjɛl ɟa:bɛlskɛ: ɔ:di", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - Czech text in IPA with spaces")]
-    [TestCase("pr̝i:liʃ\nʒlucɔutʃki:\nku:ɲ\nu:pjɛl\nɟa:bɛlskɛ:\nɔ:di", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - Czech text in IPA with new lines")]
-    [TestCase("pr̝i:liʃ\tʒlucɔutʃki:\tku:ɲ\tu:pjɛl\tɟa:bɛlskɛ:\tɔ:di", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - Czech text in IPA with tabulars")]
-    [TestCase("pr̝i:liʃ\nʒlucɔutʃki:\tku:ɲ u:pjɛl ɟa:bɛlskɛ: ɔ:di ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - Czech text in IPA with new line, tabular and trailing space")]
-    [TestCase("中", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Chinese character - CJK unified ideographs")]
-    [TestCase("⺫", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Chinese character - CJK radicals supplement")]
-    [TestCase("㆕", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Chinese character - Kanbun")]
-    [TestCase("晴", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Chinese character - CJK compatibility ideographs")]
-    [TestCase("輸", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Chinese character - CJK compatibility ideographs supplement")]
-    [TestCase("㒡", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Chinese character - CJK extension A")]
-    [TestCase("𥒯", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Chinese character - CJK extension B")]
-    [TestCase("𫇂", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Chinese character - CJK extension C")]
-    [TestCase("𫟖", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Chinese character - CJK extension D")]
-    [TestCase("𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Chinese character - CJK extension E")]
-    [TestCase("𭕄", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Chinese character - CJK extension F")]
-    [TestCase("\U000310f9", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - single Chinese character - CJK extension G")]
-    [TestCase("大考验", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs")]
-    [TestCase("大 考 验", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs with spaces")]
-    [TestCase("大\n考\n验", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs with new lines")]
-    [TestCase("大\t考\t验", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs with tabulars")]
-    [TestCase("大\t考\t验 ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Chinese characters - CJK unified ideographs with new line, tabular and space")]
-    [TestCase("𫇂𫟖𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination")]
-    [TestCase("𫇂 𫟖 𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with spaces")]
-    [TestCase("𫇂\n𫟖\n𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with new lines")]
-    [TestCase("𫇂\t𫟖\t𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
-    [TestCase("𫇂\n𫟖\t𬩽 ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
-    [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaWrongSubmitTest)} - crazy combination of 40 characters, symbols and whitespaces")]
-    public void IpaWrongSubmitTest(string inputValue, string expectedError) =>
-        _entityFormTestCommons.InvalidInputSubmitTest(
+    [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - empty string")]
+    [TestCase("0", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - zero")]
+    [TestCase("1", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single digit positive integer")]
+    [TestCase("-1", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single digit negative integer")]
+    [TestCase("123", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple digits positive integer")]
+    [TestCase("-123", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple digits negative integer")]
+    [TestCase("0.1", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - two digits positive float")]
+    [TestCase("-0.1", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - two digits negative float")]
+    [TestCase("123.456", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple digits positive float")]
+    [TestCase("-123.456", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple digits negative float")]
+    [TestCase(" ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - space")]
+    [TestCase("   ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple spaces")]
+    [TestCase("\n", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - new line")]
+    [TestCase("\n\n\n", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple new lines")]
+    [TestCase("\t", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - tabluar")]
+    [TestCase("\t\t\t", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple tabulars")]
+    [TestCase(" \n\t", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - space, new line and tabular together")]
+    [TestCase("\\", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - backslash")]
+    [TestCase("\"", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - quotes")]
+    [TestCase("`", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - backtick")]
+    [TestCase(";", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - semicolon")]
+    [TestCase("@", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - at sign")]
+    [TestCase("#", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - hash sign")]
+    [TestCase("$", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - dollar sign")]
+    [TestCase("{", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - opening curly bracket")]
+    [TestCase("}", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - closing curly bracket")]
+    [TestCase("{0}", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - placeholder")]
+    [TestCase("${@}#\'\"\\ \n\t`.:;", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - ${{@}}#\\\'\\\"\\\\ \\n\\t`.:;")]
+    [TestCase("A", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single ASCII character uppercase")]
+    [TestCase("ABC", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple ASCII characters uppercase")]
+    [TestCase("AbCdE", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple ASCII characters case combination")]
+    [TestCase("This is an ASCII text", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - ASCII text with spaces")]
+    [TestCase("This\nis\nan\nASCII\ntext", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - ASCII text with new lines")]
+    [TestCase("This\tis\tan\tASCII\ttext", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - ASCII text with tabulars")]
+    [TestCase("This\nis\tan ASCII text ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - ASCII text with new line, tabular and trailing space")]
+    [TestCase("ā", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single pinyin character lowercase")]
+    [TestCase("Ā", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single pinyin character uppercase")]
+    [TestCase("zhōng", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - pinyin single syllable lowercase")]
+    [TestCase("ZHŌNG", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - pinyin single syllable uppercase")]
+    [TestCase("ZhŌnG", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - pinyin single syllable case combination")]
+    [TestCase("dàkǎoyàn", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - pinyin multiple syllables lowercase")]
+    [TestCase("DÀKǍOYÀN", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - pinyin multiple syllables uppercase")]
+    [TestCase("DàKǎOyÀn", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - pinyin multiple syllables case combination")]
+    [TestCase("dà kǎo yàn", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - pinyin multiple syllables lowercase with spaces")]
+    [TestCase("DÀ KǍO YÀN", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - pinyin multiple syllables uppercase with spaces")]
+    [TestCase("Dà KǎO yÀn", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - pinyin multiple syllables case combination with spaces")]
+    [TestCase("Dà\nKǎo\nYàn", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - pinyin multiple syllables with new lines")]
+    [TestCase("Dà\tKǎo\tYàn", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - pinyin multiple syllables with tabulars")]
+    [TestCase("Dà\tKǎo\tYàn ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - pinyin multiple syllables with new line, tabular and space")]
+    [TestCase("ř", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Czech non-ASCII character lowercase")]
+    [TestCase("Ř", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Czech non-ASCII character uppercase")]
+    [TestCase("žščřďťň", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Czech non-ASCII characters lowercase")]
+    [TestCase("ŽŠČŘĎŤŇ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Czech non-ASCII characters uppercase")]
+    [TestCase("ŽšČřĎťŇ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Czech non-ASCII characters case combination")]
+    [TestCase("Příliš žluťoučký kůň úpěl ďábelské ódy", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - Czech text with spaces")]
+    [TestCase("Příliš\nžluťoučký\nkůň\núpěl\nďábelské\nódy", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - Czech text with new lines")]
+    [TestCase("Příliš\tžluťoučký\tkůň\túpěl\tďábelské\tódy", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - Czech text with tabulars")]
+    [TestCase("Příliš\nžluťoučký\tkůň úpěl ďábelské ódy ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - Czech text with new line, tabular and trailing space")]
+    [TestCase("я", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Russian non-ASCII character lowercase")]
+    [TestCase("Я", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Russian non-ASCII character uppercase")]
+    [TestCase("джлщыюя", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Russian non-ASCII characters lowercase")]
+    [TestCase("ДЖЛЩЫЮЯ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Russian non-ASCII characters uppercase")]
+    [TestCase("ДжЛщЫюЯ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Russian non-ASCII characters case combination")]
+    [TestCase("Слишком желтая лошадь ржала дьявольские оды", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - Russian text with spaces")]
+    [TestCase("Слишком\nжелтая\nлошадь\nржала\nдьявольские\nоды", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - Russian text with new lines")]
+    [TestCase("Слишком\tжелтая\tлошадь\tржала\tдьявольские\tоды", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - Russian text with tabulars")]
+    [TestCase("Слишком\nжелтая\tлошадь ржала дьявольские оды ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - Russian text with new line, tabular and trailing space")]
+    [TestCase("ɼ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
+    [TestCase("pr̝i:liʃ ʒlucɔutʃki: ku:ɲ u:pjɛl ɟa:bɛlskɛ: ɔ:di", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - Czech text in IPA with spaces")]
+    [TestCase("pr̝i:liʃ\nʒlucɔutʃki:\nku:ɲ\nu:pjɛl\nɟa:bɛlskɛ:\nɔ:di", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - Czech text in IPA with new lines")]
+    [TestCase("pr̝i:liʃ\tʒlucɔutʃki:\tku:ɲ\tu:pjɛl\tɟa:bɛlskɛ:\tɔ:di", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - Czech text in IPA with tabulars")]
+    [TestCase("pr̝i:liʃ\nʒlucɔutʃki:\tku:ɲ u:pjɛl ɟa:bɛlskɛ: ɔ:di ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - Czech text in IPA with new line, tabular and trailing space")]
+    [TestCase("中", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Chinese character - CJK unified ideographs")]
+    [TestCase("⺫", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Chinese character - CJK radicals supplement")]
+    [TestCase("㆕", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Chinese character - Kanbun")]
+    [TestCase("晴", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Chinese character - CJK compatibility ideographs")]
+    [TestCase("輸", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Chinese character - CJK compatibility ideographs supplement")]
+    [TestCase("㒡", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Chinese character - CJK extension A")]
+    [TestCase("𥒯", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Chinese character - CJK extension B")]
+    [TestCase("𫇂", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Chinese character - CJK extension C")]
+    [TestCase("𫟖", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Chinese character - CJK extension D")]
+    [TestCase("𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Chinese character - CJK extension E")]
+    [TestCase("𭕄", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Chinese character - CJK extension F")]
+    [TestCase("\U000310f9", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - single Chinese character - CJK extension G")]
+    [TestCase("大考验", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Chinese characters - CJK unified ideographs")]
+    [TestCase("大 考 验", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Chinese characters - CJK unified ideographs with spaces")]
+    [TestCase("大\n考\n验", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Chinese characters - CJK unified ideographs with new lines")]
+    [TestCase("大\t考\t验", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Chinese characters - CJK unified ideographs with tabulars")]
+    [TestCase("大\t考\t验 ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Chinese characters - CJK unified ideographs with new line, tabular and space")]
+    [TestCase("𫇂𫟖𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Chinese characters - CJK extensions combination")]
+    [TestCase("𫇂 𫟖 𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Chinese characters - CJK extensions combination with spaces")]
+    [TestCase("𫇂\n𫟖\n𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Chinese characters - CJK extensions combination with new lines")]
+    [TestCase("𫇂\t𫟖\t𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
+    [TestCase("𫇂\n𫟖\t𬩽 ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
+    [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - crazy combination of 40 characters, symbols and whitespaces")]
+    public void SubmitIpaWrongTest(string inputValue, string expectedError) =>
+        _entityFormTestCommons.SubmitInvalidInputTest(
             inputValue,
             expectedError,
             IDs.CHACHAR_FORM_IPA_INPUT,
@@ -665,19 +696,19 @@ internal sealed class ChacharFormTest : IDisposable
             IDs.CHACHAR_FORM_SUBMIT_BUTTON
         );
 
-    [TestCase("\'", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - apostrophe")]
-    [TestCase(".", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - dot")]
-    [TestCase(":", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - colon")]
-    [TestCase("a", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - single ASCII character lowercase")] // Lowercase ASCII characters are valid IPA
-    [TestCase("abc", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - multiple ASCII characters lowercase")]
-    [TestCase("r̝", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - Czech 'Ř' in IPA - version 1")]
-    [TestCase("r̻̝", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - Czech 'Ř' in IPA - version 2")]
-    [TestCase("r̝̊", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - Czech 'Ř' in IPA - version 3")]
-    [TestCase("r̝r̻̝r̝̊", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - Czech 'Ř' in IPA - versions 1, 2 and 3 together")]
-    [TestCase("ʈʂʊŋ", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - '中' in IPA")]
-    [TestCase("pr̝i:liʃʒlucɔutʃki:ku:ɲu:pjɛlɟa:bɛlskɛ:ɔ:di", TestName = $"{nameof(ChacharFormTest)}.{nameof(IpaCorrectSubmitTest)} - Czech text in IPA")]
-    public void IpaCorrectSubmitTest(string inputValue) =>
-        _entityFormTestCommons.ValidInputSubmitTest(
+    [TestCase("\'", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaCorrectTest)} - apostrophe")]
+    [TestCase(".", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaCorrectTest)} - dot")]
+    [TestCase(":", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaCorrectTest)} - colon")]
+    [TestCase("a", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaCorrectTest)} - single ASCII character lowercase")] // Lowercase ASCII characters are valid IPA
+    [TestCase("abc", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaCorrectTest)} - multiple ASCII characters lowercase")]
+    [TestCase("r̝", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaCorrectTest)} - Czech 'Ř' in IPA - version 1")]
+    [TestCase("r̻̝", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaCorrectTest)} - Czech 'Ř' in IPA - version 2")]
+    [TestCase("r̝̊", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaCorrectTest)} - Czech 'Ř' in IPA - version 3")]
+    [TestCase("r̝r̻̝r̝̊", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaCorrectTest)} - Czech 'Ř' in IPA - versions 1, 2 and 3 together")]
+    [TestCase("ʈʂʊŋ", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaCorrectTest)} - '中' in IPA")]
+    [TestCase("pr̝i:liʃʒlucɔutʃki:ku:ɲu:pjɛlɟa:bɛlskɛ:ɔ:di", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaCorrectTest)} - Czech text in IPA")]
+    public void SubmitIpaCorrectTest(string inputValue) =>
+        _entityFormTestCommons.SubmitValidInputTest(
             inputValue,
             IDs.CHACHAR_FORM_IPA_INPUT,
             IDs.CHACHAR_FORM_IPA_VALIDATION_MESSAGE,
@@ -698,15 +729,15 @@ internal sealed class ChacharFormTest : IDisposable
     public void ToneOnInputUnchangedTest(short? inputValue) =>
         _entityFormTestCommons.NumberInputUnchangedTest(inputValue, IDs.CHACHAR_FORM_TONE_INPUT);
 
-    [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneWrongSubmitTest)} - empty string")]
-    public void ToneWrongSubmitTest(string inputValue, string expectedError)
+    [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitToneWrongTest)} - empty string")]
+    public void SubmitToneWrongTest(string inputValue, string expectedError)
     {
         // Empty tone is the only reachable wrong input.
         // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to test this case.
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_TONE_INPUT).SetResult(true);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_TONE_INPUT, inputValue);
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_TONE_INPUT, inputValue).SetVoidResult();
 
-        _entityFormTestCommons.InvalidInputSubmitTest(
+        _entityFormTestCommons.SubmitInvalidInputTest(
             inputValue,
             expectedError,
             IDs.CHACHAR_FORM_TONE_INPUT,
@@ -715,15 +746,15 @@ internal sealed class ChacharFormTest : IDisposable
         );
     }
 
-    [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneCorrectSubmitTest)} - zero")]
-    [TestCase("1", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneCorrectSubmitTest)} - one")]
-    [TestCase("4", TestName = $"{nameof(ChacharFormTest)}.{nameof(ToneCorrectSubmitTest)} - four")]
-    public void ToneCorrectSubmitTest(string inputValue)
+    [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitToneCorrectTest)} - zero")]
+    [TestCase("1", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitToneCorrectTest)} - one")]
+    [TestCase("4", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitToneCorrectTest)} - four")]
+    public void SubmitToneCorrectTest(string inputValue)
     {
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_TONE_INPUT).SetResult(true);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_TONE_INPUT, inputValue);
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_TONE_INPUT, inputValue).SetVoidResult();
 
-        _entityFormTestCommons.ValidInputSubmitTest(
+        _entityFormTestCommons.SubmitValidInputTest(
             inputValue,
             IDs.CHACHAR_FORM_TONE_INPUT,
             IDs.CHACHAR_FORM_TONE_VALIDATION_MESSAGE,
@@ -751,15 +782,15 @@ internal sealed class ChacharFormTest : IDisposable
     public void StrokesOnInputUnchangedTest(short? inputValue) =>
         _entityFormTestCommons.NumberInputUnchangedTest(inputValue, IDs.CHACHAR_FORM_STROKES_INPUT);
 
-    [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesWrongSubmitTest)} - empty string")]
-    public void StrokesWrongSubmitTest(string inputValue, string expectedError)
+    [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitStrokesWrongTest)} - empty string")]
+    public void SubmitStrokesWrongTest(string inputValue, string expectedError)
     {
         // Empty strokes is the only reachable wrong input.
         // Invalid inputs are unreachable thanks to PreventStrokesInvalidAsync, no need to test this case.
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_STROKES_INPUT).SetResult(true);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_STROKES_INPUT, inputValue);
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_STROKES_INPUT, inputValue).SetVoidResult();
 
-        _entityFormTestCommons.InvalidInputSubmitTest(
+        _entityFormTestCommons.SubmitInvalidInputTest(
             inputValue,
             expectedError,
             IDs.CHACHAR_FORM_STROKES_INPUT,
@@ -768,18 +799,18 @@ internal sealed class ChacharFormTest : IDisposable
         );
     }
 
-    [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesCorrectSubmitTest)} - zero")]
-    [TestCase("1", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesCorrectSubmitTest)} - one")]
-    [TestCase("9", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesCorrectSubmitTest)} - nine")]
-    [TestCase("13", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesCorrectSubmitTest)} - thirteen")]
-    [TestCase("66", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesCorrectSubmitTest)} - sixty-six")]
-    [TestCase("99", TestName = $"{nameof(ChacharFormTest)}.{nameof(StrokesCorrectSubmitTest)} - ninety-nine")]
-    public void StrokesCorrectSubmitTest(string inputValue)
+    [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitStrokesCorrectTest)} - zero")]
+    [TestCase("1", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitStrokesCorrectTest)} - one")]
+    [TestCase("9", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitStrokesCorrectTest)} - nine")]
+    [TestCase("13", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitStrokesCorrectTest)} - thirteen")]
+    [TestCase("66", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitStrokesCorrectTest)} - sixty-six")]
+    [TestCase("99", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitStrokesCorrectTest)} - ninety-nine")]
+    public void SubmitStrokesCorrectTest(string inputValue)
     {
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_STROKES_INPUT).SetResult(true);
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_STROKES_INPUT, inputValue);
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_STROKES_INPUT, inputValue).SetVoidResult();
 
-        _entityFormTestCommons.ValidInputSubmitTest(
+        _entityFormTestCommons.SubmitValidInputTest(
             inputValue,
             IDs.CHACHAR_FORM_STROKES_INPUT,
             IDs.CHACHAR_FORM_STROKES_VALIDATION_MESSAGE,
@@ -788,28 +819,34 @@ internal sealed class ChacharFormTest : IDisposable
     }
 
     [Test]
-    public async Task RadicalChacharAlreadyExistsSubmitTest()
+    public async Task SubmitRadicalChacharAlreadyExistsTest()
     {
-        _chachars.AddRange(
-            _radicalChachars12
-                .Concat([_nonRadicalChacharWithAlternative11, _nonRadicalChacharWithoutAlternative31])
-        );
-
         string? errorMessage = null;
-        _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
+        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
         await SubmitAsync(_radicalChachar1);
 
         CharacterAlreadyExistsProcessDialogErrorMessageTest(errorMessage, _radicalChachar1);
+        Assert.That(_chachars, Does.Contain(_radicalChachar1));
     }
 
     [Test]
-    public async Task RadicalChacharAlreadyExistsNonKeyFieldDiffersSubmitTest()
+    public async Task SubmitRadicalChacharAlreadyExistsIpaDiffersTest()
     {
-        _chachars.AddRange(
-            _radicalChachars12
-                .Concat([_nonRadicalChacharWithAlternative11, _nonRadicalChacharWithoutAlternative31])
-        );
+        var radicalChacharClone = new Chachar
+        {
+            TheCharacter = _radicalChachar1.TheCharacter,
+            Pinyin = _radicalChachar1.Pinyin,
+            Tone = _radicalChachar1.Tone,
+            Ipa = _radicalChachar2.Ipa,
+            Strokes = _radicalChachar1.Strokes
+        };
 
+        await SubmitChacharAlreadyExistsNonKeyFieldDiffersTest(_radicalChachar1, radicalChacharClone);
+    }
+
+    [Test]
+    public async Task SubmitRadicalChacharAlreadyExistsStrokesDifferTest()
+    {
         var radicalChacharClone = new Chachar
         {
             TheCharacter = _radicalChachar1.TheCharacter,
@@ -819,123 +856,119 @@ internal sealed class ChacharFormTest : IDisposable
             Strokes = (short)(_radicalChachar1.Strokes! + 1)
         };
 
-        string? errorMessage = null;
-        _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        await SubmitAsync(radicalChacharClone);
-
-        CharacterAlreadyExistsProcessDialogErrorMessageTest(errorMessage, _radicalChachar1);
+        await SubmitChacharAlreadyExistsNonKeyFieldDiffersTest(_radicalChachar1, radicalChacharClone);
     }
 
     [Test]
-    public async Task NonRadicalChacharWithoutAlternativeAlreadyExistsSubmitTest()
+    public async Task SubmitNonRadicalChacharWithoutAlternativeAlreadyExistsTest()
     {
-        _chachars.AddRange(
-            _radicalChachars31.Concat(
-                [_nonRadicalChacharWithAlternative11, _nonRadicalChacharWithoutAlternative31])
-        );
-
         string? errorMessage = null;
-        _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
+        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
         SelectRadical();
         await SubmitAsync(_nonRadicalChacharWithoutAlternative31);
 
         CharacterAlreadyExistsProcessDialogErrorMessageTest(errorMessage, _nonRadicalChacharWithoutAlternative31);
+        Assert.That(_chachars, Does.Contain(_nonRadicalChacharWithoutAlternative31));
     }
 
     [Test]
-    public async Task NonRadicalChacharWithAlternativeAlreadyExistsSubmitTest()
+    public async Task SubmitNonRadicalChacharWithAlternativeAlreadyExistsTest()
     {
-        _chachars.AddRange(
-            _radicalChachars12
-                .Concat([_nonRadicalChacharWithAlternative11, _nonRadicalChacharWithoutAlternative31])
-        );
-
         string? errorMessage = null;
-        _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
+        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
         SelectRadicalAndAlternative();
         await SubmitAsync(_nonRadicalChacharWithAlternative11);
 
         CharacterAlreadyExistsProcessDialogErrorMessageTest(errorMessage, _nonRadicalChacharWithAlternative11);
+        Assert.That(_chachars, Does.Contain(_nonRadicalChacharWithAlternative11));
     }
 
     [Test]
-    public async Task RadicalChacharSubmitProcessingErrorTest()
+    public async Task SubmitRadicalChacharProcessingErrorTest()
     {
-        _chachars.AddRange([_nonRadicalChacharWithAlternative11, _nonRadicalChacharWithoutAlternative31]);
-        _entityFormTestCommons.MockPostStatusCode(_radicalChachar1, HttpStatusCode.InternalServerError);
+        _entityFormTestCommons.MockPostStatusCode(_radicalChachar4, HttpStatusCode.InternalServerError);
         string? errorMessage = null;
-        _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        await SubmitAsync(_radicalChachar1);
+        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
+        await SubmitAsync(_radicalChachar4);
 
         _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
+        Assert.That(_chachars, Does.Not.Contain(_radicalChachar4));
     }
 
     [Test]
-    public async Task NonRadicalChacharWithoutAlternativeSubmitProcessingErrorTest()
+    public async Task SubmitNonRadicalChacharWithoutAlternativeProcessingErrorTest()
     {
-        _chachars.AddRange(_radicalChachars12);
-        _ = _chachars.Add(_nonRadicalChacharWithAlternative11);
-        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithoutAlternative31, HttpStatusCode.InternalServerError);
+        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithoutAlternative32, HttpStatusCode.InternalServerError);
         string? errorMessage = null;
-        _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
+        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
         SelectRadical();
-        await SubmitAsync(_nonRadicalChacharWithoutAlternative31);
+        await SubmitAsync(_nonRadicalChacharWithoutAlternative32);
 
         _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
+        Assert.That(_chachars, Does.Not.Contain(_nonRadicalChacharWithoutAlternative32));
     }
 
     [Test]
-    public async Task NonRadicalChacharWithAlternativeSubmitProcessingErrorTest()
+    public async Task SubmitNonRadicalChacharWithAlternativeProcessingErrorTest()
     {
-        _chachars.AddRange(_radicalChachars12);
-        _ = _chachars.Add(_nonRadicalChacharWithoutAlternative31);
-        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithAlternative11, HttpStatusCode.InternalServerError);
+        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithAlternative12, HttpStatusCode.InternalServerError);
         string? errorMessage = null;
-        _entityFormTestCommons.CaptureErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
+        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
         SelectRadicalAndAlternative();
-        await SubmitAsync(_nonRadicalChacharWithAlternative11);
+        await SubmitAsync(_nonRadicalChacharWithAlternative12);
 
         _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
+        Assert.That(_chachars, Does.Not.Contain(_nonRadicalChacharWithAlternative12));
     }
 
     [Test]
-    public async Task RadicalChacharSubmitOkTest()
+    public async Task SubmitRadicalChacharOkTest()
     {
-        _chachars.AddRange([_nonRadicalChacharWithAlternative11, _nonRadicalChacharWithoutAlternative31]);
-        _entityFormTestCommons.MockPostStatusCode(_radicalChachar1, HttpStatusCode.OK);
+        _entityFormTestCommons.MockPostStatusCode(_radicalChachar4, HttpStatusCode.OK);
         string? successMessage = null;
-        _entityFormTestCommons.CaptureSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
-        await SubmitAsync(_radicalChachar1);
+        _entityFormTestCommons.UseSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
+        await SubmitAsync(_radicalChachar4);
 
-        CharacterCreatedProcessDialogSuccessMessageTest(successMessage, _radicalChachar1);
+        CharacterCreatedProcessDialogSuccessMessageTest(successMessage, _radicalChachar4);
+        Assert.That(_chachars, Does.Contain(_radicalChachar4));
     }
 
     [Test]
-    public async Task NonRadicalChacharWithoutAlternativeSubmitOkTest()
+    public async Task SubmitNonRadicalChacharWithoutAlternativeOkTest()
     {
-        _chachars.AddRange(_radicalChachars31);
-        _ = _chachars.Add(_nonRadicalChacharWithAlternative11);
-        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithoutAlternative31, HttpStatusCode.OK);
+        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithoutAlternative32, HttpStatusCode.OK);
         string? successMessage = null;
-        _entityFormTestCommons.CaptureSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
+        _entityFormTestCommons.UseSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
         SelectRadical();
-        await SubmitAsync(_nonRadicalChacharWithoutAlternative31);
+        await SubmitAsync(_nonRadicalChacharWithoutAlternative32);
 
-        CharacterCreatedProcessDialogSuccessMessageTest(successMessage, _nonRadicalChacharWithoutAlternative31);
+        CharacterCreatedProcessDialogSuccessMessageTest(successMessage, _nonRadicalChacharWithoutAlternative32);
+        Assert.That(_chachars, Does.Contain(_nonRadicalChacharWithoutAlternative32));
     }
 
     [Test]
-    public async Task NonRadicalChacharWithAlternativeSubmitOkTest()
+    public async Task SubmitNonRadicalChacharWithAlternativeOkTest()
     {
-        _chachars.AddRange(_radicalChachars12);
-        _ = _chachars.Add(_nonRadicalChacharWithoutAlternative31);
-        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithAlternative11, HttpStatusCode.OK);
+        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithAlternative12, HttpStatusCode.OK);
         string? successMessage = null;
-        _entityFormTestCommons.CaptureSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
+        _entityFormTestCommons.UseSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
         SelectRadicalAndAlternative();
-        await SubmitAsync(_nonRadicalChacharWithAlternative11);
+        await SubmitAsync(_nonRadicalChacharWithAlternative12);
 
-        CharacterCreatedProcessDialogSuccessMessageTest(successMessage, _nonRadicalChacharWithAlternative11);
+        CharacterCreatedProcessDialogSuccessMessageTest(successMessage, _nonRadicalChacharWithAlternative12);
+        Assert.That(_chachars, Does.Contain(_nonRadicalChacharWithAlternative12));
+    }
+
+    private async Task SubmitChacharAlreadyExistsNonKeyFieldDiffersTest(Chachar chachar, Chachar chacharClone)
+    {
+        string? errorMessage = null;
+        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
+        await SubmitAsync(chacharClone);
+
+        CharacterAlreadyExistsProcessDialogErrorMessageTest(errorMessage, chachar);
+        Assert.That(_chachars, Does.Contain(chachar));
+        Assert.That(_chachars, Does.Contain(chacharClone));
+        // The clone is not in the list, but the presence is decided only by key fields. This is expected state.
     }
 
     private void SelectRadical() =>

@@ -15,34 +15,34 @@
         role="document">
         <div
             class="modal-content"
-            id="@IDs.SUBMIT_DIALOG_MODAL_CONTENT">
+            id="@IDs.PROCESS_DIALOG_MODAL_CONTENT">
             <div
                 class="modal-header"
-                id="@IDs.SUBMIT_DIALOG_HEADER">
+                id="@IDs.PROCESS_DIALOG_HEADER">
                 <div class="fw-bold text-center text-uppercase text-white w-100">@HeaderText</div>
             </div>
             <div class="modal-body">
                 <Loading
-                    Id="@IDs.SUBMIT_DIALOG_LOADING"
+                    Id="@IDs.PROCESS_DIALOG_LOADING"
                     TextResource="@Resource.Processing" />
-                <div id="@IDs.SUBMIT_DIALOG_BODY_TEXT">@BodyText</div>
+                <div id="@IDs.PROCESS_DIALOG_BODY_TEXT">@BodyText</div>
             </div>
             <div
                 class="modal-footer border-0 bottom-0 end-0"
-                id="@IDs.SUBMIT_DIALOG_FOOTER">
+                id="@IDs.PROCESS_DIALOG_FOOTER">
                 <button
                     type="button"
                     class="btn btn-modal btn-danger"
-                    id="@IDs.SUBMIT_DIALOG_BUTTON_BACK"
+                    id="@IDs.PROCESS_DIALOG_BUTTON_BACK"
                     @onclick="async _ => await ModalCommons.CloseAsyncCommon(this, CancellationToken.None)">
                     <span>@Localizer[Resource.Back]</span>
                 </button>
                 <button
                     type="button"
                     class="btn btn-modal btn-primary ms-3"
-                    id="@IDs.SUBMIT_DIALOG_BUTTON_PROCEED"
+                    id="@IDs.PROCESS_DIALOG_BUTTON_PROCEED"
                     @onclick="async _ => await ProceedAsync(CancellationToken.None)">
-                    <span id="@IDs.SUBMIT_DIALOG_BUTTON_PROCEED_TEXT">@ButtonProceedText</span>
+                    <span id="@IDs.PROCESS_DIALOG_BUTTON_PROCEED_TEXT">@ButtonProceedText</span>
                 </button>
             </div>
         </div>

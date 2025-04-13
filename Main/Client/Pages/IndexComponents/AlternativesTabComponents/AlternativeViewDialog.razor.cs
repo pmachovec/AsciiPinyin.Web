@@ -65,7 +65,7 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
         Page = page;
         HtmlTitle = $"{StringConstants.ASCII_PINYIN} - {alternative.TheCharacter}";
         Alternative = alternative;
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
 
         await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
         await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
@@ -81,7 +81,7 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
         {
             DisableDeleteCss = $"{CssClasses.DISABLED} {CssClasses.OPACITY_25}";
             DeleteTitle = $"{Localizer[Resource.CannotBeDeleted]} {Localizer[Resource.AlternativeUsedByCharactersInDb]}";
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged);
         }
 
         await Index.ProcessDialog.CloseAsync(cancellationToken);
@@ -94,10 +94,7 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
         StateHasChanged();
     }
 
-    protected async Task InitiateDeleteAsync(CancellationToken cancellationToken)
-    {
-        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
-
+    protected async Task InitiateDeleteAsync(CancellationToken cancellationToken) =>
         await Index.ProcessDialog.SetWarningAsync(
             this,
             string.Format(
@@ -110,7 +107,6 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
             SubmitDeleteAsync,
             cancellationToken
         );
-    }
 
     private async Task SubmitDeleteAsync(CancellationToken cancellationToken)
     {

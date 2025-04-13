@@ -7,7 +7,6 @@ using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
-using Microsoft.JSInterop;
 using System.Globalization;
 using System.Text;
 
@@ -67,7 +66,7 @@ public class ChacharViewDialogBase : ComponentBase, IModal
         Page = page;
         HtmlTitle = $"{StringConstants.ASCII_PINYIN} - {chachar.TheCharacter}";
         Chachar = chachar;
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
 
         await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
         await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
@@ -102,7 +101,7 @@ public class ChacharViewDialogBase : ComponentBase, IModal
         if (databaseIntegrityErrorMessages.Count > 0)
         {
             DeleteTitle = GetErrorMessageFormatted(databaseIntegrityErrorMessages);
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged);
         }
 
         await Index.ProcessDialog.CloseAsync(cancellationToken);
@@ -115,10 +114,7 @@ public class ChacharViewDialogBase : ComponentBase, IModal
         StateHasChanged();
     }
 
-    protected async Task InitiateDeleteAsync(CancellationToken cancellationToken)
-    {
-        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
-
+    protected async Task InitiateDeleteAsync(CancellationToken cancellationToken) =>
         await Index.ProcessDialog.SetWarningAsync(
             this,
             string.Format(
@@ -130,7 +126,6 @@ public class ChacharViewDialogBase : ComponentBase, IModal
             SubmitDeleteAsync,
             cancellationToken
         );
-    }
 
     private string GetErrorMessageFormatted(IEnumerable<string> databaseIntegrityErrorMessages)
     {

@@ -18,7 +18,7 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
 
     protected Func<CancellationToken, Task> ProceedAsync { get; private set; } = default!;
 
-    public string RootId { get; } = IDs.SUBMIT_DIALOG;
+    public string RootId { get; } = IDs.PROCESS_DIALOG;
 
     public IPage? Page { get; private set; }
 
@@ -43,14 +43,14 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
 
         await Task.WhenAll(
-            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
-            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_BODY_TEXT, cancellationToken),
-            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_BODY_TEXT, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_FOOTER, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_LOADING, cancellationToken),
             ModalCommons.OpenAsyncCommon(this, cancellationToken)
         );
 
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 
     public async Task SetSuccessAsync(
@@ -70,13 +70,13 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         StateHasChanged();
 
         await Task.WhenAll(
-            JSInteropDOM.None2FlexAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
-            JSInteropDOM.None2FlexAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BODY_TEXT, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BUTTON_PROCEED, cancellationToken),
-            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_BUTTON_BACK, cancellationToken),
-            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
-            JSInteropDOM.SetBgPrimaryAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.None2FlexAsync(IDs.PROCESS_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.None2FlexAsync(IDs.PROCESS_DIALOG_FOOTER, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_BODY_TEXT, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_BUTTON_PROCEED, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_BUTTON_BACK, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_LOADING, cancellationToken),
+            JSInteropDOM.SetBgPrimaryAsync(IDs.PROCESS_DIALOG_HEADER, cancellationToken),
             ModalCommons.OpenAsyncCommon(this, cancellationToken)
         );
     }
@@ -96,13 +96,13 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         StateHasChanged();
 
         await Task.WhenAll(
-            JSInteropDOM.None2FlexAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
-            JSInteropDOM.None2FlexAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BODY_TEXT, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BUTTON_BACK, cancellationToken),
-            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_BUTTON_PROCEED, cancellationToken),
-            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
-            JSInteropDOM.SetBgDangerAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.None2FlexAsync(IDs.PROCESS_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.None2FlexAsync(IDs.PROCESS_DIALOG_FOOTER, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_BODY_TEXT, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_BUTTON_BACK, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_BUTTON_PROCEED, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_LOADING, cancellationToken),
+            JSInteropDOM.SetBgDangerAsync(IDs.PROCESS_DIALOG_HEADER, cancellationToken),
             ModalCommons.OpenAsyncCommon(this, cancellationToken)
         );
     }
@@ -125,13 +125,13 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         StateHasChanged();
 
         await Task.WhenAll(
-            JSInteropDOM.None2FlexAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
-            JSInteropDOM.None2FlexAsync(IDs.SUBMIT_DIALOG_FOOTER, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BODY_TEXT, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BUTTON_BACK, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.SUBMIT_DIALOG_BUTTON_PROCEED, cancellationToken),
-            JSInteropDOM.Display2NoneAsync(IDs.SUBMIT_DIALOG_LOADING, cancellationToken),
-            JSInteropDOM.SetBgWarningAsync(IDs.SUBMIT_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.None2FlexAsync(IDs.PROCESS_DIALOG_HEADER, cancellationToken),
+            JSInteropDOM.None2FlexAsync(IDs.PROCESS_DIALOG_FOOTER, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_BODY_TEXT, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_BUTTON_BACK, cancellationToken),
+            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_BUTTON_PROCEED, cancellationToken),
+            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_LOADING, cancellationToken),
+            JSInteropDOM.SetBgWarningAsync(IDs.PROCESS_DIALOG_HEADER, cancellationToken),
             ModalCommons.OpenAsyncCommon(this, cancellationToken)
         );
     }

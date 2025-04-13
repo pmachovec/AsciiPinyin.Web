@@ -40,45 +40,6 @@ internal sealed class AlternativesControllerTest
         Strokes = 1
     };
 
-    private static readonly Chachar _nonRadicalChacharWithAlternative11 = new()
-    {
-        TheCharacter = "零",
-        Pinyin = "ling",
-        Ipa = "liŋ",
-        Tone = 2,
-        Strokes = 13,
-        RadicalCharacter = _radicalChachar1.TheCharacter,
-        RadicalPinyin = _radicalChachar1.Pinyin,
-        RadicalTone = _radicalChachar1.Tone,
-        RadicalAlternativeCharacter = "⻗"
-    };
-
-    private static readonly Chachar _nonRadicalChacharWithAlternative12 = new()
-    {
-        TheCharacter = "雫",
-        Pinyin = "na",
-        Ipa = "na",
-        Tone = 3,
-        Strokes = 11,
-        RadicalCharacter = _radicalChachar1.TheCharacter,
-        RadicalPinyin = _radicalChachar1.Pinyin,
-        RadicalTone = _radicalChachar1.Tone,
-        RadicalAlternativeCharacter = "⻗"
-    };
-
-    private static readonly Chachar _nonRadicalChacharWithAlternative13 = new()
-    {
-        TheCharacter = "雪",
-        Pinyin = "ɕɥœ",
-        Ipa = "na",
-        Tone = 3,
-        Strokes = 11,
-        RadicalCharacter = _radicalChachar1.TheCharacter,
-        RadicalPinyin = _radicalChachar1.Pinyin,
-        RadicalTone = _radicalChachar1.Tone,
-        RadicalAlternativeCharacter = "⻗"
-    };
-
     private static readonly Alternative _alternative11 = new()
     {
         TheCharacter = "⻗",
@@ -104,6 +65,45 @@ internal sealed class AlternativesControllerTest
         OriginalPinyin = _radicalChachar2.Pinyin,
         OriginalTone = _radicalChachar2.Tone,
         Strokes = 1
+    };
+
+    private static readonly Chachar _nonRadicalChacharWithAlternative11 = new()
+    {
+        TheCharacter = "零",
+        Pinyin = "ling",
+        Ipa = "liŋ",
+        Tone = 2,
+        Strokes = 13,
+        RadicalCharacter = _radicalChachar1.TheCharacter,
+        RadicalPinyin = _radicalChachar1.Pinyin,
+        RadicalTone = _radicalChachar1.Tone,
+        RadicalAlternativeCharacter = _alternative11.TheCharacter
+    };
+
+    private static readonly Chachar _nonRadicalChacharWithAlternative12 = new()
+    {
+        TheCharacter = "雫",
+        Pinyin = "na",
+        Ipa = "na",
+        Tone = 3,
+        Strokes = 11,
+        RadicalCharacter = _radicalChachar1.TheCharacter,
+        RadicalPinyin = _radicalChachar1.Pinyin,
+        RadicalTone = _radicalChachar1.Tone,
+        RadicalAlternativeCharacter = _alternative11.TheCharacter
+    };
+
+    private static readonly Chachar _nonRadicalChacharWithAlternative13 = new()
+    {
+        TheCharacter = "雪",
+        Pinyin = "ɕɥœ",
+        Ipa = "na",
+        Tone = 3,
+        Strokes = 11,
+        RadicalCharacter = _radicalChachar1.TheCharacter,
+        RadicalPinyin = _radicalChachar1.Pinyin,
+        RadicalTone = _radicalChachar1.Tone,
+        RadicalAlternativeCharacter = _alternative11.TheCharacter
     };
 
     private static readonly Mock<AsciiPinyinContext> _asciiPinyinContextMock = new(new DbContextOptions<AsciiPinyinContext>());
@@ -589,7 +589,7 @@ internal sealed class AlternativesControllerTest
     }
 
     [Test]
-    public async Task PostNonKeyFieldDiffersAlternativeAlreadyExistsTest()
+    public async Task PostAlternativeAlreadyExistsStrokesDifferTest()
     {
         var alternativeClone = new Alternative
         {
@@ -1006,7 +1006,7 @@ internal sealed class AlternativesControllerTest
     }
 
     [Test]
-    public async Task PostDeleteStrokesDifferAlternativeDoesNotExistTest()
+    public async Task PostDeleteAlternativeDoesNotExistStrokesDifferTest()
     {
         var alternativeClone = new Alternative
         {
@@ -1027,7 +1027,7 @@ internal sealed class AlternativesControllerTest
     }
 
     [Test]
-    public async Task PostDeleteAlternativeForOneExistingChachar()
+    public async Task PostDeleteAlternativeForOneExistingChacharTest()
     {
         _entityControllerTestCommons.AddToContextAndSave(
             _asciiPinyinContext,
@@ -1048,7 +1048,7 @@ internal sealed class AlternativesControllerTest
     }
 
     [Test]
-    public async Task PostDeleteAlternativeForMultipleExistingChachars()
+    public async Task PostDeleteAlternativeForMultipleExistingChacharsTest()
     {
         _entityControllerTestCommons.AddToContextAndSave(
             _asciiPinyinContext,
