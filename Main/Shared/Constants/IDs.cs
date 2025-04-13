@@ -12,6 +12,7 @@ public static class IDs
     public const string ALTERNATIVE_FORM_SUBMIT_BUTTON = "alternative-form-submit-button";
     public const string ALTERNATIVE_FORM_THE_CHARACTER_INPUT = "alternative-form-the-character-input";
     public const string ALTERNATIVE_FORM_THE_CHARACTER_VALIDATION_MESSAGE = "alternative-form-the-character-validation-message";
+    public const string ALTERNATIVE_VIEW_DIALOG_DELETE_TOOLTIP = "alternative-view-dialog-delete-tooltip";
     public const string ALTERNATIVE_VIEW_DIALOG_ROOT = "alternative-view-dialog-root";
     public const string ALTERNATIVES_TAB_BUTTON = "alternatives-tab-button";
     public const string APP_ALTERNATIVES_PRELOAD = "app-alternatives-preload";
@@ -35,6 +36,7 @@ public static class IDs
     public const string CHACHAR_FORM_THE_CHARACTER_VALIDATION_MESSAGE = "chachar-form-the-character-validation-message";
     public const string CHACHAR_FORM_TONE_INPUT = "chachar-form-tone-input";
     public const string CHACHAR_FORM_TONE_VALIDATION_MESSAGE = "chachar-form-tone-validation-message";
+    public const string CHACHAR_VIEW_DIALOG_DELETE_TOOLTIP = "chachar-view-delete-tooltip";
     public const string CHACHAR_VIEW_DIALOG_ROOT = "chachar-view-dialog-root";
     public const string CHACHARS_TAB_BUTTON = "chachars-tab-button";
     public const string SUBMIT_DIALOG = "submit-dialog";

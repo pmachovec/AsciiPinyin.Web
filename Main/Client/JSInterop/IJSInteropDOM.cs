@@ -62,7 +62,7 @@ public interface IJSInteropDOM
     /// <summary>
     /// Sets the given text to the given element.
     /// </summary>
-    /// <param name="elementId">ID of the elemet for to which the text should be set.</param>
+    /// <param name="elementId">ID of the elemet for which the text should be set.</param>
     /// <param name="text">The text to be set.</param>
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
     Task SetTextAsync(string elementId, string text, CancellationToken cancellationToken);
@@ -70,10 +70,19 @@ public interface IJSInteropDOM
     /// <summary>
     /// Sets the given value to the given element.
     /// </summary>
-    /// <param name="elementId">ID of the elemet for to which the value should be set.</param>
+    /// <param name="elementId">ID of the elemet for which the value should be set.</param>
     /// <param name="value">The value to be set.</param>
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
     Task SetValueAsync<T>(string elementId, T value, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets the given value to the given attribute of the given element.
+    /// </summary>
+    /// <param name="elementId">ID of the element for which the attribute value should be set.</param>
+    /// <param name="attributeName">Name of the attribute for which the value should be set.</param>
+    /// <param name="value">The value to be set.</param>
+    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
+    Task SetAttributeAsync(string elementId, string attributeName, string value, CancellationToken cancellationToken);
 
     /// <summary>
     /// Decides if the given element contains a valid input value by the EcmaScript definition of 'validity.badInput'.

@@ -38,6 +38,9 @@ public sealed class JSInteropDOM(IJSRuntime jsRuntime) : IJSInteropDOM
     public async Task SetValueAsync<T>(string elementId, T value, CancellationToken cancellationToken) =>
         await _jsRuntime.InvokeVoidAsync(DOMFunctions.SET_VALUE, cancellationToken, elementId, value);
 
+    public async Task SetAttributeAsync(string elementId, string attributeName, string value, CancellationToken cancellationToken) =>
+        await _jsRuntime.InvokeVoidAsync(DOMFunctions.SET_ATTRIBUTE, cancellationToken, elementId, attributeName, value);
+
     public async Task<bool> IsValidInputAsync(string elementId, CancellationToken cancellationToken) =>
         await _jsRuntime.InvokeAsync<bool>(DOMFunctions.IS_VALID_INPUT, cancellationToken, elementId);
 

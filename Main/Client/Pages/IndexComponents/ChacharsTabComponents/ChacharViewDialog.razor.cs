@@ -1,11 +1,13 @@
 using AsciiPinyin.Web.Client.Commons;
 using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.HttpClients;
+using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
+using Microsoft.JSInterop;
 using System.Globalization;
 using System.Text;
 
@@ -31,6 +33,9 @@ public class ChacharViewDialogBase : ComponentBase, IModal
     private IEntityClient EntityClient { get; set; } = default!;
 
     [Inject]
+    private IJSInteropDOM JSInteropDOM { get; set; } = default!;
+
+    [Inject]
     private ILogger<ChacharViewDialog> Logger { get; set; } = default!;
 
     [Inject]
@@ -48,6 +53,13 @@ public class ChacharViewDialogBase : ComponentBase, IModal
         CancellationToken cancellationToken
     )
     {
+        await JSInteropDOM.SetAttributeAsync(
+            IDs.CHACHAR_VIEW_DIALOG_DELETE_TOOLTIP,
+            Attributes.DATA_BS_ORIGINAL_TITLE,
+            string.Empty,
+            cancellationToken
+        );
+
         var databaseIntegrityErrorMessages = new List<string>();
         DeleteTitle = string.Empty;
         DisableDeleteCss = string.Empty;

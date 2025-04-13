@@ -10,6 +10,7 @@ internal static class DOMFunctions
     public const string IS_VALID_INPUT = "isValidInput";
     public const string REMOVE_CLASS = "removeClass";
     public const string REMOVE_TEXT = "removeText";
+    public const string SET_ATTRIBUTE = "setAttribute";
     public const string SET_TEXT = "setText";
     public const string SET_TITLE = "setTitle";
     public const string SET_VALUE = "setValue";

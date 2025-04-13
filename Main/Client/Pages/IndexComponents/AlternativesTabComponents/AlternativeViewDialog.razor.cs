@@ -1,6 +1,7 @@
 using AsciiPinyin.Web.Client.Commons;
 using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.HttpClients;
+using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
@@ -31,6 +32,9 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
     private IEntityClient EntityClient { get; set; } = default!;
 
     [Inject]
+    private IJSInteropDOM JSInteropDOM { get; set; } = default!;
+
+    [Inject]
     private ILogger<ChacharViewDialog> Logger { get; set; } = default!;
 
     [Inject]
@@ -48,6 +52,13 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
         CancellationToken cancellationToken
     )
     {
+        await JSInteropDOM.SetAttributeAsync(
+            IDs.ALTERNATIVE_VIEW_DIALOG_DELETE_TOOLTIP,
+            Attributes.DATA_BS_ORIGINAL_TITLE,
+            string.Empty,
+            cancellationToken
+        );
+
         DeleteTitle = string.Empty;
         DisableDeleteCss = string.Empty;
         ModalLowerLevel = null;
