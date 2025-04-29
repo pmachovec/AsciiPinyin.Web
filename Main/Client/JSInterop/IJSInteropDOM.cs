@@ -34,24 +34,6 @@ public interface IJSInteropDOM
     Task DisableAsync(string elementId, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Adds the given CSS class for the given element.
-    /// If the element already has the class, nothing happens.
-    /// </summary>
-    /// <param name="elementId">ID of the element for which the class should be added.</param>
-    /// <param name="theClass">The name of the class.</param>
-    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    Task AddClassAsync(string elementId, string theClass, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Removes the given CSS class from the given element.
-    /// If the element already doesn't have the class, nothing happens.
-    /// </summary>
-    /// <param name="elementId">ID of the element from which the class should be removed.</param>
-    /// <param name="theClass">The name of the class.</param>
-    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    Task RemoveClassAsync(string elementId, string theClass, CancellationToken cancellationToken);
-
-    /// <summary>
     /// Gets text content of the given element.
     /// </summary>
     /// <param name="elementId">ID of the element whose text should be got.</param>
@@ -113,55 +95,4 @@ public interface IJSInteropDOM
     /// <param name="value">The value of the set Z index.</param>
     /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
     Task SetZIndexAsync(string elementId, int value, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Removes all but "d-none" display css classes from the given element.
-    /// Adds "d-none" css class to the given element.
-    /// </summary>
-    /// <param name="elementId">ID of the element to adjust css classes of.</param>
-    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    Task Display2NoneAsync(string elementId, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Removes "d-none" css class from the given element, if the element has the class.
-    /// Adds "d-block" css class to the given element.
-    /// </summary>
-    /// <param name="elementId">ID of the element to adjust css classes of.</param>
-    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    Task None2BlockAsync(string elementId, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Removes "d-none" css class from the given element, if the element has the class.
-    /// Adds "d-flex" css class to the given element.
-    /// </summary>
-    /// <param name="elementId">ID of the element to adjust css classes of.</param>
-    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    Task None2FlexAsync(string elementId, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Adds the 'bg-primary' css class for the given element.
-    /// If the element already has the class, nothing happens.
-    /// If the element has other 'bg' classes, they are removed from the element
-    /// </summary>
-    /// <param name="elementId">ID of the element to adjust css classes of.</param>
-    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    Task SetBgPrimaryAsync(string elementId, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Adds the 'bg-warning' css class for the given element.
-    /// If the element already has the class, nothing happens.
-    /// If the element has other 'bg' classes, they are removed from the element
-    /// </summary>
-    /// <param name="elementId">ID of the element to adjust css classes of.</param>
-    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    Task SetBgWarningAsync(string elementId, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Adds the 'bg-danger' css class for the given element.
-    /// If the element already has the class, nothing happens.
-    /// If the element has other 'bg' classes, they are removed from the element
-    /// </summary>
-    /// <param name="elementId">ID of the element to adjust css classes of.</param>
-    /// <param name="cancellationToken">Cancellation token for the asynchronous operation.</param>
-    Task SetBgDangerAsync(string elementId, CancellationToken cancellationToken);
 }

@@ -1,5 +1,3 @@
-using AngleSharp.Diffing.Extensions;
-using AngleSharp.Dom;
 using Asciipinyin.Web.Client.Test.Commons;
 using Asciipinyin.Web.Client.Test.Constants.JSInterop;
 using Asciipinyin.Web.Client.Test.Tools;
@@ -168,10 +166,6 @@ internal sealed class ChacharViewDialogTest : IDisposable
             )
             .ReturnsAsync(HttpStatusCode.OK);
 
-        _ = _indexMock
-            .Setup(index => index.BackdropId)
-            .Returns(IDs.INDEX_BACKDROP);
-
         _localizerMockSetter.SetUpResources(
             (Resource.AlternativesExistForCharacter, ALTERNATIVES_EXIST),
             (Resource.CannotBeDeleted, CANNOT_BE_DELETED),
@@ -217,53 +211,6 @@ internal sealed class ChacharViewDialogTest : IDisposable
             Attributes.DATA_BS_ORIGINAL_TITLE,
             string.Empty
         ).SetVoidResult();
-
-        _jsInteropSetter.SetUpAddClasses(
-            (IDs.CHACHAR_VIEW_DIALOG_ROOT, CssClasses.D_BLOCK),
-            (IDs.CHACHAR_VIEW_DIALOG_ROOT, CssClasses.SHOW),
-            (IDs.INDEX_BACKDROP, CssClasses.D_BLOCK),
-            (IDs.INDEX_BACKDROP, CssClasses.SHOW),
-            (IDs.PROCESS_DIALOG, CssClasses.D_BLOCK),
-            (IDs.PROCESS_DIALOG, CssClasses.D_NONE),
-            (IDs.PROCESS_DIALOG, CssClasses.SHOW),
-            (IDs.PROCESS_DIALOG_BODY_TEXT, CssClasses.D_BLOCK),
-            (IDs.PROCESS_DIALOG_BODY_TEXT, CssClasses.D_NONE),
-            (IDs.PROCESS_DIALOG_BUTTON_BACK, CssClasses.D_NONE),
-            (IDs.PROCESS_DIALOG_BUTTON_PROCEED, CssClasses.D_BLOCK),
-            (IDs.PROCESS_DIALOG_FOOTER, CssClasses.D_FLEX),
-            (IDs.PROCESS_DIALOG_FOOTER, CssClasses.D_NONE),
-            (IDs.PROCESS_DIALOG_HEADER, CssClasses.BG_PRIMARY),
-            (IDs.PROCESS_DIALOG_HEADER, CssClasses.D_FLEX),
-            (IDs.PROCESS_DIALOG_HEADER, CssClasses.D_NONE),
-            (IDs.PROCESS_DIALOG_LOADING, CssClasses.D_BLOCK),
-            (IDs.PROCESS_DIALOG_LOADING, CssClasses.D_NONE)
-        );
-
-        _jsInteropSetter.SetUpRemoveClasses(
-            (IDs.CHACHAR_VIEW_DIALOG_ROOT, CssClasses.D_NONE),
-            (IDs.INDEX_BACKDROP, CssClasses.D_NONE),
-            (IDs.PROCESS_DIALOG, CssClasses.D_BLOCK),
-            (IDs.PROCESS_DIALOG, CssClasses.D_FLEX),
-            (IDs.PROCESS_DIALOG, CssClasses.D_NONE),
-            (IDs.PROCESS_DIALOG, CssClasses.SHOW),
-            (IDs.PROCESS_DIALOG_BODY_TEXT, CssClasses.D_BLOCK),
-            (IDs.PROCESS_DIALOG_BODY_TEXT, CssClasses.D_FLEX),
-            (IDs.PROCESS_DIALOG_BODY_TEXT, CssClasses.D_NONE),
-            (IDs.PROCESS_DIALOG_BUTTON_BACK, CssClasses.D_BLOCK),
-            (IDs.PROCESS_DIALOG_BUTTON_BACK, CssClasses.D_FLEX),
-            (IDs.PROCESS_DIALOG_BUTTON_PROCEED, CssClasses.D_NONE),
-            (IDs.PROCESS_DIALOG_FOOTER, CssClasses.D_BLOCK),
-            (IDs.PROCESS_DIALOG_FOOTER, CssClasses.D_FLEX),
-            (IDs.PROCESS_DIALOG_FOOTER, CssClasses.D_NONE),
-            (IDs.PROCESS_DIALOG_HEADER, CssClasses.BG_DANGER),
-            (IDs.PROCESS_DIALOG_HEADER, CssClasses.BG_WARNING),
-            (IDs.PROCESS_DIALOG_HEADER, CssClasses.D_BLOCK),
-            (IDs.PROCESS_DIALOG_HEADER, CssClasses.D_FLEX),
-            (IDs.PROCESS_DIALOG_HEADER, CssClasses.D_NONE),
-            (IDs.PROCESS_DIALOG_LOADING, CssClasses.D_BLOCK),
-            (IDs.PROCESS_DIALOG_LOADING, CssClasses.D_FLEX),
-            (IDs.PROCESS_DIALOG_LOADING, CssClasses.D_NONE)
-        );
 
         _jsInteropSetter.SetUpSetTitles(
             $"{PROCESSING}...",

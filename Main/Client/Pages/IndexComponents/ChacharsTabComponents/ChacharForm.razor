@@ -9,7 +9,7 @@
 @inherits ChacharFormBase
 
 <div
-    class="modal fade @CssClasses.D_NONE"
+    class="modal fade @Classes"
     tabindex="-1"
     role="dialog"
     id="@IDs.CHACHAR_FORM_ROOT">
@@ -124,7 +124,7 @@
                             </button>
                             <button
                                 type="button"
-                                class="btn"
+                                class="btn @ClearAlternativeClasses"
                                 id="@IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE"
                                 @onclick="ClearAlternative">
                                 &#x2715;

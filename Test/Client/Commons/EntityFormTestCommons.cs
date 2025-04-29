@@ -17,8 +17,7 @@ internal sealed class EntityFormTestCommons(
     TestContext _testContext,
     IRenderedComponent<IComponent> _formComponent,
     Mock<IEntityClient> _entityClientMock,
-    Mock<IProcessDialog> _processDialogMock,
-    IEnumerable<string> _inputIds
+    Mock<IProcessDialog> _processDialogMock
 )
 {
     private const string DIV = "div";
@@ -136,7 +135,7 @@ internal sealed class EntityFormTestCommons(
 
     /// <summary>
     /// Tests behavior of a button input and its corresponding ValidationMessage element when the input contains an invalid value and the form is submitted.
-    /// The input is expected to be assigned the 'invalid' class by JS interoperability.
+    /// The input is expected to be assigned the 'invalid' CSS class.
     /// </summary>
     /// <param name="expectedError">Expected error message to appear in the ValidationMessage element</param>
     /// <param name="inputId">ID of the input</param>
@@ -149,21 +148,11 @@ internal sealed class EntityFormTestCommons(
         string submitButtonId
     )
     {
-        // When a class is assigned by JS interoperability, its presence cannot be tested with bUnit - the class doesn't appear in the elemen's class list.
-        // The only thing possible to be tested is the actuall JS interoperability call.
-        var addInvalidClassHandler = _testContext.JSInterop.SetupVoid(
-            DOMFunctions.ADD_CLASS,
-            inputId,
-            CssClasses.INVALID
-        );
-
+        var formInput = _formComponent.Find($"#{inputId}");
         var formSubmitButton = _formComponent.Find($"#{submitButtonId}");
         formSubmitButton.Click();
 
-        var addClassInvocation = addInvalidClassHandler.VerifyInvoke(DOMFunctions.ADD_CLASS);
-        Assert.That(addClassInvocation.Arguments.Count, Is.EqualTo(2));
-        Assert.That(addClassInvocation.Arguments[0], Is.EqualTo(inputId));
-        Assert.That(addClassInvocation.Arguments[1], Is.EqualTo(CssClasses.INVALID));
+        Assert.That(formInput.ClassList, Does.Contain(CssClasses.INVALID));
 
         var validationMessageElement = _formComponent.Find($"#{validationMessageId}");
         Assert.That(validationMessageElement!.InnerHtml, Is.Not.Null);
@@ -185,20 +174,12 @@ internal sealed class EntityFormTestCommons(
         string submitButtonId
     )
     {
-        var addInvalidClassHandler = _testContext.JSInterop.SetupVoid(
-            DOMFunctions.ADD_CLASS,
-            inputId,
-            CssClasses.INVALID
-        );
-
-        MockOtherInputsInvalid(inputId);
         var formInput = _formComponent.Find($"#{inputId}");
         var formSubmitButton = _formComponent.Find($"#{submitButtonId}");
         formInput.Change(inputValue);
         formSubmitButton.Click();
 
         Assert.That(formInput.ClassList, Does.Not.Contain(CssClasses.INVALID));
-        addInvalidClassHandler.VerifyNotInvoke(DOMFunctions.ADD_CLASS);
 
         var validationMessageElement = _formComponent.FindAll($"#{validationMessageId}");
         Assert.That(validationMessageElement, Is.Empty);
@@ -217,19 +198,11 @@ internal sealed class EntityFormTestCommons(
         string submitButtonId
     )
     {
-        var addInvalidClassHandler = _testContext.JSInterop.SetupVoid(
-            DOMFunctions.ADD_CLASS,
-            inputId,
-            CssClasses.INVALID
-        );
-
-        MockOtherInputsInvalid(inputId);
         var formInput = _formComponent.Find($"#{inputId}");
         var formSubmitButton = _formComponent.Find($"#{submitButtonId}");
         formSubmitButton.Click();
 
         Assert.That(formInput.ClassList, Does.Not.Contain(CssClasses.INVALID));
-        addInvalidClassHandler.VerifyNotInvoke(DOMFunctions.ADD_CLASS);
 
         var validationMessageElement = _formComponent.FindAll($"#{validationMessageId}");
         Assert.That(validationMessageElement, Is.Empty);
@@ -348,25 +321,6 @@ internal sealed class EntityFormTestCommons(
         var firstButtonDiv = buttonDivs.FirstOrDefault();
         Assert.That(firstButtonDiv, Is.Not.Null);
         firstButtonDiv!.Click();
-    }
-
-    /// <summary>
-    /// Mocks setting the 'invalid' css class for all other inputs than the one corresponding to the given ID.
-    /// </summary>
-    /// <param name="inputId">ID of the input</param>
-    private void MockOtherInputsInvalid(string inputId)
-    {
-        foreach (var otherInputId in _inputIds)
-        {
-            if (otherInputId != inputId)
-            {
-                _ = _testContext.JSInterop.SetupVoid(
-                    DOMFunctions.ADD_CLASS,
-                    otherInputId,
-                    CssClasses.INVALID
-                );
-            }
-        }
     }
 
     /// <summary>

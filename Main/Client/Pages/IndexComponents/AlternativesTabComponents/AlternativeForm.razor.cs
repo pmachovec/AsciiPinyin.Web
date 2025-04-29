@@ -17,19 +17,23 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents
 
 public class AlternativeFormBase : ComponentBase, IEntityForm
 {
+    protected string Classes { get; private set; } = CssClasses.D_NONE;
+
+    protected string OriginalSelectorClasses { get; private set; } = string.Empty;
+
     protected EntitySelector<Chachar> OriginalSelector { get; set; } = default!;
 
     protected Alternative Alternative { get; set; } = new();
 
     protected EditContext EditContext = default!;
 
-    public string RootId { get; } = IDs.ALTERNATIVE_FORM_ROOT;
-
-    public IPage? Page { get; private set; }
+    public string HtmlTitle { get; private set; } = string.Empty;
 
     public IModal? ModalLowerLevel { get; private set; }
 
-    public string HtmlTitle { get; private set; } = string.Empty;
+    public IPage? Page { get; private set; }
+
+    public string RootId { get; } = IDs.ALTERNATIVE_FORM_ROOT;
 
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
@@ -56,7 +60,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     {
         HtmlTitle = Localizer[Resource.CreateNewAlternative];
         SetUpEditContext();
-        EditContext.OnValidationRequested += async (_, _) => await ValidateAdditionalAsync(CancellationToken.None);
+        EditContext.OnValidationRequested += (_, _) => ValidateAdditional();
     }
 
     public async Task OpenAsync(IPage page, CancellationToken cancellationToken)
@@ -69,9 +73,17 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     public async Task CloseAsync(CancellationToken cancellationToken) =>
         await ModalCommons.CloseAsyncCommon(this, cancellationToken);
 
-    protected async Task OpenOriginalSelectorAsync(CancellationToken cancellationToken) =>
+    public void AddClasses(params string[] classes) => Classes += $" {string.Join(' ', classes)}";
+
+    public void SetClasses(params string[] classes) => Classes = string.Join(' ', classes);
+
+    public async Task StateHasChangedAsync() => await InvokeAsync(StateHasChanged);
+
+    protected async Task OpenOriginalSelectorAsync(CancellationToken cancellationToken)
+    {
+        ClearOriginal();
+
         await Task.WhenAll(
-            ClearOriginalAsync(cancellationToken),
             JSInteropDOM.SetZIndexAsync(
                 IDs.ALTERNATIVE_FORM_ROOT,
                 NumberConstants.INDEX_BACKDROP_Z - 1,
@@ -82,6 +94,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
                 cancellationToken
             )
         );
+    }
 
     protected async Task SelectOriginalAsync(Chachar originalChachar, CancellationToken cancellationToken)
     {
@@ -92,15 +105,10 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         await OriginalSelector.CloseAsync(cancellationToken);
     }
 
-    protected async Task ClearOriginalAsync(CancellationToken cancellationToken)
+    protected void ClearOriginal()
     {
         ClearError(nameof(Alternative.OriginalCharacter));
-
-        await Task.WhenAll(
-            JSInteropDOM.RemoveClassAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.INVALID, cancellationToken),
-            JSInteropDOM.RemoveClassAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_CLEAR, CssClasses.INVALID, cancellationToken)
-        );
-
+        OriginalSelectorClasses = string.Empty;
         Alternative.OriginalCharacter = null;
         Alternative.OriginalPinyin = null;
         Alternative.OriginalTone = null;
@@ -144,16 +152,13 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         EditContext.NotifyFieldChanged(fieldIdentifier);
     }
 
-    protected async Task ValidateAdditionalAsync(CancellationToken cancellationToken)
+    protected void ValidateAdditional()
     {
         var originalField = new FieldIdentifier(Alternative, nameof(Alternative.OriginalCharacter));
 
         if (EditContext.GetValidationMessages(originalField).Any())
         {
-            await Task.WhenAll(
-                JSInteropDOM.AddClassAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.INVALID, cancellationToken),
-                JSInteropDOM.AddClassAsync(IDs.ALTERNATIVE_FORM_ORIGINAL_CLEAR, CssClasses.INVALID, cancellationToken)
-            );
+            OriginalSelectorClasses = CssClasses.INVALID;
         }
     }
 

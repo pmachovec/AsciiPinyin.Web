@@ -7,7 +7,10 @@
 @page "/"
 @inherits IndexBase
 
-<IndexBackdrop />
+<div
+    class="modal-backdrop fade @BackdropClasses"
+    style="z-index: @NumberConstants.INDEX_BACKDROP_Z">
+</div>
 
 <div
     class="container pb-5"

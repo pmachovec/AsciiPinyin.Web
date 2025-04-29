@@ -9,19 +9,17 @@
         <ul class="nav nav-tabs">
             <li class="nav-item">
                 <input
-                    class="nav-link tab-button @CssClasses.TEXT_DARK"
+                    class="nav-link tab-button text-dark @CssClasses.TEXT_DARK @(ChacharsTab?.Classes ?? string.Empty)"
                     type="button"
                     value="@Localizer[Resource.Characters]"
-                    id="@IDs.CHACHARS_TAB_BUTTON"
-                    @onclick="async _ => await SelectTabAsync(ChacharsTab, CancellationToken.None)" />
+                    @onclick="async _ => await SelectTabAsync(ChacharsTab!, CancellationToken.None)" />
             </li>
             <li class="nav-item">
                 <input
-                    class="nav-link tab-button @CssClasses.TEXT_DARK"
+                    class="nav-link tab-button @CssClasses.TEXT_DARK @(AlternativesTab?.Classes ?? string.Empty)"
                     type="button"
                     value="@Localizer[Resource.Alternatives]"
-                    id="@IDs.ALTERNATIVES_TAB_BUTTON"
-                    @onclick="async _ => await SelectTabAsync(AlternativesTab, CancellationToken.None)" />
+                    @onclick="async _ => await SelectTabAsync(AlternativesTab!, CancellationToken.None)" />
             </li>
         </ul>
     </div>

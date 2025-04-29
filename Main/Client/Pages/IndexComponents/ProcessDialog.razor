@@ -6,7 +6,7 @@
 @inherits ProcessDialogBase
 
 <div
-    class="modal fade @CssClasses.D_NONE"
+    class="modal fade @Classes"
     tabindex="-1"
     role="dialog"
     id="@RootId">
@@ -16,33 +16,29 @@
         <div
             class="modal-content"
             id="@IDs.PROCESS_DIALOG_MODAL_CONTENT">
-            <div
-                class="modal-header"
-                id="@IDs.PROCESS_DIALOG_HEADER">
+            <div class="modal-header @HeaderClasses">
                 <div class="fw-bold text-center text-uppercase text-white w-100">@HeaderText</div>
             </div>
             <div class="modal-body">
                 <Loading
-                    Id="@IDs.PROCESS_DIALOG_LOADING"
+                    Classes="@LoadingClasses"
                     TextResource="@Resource.Processing" />
-                <div id="@IDs.PROCESS_DIALOG_BODY_TEXT">@BodyText</div>
+                <div class="@BodyTextClasses">@BodyText</div>
             </div>
-            <div
-                class="modal-footer border-0 bottom-0 end-0"
-                id="@IDs.PROCESS_DIALOG_FOOTER">
+            <div class="modal-footer border-0 bottom-0 end-0 @FooterClasses">
                 <button
                     type="button"
-                    class="btn btn-modal btn-danger"
+                    class="btn btn-modal btn-danger @ButtonBackClasses"
                     id="@IDs.PROCESS_DIALOG_BUTTON_BACK"
                     @onclick="async _ => await ModalCommons.CloseAsyncCommon(this, CancellationToken.None)">
                     <span>@Localizer[Resource.Back]</span>
                 </button>
                 <button
                     type="button"
-                    class="btn btn-modal btn-primary ms-3"
-                    id="@IDs.PROCESS_DIALOG_BUTTON_PROCEED"
+                    class="btn btn-modal btn-primary ms-3 @ButtonProceedClasses"
+                        id="@IDs.PROCESS_DIALOG_BUTTON_PROCEED"
                     @onclick="async _ => await ProceedAsync(CancellationToken.None)">
-                    <span id="@IDs.PROCESS_DIALOG_BUTTON_PROCEED_TEXT">@ButtonProceedText</span>
+                    <span>@ButtonProceedText</span>
                 </button>
             </div>
         </div>

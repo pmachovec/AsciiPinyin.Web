@@ -15,7 +15,7 @@ public class AlternativesTabBase : ComponentBase, IEntityTab
 
     protected AlternativeViewDialog AlternativeViewDialog { get; set; } = default!;
 
-    public string ButtonId { get; } = IDs.ALTERNATIVES_TAB_BUTTON;
+    public string Classes { get; set; } = string.Empty;
 
     public string HtmlTitle { get; private set; } = string.Empty;
 

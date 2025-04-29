@@ -35,13 +35,6 @@ internal sealed class AlternativeFormTest : IDisposable
     private const string PROCESSING_ERROR = nameof(PROCESSING_ERROR);
     private const string SELECT_BASE_CHARACTER = nameof(SELECT_BASE_CHARACTER);
 
-    private readonly IEnumerable<string> _inputIds =
-    [
-        IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
-        IDs.ALTERNATIVE_FORM_STROKES_INPUT,
-        IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT
-    ];
-
     private static readonly Chachar _radicalChachar1 = new()
     {
         TheCharacter = "丿",
@@ -121,15 +114,6 @@ internal sealed class AlternativeFormTest : IDisposable
         _testContext = new TestContext();
         _jsInteropSetter = new(_testContext.JSInterop);
 
-        _jsInteropSetter.SetUpAddClasses(
-            (IDs.ALTERNATIVE_FORM_ORIGINAL_SELECTOR, CssClasses.D_BLOCK)
-        );
-
-        _jsInteropSetter.SetUpRemoveClasses(
-            (IDs.ALTERNATIVE_FORM_ORIGINAL_CLEAR, CssClasses.INVALID),
-            (IDs.ALTERNATIVE_FORM_ORIGINAL_SELECTOR, CssClasses.D_NONE)
-        );
-
         _jsInteropSetter.SetUpSetTitles(SELECT_BASE_CHARACTER);
         _jsInteropSetter.SetUpSetZIndex(IDs.ALTERNATIVE_FORM_ROOT);
 
@@ -146,8 +130,7 @@ internal sealed class AlternativeFormTest : IDisposable
             _testContext,
             _alternativeFormComponent,
             _entityClientMock,
-            _processDialogMock,
-            _inputIds
+            _processDialogMock
         );
     }
 
@@ -505,18 +488,6 @@ internal sealed class AlternativeFormTest : IDisposable
 
     private void SelectOriginal()
     {
-        _ = _testContext.JSInterop.SetupVoid(
-            DOMFunctions.REMOVE_CLASS,
-            IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
-            CssClasses.INVALID
-        ).SetVoidResult();
-
-        _ = _testContext.JSInterop.SetupVoid(
-            DOMFunctions.REMOVE_CLASS,
-            IDs.ALTERNATIVE_FORM_ORIGINAL_SELECTOR,
-            CssClasses.SHOW)
-        .SetVoidResult();
-
         _jsInteropSetter.SetUpSetTitles(CREATE_NEW_ALTERNATIVE);
         _entityFormTestCommons.ClickFirstInSelector(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.ORIGINAL_SELECTOR);
     }

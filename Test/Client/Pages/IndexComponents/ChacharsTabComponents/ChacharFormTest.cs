@@ -39,15 +39,6 @@ internal sealed class ChacharFormTest : IDisposable
     private const string SELECT_RADICAL = nameof(SELECT_RADICAL);
     private const string SELECT_RADICAL_ALTERNATIVE = nameof(SELECT_RADICAL_ALTERNATIVE);
 
-    private static readonly IEnumerable<string> _inputIds =
-    [
-        IDs.CHACHAR_FORM_IPA_INPUT,
-        IDs.CHACHAR_FORM_PINYIN_INPUT,
-        IDs.CHACHAR_FORM_STROKES_INPUT,
-        IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
-        IDs.CHACHAR_FORM_TONE_INPUT,
-    ];
-
     private static readonly Chachar _radicalChachar1 = new()
     {
         TheCharacter = "雨",
@@ -224,36 +215,6 @@ internal sealed class ChacharFormTest : IDisposable
             IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE
         );
 
-        _jsInteropSetter.SetUpAddClasses(
-            (IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50),
-            (IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK),
-            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_BLOCK),
-            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_FLEX),
-            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_NONE),
-            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.SHOW),
-            (IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY),
-            (IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY),
-            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_BLOCK),
-            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_FLEX),
-            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_NONE),
-            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.SHOW)
-        );
-
-        _jsInteropSetter.SetUpRemoveClasses(
-            (IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50),
-            (IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK),
-            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_BLOCK),
-            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_FLEX),
-            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.D_NONE),
-            (IDs.CHACHAR_FORM_ALTERNATIVE_SELECTOR, CssClasses.SHOW),
-            (IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY),
-            (IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY),
-            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_BLOCK),
-            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_FLEX),
-            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.D_NONE),
-            (IDs.CHACHAR_FORM_RADICAL_SELECTOR, CssClasses.SHOW)
-        );
-
         _jsInteropSetter.SetUpSetTitles(
             CREATE_NEW_CHARACTER,
             SELECT_RADICAL,
@@ -277,8 +238,7 @@ internal sealed class ChacharFormTest : IDisposable
             _testContext,
             _chacharFormComponent,
             _entityClientMock,
-            _processDialogMock,
-            _inputIds
+            _processDialogMock
         );
     }
 

@@ -15,7 +15,7 @@ public class ChacharsTabBase : ComponentBase, IEntityTab
 
     protected ChacharViewDialog ChacharViewDialog { get; set; } = default!;
 
-    public string ButtonId { get; } = IDs.CHACHARS_TAB_BUTTON;
+    public string Classes { get; set; } = string.Empty;
 
     public string HtmlTitle { get; private set; } = string.Empty;
 

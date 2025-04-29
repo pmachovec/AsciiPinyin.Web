@@ -1,5 +1,6 @@
 using AsciiPinyin.Web.Client.Commons;
 using AsciiPinyin.Web.Client.ComponentInterfaces;
+using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.AspNetCore.Components;
@@ -9,6 +10,8 @@ namespace AsciiPinyin.Web.Client.Components;
 
 public class EntitySelectorBase<T> : ComponentBase, IModal where T : IEntity
 {
+    protected string Classes { get; private set; } = CssClasses.D_NONE;
+
     public IPage? Page { get; private set; }
 
     public IModal? ModalLowerLevel { get; private set; }
@@ -53,4 +56,10 @@ public class EntitySelectorBase<T> : ComponentBase, IModal where T : IEntity
 
     public async Task CloseAsync(CancellationToken cancellationToken) =>
         await ModalCommons.CloseAsyncCommon(this, cancellationToken);
+
+    public void AddClasses(params string[] classes) => Classes += $" {string.Join(' ', classes)}";
+
+    public void SetClasses(params string[] classes) => Classes = string.Join(' ', classes);
+
+    public async Task StateHasChangedAsync() => await InvokeAsync(StateHasChanged);
 }

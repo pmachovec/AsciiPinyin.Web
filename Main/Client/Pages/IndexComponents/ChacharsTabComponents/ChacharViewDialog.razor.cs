@@ -16,17 +16,19 @@ public class ChacharViewDialogBase : ComponentBase, IModal
 {
     protected Chachar? Chachar { get; set; }
 
-    public string RootId { get; } = IDs.CHACHAR_VIEW_DIALOG_ROOT;
-
-    public IPage? Page { get; private set; }
-
-    public IModal? ModalLowerLevel { get; private set; }
-
-    public string HtmlTitle { get; private set; } = string.Empty;
+    protected string Classes { get; private set; } = CssClasses.D_NONE;
 
     protected string DisableDeleteCss { get; private set; } = string.Empty;
 
     protected string DeleteTitle { get; private set; } = string.Empty;
+
+    public string HtmlTitle { get; private set; } = string.Empty;
+
+    public IModal? ModalLowerLevel { get; private set; }
+
+    public IPage? Page { get; private set; }
+
+    public string RootId { get; } = IDs.CHACHAR_VIEW_DIALOG_ROOT;
 
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
@@ -66,9 +68,7 @@ public class ChacharViewDialogBase : ComponentBase, IModal
         Page = page;
         HtmlTitle = $"{StringConstants.ASCII_PINYIN} - {chachar.TheCharacter}";
         Chachar = chachar;
-        await InvokeAsync(StateHasChanged);
 
-        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
         await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
 
         if (chachar.IsRadical)
@@ -103,16 +103,19 @@ public class ChacharViewDialogBase : ComponentBase, IModal
             DeleteTitle = GetErrorMessageFormatted(databaseIntegrityErrorMessages);
             await InvokeAsync(StateHasChanged);
         }
-
-        await Index.ProcessDialog.CloseAsync(cancellationToken);
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken)
     {
-        await ModalCommons.CloseAsyncCommon(this, cancellationToken);
         Chachar = null;
-        StateHasChanged();
+        await ModalCommons.CloseAsyncCommon(this, cancellationToken);
     }
+
+    public void AddClasses(params string[] classes) => Classes += $" {string.Join(' ', classes)}";
+
+    public void SetClasses(params string[] classes) => Classes = string.Join(' ', classes);
+
+    public async Task StateHasChangedAsync() => await InvokeAsync(StateHasChanged);
 
     protected async Task InitiateDeleteAsync(CancellationToken cancellationToken) =>
         await Index.ProcessDialog.SetWarningAsync(

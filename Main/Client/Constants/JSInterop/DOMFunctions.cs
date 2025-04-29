@@ -2,13 +2,11 @@ namespace AsciiPinyin.Web.Client.Constants.JSInterop;
 
 internal static class DOMFunctions
 {
-    public const string ADD_CLASS = "addClass";
     public const string DISABLE = "disable";
     public const string ENABLE = "enable";
     public const string GET_TEXT = "getText";
     public const string HIDE_ELEMENT = "hideElement";
     public const string IS_VALID_INPUT = "isValidInput";
-    public const string REMOVE_CLASS = "removeClass";
     public const string REMOVE_TEXT = "removeText";
     public const string SET_ATTRIBUTE = "setAttribute";
     public const string SET_TEXT = "setText";

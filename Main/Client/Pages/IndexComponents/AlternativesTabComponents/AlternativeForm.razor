@@ -8,7 +8,7 @@
 @inherits AlternativeFormBase
 
 <div
-    class="modal fade @CssClasses.D_NONE"
+    class="modal fade @Classes"
     tabindex="-1"
     role="dialog"
     id="@IDs.ALTERNATIVE_FORM_ROOT">
@@ -56,16 +56,15 @@
                         <div class="input-group">
                             <button
                                 type="button"
-                                class="btn-input-text form-control"
+                                class="btn-input-text form-control @OriginalSelectorClasses"
                                 id="@IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT"
                                 @onclick="async _ => await OpenOriginalSelectorAsync(CancellationToken.None)">
                                 @Alternative.OriginalCharacter
                             </button>
                             <button
                                 type="button"
-                                class="btn @CssClasses.BTN_OUTLINE_PRIMARY"
-                                id="@IDs.ALTERNATIVE_FORM_ORIGINAL_CLEAR"
-                                @onclick="async _ => await ClearOriginalAsync(CancellationToken.None)">
+                                class="btn @CssClasses.BTN_OUTLINE_PRIMARY @OriginalSelectorClasses"
+                                @onclick="_ => ClearOriginal()">
                                 &#x2715;
                             </button>
                         </div>

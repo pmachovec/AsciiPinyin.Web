@@ -1,6 +1,5 @@
 using AngleSharp.Diffing.Extensions;
 using AngleSharp.Dom;
-using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Test.Constants;
 using Bunit;
 using Microsoft.AspNetCore.Components;
@@ -33,10 +32,8 @@ internal sealed class EntityViewDialogTestCommons(
 
         var deleteButton = deleteButtonTooltipElement.FirstElementChild;
         Assert.That(deleteButton, Is.Not.Null);
-
-        var deleteButtonClassAttribute = DeleteButtonClassTest(deleteButton!);
-        Assert.That(deleteButtonClassAttribute!.Value, Does.Contain(CssClasses.DISABLED));
-        Assert.That(deleteButtonClassAttribute!.Value, Does.Contain(CssClasses.OPACITY_25));
+        Assert.That(deleteButton!.ClassList, Does.Contain(CssClasses.DISABLED));
+        Assert.That(deleteButton!.ClassList, Does.Contain(CssClasses.OPACITY_25));
     }
 
     public async Task DeleteEntityTest()
@@ -47,10 +44,8 @@ internal sealed class EntityViewDialogTestCommons(
 
         var deleteButton = deleteButtonTooltipElement.FirstElementChild;
         Assert.That(deleteButton, Is.Not.Null);
-
-        var deleteButtonClassAttribute = DeleteButtonClassTest(deleteButton!);
-        Assert.That(deleteButtonClassAttribute!.Value, Does.Not.Contain(CssClasses.DISABLED));
-        Assert.That(deleteButtonClassAttribute!.Value, Does.Not.Contain(CssClasses.OPACITY_25));
+        Assert.That(deleteButton!.ClassList, Does.Not.Contain(CssClasses.DISABLED));
+        Assert.That(deleteButton!.ClassList, Does.Not.Contain(CssClasses.OPACITY_25));
 
         await deleteButton!.ClickAsync(new());
 
@@ -67,13 +62,5 @@ internal sealed class EntityViewDialogTestCommons(
         Assert.That(deleteButtonTooltipTilteAttribute, Is.Not.Null);
 
         return deleteButtonTooltipTilteAttribute!.Value;
-    }
-
-    private static IAttr DeleteButtonClassTest(IElement deleteButton)
-    {
-        Assert.That(deleteButton.TryGetAttr(Attributes.CLASS, out var deleteButtonClassAttribute), Is.True);
-        Assert.That(deleteButtonClassAttribute, Is.Not.Null);
-
-        return deleteButtonClassAttribute!;
     }
 }

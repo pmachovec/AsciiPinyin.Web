@@ -17,6 +17,10 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
 public class ChacharFormBase : ComponentBase, IEntityForm
 {
+    protected string Classes { get; private set; } = CssClasses.D_NONE;
+
+    protected string ClearAlternativeClasses { get; private set; } = string.Empty;
+
     protected EntitySelector<Alternative> AlternativeSelector { get; set; } = default!;
 
     protected EntitySelector<Chachar> RadicalSelector { get; set; } = default!;
@@ -27,13 +31,13 @@ public class ChacharFormBase : ComponentBase, IEntityForm
 
     protected EditContext EditContext = default!;
 
-    public string RootId { get; } = IDs.CHACHAR_FORM_ROOT;
-
-    public IPage? Page { get; private set; }
+    public string HtmlTitle { get; private set; } = string.Empty;
 
     public IModal? ModalLowerLevel { get; private set; }
 
-    public string HtmlTitle { get; private set; } = string.Empty;
+    public IPage? Page { get; private set; }
+
+    public string RootId { get; } = IDs.CHACHAR_FORM_ROOT;
 
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
@@ -67,24 +71,20 @@ public class ChacharFormBase : ComponentBase, IEntityForm
         // No need to set these properties for these elements explicitly in the HTML part.
         if (AvailableAlternatives.Any())
         {
+            ClearAlternativeClasses = CssClasses.BTN_OUTLINE_PRIMARY;
+
             await Task.WhenAll(
                 JSInteropDOM.EnableAsync(IDs.CHACHAR_FORM_ALTERNATIVE_INPUT, CancellationToken.None),
-                JSInteropDOM.EnableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CancellationToken.None),
-                JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50, CancellationToken.None),
-                JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY, CancellationToken.None),
-                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK, CancellationToken.None),
-                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY, CancellationToken.None)
+                JSInteropDOM.EnableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CancellationToken.None)
             );
         }
         else
         {
+            ClearAlternativeClasses = CssClasses.BTN_OUTLINE_SECONDARY;
+
             await Task.WhenAll(
                 JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_ALTERNATIVE_INPUT, CancellationToken.None),
-                JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CancellationToken.None),
-                JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_DARK, CancellationToken.None),
-                JSInteropDOM.RemoveClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_PRIMARY, CancellationToken.None),
-                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_ALTERNATIVE_LABEL, CssClasses.TEXT_BLACK_50, CancellationToken.None),
-                JSInteropDOM.AddClassAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CssClasses.BTN_OUTLINE_SECONDARY, CancellationToken.None)
+                JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CancellationToken.None)
             );
         }
     }
@@ -98,6 +98,12 @@ public class ChacharFormBase : ComponentBase, IEntityForm
 
     public async Task CloseAsync(CancellationToken cancellationToken) =>
         await ModalCommons.CloseAsyncCommon(this, cancellationToken);
+
+    public void AddClasses(params string[] classes) => Classes += $" {string.Join(' ', classes)}";
+
+    public void SetClasses(params string[] classes) => Classes = string.Join(' ', classes);
+
+    public async Task StateHasChangedAsync() => await InvokeAsync(StateHasChanged);
 
     protected async Task OpenRadicalSelectorAsync(CancellationToken cancellationToken) =>
         await Task.WhenAll(

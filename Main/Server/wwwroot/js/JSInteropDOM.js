@@ -6,10 +6,6 @@ enable = (elementId) => { $(`#${elementId}`).prop('disabled', false); }
 
 disable = (elementId) => { $(`#${elementId}`).prop('disabled', true); }
 
-addClass = (elementId, theClass) => { $(`#${elementId}`).addClass(theClass); }
-
-removeClass = (elementId, theClass) => { $(`#${elementId}`).removeClass(theClass); }
-
 getText = (elementId) => { return $(`#${elementId}`).text(); }
 
 setText = (elementId, text) => { $(`#${elementId}`).text(text); }

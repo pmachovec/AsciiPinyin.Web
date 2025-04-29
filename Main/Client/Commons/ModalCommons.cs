@@ -25,17 +25,25 @@ public sealed class ModalCommons(
 
         if (modal.Page is { } modalPage)
         {
-            await _jSInteropDOM.None2BlockAsync(modalPage.BackdropId, cancellationToken);
-            await _jSInteropDOM.AddClassAsync(modalPage.BackdropId, CssClasses.SHOW, cancellationToken);
+            modal.SetClasses(CssClasses.D_BLOCK);
+            modalPage.SetBackdropClasses(CssClasses.D_BLOCK);
+            await modal.StateHasChangedAsync();
+            await modalPage.StateHasChangedAsync();
+            await Task.Delay(IntConstants.MODAL_SHOW_DELAY, cancellationToken);
+            modal.AddClasses(CssClasses.SHOW);
+            modalPage.AddBackdropClasses(CssClasses.SHOW);
+            await modal.StateHasChangedAsync();
+            await modalPage.StateHasChangedAsync();
         }
         else
         {
             await LowerAllZIndexesAsync(modal.ModalLowerLevel!, NumberConstants.INDEX_BACKDROP_Z, cancellationToken);
+            modal.SetClasses(CssClasses.D_BLOCK);
+            await modal.StateHasChangedAsync();
+            await Task.Delay(IntConstants.MODAL_SHOW_DELAY, cancellationToken);
+            modal.AddClasses(CssClasses.SHOW);
+            await modal.StateHasChangedAsync();
         }
-
-        await _jSInteropDOM.None2BlockAsync(modal.RootId, cancellationToken);
-        await Task.Delay(IntConstants.MODAL_SHOW_DELAY, cancellationToken);
-        await _jSInteropDOM.AddClassAsync(modal.RootId, CssClasses.SHOW, cancellationToken);
     }
 
     public async Task OpenAsyncCommon(
@@ -56,19 +64,20 @@ public sealed class ModalCommons(
     {
         ThrowOnInvalidModal(modal);
 
-        if (modal.Page is { } modalPage)
+        if (modal.Page is not null)
         {
-            await _jSInteropDOM.SetTitleAsync(modalPage.HtmlTitle, cancellationToken);
-            await _jSInteropDOM.RemoveClassAsync(modalPage.BackdropId, CssClasses.SHOW, cancellationToken);
-            await _jSInteropDOM.Display2NoneAsync(modalPage.BackdropId, cancellationToken);
+            await CloseModalFirstLevelAsync(modal, cancellationToken);
         }
         else
         {
             await _jSInteropDOM.SetTitleAsync(modal.ModalLowerLevel!.HtmlTitle, cancellationToken);
+            modal.SetClasses(CssClasses.D_BLOCK);
+            await modal.StateHasChangedAsync();
             await IncreaseAllZIndexesAsync(modal.ModalLowerLevel!, NumberConstants.INDEX_BACKDROP_Z, cancellationToken);
+            await Task.Delay(IntConstants.MODAL_HIDE_DELAY, cancellationToken);
+            modal.SetClasses(CssClasses.D_NONE);
+            await modal.StateHasChangedAsync();
         }
-
-        await CloseAsyncCommonCommon(modal, cancellationToken);
     }
 
     public async Task CloseAllAsyncCommon(
@@ -78,12 +87,9 @@ public sealed class ModalCommons(
     {
         ThrowOnInvalidModal(modal);
 
-        if (modal.Page is { } modalPage)
+        if (modal.Page is not null)
         {
-            await _jSInteropDOM.SetTitleAsync(modalPage.HtmlTitle, cancellationToken);
-            await _jSInteropDOM.RemoveClassAsync(modalPage.BackdropId, CssClasses.SHOW, cancellationToken);
-            await _jSInteropDOM.Display2NoneAsync(modalPage.BackdropId, cancellationToken);
-            await CloseAsyncCommonCommon(modal, cancellationToken);
+            await CloseModalFirstLevelAsync(modal, cancellationToken);
         }
         else
         {
@@ -124,7 +130,7 @@ public sealed class ModalCommons(
             );
 
             _ = indexAlterCollection(entity);
-            index.StateHasChangedPublic();
+            await index.StateHasChangedAsync();
             return true;
         }
         else
@@ -188,10 +194,17 @@ public sealed class ModalCommons(
         }
     }
 
-    private async Task CloseAsyncCommonCommon(IModal modal, CancellationToken cancellationToken)
+    private async Task CloseModalFirstLevelAsync(IModal modalFirstLevel, CancellationToken cancellationToken)
     {
-        await _jSInteropDOM.RemoveClassAsync(modal.RootId, CssClasses.SHOW, cancellationToken);
+        await _jSInteropDOM.SetTitleAsync(modalFirstLevel.Page!.HtmlTitle, cancellationToken);
+        modalFirstLevel.SetClasses(CssClasses.D_BLOCK);
+        modalFirstLevel.Page.SetBackdropClasses(CssClasses.D_BLOCK);
+        await modalFirstLevel.StateHasChangedAsync();
+        await modalFirstLevel.Page.StateHasChangedAsync();
         await Task.Delay(IntConstants.MODAL_HIDE_DELAY, cancellationToken);
-        await _jSInteropDOM.Display2NoneAsync(modal.RootId, cancellationToken);
+        modalFirstLevel.SetClasses(CssClasses.D_NONE);
+        modalFirstLevel.Page.SetBackdropClasses(CssClasses.D_NONE);
+        await modalFirstLevel.StateHasChangedAsync();
+        await modalFirstLevel.Page.StateHasChangedAsync();
     }
 }

@@ -2,7 +2,6 @@ namespace AsciiPinyin.Web.Shared.Constants;
 
 public static class IDs
 {
-    public const string ALTERNATIVE_FORM_ORIGINAL_CLEAR = "alternative-form-original-clear";
     public const string ALTERNATIVE_FORM_ORIGINAL_INPUT = "alternative-form-original-input";
     public const string ALTERNATIVE_FORM_ORIGINAL_SELECTOR = "alternative-form-original-selector";
     public const string ALTERNATIVE_FORM_ORIGINAL_VALIDATION_MESSAGE = "alternative-form-original-validation-message";
@@ -14,12 +13,10 @@ public static class IDs
     public const string ALTERNATIVE_FORM_THE_CHARACTER_VALIDATION_MESSAGE = "alternative-form-the-character-validation-message";
     public const string ALTERNATIVE_VIEW_DIALOG_DELETE_TOOLTIP = "alternative-view-dialog-delete-tooltip";
     public const string ALTERNATIVE_VIEW_DIALOG_ROOT = "alternative-view-dialog-root";
-    public const string ALTERNATIVES_TAB_BUTTON = "alternatives-tab-button";
     public const string APP_ALTERNATIVES_PRELOAD = "app-alternatives-preload";
     public const string APP_CHACHARS_PRELOAD = "app-chachars-preload";
     public const string APP_LOADING = "app-loading";
     public const string CHACHAR_FORM_ALTERNATIVE_INPUT = "chachar-form-alternative-input";
-    public const string CHACHAR_FORM_ALTERNATIVE_LABEL = "chachar-form-alternative-label";
     public const string CHACHAR_FORM_ALTERNATIVE_SELECTOR = "chachar-form-alternative-selector";
     public const string CHACHAR_FORM_CLEAR_ALTERNATIVE = "chachar-form-clear-alternative";
     public const string CHACHAR_FORM_IPA_INPUT = "chachar-form-ipa-input";
@@ -38,21 +35,14 @@ public static class IDs
     public const string CHACHAR_FORM_TONE_VALIDATION_MESSAGE = "chachar-form-tone-validation-message";
     public const string CHACHAR_VIEW_DIALOG_DELETE_TOOLTIP = "chachar-view-dialog-delete-tooltip";
     public const string CHACHAR_VIEW_DIALOG_ROOT = "chachar-view-dialog-root";
-    public const string CHACHARS_TAB_BUTTON = "chachars-tab-button";
-    public const string INDEX_BACKDROP = "index-backdrop";
     public const string INDEX_ROOT = "index-root";
     public const string LOADING_SPLASH_NAVBAR = "loading-splash-navbar";
     public const string LOADING_SPLASH_WHEEL = "loading-splash-wheel";
     public const string NAVBAR_ALTERNATIVES_TAB_ROOT = "navbar-alternatives-tab-root";
     public const string NAVBAR_CHACHARS_TAB_ROOT = "navbar-chachars-tab-root";
     public const string PROCESS_DIALOG = "process-dialog";
-    public const string PROCESS_DIALOG_BODY_TEXT = "process-dialog-body-text";
     public const string PROCESS_DIALOG_BUTTON_BACK = "process-dialog-button-back";
     public const string PROCESS_DIALOG_BUTTON_PROCEED = "process-dialog-button-proceed";
-    public const string PROCESS_DIALOG_BUTTON_PROCEED_TEXT = "process-dialog-button-proceed-text";
-    public const string PROCESS_DIALOG_FOOTER = "process-dialog-footer";
-    public const string PROCESS_DIALOG_HEADER = "process-dialog-header";
-    public const string PROCESS_DIALOG_LOADING = "process-dialog-loading";
     public const string PROCESS_DIALOG_MODAL_CONTENT = "process-dialog-modal-content";
     public const string PROCESS_DIALOG_SUCCESS = "process-dialog-success";
     public const string SAVE_FAILED_ROOT = "save-failed-root";

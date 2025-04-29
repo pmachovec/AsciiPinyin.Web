@@ -14,6 +14,4 @@ public interface IIndex : IPage
     ISet<Alternative> Alternatives { get; }
 
     ISet<Chachar> Chachars { get; }
-
-    void StateHasChangedPublic();
 }

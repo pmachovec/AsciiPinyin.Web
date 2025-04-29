@@ -18,7 +18,7 @@ public class IndexBase : ComponentBase, IIndex
 
     protected ChacharsTab ChacharsTab { get; set; } = default!;
 
-    public string BackdropId => IDs.INDEX_BACKDROP;
+    protected string BackdropClasses { get; private set; } = CssClasses.D_NONE;
 
     public string HtmlTitle { get; private set; } = string.Empty;
 
@@ -39,7 +39,11 @@ public class IndexBase : ComponentBase, IIndex
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
 
-    public void StateHasChangedPublic() => StateHasChanged();
+    public void AddBackdropClasses(params string[] classes) => BackdropClasses += $" {string.Join(' ', classes)}";
+
+    public void SetBackdropClasses(params string[] classes) => BackdropClasses = string.Join(' ', classes);
+
+    public async Task StateHasChangedAsync() => await InvokeAsync(StateHasChanged);
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,17 +89,12 @@ public class IndexBase : ComponentBase, IIndex
 
         if (_selectedTab is { } selectedTab)
         {
-            await Task.WhenAll(
-                selectedTab.HideAsync(cancellationToken),
-                JSInteropDOM.RemoveClassAsync(selectedTab.ButtonId, CssClasses.ACTIVE, cancellationToken)
-            );
+            await selectedTab.HideAsync(cancellationToken);
+            selectedTab.Classes = string.Empty;
         }
 
-        await Task.WhenAll(
-            JSInteropDOM.AddClassAsync(tab.ButtonId, CssClasses.ACTIVE, cancellationToken),
-            tab.ShowAsync(cancellationToken)
-        );
-
+        tab.Classes = CssClasses.ACTIVE;
+        await tab.ShowAsync(cancellationToken);
         _selectedTab = tab;
         StateHasChanged();
     }

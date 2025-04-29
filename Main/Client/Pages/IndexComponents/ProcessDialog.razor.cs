@@ -10,21 +10,35 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public class ProcessDialogBase : ComponentBase, IProcessDialog
 {
-    protected string HeaderText { get; private set; } = string.Empty;
-
     protected MarkupString BodyText { get; private set; } = new(string.Empty);
+
+    protected string BodyTextClasses { get; private set; } = string.Empty;
+
+    protected string ButtonBackClasses { get; private set; } = string.Empty;
+
+    protected string ButtonProceedClasses { get; private set; } = string.Empty;
 
     protected string ButtonProceedText { get; private set; } = string.Empty;
 
+    protected string Classes { get; private set; } = CssClasses.D_NONE;
+
+    protected string FooterClasses { get; private set; } = CssClasses.D_NONE;
+
+    protected string HeaderClasses { get; private set; } = string.Empty;
+
+    protected string LoadingClasses { get; private set; } = string.Empty;
+
+    protected string HeaderText { get; private set; } = string.Empty;
+
     protected Func<CancellationToken, Task> ProceedAsync { get; private set; } = default!;
 
-    public string RootId { get; } = IDs.PROCESS_DIALOG;
-
-    public IPage? Page { get; private set; }
+    public string HtmlTitle { get; private set; } = string.Empty;
 
     public IModal? ModalLowerLevel { get; private set; }
 
-    public string HtmlTitle { get; private set; } = string.Empty;
+    public IPage? Page { get; private set; }
+
+    public string RootId { get; } = IDs.PROCESS_DIALOG;
 
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
@@ -42,15 +56,13 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         HtmlTitle = $"{Localizer[Resource.Processing]}...";
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
 
-        await Task.WhenAll(
-            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_HEADER, cancellationToken),
-            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_BODY_TEXT, cancellationToken),
-            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_FOOTER, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_LOADING, cancellationToken),
-            ModalCommons.OpenAsyncCommon(this, cancellationToken)
-        );
+        LoadingClasses = CssClasses.D_BLOCK;
+        HeaderClasses = CssClasses.D_NONE;
+        BodyTextClasses = CssClasses.D_NONE;
+        FooterClasses = CssClasses.D_NONE;
 
-        await InvokeAsync(StateHasChanged);
+        await ModalCommons.OpenAsyncCommon(this, cancellationToken);
+        await StateHasChangedAsync();
     }
 
     public async Task SetSuccessAsync(
@@ -63,22 +75,21 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         ModalLowerLevel = modalLowerLevel;
         HtmlTitle = Localizer[Resource.Success];
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
+
         HeaderText = $"{Localizer[Resource.Success]}!";
         BodyText = new(message);
         ButtonProceedText = Localizer[Resource.OK];
         ProceedAsync = CloseAllAsync;
-        StateHasChanged();
 
-        await Task.WhenAll(
-            JSInteropDOM.None2FlexAsync(IDs.PROCESS_DIALOG_HEADER, cancellationToken),
-            JSInteropDOM.None2FlexAsync(IDs.PROCESS_DIALOG_FOOTER, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_BODY_TEXT, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_BUTTON_PROCEED, cancellationToken),
-            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_BUTTON_BACK, cancellationToken),
-            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_LOADING, cancellationToken),
-            JSInteropDOM.SetBgPrimaryAsync(IDs.PROCESS_DIALOG_HEADER, cancellationToken),
-            ModalCommons.OpenAsyncCommon(this, cancellationToken)
-        );
+        LoadingClasses = CssClasses.D_NONE;
+        HeaderClasses = $"{CssClasses.D_FLEX} {CssClasses.BG_PRIMARY}";
+        BodyTextClasses = CssClasses.D_BLOCK;
+        ButtonBackClasses = CssClasses.D_NONE;
+        ButtonProceedClasses = CssClasses.D_BLOCK;
+        FooterClasses = CssClasses.D_FLEX;
+
+        await ModalCommons.OpenAsyncCommon(this, cancellationToken);
+        await StateHasChangedAsync();
     }
 
     public async Task SetErrorAsync(
@@ -91,20 +102,19 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         ModalLowerLevel = modalLowerLevel;
         HtmlTitle = Localizer[Resource.Error];
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
+
         HeaderText = $"{Localizer[Resource.Error]}!";
         BodyText = new(message);
-        StateHasChanged();
 
-        await Task.WhenAll(
-            JSInteropDOM.None2FlexAsync(IDs.PROCESS_DIALOG_HEADER, cancellationToken),
-            JSInteropDOM.None2FlexAsync(IDs.PROCESS_DIALOG_FOOTER, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_BODY_TEXT, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_BUTTON_BACK, cancellationToken),
-            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_BUTTON_PROCEED, cancellationToken),
-            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_LOADING, cancellationToken),
-            JSInteropDOM.SetBgDangerAsync(IDs.PROCESS_DIALOG_HEADER, cancellationToken),
-            ModalCommons.OpenAsyncCommon(this, cancellationToken)
-        );
+        LoadingClasses = CssClasses.D_NONE;
+        HeaderClasses = $"{CssClasses.D_FLEX} {CssClasses.BG_DANGER}";
+        BodyTextClasses = CssClasses.D_BLOCK;
+        ButtonBackClasses = CssClasses.D_BLOCK;
+        ButtonProceedClasses = CssClasses.D_NONE;
+        FooterClasses = CssClasses.D_FLEX;
+
+        await ModalCommons.OpenAsyncCommon(this, cancellationToken);
+        await StateHasChangedAsync();
     }
 
     public async Task SetWarningAsync(
@@ -118,26 +128,31 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         ModalLowerLevel = modalLowerLevel;
         HtmlTitle = Localizer[Resource.Warning];
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
+
         HeaderText = $"{Localizer[Resource.Warning]}!";
         BodyText = new(message);
         ButtonProceedText = Localizer[Resource.Proceed];
         ProceedAsync = methodOnProceedAsync;
-        StateHasChanged();
 
-        await Task.WhenAll(
-            JSInteropDOM.None2FlexAsync(IDs.PROCESS_DIALOG_HEADER, cancellationToken),
-            JSInteropDOM.None2FlexAsync(IDs.PROCESS_DIALOG_FOOTER, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_BODY_TEXT, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_BUTTON_BACK, cancellationToken),
-            JSInteropDOM.None2BlockAsync(IDs.PROCESS_DIALOG_BUTTON_PROCEED, cancellationToken),
-            JSInteropDOM.Display2NoneAsync(IDs.PROCESS_DIALOG_LOADING, cancellationToken),
-            JSInteropDOM.SetBgWarningAsync(IDs.PROCESS_DIALOG_HEADER, cancellationToken),
-            ModalCommons.OpenAsyncCommon(this, cancellationToken)
-        );
+        LoadingClasses = CssClasses.D_NONE;
+        HeaderClasses = $"{CssClasses.D_FLEX} {CssClasses.BG_WARNING}";
+        BodyTextClasses = CssClasses.D_BLOCK;
+        ButtonBackClasses = CssClasses.D_BLOCK;
+        ButtonProceedClasses = CssClasses.D_BLOCK;
+        FooterClasses = CssClasses.D_FLEX;
+
+        await ModalCommons.OpenAsyncCommon(this, cancellationToken);
+        await StateHasChangedAsync();
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken) =>
         await ModalCommons.CloseAsyncCommon(this, cancellationToken);
+
+    public void AddClasses(params string[] classes) => Classes += $" {string.Join(' ', classes)}";
+
+    public void SetClasses(params string[] classes) => Classes = string.Join(' ', classes);
+
+    public async Task StateHasChangedAsync() => await InvokeAsync(StateHasChanged);
 
     protected async Task CloseAllAsync(CancellationToken cancellationToken)
         => await ModalCommons.CloseAllAsyncCommon(this, cancellationToken);

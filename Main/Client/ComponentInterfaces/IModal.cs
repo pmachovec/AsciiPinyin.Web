@@ -9,4 +9,10 @@ public interface IModal
     IPage? Page { get; }
 
     string RootId { get; }
+
+    void AddClasses(params string[] classes);
+
+    void SetClasses(params string[] classes);
+
+    Task StateHasChangedAsync();
 }

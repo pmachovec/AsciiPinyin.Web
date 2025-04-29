@@ -10,7 +10,7 @@ public class LoadingBase : ComponentBase
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
     [Parameter, EditorRequired]
-    public required string Id { protected get; init; }
+    public required string Classes { protected get; init; }
 
     [Parameter, EditorRequired]
     public required string TextResource { protected get; init; }

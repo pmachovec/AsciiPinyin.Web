@@ -2,7 +2,7 @@ namespace AsciiPinyin.Web.Shared.ComponentInterfaces;
 
 public interface IEntityTab
 {
-    string ButtonId { get; }
+    string Classes { get; set; }
 
     string HtmlTitle { get; }
 
