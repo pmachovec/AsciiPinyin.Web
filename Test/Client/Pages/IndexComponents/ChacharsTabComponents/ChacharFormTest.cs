@@ -205,16 +205,6 @@ internal sealed class ChacharFormTest : IDisposable
         _testContext = new TestContext();
         _jsInteropSetter = new(_testContext.JSInterop);
 
-        _jsInteropSetter.SetUpDisable(
-            IDs.CHACHAR_FORM_ALTERNATIVE_INPUT,
-            IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE
-        );
-
-        _jsInteropSetter.SetUpEnable(
-            IDs.CHACHAR_FORM_ALTERNATIVE_INPUT,
-            IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE
-        );
-
         _jsInteropSetter.SetUpSetTitles(
             CREATE_NEW_CHARACTER,
             SELECT_RADICAL,
@@ -222,6 +212,10 @@ internal sealed class ChacharFormTest : IDisposable
         );
 
         _jsInteropSetter.SetUpSetZIndex(IDs.CHACHAR_FORM_ROOT);
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.DISABLE, IDs.CHACHAR_FORM_ALTERNATIVE_INPUT).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.DISABLE, IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ENABLE, IDs.CHACHAR_FORM_ALTERNATIVE_INPUT).SetVoidResult();
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.ENABLE, IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE).SetVoidResult();
 
         _ = _testContext.Services
             .AddSingleton(_entityClientMock.Object)

@@ -5,22 +5,6 @@ namespace Asciipinyin.Web.Client.Test.Tools;
 
 internal sealed class JSInteropSetter(BunitJSInterop _jsInterop)
 {
-    public void SetUpDisable(params string[] ids)
-    {
-        foreach (var id in ids)
-        {
-            _ = _jsInterop.SetupVoid(DOMFunctions.DISABLE, id).SetVoidResult();
-        }
-    }
-
-    public void SetUpEnable(params string[] ids)
-    {
-        foreach (var id in ids)
-        {
-            _ = _jsInterop.SetupVoid(DOMFunctions.ENABLE, id).SetVoidResult();
-        }
-    }
-
     public void SetUpSetTitles(params string[] titles)
     {
         foreach (var title in titles)

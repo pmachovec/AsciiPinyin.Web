@@ -29,6 +29,8 @@ internal sealed class ChacharViewDialogTest : IDisposable
 
     private const string ALTERNATIVES_EXIST = nameof(ALTERNATIVES_EXIST);
     private const string CANNOT_BE_DELETED = nameof(CANNOT_BE_DELETED);
+    private const string ERROR = nameof(ERROR);
+    private const string INDEX_TITLE = nameof(INDEX_TITLE);
     private const string IS_RADICAL_FOR_OTHERS = nameof(IS_RADICAL_FOR_OTHERS);
     private const string OK = nameof(OK);
     private const string PROCESSING = nameof(PROCESSING);
@@ -63,6 +65,15 @@ internal sealed class ChacharViewDialogTest : IDisposable
     };
 
     private static readonly Chachar _radicalChachar4 = new()
+    {
+        TheCharacter = "木",
+        Pinyin = "mu",
+        Ipa = "mu",
+        Tone = 4,
+        Strokes = 4
+    };
+
+    private static readonly Chachar _radicalChachar5 = new()
     {
         TheCharacter = "辵",
         Pinyin = "chuo",
@@ -127,7 +138,7 @@ internal sealed class ChacharViewDialogTest : IDisposable
     private static readonly LocalizerMockSetter _localizerMockSetter = new(_localizerMock);
 
     private HashSet<Chachar> _chachars = default!;
-    private EntityViewDialogTestCommons _entityViewDialogTestCommons = default!;
+    private EntityViewDialogTestCommons<Chachar> _entityViewDialogTestCommons = default!;
     private IRenderedComponent<ChacharViewDialog> _chacharViewDialogComponent = default!;
     private IRenderedComponent<ProcessDialog> _processDialogComponent = default!;
     private JSInteropSetter _jsInteropSetter = default!;
@@ -140,7 +151,17 @@ internal sealed class ChacharViewDialogTest : IDisposable
             .Setup(
                 entityClient => entityClient.PostDeleteEntityAsync(
                     ApiNames.CHARACTERS,
-                    _radicalChachar4,
+                    _radicalChachar5,
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ReturnsAsync(HttpStatusCode.InternalServerError);
+
+        _ = _entityClientMock
+            .Setup(
+                entityClient => entityClient.PostDeleteEntityAsync(
+                    ApiNames.CHARACTERS,
+                    _radicalChachar5,
                     It.IsAny<CancellationToken>()
                 )
             )
@@ -172,6 +193,7 @@ internal sealed class ChacharViewDialogTest : IDisposable
             (Resource.CharacterDeleted, CHARACTER_DELETED),
             (Resource.CharacterWillBeDeleted, CHARACTER_WILL_BE_DELETED),
             (Resource.CharacterIsRadicalForOthers, IS_RADICAL_FOR_OTHERS),
+            (Resource.Error, ERROR),
             (Resource.OK, OK),
             (Resource.Processing, PROCESSING),
             (Resource.Success, SUCCESS),
@@ -188,6 +210,7 @@ internal sealed class ChacharViewDialogTest : IDisposable
             _radicalChachar2,
             _radicalChachar3,
             _radicalChachar4,
+            _radicalChachar5,
             _nonRadicalChacharWithoutAlternative21,
             _nonRadicalChacharWithAlternative31
         ];
@@ -199,6 +222,10 @@ internal sealed class ChacharViewDialogTest : IDisposable
         _ = _indexMock
             .Setup(index => index.Chachars)
             .Returns(_chachars);
+
+        _ = _indexMock
+            .Setup(index => index.HtmlTitle)
+            .Returns(INDEX_TITLE);
 
         _testContext = new TestContext();
         _jsInteropSetter = new(_testContext.JSInterop);
@@ -212,12 +239,7 @@ internal sealed class ChacharViewDialogTest : IDisposable
             string.Empty
         ).SetVoidResult();
 
-        _jsInteropSetter.SetUpSetTitles(
-            $"{PROCESSING}...",
-            SUCCESS,
-            WARNING
-        );
-
+        _jsInteropSetter.SetUpSetTitles($"{PROCESSING}...");
         _jsInteropSetter.SetUpSetZIndex(IDs.CHACHAR_VIEW_DIALOG_ROOT);
 
         _ = _testContext.Services
@@ -239,6 +261,9 @@ internal sealed class ChacharViewDialogTest : IDisposable
         _entityViewDialogTestCommons = new(
             _chacharViewDialogComponent,
             _processDialogComponent,
+            _testContext.JSInterop,
+            _indexMock,
+            IDs.CHACHAR_VIEW_DIALOG_ROOT,
             IDs.CHACHAR_VIEW_DIALOG_DELETE_TOOLTIP
         );
     }
@@ -249,32 +274,51 @@ internal sealed class ChacharViewDialogTest : IDisposable
     public void Dispose() => _testContext.Dispose();
 
     [Test]
-    public async Task OpenRadicalChacharWithAlternativesTest()
+    public async Task OpenCloseRadicalWithAlternativesTest() =>
+        await OpenCloseDeleteButtonDisabledTest(_radicalChachar1, ALTERNATIVES_EXIST);
+
+    [Test]
+    public async Task OpenCloseRadicalForOthersTest() =>
+        await OpenCloseDeleteButtonDisabledTest(_radicalChachar2, IS_RADICAL_FOR_OTHERS);
+
+    [Test]
+    public async Task OpenCloseRadicalWithAlternativesRadicalForOthersTest() =>
+        await OpenCloseDeleteButtonDisabledTest(_radicalChachar3, ALTERNATIVES_EXIST, IS_RADICAL_FOR_OTHERS);
+
+    [Test]
+    public async Task DeleteChacharErrorTest()
     {
-        _jsInteropSetter.SetUpSetTitles($"{StringConstants.ASCII_PINYIN} - {_radicalChachar1.TheCharacter}");
-        await _chacharViewDialogComponent.Instance.OpenAsync(_indexMock.Object, _radicalChachar1, CancellationToken.None);
-        _entityViewDialogTestCommons.DeleteButtonDisabledTest(CANNOT_BE_DELETED, ALTERNATIVES_EXIST);
+        var dialogTitle = $"{StringConstants.ASCII_PINYIN} - {_radicalChachar4.TheCharacter}";
+        var setDialogTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, dialogTitle).SetVoidResult();
+
+        await _entityViewDialogTestCommons.OpenDialogTest(_radicalChachar4, setDialogTitleHandler, dialogTitle);
+        var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
+        await _entityViewDialogTestCommons.ClickDeleteButtonWarningTest(deleteButton, WARNING);
+        await _entityViewDialogTestCommons.ClickProcessDialogProceedButtonErrorTest(ERROR);
+        await _entityViewDialogTestCommons.ClickProcessDialogBackButtonTest(setDialogTitleHandler, dialogTitle);
+        await _entityViewDialogTestCommons.CloseDialogTest(INDEX_TITLE);
+
+        Assert.That(_chachars, Does.Contain(_radicalChachar4));
     }
 
     [Test]
-    public async Task OpenRadicalChacharRadicalForOthersTest()
+    public async Task DeleteChacharClickBackTest()
     {
-        _jsInteropSetter.SetUpSetTitles($"{StringConstants.ASCII_PINYIN} - {_radicalChachar2.TheCharacter}");
-        await _chacharViewDialogComponent.Instance.OpenAsync(_indexMock.Object, _radicalChachar2, CancellationToken.None);
-        _entityViewDialogTestCommons.DeleteButtonDisabledTest(CANNOT_BE_DELETED, IS_RADICAL_FOR_OTHERS);
-    }
+        var dialogTitle = $"{StringConstants.ASCII_PINYIN} - {_radicalChachar5.TheCharacter}";
+        var setDialogTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, dialogTitle).SetVoidResult();
 
-    [Test]
-    public async Task OpenRadicalChacharWithAlternativesRadicalForOthersTest()
-    {
-        _jsInteropSetter.SetUpSetTitles($"{StringConstants.ASCII_PINYIN} - {_radicalChachar3.TheCharacter}");
-        await _chacharViewDialogComponent.Instance.OpenAsync(_indexMock.Object, _radicalChachar3, CancellationToken.None);
-        _entityViewDialogTestCommons.DeleteButtonDisabledTest(CANNOT_BE_DELETED, ALTERNATIVES_EXIST, IS_RADICAL_FOR_OTHERS);
+        await _entityViewDialogTestCommons.OpenDialogTest(_radicalChachar5, setDialogTitleHandler, dialogTitle);
+        var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
+        await _entityViewDialogTestCommons.ClickDeleteButtonWarningTest(deleteButton, WARNING);
+        await _entityViewDialogTestCommons.ClickProcessDialogBackButtonTest(setDialogTitleHandler, dialogTitle);
+        await _entityViewDialogTestCommons.CloseDialogTest(INDEX_TITLE);
+
+        Assert.That(_chachars, Does.Contain(_radicalChachar5));
     }
 
     [Test]
     public async Task DeleteRadicalChacharTest() =>
-        await DeleteChacharTest(_radicalChachar4);
+        await DeleteChacharTest(_radicalChachar5);
 
     [Test]
     public async Task DeleteNonRadicalChacharWithoutAlternativeTest() =>
@@ -284,11 +328,25 @@ internal sealed class ChacharViewDialogTest : IDisposable
     public async Task DeleteNonRadicalChacharWthAlternativeTest() =>
         await DeleteChacharTest(_nonRadicalChacharWithAlternative31);
 
+    private async Task OpenCloseDeleteButtonDisabledTest(Chachar chachar, params string[] expectedTooltipParts)
+    {
+        await _entityViewDialogTestCommons.OpenDialogTest(chachar, $"{StringConstants.ASCII_PINYIN} - {chachar.TheCharacter}");
+        _entityViewDialogTestCommons.DeleteButtonDisabledTest(CANNOT_BE_DELETED, expectedTooltipParts);
+        await _entityViewDialogTestCommons.CloseDialogTest(INDEX_TITLE);
+
+        Assert.That(_chachars, Does.Contain(chachar));
+    }
+
     private async Task DeleteChacharTest(Chachar chachar)
     {
-        _jsInteropSetter.SetUpSetTitles($"{StringConstants.ASCII_PINYIN} - {chachar.TheCharacter}");
-        await _chacharViewDialogComponent.Instance.OpenAsync(_indexMock.Object, chachar, CancellationToken.None);
-        await _entityViewDialogTestCommons.DeleteEntityTest();
+        var dialogTitle = $"{StringConstants.ASCII_PINYIN} - {chachar.TheCharacter}";
+        var setDialogTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, dialogTitle).SetVoidResult();
+
+        await _entityViewDialogTestCommons.OpenDialogTest(chachar, setDialogTitleHandler, dialogTitle);
+        var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
+        await _entityViewDialogTestCommons.ClickDeleteButtonWarningTest(deleteButton, WARNING);
+        await _entityViewDialogTestCommons.ClickProcessDialogProceedButtonTest(SUCCESS);
+
         Assert.That(_chachars, Does.Not.Contain(chachar));
     }
 }

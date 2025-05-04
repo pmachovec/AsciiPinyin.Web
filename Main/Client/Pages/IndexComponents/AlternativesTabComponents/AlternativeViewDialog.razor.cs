@@ -12,7 +12,7 @@ using System.Globalization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
-public class AlternativeViewDialogBase : ComponentBase, IModal
+public class AlternativeViewDialogBase : ComponentBase, IEntityViewDialog<Alternative>
 {
     protected Alternative? Alternative { get; set; }
 
@@ -54,6 +54,8 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
         CancellationToken cancellationToken
     )
     {
+        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
+
         await JSInteropDOM.SetAttributeAsync(
             IDs.ALTERNATIVE_VIEW_DIALOG_DELETE_TOOLTIP,
             Attributes.DATA_BS_ORIGINAL_TITLE,
@@ -67,9 +69,6 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
         Page = page;
         HtmlTitle = $"{StringConstants.ASCII_PINYIN} - {alternative.TheCharacter}";
         Alternative = alternative;
-
-        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
-        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
 
         var chacharsWithThis = Index.Chachars.Where(chachar =>
             chachar.RadicalAlternativeCharacter == Alternative!.TheCharacter
@@ -85,6 +84,7 @@ public class AlternativeViewDialogBase : ComponentBase, IModal
             await InvokeAsync(StateHasChanged);
         }
 
+        await ModalCommons.OpenAsyncCommon(this, cancellationToken);
         await Index.ProcessDialog.CloseAsync(cancellationToken);
     }
 

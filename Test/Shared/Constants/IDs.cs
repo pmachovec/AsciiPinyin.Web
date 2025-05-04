@@ -35,4 +35,5 @@ public static class IDs
     public const string PROCESS_DIALOG = "process-dialog";
     public const string PROCESS_DIALOG_BUTTON_BACK = "process-dialog-button-back";
     public const string PROCESS_DIALOG_BUTTON_PROCEED = "process-dialog-button-proceed";
+    public const string PROCESS_DIALOG_HEADER = "process-dialog-header";
 }

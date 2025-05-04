@@ -12,7 +12,7 @@ using System.Text;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
-public class ChacharViewDialogBase : ComponentBase, IModal
+public class ChacharViewDialogBase : ComponentBase, IEntityViewDialog<Chachar>
 {
     protected Chachar? Chachar { get; set; }
 
@@ -54,6 +54,8 @@ public class ChacharViewDialogBase : ComponentBase, IModal
         CancellationToken cancellationToken
     )
     {
+        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
+
         await JSInteropDOM.SetAttributeAsync(
             IDs.CHACHAR_VIEW_DIALOG_DELETE_TOOLTIP,
             Attributes.DATA_BS_ORIGINAL_TITLE,
@@ -68,8 +70,6 @@ public class ChacharViewDialogBase : ComponentBase, IModal
         Page = page;
         HtmlTitle = $"{StringConstants.ASCII_PINYIN} - {chachar.TheCharacter}";
         Chachar = chachar;
-
-        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
 
         if (chachar.IsRadical)
         {
@@ -103,6 +103,9 @@ public class ChacharViewDialogBase : ComponentBase, IModal
             DeleteTitle = GetErrorMessageFormatted(databaseIntegrityErrorMessages);
             await InvokeAsync(StateHasChanged);
         }
+
+        await ModalCommons.OpenAsyncCommon(this, cancellationToken);
+        await Index.ProcessDialog.CloseAsync(cancellationToken);
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken)

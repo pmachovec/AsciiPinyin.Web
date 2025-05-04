@@ -71,12 +71,7 @@ public sealed class ModalCommons(
         else
         {
             await _jSInteropDOM.SetTitleAsync(modal.ModalLowerLevel!.HtmlTitle, cancellationToken);
-            modal.SetClasses(CssClasses.D_BLOCK);
-            await modal.StateHasChangedAsync();
-            await IncreaseAllZIndexesAsync(modal.ModalLowerLevel!, NumberConstants.INDEX_BACKDROP_Z, cancellationToken);
-            await Task.Delay(IntConstants.MODAL_HIDE_DELAY, cancellationToken);
-            modal.SetClasses(CssClasses.D_NONE);
-            await modal.StateHasChangedAsync();
+            await CloseModalHigherLevelAsync(modal, cancellationToken);
         }
     }
 
@@ -95,7 +90,7 @@ public sealed class ModalCommons(
         {
             await Task.WhenAll(
                 CloseAllAsyncCommon(modal.ModalLowerLevel!, cancellationToken),
-                CloseAsyncCommon(modal, cancellationToken)
+                CloseModalHigherLevelAsync(modal, cancellationToken)
             );
         }
     }
@@ -206,5 +201,18 @@ public sealed class ModalCommons(
         modalFirstLevel.Page.SetBackdropClasses(CssClasses.D_NONE);
         await modalFirstLevel.StateHasChangedAsync();
         await modalFirstLevel.Page.StateHasChangedAsync();
+    }
+
+    private async Task CloseModalHigherLevelAsync(
+        IModal modal,
+        CancellationToken cancellationToken
+    )
+    {
+        modal.SetClasses(CssClasses.D_BLOCK);
+        await modal.StateHasChangedAsync();
+        await IncreaseAllZIndexesAsync(modal.ModalLowerLevel!, NumberConstants.INDEX_BACKDROP_Z, cancellationToken);
+        await Task.Delay(IntConstants.MODAL_HIDE_DELAY, cancellationToken);
+        modal.SetClasses(CssClasses.D_NONE);
+        await modal.StateHasChangedAsync();
     }
 }

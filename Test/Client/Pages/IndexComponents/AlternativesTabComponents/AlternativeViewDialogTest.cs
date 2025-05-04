@@ -27,6 +27,8 @@ internal sealed class AlternativeViewDialogTest : IDisposable
     private const string ALTERNATIVE_WILL_BE_DELETED = "Alternative '{0}' - '{1}' - '{2}' will be deleted";
 
     private const string CANNOT_BE_DELETED = nameof(CANNOT_BE_DELETED);
+    private const string ERROR = nameof(ERROR);
+    private const string INDEX_TITLE = nameof(INDEX_TITLE);
     private const string PROCESSING = nameof(PROCESSING);
     private const string SUCCESS = nameof(SUCCESS);
     private const string USED_BY_CHACHARS = nameof(USED_BY_CHACHARS);
@@ -42,6 +44,15 @@ internal sealed class AlternativeViewDialogTest : IDisposable
     };
 
     private static readonly Chachar _radicalChachar2 = new()
+    {
+        TheCharacter = "辵",
+        Pinyin = "chuo",
+        Ipa = "ʈʂʰuɔ",
+        Tone = 4,
+        Strokes = 7
+    };
+
+    private static readonly Chachar _radicalChachar3 = new()
     {
         TheCharacter = "人",
         Pinyin = "ren",
@@ -60,10 +71,19 @@ internal sealed class AlternativeViewDialogTest : IDisposable
 
     private static readonly Alternative _alternative21 = new()
     {
-        TheCharacter = "亻",
+        TheCharacter = "⻌",
         OriginalCharacter = _radicalChachar2.TheCharacter,
         OriginalPinyin = _radicalChachar2.Pinyin,
         OriginalTone = _radicalChachar2.Tone,
+        Strokes = 3
+    };
+
+    private static readonly Alternative _alternative31 = new()
+    {
+        TheCharacter = "亻",
+        OriginalCharacter = _radicalChachar3.TheCharacter,
+        OriginalPinyin = _radicalChachar3.Pinyin,
+        OriginalTone = _radicalChachar3.Tone,
         Strokes = 2
     };
 
@@ -83,7 +103,7 @@ internal sealed class AlternativeViewDialogTest : IDisposable
     private static readonly HashSet<Chachar> _chachars =
     [
         _radicalChachar1,
-        _radicalChachar2,
+        _radicalChachar3,
         _nonRadicalChacharWithAlternative11
     ];
 
@@ -94,7 +114,7 @@ internal sealed class AlternativeViewDialogTest : IDisposable
     private static readonly LocalizerMockSetter _localizerMockSetter = new(_localizerMock);
 
     private HashSet<Alternative> _alternatives = default!;
-    private EntityViewDialogTestCommons _entityViewDialogTestCommons = default!;
+    private EntityViewDialogTestCommons<Alternative> _entityViewDialogTestCommons = default!;
     private IRenderedComponent<AlternativeViewDialog> _alternativeViewDialogComponent = default!;
     private IRenderedComponent<ProcessDialog> _processDialogComponent = default!;
     private JSInteropSetter _jsInteropSetter = default!;
@@ -111,6 +131,16 @@ internal sealed class AlternativeViewDialogTest : IDisposable
                     It.IsAny<CancellationToken>()
                 )
             )
+            .ReturnsAsync(HttpStatusCode.InternalServerError);
+
+        _ = _entityClientMock
+            .Setup(
+                entityClient => entityClient.PostDeleteEntityAsync(
+                    ApiNames.ALTERNATIVES,
+                    _alternative31,
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(HttpStatusCode.OK);
 
         _localizerMockSetter.SetUpResources(
@@ -118,6 +148,7 @@ internal sealed class AlternativeViewDialogTest : IDisposable
             (Resource.AlternativeDeleted, ALTERNATIVE_DELETED),
             (Resource.AlternativeWillBeDeleted, ALTERNATIVE_WILL_BE_DELETED),
             (Resource.CannotBeDeleted, CANNOT_BE_DELETED),
+            (Resource.Error, ERROR),
             (Resource.Processing, PROCESSING),
             (Resource.Success, SUCCESS),
             (Resource.Warning, WARNING)
@@ -130,7 +161,8 @@ internal sealed class AlternativeViewDialogTest : IDisposable
         _alternatives =
         [
             _alternative11,
-            _alternative21
+            _alternative21,
+            _alternative31
         ];
 
         _ = _indexMock
@@ -140,6 +172,10 @@ internal sealed class AlternativeViewDialogTest : IDisposable
         _ = _indexMock
             .Setup(index => index.Chachars)
             .Returns(_chachars);
+
+        _ = _indexMock
+            .Setup(index => index.HtmlTitle)
+            .Returns(INDEX_TITLE);
 
         _testContext = new TestContext();
         _jsInteropSetter = new(_testContext.JSInterop);
@@ -180,6 +216,9 @@ internal sealed class AlternativeViewDialogTest : IDisposable
         _entityViewDialogTestCommons = new(
             _alternativeViewDialogComponent,
             _processDialogComponent,
+            _testContext.JSInterop,
+            _indexMock,
+            IDs.ALTERNATIVE_VIEW_DIALOG_ROOT,
             IDs.ALTERNATIVE_VIEW_DIALOG_DELETE_TOOLTIP
         );
     }
@@ -190,19 +229,57 @@ internal sealed class AlternativeViewDialogTest : IDisposable
     public void Dispose() => _testContext.Dispose();
 
     [Test]
-    public async Task OpenUsedByChacharsTest()
+    public async Task OpenCloseUsedByChacharsTest()
     {
-        _jsInteropSetter.SetUpSetTitles($"{StringConstants.ASCII_PINYIN} - {_alternative11.TheCharacter}");
-        await _alternativeViewDialogComponent.Instance.OpenAsync(_indexMock.Object, _alternative11, CancellationToken.None);
+        await _entityViewDialogTestCommons.OpenDialogTest(_alternative11, $"{StringConstants.ASCII_PINYIN} - {_alternative11.TheCharacter}");
         _entityViewDialogTestCommons.DeleteButtonDisabledTest(CANNOT_BE_DELETED, USED_BY_CHACHARS);
+        await _entityViewDialogTestCommons.CloseDialogTest(INDEX_TITLE);
+
+        Assert.That(_alternatives, Does.Contain(_alternative11));
+    }
+
+    [Test]
+    public async Task DeleteAlternativeErrorTest()
+    {
+        var dialogTitle = $"{StringConstants.ASCII_PINYIN} - {_alternative21.TheCharacter}";
+        var setDialogTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, dialogTitle).SetVoidResult();
+
+        await _entityViewDialogTestCommons.OpenDialogTest(_alternative21, setDialogTitleHandler, dialogTitle);
+        var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
+        await _entityViewDialogTestCommons.ClickDeleteButtonWarningTest(deleteButton, WARNING);
+        await _entityViewDialogTestCommons.ClickProcessDialogProceedButtonErrorTest(ERROR);
+        await _entityViewDialogTestCommons.ClickProcessDialogBackButtonTest(setDialogTitleHandler, dialogTitle);
+        await _entityViewDialogTestCommons.CloseDialogTest(INDEX_TITLE);
+
+        Assert.That(_alternatives, Does.Contain(_alternative21));
+    }
+
+    [Test]
+    public async Task DeleteAlternativeClickBackTest()
+    {
+        var dialogTitle = $"{StringConstants.ASCII_PINYIN} - {_alternative31.TheCharacter}";
+        var setDialogTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, dialogTitle).SetVoidResult();
+
+        await _entityViewDialogTestCommons.OpenDialogTest(_alternative31, setDialogTitleHandler, dialogTitle);
+        var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
+        await _entityViewDialogTestCommons.ClickDeleteButtonWarningTest(deleteButton, WARNING);
+        await _entityViewDialogTestCommons.ClickProcessDialogBackButtonTest(setDialogTitleHandler, dialogTitle);
+        await _entityViewDialogTestCommons.CloseDialogTest(INDEX_TITLE);
+
+        Assert.That(_alternatives, Does.Contain(_alternative31));
     }
 
     [Test]
     public async Task DeleteAlternativeTest()
     {
-        _jsInteropSetter.SetUpSetTitles($"{StringConstants.ASCII_PINYIN} - {_alternative21.TheCharacter}");
-        await _alternativeViewDialogComponent.Instance.OpenAsync(_indexMock.Object, _alternative21, CancellationToken.None);
-        await _entityViewDialogTestCommons.DeleteEntityTest();
-        Assert.That(_alternatives, Does.Not.Contain(_alternative21));
+        var dialogTitle = $"{StringConstants.ASCII_PINYIN} - {_alternative31.TheCharacter}";
+        var setDialogTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, dialogTitle).SetVoidResult();
+
+        await _entityViewDialogTestCommons.OpenDialogTest(_alternative31, setDialogTitleHandler, dialogTitle);
+        var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
+        await _entityViewDialogTestCommons.ClickDeleteButtonWarningTest(deleteButton, WARNING);
+        await _entityViewDialogTestCommons.ClickProcessDialogProceedButtonTest(SUCCESS);
+
+        Assert.That(_alternatives, Does.Not.Contain(_alternative31));
     }
 }

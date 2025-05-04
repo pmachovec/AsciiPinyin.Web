@@ -43,6 +43,7 @@ public static class IDs
     public const string PROCESS_DIALOG = "process-dialog";
     public const string PROCESS_DIALOG_BUTTON_BACK = "process-dialog-button-back";
     public const string PROCESS_DIALOG_BUTTON_PROCEED = "process-dialog-button-proceed";
+    public const string PROCESS_DIALOG_HEADER = "process-dialog-header";
     public const string PROCESS_DIALOG_MODAL_CONTENT = "process-dialog-modal-content";
     public const string PROCESS_DIALOG_SUCCESS = "process-dialog-success";
     public const string SAVE_FAILED_ROOT = "save-failed-root";
