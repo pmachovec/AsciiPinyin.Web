@@ -15,7 +15,7 @@ using System.Globalization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
-public class ChacharFormBase : ComponentBase, IEntityForm
+public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
 {
     protected string Classes { get; private set; } = CssClasses.D_NONE;
 
@@ -87,6 +87,12 @@ public class ChacharFormBase : ComponentBase, IEntityForm
                 JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CancellationToken.None)
             );
         }
+    }
+
+    public async Task OpenAsync(Chachar chachar, IPage page, CancellationToken cancellationToken)
+    {
+        Chachar = chachar;
+        await OpenAsync(page, cancellationToken);
     }
 
     public async Task OpenAsync(IPage page, CancellationToken cancellationToken)
@@ -277,6 +283,6 @@ public class ChacharFormBase : ComponentBase, IEntityForm
     private void SetUpEditContext()
     {
         EditContext = new(Chachar);
-        _ = new FormValidationHandler<ChacharForm>(Logger, Localizer, EditContext);
+        _ = new FormValidationHandler<ChacharForm, Chachar>(Logger, Localizer, EditContext);
     }
 }

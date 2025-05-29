@@ -12,7 +12,7 @@ using System.Globalization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
-public class AlternativeViewDialogBase : ComponentBase, IEntityViewDialog<Alternative>
+public class AlternativeViewDialogBase : ComponentBase, IEntityModal<Alternative>
 {
     protected Alternative? Alternative { get; set; }
 
@@ -49,8 +49,8 @@ public class AlternativeViewDialogBase : ComponentBase, IEntityViewDialog<Altern
     public required IIndex Index { get; init; }
 
     public async Task OpenAsync(
-        IPage page,
         Alternative alternative,
+        IPage page,
         CancellationToken cancellationToken
     )
     {

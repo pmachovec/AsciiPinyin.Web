@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Components;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
-public interface IEntityViewDialog<T> : IModal, IComponent where T : IEntity
+public interface IEntityModal<T> : IModal, IComponent where T : IEntity
 {
-    Task OpenAsync(IPage page, T entity, CancellationToken cancellationToken);
+    Task OpenAsync(T entity, IPage page, CancellationToken cancellationToken);
 
     Task CloseAsync(CancellationToken cancellationToken);
 }

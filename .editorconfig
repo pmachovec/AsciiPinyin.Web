@@ -107,3 +107,8 @@ dotnet_diagnostic.CA1848.severity = none
 
 # CA1727: Use PascalCase for named placeholders
 dotnet_diagnostic.CA1727.severity = none
+csharp_style_prefer_primary_constructors = true:suggestion
+csharp_prefer_system_threading_lock = true:suggestion
+
+# CA1863: Use 'CompositeFormat'
+dotnet_diagnostic.CA1863.severity = none

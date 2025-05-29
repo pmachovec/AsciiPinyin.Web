@@ -15,7 +15,7 @@ using System.Globalization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 
-public class AlternativeFormBase : ComponentBase, IEntityForm
+public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
 {
     protected string Classes { get; private set; } = CssClasses.D_NONE;
 
@@ -61,6 +61,12 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
         HtmlTitle = Localizer[Resource.CreateNewAlternative];
         SetUpEditContext();
         EditContext.OnValidationRequested += (_, _) => ValidateAdditional();
+    }
+
+    public async Task OpenAsync(Alternative alternative, IPage page, CancellationToken cancellationToken)
+    {
+        Alternative = alternative;
+        await OpenAsync(page, cancellationToken);
     }
 
     public async Task OpenAsync(IPage page, CancellationToken cancellationToken)
@@ -228,6 +234,6 @@ public class AlternativeFormBase : ComponentBase, IEntityForm
     private void SetUpEditContext()
     {
         EditContext = new(Alternative);
-        _ = new FormValidationHandler<AlternativeForm>(Logger, Localizer, EditContext);
+        _ = new FormValidationHandler<AlternativeForm, Alternative>(Logger, Localizer, EditContext);
     }
 }

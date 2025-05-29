@@ -10,14 +10,14 @@ using Microsoft.Extensions.Localization;
 
 namespace AsciiPinyin.Web.Client.Validation;
 
-internal sealed class FormValidationHandler<T> where T : IEntityForm
+internal sealed class FormValidationHandler<T1, T2> where T1 : IEntityForm<T2> where T2 : IEntity
 {
-    private readonly ILogger<T> _logger;
+    private readonly ILogger<T1> _logger;
     private readonly IStringLocalizer<Resource> _localizer;
     private readonly ValidationMessageStore _messageStore;
 
     public FormValidationHandler(
-        ILogger<T> logger,
+        ILogger<T1> logger,
         IStringLocalizer<Resource> localizer,
         EditContext editContext
     )
@@ -63,7 +63,7 @@ internal sealed class FormValidationHandler<T> where T : IEntityForm
         editContext.NotifyValidationStateChanged();
     }
 
-    private void ValidateTheCharacter<T1>(T1 entity) where T1 : IEntity
+    private void ValidateTheCharacter<T>(T entity) where T : IEntity
     {
         string? theCharacterErrorText = null;
 
@@ -87,7 +87,7 @@ internal sealed class FormValidationHandler<T> where T : IEntityForm
         }
     }
 
-    private void ValidateStrokes<T1>(T1 entity) where T1 : IEntity
+    private void ValidateStrokes<T>(T entity) where T : IEntity
     {
         string? strokesErrorText = null;
 

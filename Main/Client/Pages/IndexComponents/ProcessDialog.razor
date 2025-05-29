@@ -25,7 +25,9 @@
                 <Loading
                     Classes="@LoadingClasses"
                     TextResource="@Resource.Processing" />
-                <div class="@BodyTextClasses">@BodyText</div>
+                <div
+                    class="@BodyTextClasses"
+                    id="@IDs.PROCESS_DIALOG_BODY">@BodyText</div>
             </div>
             <div class="modal-footer border-0 bottom-0 end-0 @FooterClasses">
                 <button
@@ -38,7 +40,7 @@
                 <button
                     type="button"
                     class="btn btn-modal btn-primary ms-3 @ButtonProceedClasses"
-                        id="@IDs.PROCESS_DIALOG_BUTTON_PROCEED"
+                    id="@IDs.PROCESS_DIALOG_BUTTON_PROCEED"
                     @onclick="async _ => await ProceedAsync(CancellationToken.None)">
                     <span>@ButtonProceedText</span>
                 </button>

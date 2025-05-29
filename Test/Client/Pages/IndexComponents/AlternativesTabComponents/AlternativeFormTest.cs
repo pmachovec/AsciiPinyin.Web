@@ -31,9 +31,13 @@ internal sealed class AlternativeFormTest : IDisposable
 
     private const string COMPULSORY_VALUE = nameof(COMPULSORY_VALUE);
     private const string CREATE_NEW_ALTERNATIVE = nameof(CREATE_NEW_ALTERNATIVE);
+    private const string ERROR = nameof(ERROR);
+    private const string INDEX_TITLE = nameof(INDEX_TITLE);
     private const string MUST_BE_CHINESE_CHARACTER = nameof(MUST_BE_CHINESE_CHARACTER);
+    private const string PROCESSING = nameof(PROCESSING);
     private const string PROCESSING_ERROR = nameof(PROCESSING_ERROR);
     private const string SELECT_BASE_CHARACTER = nameof(SELECT_BASE_CHARACTER);
+    private const string SUCCESS = nameof(SUCCESS);
 
     private static readonly Chachar _radicalChachar1 = new()
     {
@@ -62,39 +66,37 @@ internal sealed class AlternativeFormTest : IDisposable
         Strokes = 1
     };
 
-    private static readonly CompositeFormat _alternativeAlreadyInDb = CompositeFormat.Parse(ALTERNATIVE_ALREADY_IN_DB);
-    private static readonly CompositeFormat _alternativeCreated = CompositeFormat.Parse(ALTERNATIVE_CREATED);
     private static readonly HashSet<Chachar> _chachars = [_radicalChachar1];
     private static readonly MouseEventArgs _mouseEventArgs = new();
 
     private static readonly Mock<IEntityClient> _entityClientMock = new();
     private static readonly Mock<IIndex> _indexMock = new();
-    private static readonly Mock<IProcessDialog> _processDialogMock = new();
     private static readonly Mock<IStringLocalizer<Resource>> _localizerMock = new();
 
     private static readonly LocalizerMockSetter _localizerMockSetter = new(_localizerMock);
 
     private HashSet<Alternative> _alternatives = default!;
-    private EntityFormTestCommons _entityFormTestCommons = default!;
+    private EntityFormTestCommons<Alternative> _entityFormTestCommons = default!;
+    private EntityModalTestCommons<Alternative> _entityModalTestCommons = default!;
     private IRenderedComponent<AlternativeForm> _alternativeFormComponent = default!;
+    private IRenderedComponent<ProcessDialog> _processDialogComponent = default!;
     private JSInteropSetter _jsInteropSetter = default!;
     private TestContext _testContext = default!;
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        _ = _indexMock
-           .Setup(index => index.ProcessDialog)
-           .Returns(_processDialogMock.Object);
-
         _localizerMockSetter.SetUpResources(
             (Resource.AlternativeAlreadyInDb, ALTERNATIVE_ALREADY_IN_DB),
             (Resource.AlternativeCreated, ALTERNATIVE_CREATED),
             (Resource.CreateNewAlternative, CREATE_NEW_ALTERNATIVE),
             (Resource.CompulsoryValue, COMPULSORY_VALUE),
+            (Resource.Error, ERROR),
             (Resource.MustBeChineseCharacter, MUST_BE_CHINESE_CHARACTER),
+            (Resource.Processing, PROCESSING),
             (Resource.ProcessingError, PROCESSING_ERROR),
-            (Resource.SelectBaseCharacter, SELECT_BASE_CHARACTER)
+            (Resource.SelectBaseCharacter, SELECT_BASE_CHARACTER),
+            (Resource.Success, SUCCESS)
         );
     }
 
@@ -111,10 +113,18 @@ internal sealed class AlternativeFormTest : IDisposable
             .Setup(index => index.Chachars)
             .Returns(_chachars);
 
+        _ = _indexMock
+            .Setup(index => index.HtmlTitle)
+            .Returns(INDEX_TITLE);
+
         _testContext = new TestContext();
         _jsInteropSetter = new(_testContext.JSInterop);
 
-        _jsInteropSetter.SetUpSetTitles(SELECT_BASE_CHARACTER);
+        _jsInteropSetter.SetUpSetTitles(
+            $"{PROCESSING}...",
+            SELECT_BASE_CHARACTER
+        );
+
         _jsInteropSetter.SetUpSetZIndex(IDs.ALTERNATIVE_FORM_ROOT);
 
         _ = _testContext.Services
@@ -124,13 +134,30 @@ internal sealed class AlternativeFormTest : IDisposable
             .AddSingleton<IJSInteropDOM, JSInteropDOM>()
             .AddSingleton<IModalCommons, ModalCommons>();
 
-        _alternativeFormComponent = _testContext.RenderComponent<AlternativeForm>(parameters => parameters.Add(parameter => parameter.Index, _indexMock.Object));
+        _processDialogComponent = _testContext.RenderComponent<ProcessDialog>();
+
+        _ = _indexMock
+           .Setup(index => index.ProcessDialog)
+           .Returns(_processDialogComponent.Instance);
+
+        _alternativeFormComponent = _testContext.RenderComponent<AlternativeForm>(
+            parameters => parameters.Add(parameter => parameter.Index, _indexMock.Object)
+        );
 
         _entityFormTestCommons = new(
-            _testContext,
             _alternativeFormComponent,
+            _testContext.JSInterop,
             _entityClientMock,
-            _processDialogMock
+            _indexMock,
+            IDs.ALTERNATIVE_FORM_ROOT
+        );
+
+        _entityModalTestCommons = new(
+            _alternativeFormComponent,
+            _processDialogComponent,
+            _testContext.JSInterop,
+            _indexMock,
+            IDs.ALTERNATIVE_FORM_ROOT
         );
     }
 
@@ -392,6 +419,7 @@ internal sealed class AlternativeFormTest : IDisposable
     [TestCase(TestName = $"{nameof(AlternativeFormTest)}.{nameof(SubmitOriginalValidTest)} - original selected")]
     public void SubmitOriginalValidTest()
     {
+        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_ALTERNATIVE).SetVoidResult();
         SelectOriginal();
 
         _entityFormTestCommons.SubmitValidButtonInputTest(
@@ -402,24 +430,16 @@ internal sealed class AlternativeFormTest : IDisposable
     }
 
     [Test]
-    public async Task SubmitAlternativeAlreadyExistsTest()
+    public async Task OpenCloseTest()
     {
-        string? errorMessage = null;
-        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        SelectOriginal();
-        await SubmitAsync(_alternative11);
-
-        var expectedErrorMessage = string.Format(
-            CultureInfo.InvariantCulture,
-            _alternativeAlreadyInDb,
-            _alternative11.TheCharacter,
-            _alternative11.OriginalCharacter,
-            _alternative11.OriginalRealPinyin
-        );
-
-        _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, expectedErrorMessage);
-        Assert.That(_alternatives, Does.Contain(_alternative11));
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_ALTERNATIVE).SetVoidResult();
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE);
+        await _entityModalTestCommons.CloseTest(INDEX_TITLE);
     }
+
+    [Test]
+    public async Task SubmitAlternativeAlreadyExistsTest() =>
+        await SubmitAlternativeAlreadyExistsTest(_alternative11);
 
     [Test]
     public async Task SubmitAlternativeAlreadyExistsStrokesDifferTest()
@@ -433,21 +453,7 @@ internal sealed class AlternativeFormTest : IDisposable
             Strokes = (short)(_alternative11.Strokes! + 1)
         };
 
-        string? errorMessage = null;
-        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        SelectOriginal();
-        await SubmitAsync(alternativeClone);
-
-        var expectedErrorMessage = string.Format(
-            CultureInfo.InvariantCulture,
-            _alternativeAlreadyInDb,
-            _alternative11.TheCharacter,
-            _alternative11.OriginalCharacter,
-            _alternative11.OriginalRealPinyin
-        );
-
-        _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, expectedErrorMessage);
-        Assert.That(_alternatives, Does.Contain(_alternative11));
+        await SubmitAlternativeAlreadyExistsTest(alternativeClone);
         Assert.That(_alternatives, Does.Contain(alternativeClone));
         // The clone is not in the list, but the presence is decided only by key fields. This is expected state.
     }
@@ -456,12 +462,15 @@ internal sealed class AlternativeFormTest : IDisposable
     public async Task SubmitAlternativeProcessingErrorTest()
     {
         _entityFormTestCommons.MockPostStatusCode(_alternative12, HttpStatusCode.InternalServerError);
-        string? errorMessage = null;
-        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_ALTERNATIVE).SetVoidResult();
+        var setProcessDialogErrorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, ERROR).SetVoidResult();
+
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE);
         SelectOriginal();
         await SubmitAsync(_alternative12);
-
-        _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
+        _entityModalTestCommons.ProcessDialogErrorTest(setProcessDialogErrorTitleHandler, ERROR, PROCESSING_ERROR);
+        await _entityModalTestCommons.ClickProcessDialogBackButtonTest();
+        _entityModalTestCommons.ProcessDialogOverModalClosedTest(setFormTitleHandler, IDs.ALTERNATIVE_FORM_ROOT, CREATE_NEW_ALTERNATIVE, calledTimes: 3);
         Assert.That(_alternatives, Does.Not.Contain(_alternative12));
     }
 
@@ -469,28 +478,52 @@ internal sealed class AlternativeFormTest : IDisposable
     public async Task SubmitAlternativeOkTest()
     {
         _entityFormTestCommons.MockPostStatusCode(_alternative12, HttpStatusCode.OK);
-        string? successMessage = null;
-        _entityFormTestCommons.UseSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_ALTERNATIVE).SetVoidResult();
+        var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
+        var setProcessDialogSuccessTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SUCCESS).SetVoidResult();
+
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE);
         SelectOriginal();
         await SubmitAsync(_alternative12);
 
-        var expectedSuccessMessage = string.Format(
-            CultureInfo.InvariantCulture,
-            _alternativeCreated,
-            _alternative12.TheCharacter,
-            _alternative12.OriginalCharacter,
-            _alternative12.OriginalRealPinyin
+        _entityModalTestCommons.ProcessDialogSuccessTest(
+            setProcessDialogSuccessTitleHandler,
+            SUCCESS,
+            ALTERNATIVE_CREATED,
+            _alternative12.TheCharacter!,
+            _alternative12.OriginalCharacter!,
+            _alternative12.OriginalRealPinyin!
         );
 
-        _entityFormTestCommons.ProcessDialogSuccessMessageTest(successMessage, expectedSuccessMessage);
+        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest();
+        _entityModalTestCommons.ModalClosedTest(setIndexTitleHandler, IDs.ALTERNATIVE_FORM_ROOT, INDEX_TITLE);
         Assert.That(_alternatives, Does.Contain(_alternative12));
     }
 
-    private void SelectOriginal()
+    private async Task SubmitAlternativeAlreadyExistsTest(Alternative alternative)
     {
-        _jsInteropSetter.SetUpSetTitles(CREATE_NEW_ALTERNATIVE);
-        _entityFormTestCommons.ClickFirstInSelector(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.ORIGINAL_SELECTOR);
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_ALTERNATIVE).SetVoidResult();
+        var setProcessDialogErrorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, ERROR).SetVoidResult();
+
+        var expectedErrorMessage = string.Format(
+            CultureInfo.InvariantCulture,
+            ALTERNATIVE_ALREADY_IN_DB,
+            alternative.TheCharacter,
+            alternative.OriginalCharacter,
+            alternative.OriginalRealPinyin
+        );
+
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE);
+        SelectOriginal();
+        await SubmitAsync(alternative);
+        _entityModalTestCommons.ProcessDialogErrorTest(setProcessDialogErrorTitleHandler, ERROR, expectedErrorMessage);
+        await _entityModalTestCommons.ClickProcessDialogBackButtonTest();
+        _entityModalTestCommons.ProcessDialogOverModalClosedTest(setFormTitleHandler, IDs.ALTERNATIVE_FORM_ROOT, CREATE_NEW_ALTERNATIVE, calledTimes: 3);
+        Assert.That(_alternatives, Does.Contain(alternative));
     }
+
+    private void SelectOriginal() =>
+        _entityFormTestCommons.ClickFirstInSelector(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.ORIGINAL_SELECTOR);
 
     private async Task SubmitAsync(Alternative alternative)
     {

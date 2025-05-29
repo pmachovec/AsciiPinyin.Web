@@ -12,7 +12,7 @@ using System.Text;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 
-public class ChacharViewDialogBase : ComponentBase, IEntityViewDialog<Chachar>
+public class ChacharViewDialogBase : ComponentBase, IEntityModal<Chachar>
 {
     protected Chachar? Chachar { get; set; }
 
@@ -49,8 +49,8 @@ public class ChacharViewDialogBase : ComponentBase, IEntityViewDialog<Chachar>
     public required IIndex Index { get; init; }
 
     public async Task OpenAsync(
-        IPage page,
         Chachar chachar,
+        IPage page,
         CancellationToken cancellationToken
     )
     {

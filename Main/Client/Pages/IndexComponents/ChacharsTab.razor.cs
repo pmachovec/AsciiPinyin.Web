@@ -53,5 +53,5 @@ public class ChacharsTabBase : ComponentBase, IEntityTab
         await ChacharForm.OpenAsync(Index, cancellationToken);
 
     protected async Task ShowChacharViewDialogAsync(Chachar chachar, CancellationToken cancellationToken) =>
-        await ChacharViewDialog.OpenAsync(Index, chachar, cancellationToken);
+        await ChacharViewDialog.OpenAsync(chachar, Index, cancellationToken);
 }

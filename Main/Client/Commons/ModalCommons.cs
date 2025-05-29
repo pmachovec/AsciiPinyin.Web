@@ -88,10 +88,8 @@ public sealed class ModalCommons(
         }
         else
         {
-            await Task.WhenAll(
-                CloseAllAsyncCommon(modal.ModalLowerLevel!, cancellationToken),
-                CloseModalHigherLevelAsync(modal, cancellationToken)
-            );
+            await CloseModalHigherLevelAsync(modal, cancellationToken);
+            await CloseAllAsyncCommon(modal.ModalLowerLevel!, cancellationToken);
         }
     }
 

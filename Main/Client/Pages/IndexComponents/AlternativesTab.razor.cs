@@ -53,5 +53,5 @@ public class AlternativesTabBase : ComponentBase, IEntityTab
         await AlternativeForm.OpenAsync(Index, cancellationToken);
 
     public async Task ShowAlternativeViewDialogAsync(Alternative alternative, CancellationToken cancellationToken) =>
-        await AlternativeViewDialog.OpenAsync(Index, alternative, cancellationToken);
+        await AlternativeViewDialog.OpenAsync(alternative, Index, cancellationToken);
 }

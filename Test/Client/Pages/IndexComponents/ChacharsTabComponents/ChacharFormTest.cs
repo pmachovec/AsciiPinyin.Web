@@ -32,12 +32,16 @@ internal sealed class ChacharFormTest : IDisposable
 
     private const string COMPULSORY_VALUE = nameof(COMPULSORY_VALUE);
     private const string CREATE_NEW_CHARACTER = nameof(CREATE_NEW_CHARACTER);
+    private const string ERROR = nameof(ERROR);
+    private const string INDEX_TITLE = nameof(INDEX_TITLE);
     private const string MUST_BE_CHINESE_CHARACTER = nameof(MUST_BE_CHINESE_CHARACTER);
     private const string ONLY_ASCII_ALLOWED = nameof(ONLY_ASCII_ALLOWED);
     private const string ONLY_IPA_ALLOWED = nameof(ONLY_IPA_ALLOWED);
+    private const string PROCESSING = nameof(PROCESSING);
     private const string PROCESSING_ERROR = nameof(PROCESSING_ERROR);
     private const string SELECT_RADICAL = nameof(SELECT_RADICAL);
     private const string SELECT_RADICAL_ALTERNATIVE = nameof(SELECT_RADICAL_ALTERNATIVE);
+    private const string SUCCESS = nameof(SUCCESS);
 
     private static readonly Chachar _radicalChachar1 = new()
     {
@@ -144,41 +148,39 @@ internal sealed class ChacharFormTest : IDisposable
     };
 
     private static readonly HashSet<Alternative> _alternatives = [_alternative11, _alternative21];
-    private static readonly CompositeFormat _characterAlreadyInDb = CompositeFormat.Parse(CHARACTER_ALREADY_IN_DB);
-    private static readonly CompositeFormat _characterCreated = CompositeFormat.Parse(CHARACTER_CREATED);
     private static readonly MouseEventArgs _mouseEventArgs = new();
 
     private static readonly Mock<IEntityClient> _entityClientMock = new();
     private static readonly Mock<IIndex> _indexMock = new();
-    private static readonly Mock<IProcessDialog> _processDialogMock = new();
     private static readonly Mock<IStringLocalizer<Resource>> _localizerMock = new();
 
     private static readonly LocalizerMockSetter _localizerMockSetter = new(_localizerMock);
 
     private HashSet<Chachar> _chachars = default!;
-    private EntityFormTestCommons _entityFormTestCommons = default!;
+    private EntityFormTestCommons<Chachar> _entityFormTestCommons = default!;
+    private EntityModalTestCommons<Chachar> _entityModalTestCommons = default!;
     private IRenderedComponent<ChacharForm> _chacharFormComponent = default!;
+    private IRenderedComponent<ProcessDialog> _processDialogComponent = default!;
     private JSInteropSetter _jsInteropSetter = default!;
     private TestContext _testContext = default!;
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        _ = _indexMock
-            .Setup(index => index.ProcessDialog)
-            .Returns(_processDialogMock.Object);
-
         _localizerMockSetter.SetUpResources(
             (Resource.CharacterAlreadyInDb, CHARACTER_ALREADY_IN_DB),
             (Resource.CharacterCreated, CHARACTER_CREATED),
             (Resource.CompulsoryValue, COMPULSORY_VALUE),
             (Resource.CreateNewCharacter, CREATE_NEW_CHARACTER),
+            (Resource.Error, ERROR),
             (Resource.MustBeChineseCharacter, MUST_BE_CHINESE_CHARACTER),
             (Resource.OnlyAsciiAllowed, ONLY_ASCII_ALLOWED),
             (Resource.OnlyIpaAllowed, ONLY_IPA_ALLOWED),
+            (Resource.Processing, PROCESSING),
             (Resource.ProcessingError, PROCESSING_ERROR),
             (Resource.SelectRadical, SELECT_RADICAL),
-            (Resource.SelectRadicalAlternative, SELECT_RADICAL_ALTERNATIVE)
+            (Resource.SelectRadicalAlternative, SELECT_RADICAL_ALTERNATIVE),
+            (Resource.Success, SUCCESS)
          );
     }
 
@@ -202,11 +204,16 @@ internal sealed class ChacharFormTest : IDisposable
             .Setup(index => index.Chachars)
             .Returns(_chachars);
 
+        _ = _indexMock
+            .Setup(index => index.HtmlTitle)
+            .Returns(INDEX_TITLE);
+
         _testContext = new TestContext();
         _jsInteropSetter = new(_testContext.JSInterop);
 
         _jsInteropSetter.SetUpSetTitles(
             CREATE_NEW_CHARACTER,
+            $"{PROCESSING}...",
             SELECT_RADICAL,
             SELECT_RADICAL_ALTERNATIVE
         );
@@ -224,15 +231,30 @@ internal sealed class ChacharFormTest : IDisposable
             .AddSingleton<IJSInteropDOM, JSInteropDOM>()
             .AddSingleton<IModalCommons, ModalCommons>();
 
+        _processDialogComponent = _testContext.RenderComponent<ProcessDialog>();
+
+        _ = _indexMock
+            .Setup(index => index.ProcessDialog)
+            .Returns(_processDialogComponent.Instance);
+
         _chacharFormComponent = _testContext.RenderComponent<ChacharForm>(
             parameters => parameters.Add(parameter => parameter.Index, _indexMock.Object)
         );
 
         _entityFormTestCommons = new(
-            _testContext,
             _chacharFormComponent,
+            _testContext.JSInterop,
             _entityClientMock,
-            _processDialogMock
+            _indexMock,
+            IDs.CHACHAR_FORM_ROOT
+        );
+
+        _entityModalTestCommons = new(
+            _chacharFormComponent,
+            _processDialogComponent,
+            _testContext.JSInterop,
+            _indexMock,
+            IDs.CHACHAR_FORM_ROOT
         );
     }
 
@@ -773,15 +795,17 @@ internal sealed class ChacharFormTest : IDisposable
     }
 
     [Test]
-    public async Task SubmitRadicalChacharAlreadyExistsTest()
+    public async Task OpenCloseTest()
     {
-        string? errorMessage = null;
-        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        await SubmitAsync(_radicalChachar1);
-
-        CharacterAlreadyExistsProcessDialogErrorMessageTest(errorMessage, _radicalChachar1);
-        Assert.That(_chachars, Does.Contain(_radicalChachar1));
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
+        await _entityModalTestCommons.CloseTest(INDEX_TITLE);
     }
+
+    [Test]
+    public async Task SubmitRadicalChacharAlreadyExistsTest() =>
+        await SubmitChacharAlreadyExistsTest(_radicalChachar1);
+
 
     [Test]
     public async Task SubmitRadicalChacharAlreadyExistsIpaDiffersTest()
@@ -814,115 +838,113 @@ internal sealed class ChacharFormTest : IDisposable
     }
 
     [Test]
-    public async Task SubmitNonRadicalChacharWithoutAlternativeAlreadyExistsTest()
-    {
-        string? errorMessage = null;
-        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        SelectRadical();
-        await SubmitAsync(_nonRadicalChacharWithoutAlternative31);
+    public async Task SubmitNonRadicalChacharWithoutAlternativeAlreadyExistsTest() =>
+        await SubmitChacharAlreadyExistsTest(_nonRadicalChacharWithoutAlternative31);
 
-        CharacterAlreadyExistsProcessDialogErrorMessageTest(errorMessage, _nonRadicalChacharWithoutAlternative31);
-        Assert.That(_chachars, Does.Contain(_nonRadicalChacharWithoutAlternative31));
-    }
 
     [Test]
-    public async Task SubmitNonRadicalChacharWithAlternativeAlreadyExistsTest()
-    {
-        string? errorMessage = null;
-        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        SelectRadicalAndAlternative();
-        await SubmitAsync(_nonRadicalChacharWithAlternative11);
-
-        CharacterAlreadyExistsProcessDialogErrorMessageTest(errorMessage, _nonRadicalChacharWithAlternative11);
-        Assert.That(_chachars, Does.Contain(_nonRadicalChacharWithAlternative11));
-    }
+    public async Task SubmitNonRadicalChacharWithAlternativeAlreadyExistsTest() =>
+        await SubmitChacharAlreadyExistsTest(_nonRadicalChacharWithAlternative11);
 
     [Test]
-    public async Task SubmitRadicalChacharProcessingErrorTest()
-    {
-        _entityFormTestCommons.MockPostStatusCode(_radicalChachar4, HttpStatusCode.InternalServerError);
-        string? errorMessage = null;
-        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        await SubmitAsync(_radicalChachar4);
-
-        _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
-        Assert.That(_chachars, Does.Not.Contain(_radicalChachar4));
-    }
+    public async Task SubmitRadicalChacharProcessingErrorTest() =>
+        await SubmitChacharProcessingErrorTest(_radicalChachar4);
 
     [Test]
     public async Task SubmitNonRadicalChacharWithoutAlternativeProcessingErrorTest()
     {
-        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithoutAlternative32, HttpStatusCode.InternalServerError);
-        string? errorMessage = null;
-        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
         SelectRadical();
-        await SubmitAsync(_nonRadicalChacharWithoutAlternative32);
-
-        _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
-        Assert.That(_chachars, Does.Not.Contain(_nonRadicalChacharWithoutAlternative32));
+        await SubmitChacharProcessingErrorTest(_nonRadicalChacharWithoutAlternative32);
     }
 
     [Test]
     public async Task SubmitNonRadicalChacharWithAlternativeProcessingErrorTest()
     {
-        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithAlternative12, HttpStatusCode.InternalServerError);
-        string? errorMessage = null;
-        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
         SelectRadicalAndAlternative();
-        await SubmitAsync(_nonRadicalChacharWithAlternative12);
-
-        _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, PROCESSING_ERROR);
-        Assert.That(_chachars, Does.Not.Contain(_nonRadicalChacharWithAlternative12));
+        await SubmitChacharProcessingErrorTest(_nonRadicalChacharWithAlternative12);
     }
 
     [Test]
-    public async Task SubmitRadicalChacharOkTest()
-    {
-        _entityFormTestCommons.MockPostStatusCode(_radicalChachar4, HttpStatusCode.OK);
-        string? successMessage = null;
-        _entityFormTestCommons.UseSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
-        await SubmitAsync(_radicalChachar4);
-
-        CharacterCreatedProcessDialogSuccessMessageTest(successMessage, _radicalChachar4);
-        Assert.That(_chachars, Does.Contain(_radicalChachar4));
-    }
+    public async Task SubmitRadicalChacharOkTest() =>
+        await SubmitChacharOkTest(_radicalChachar4);
 
     [Test]
     public async Task SubmitNonRadicalChacharWithoutAlternativeOkTest()
     {
-        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithoutAlternative32, HttpStatusCode.OK);
-        string? successMessage = null;
-        _entityFormTestCommons.UseSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
         SelectRadical();
-        await SubmitAsync(_nonRadicalChacharWithoutAlternative32);
-
-        CharacterCreatedProcessDialogSuccessMessageTest(successMessage, _nonRadicalChacharWithoutAlternative32);
-        Assert.That(_chachars, Does.Contain(_nonRadicalChacharWithoutAlternative32));
+        await SubmitChacharOkTest(_nonRadicalChacharWithoutAlternative32);
     }
+
 
     [Test]
     public async Task SubmitNonRadicalChacharWithAlternativeOkTest()
     {
-        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithAlternative12, HttpStatusCode.OK);
-        string? successMessage = null;
-        _entityFormTestCommons.UseSuccessMessage(actualSuccessMessage => successMessage = actualSuccessMessage);
         SelectRadicalAndAlternative();
-        await SubmitAsync(_nonRadicalChacharWithAlternative12);
-
-        CharacterCreatedProcessDialogSuccessMessageTest(successMessage, _nonRadicalChacharWithAlternative12);
-        Assert.That(_chachars, Does.Contain(_nonRadicalChacharWithAlternative12));
+        await SubmitChacharOkTest(_nonRadicalChacharWithAlternative12);
     }
 
     private async Task SubmitChacharAlreadyExistsNonKeyFieldDiffersTest(Chachar chachar, Chachar chacharClone)
     {
-        string? errorMessage = null;
-        _entityFormTestCommons.UseErrorMessage(actualErrorMessage => errorMessage = actualErrorMessage);
-        await SubmitAsync(chacharClone);
-
-        CharacterAlreadyExistsProcessDialogErrorMessageTest(errorMessage, chachar);
-        Assert.That(_chachars, Does.Contain(chachar));
+        await SubmitChacharAlreadyExistsTest(chachar);
         Assert.That(_chachars, Does.Contain(chacharClone));
         // The clone is not in the list, but the presence is decided only by key fields. This is expected state.
+    }
+
+    private async Task SubmitChacharAlreadyExistsTest(Chachar chachar)
+    {
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
+        var setProcessDialogErrorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, ERROR).SetVoidResult();
+
+        var expectedErrorMessage = string.Format(
+            CultureInfo.InvariantCulture,
+            CHARACTER_ALREADY_IN_DB,
+            chachar.TheCharacter,
+            chachar.RealPinyin
+        );
+
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
+        await SubmitAsync(chachar);
+        _entityModalTestCommons.ProcessDialogErrorTest(setProcessDialogErrorTitleHandler, ERROR, expectedErrorMessage);
+        await _entityModalTestCommons.ClickProcessDialogBackButtonTest();
+        _entityModalTestCommons.ProcessDialogOverModalClosedTest(setFormTitleHandler, IDs.CHACHAR_FORM_ROOT, CREATE_NEW_CHARACTER);
+        Assert.That(_chachars, Does.Contain(chachar));
+    }
+
+    private async Task SubmitChacharProcessingErrorTest(Chachar chachar)
+    {
+        _entityFormTestCommons.MockPostStatusCode(chachar, HttpStatusCode.InternalServerError);
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
+        var setProcessDialogErrorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, ERROR).SetVoidResult();
+
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
+        await SubmitAsync(chachar);
+        _entityModalTestCommons.ProcessDialogErrorTest(setProcessDialogErrorTitleHandler, ERROR, PROCESSING_ERROR);
+        await _entityModalTestCommons.ClickProcessDialogBackButtonTest();
+        _entityModalTestCommons.ProcessDialogOverModalClosedTest(setFormTitleHandler, IDs.CHACHAR_FORM_ROOT, CREATE_NEW_CHARACTER);
+        Assert.That(_chachars, Does.Not.Contain(chachar));
+    }
+
+    private async Task SubmitChacharOkTest(Chachar chachar)
+    {
+        _entityFormTestCommons.MockPostStatusCode(chachar, HttpStatusCode.OK);
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
+        var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
+        var setProcessDialogSuccessTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SUCCESS).SetVoidResult();
+
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
+        await SubmitAsync(chachar);
+
+        _entityModalTestCommons.ProcessDialogSuccessTest(
+            setProcessDialogSuccessTitleHandler,
+            SUCCESS,
+            CHARACTER_CREATED,
+            chachar.TheCharacter!,
+            chachar.RealPinyin!
+        );
+
+        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest();
+        _entityModalTestCommons.ModalClosedTest(setIndexTitleHandler, IDs.CHACHAR_FORM_ROOT, INDEX_TITLE);
+        Assert.That(_chachars, Does.Contain(chachar));
     }
 
     private void SelectRadical() =>
@@ -962,29 +984,5 @@ internal sealed class ChacharFormTest : IDisposable
         strokesInput.Change(chachar.Strokes);
 
         await formSubmitButton.ClickAsync(_mouseEventArgs);
-    }
-
-    private void CharacterAlreadyExistsProcessDialogErrorMessageTest(string? errorMessage, Chachar chachar)
-    {
-        var expectedErrorMessage = string.Format(
-            CultureInfo.InvariantCulture,
-            _characterAlreadyInDb,
-            chachar.TheCharacter,
-            chachar.RealPinyin
-        );
-
-        _entityFormTestCommons.ProcessDialogErrorMessageTest(errorMessage, expectedErrorMessage);
-    }
-
-    private void CharacterCreatedProcessDialogSuccessMessageTest(string? successMessage, Chachar chachar)
-    {
-        var expectedSuccessMessage = string.Format(
-            CultureInfo.InvariantCulture,
-            _characterCreated,
-            chachar.TheCharacter,
-            chachar.RealPinyin
-        );
-
-        _entityFormTestCommons.ProcessDialogSuccessMessageTest(successMessage, expectedSuccessMessage);
     }
 }

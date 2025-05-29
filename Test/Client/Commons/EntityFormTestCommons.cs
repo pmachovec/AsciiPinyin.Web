@@ -1,26 +1,46 @@
-using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.HttpClients;
+using AsciiPinyin.Web.Client.Pages;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Client.Test.Constants.JSInterop;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Test.Constants;
 using Bunit;
-using Microsoft.AspNetCore.Components;
 using Moq;
 using NUnit.Framework;
 using System.Net;
-using TestContext = Bunit.TestContext;
 
 namespace Asciipinyin.Web.Client.Test.Commons;
 
-internal sealed class EntityFormTestCommons(
-    TestContext _testContext,
-    IRenderedComponent<IComponent> _formComponent,
+internal sealed class EntityFormTestCommons<T>(
+    IRenderedComponent<IEntityForm<T>> _entityFormComponent,
+    BunitJSInterop _jsInterop,
     Mock<IEntityClient> _entityClientMock,
-    Mock<IProcessDialog> _processDialogMock
-)
+    Mock<IIndex> _indexMock,
+    string entityFormRootId
+) where T : IEntity
 {
     private const string DIV = "div";
+
+    /// <summary>
+    /// Tests if correct HTML title and CSS classes are set when the form is opened without a specific entity.
+    /// </summary>
+    /// <param name="title">Expected HTML title</param>
+    /// <returns>Task of the asynchronous operation</returns>
+    public async Task OpenTest(JSRuntimeInvocationHandler setTitleHandler, string title)
+    {
+        var modalRoot = _entityFormComponent.Find($"#{entityFormRootId}");
+        setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, title);
+        Assert.That(modalRoot.ClassList, Does.Contain(CssClasses.D_NONE));
+        Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.D_BLOCK));
+        Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.SHOW));
+
+        await _entityFormComponent.Instance.OpenAsync(_indexMock.Object, CancellationToken.None);
+
+        _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, title);
+        Assert.That(modalRoot.ClassList, Does.Contain(CssClasses.D_BLOCK));
+        Assert.That(modalRoot.ClassList, Does.Contain(CssClasses.SHOW));
+        Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.D_NONE));
+    }
 
     /// <summary>
     /// Tests if a string input, when it's given a value, keeps the value unchanged
@@ -33,8 +53,8 @@ internal sealed class EntityFormTestCommons(
         string inputId
     )
     {
-        var setValueInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, inputValue);
-        var formInput = _formComponent.Find($"#{inputId}");
+        var setValueInvocationHandler = _jsInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, inputValue);
+        var formInput = _entityFormComponent.Find($"#{inputId}");
         formInput.Input(inputValue);
 
         setValueInvocationHandler.VerifyNotInvoke(DOMFunctions.SET_VALUE);
@@ -53,14 +73,14 @@ internal sealed class EntityFormTestCommons(
     )
     {
         // Mock the input to be valid first.
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, previousValidInput);
-        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, inputId).SetResult(true);
-        var formNumberInput = _formComponent.Find($"#{inputId}");
+        _ = _jsInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, previousValidInput);
+        _ = _jsInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, inputId).SetResult(true);
+        var formNumberInput = _entityFormComponent.Find($"#{inputId}");
         formNumberInput.Input(previousValidInput);
 
         // Now mock invalid input and verify that it was changed to the previous valid one.
         // Substitutes all invalid inputs, no need to run the test for each one separately.
-        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, inputId).SetResult(false);
+        _ = _jsInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, inputId).SetResult(false);
         InputValueSetTest(It.IsAny<short>(), previousValidInput, inputId);
     }
 
@@ -75,7 +95,7 @@ internal sealed class EntityFormTestCommons(
         string inputId
     )
     {
-        _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, inputId).SetResult(true);
+        _ = _jsInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, inputId).SetResult(true);
         InputValueSetTest(theInput, theInput, inputId);
     }
 
@@ -83,18 +103,18 @@ internal sealed class EntityFormTestCommons(
     /// Sets the given value to the given input and verifies if it matches the ecxpected value afterwards.
     /// There are automatic input value adjustments on some inputs.
     /// </summary>
-    /// <typeparam name="T">Type of the value to set</typeparam>
+    /// <typeparam name="T1">Type of the value to set</typeparam>
     /// <param name="valueToSet">The value to set</param>
     /// <param name="expectedContent">Expected input content after the value is set</param>
     /// <param name="inputId">ID of the input</param>
-    public void InputValueSetTest<T>(
-        T valueToSet,
-        T expectedContent,
+    public void InputValueSetTest<T1>(
+        T1 valueToSet,
+        T1 expectedContent,
         string inputId
     )
     {
-        var setValueInvocationHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, expectedContent);
-        var chacharFormInput = _formComponent.Find($"#{inputId}");
+        var setValueInvocationHandler = _jsInterop.SetupVoid(DOMFunctions.SET_VALUE, inputId, expectedContent);
+        var chacharFormInput = _entityFormComponent.Find($"#{inputId}");
         chacharFormInput.Input(valueToSet);
 
         var setValueInvocation = setValueInvocationHandler.VerifyInvoke(DOMFunctions.SET_VALUE);
@@ -121,14 +141,14 @@ internal sealed class EntityFormTestCommons(
         string submitButtonId
     )
     {
-        var formInput = _formComponent.Find($"#{inputId}");
-        var formSubmitButton = _formComponent.Find($"#{submitButtonId}");
+        var formInput = _entityFormComponent.Find($"#{inputId}");
+        var formSubmitButton = _entityFormComponent.Find($"#{submitButtonId}");
         formInput.Change(inputValue);
         formSubmitButton.Click();
 
         Assert.That(formInput.ClassList, Does.Contain(CssClasses.INVALID));
 
-        var validationMessageElement = _formComponent.Find($"#{validationMessageId}");
+        var validationMessageElement = _entityFormComponent.Find($"#{validationMessageId}");
         Assert.That(validationMessageElement!.InnerHtml, Is.Not.Null);
         Assert.That(validationMessageElement.InnerHtml, Is.EqualTo(expectedError));
     }
@@ -148,13 +168,13 @@ internal sealed class EntityFormTestCommons(
         string submitButtonId
     )
     {
-        var formInput = _formComponent.Find($"#{inputId}");
-        var formSubmitButton = _formComponent.Find($"#{submitButtonId}");
+        var formInput = _entityFormComponent.Find($"#{inputId}");
+        var formSubmitButton = _entityFormComponent.Find($"#{submitButtonId}");
         formSubmitButton.Click();
 
         Assert.That(formInput.ClassList, Does.Contain(CssClasses.INVALID));
 
-        var validationMessageElement = _formComponent.Find($"#{validationMessageId}");
+        var validationMessageElement = _entityFormComponent.Find($"#{validationMessageId}");
         Assert.That(validationMessageElement!.InnerHtml, Is.Not.Null);
         Assert.That(validationMessageElement.InnerHtml, Is.EqualTo(expectedError));
     }
@@ -174,14 +194,14 @@ internal sealed class EntityFormTestCommons(
         string submitButtonId
     )
     {
-        var formInput = _formComponent.Find($"#{inputId}");
-        var formSubmitButton = _formComponent.Find($"#{submitButtonId}");
+        var formInput = _entityFormComponent.Find($"#{inputId}");
+        var formSubmitButton = _entityFormComponent.Find($"#{submitButtonId}");
         formInput.Change(inputValue);
         formSubmitButton.Click();
 
         Assert.That(formInput.ClassList, Does.Not.Contain(CssClasses.INVALID));
 
-        var validationMessageElement = _formComponent.FindAll($"#{validationMessageId}");
+        var validationMessageElement = _entityFormComponent.FindAll($"#{validationMessageId}");
         Assert.That(validationMessageElement, Is.Empty);
     }
 
@@ -198,13 +218,13 @@ internal sealed class EntityFormTestCommons(
         string submitButtonId
     )
     {
-        var formInput = _formComponent.Find($"#{inputId}");
-        var formSubmitButton = _formComponent.Find($"#{submitButtonId}");
+        var formInput = _entityFormComponent.Find($"#{inputId}");
+        var formSubmitButton = _entityFormComponent.Find($"#{submitButtonId}");
         formSubmitButton.Click();
 
         Assert.That(formInput.ClassList, Does.Not.Contain(CssClasses.INVALID));
 
-        var validationMessageElement = _formComponent.FindAll($"#{validationMessageId}");
+        var validationMessageElement = _entityFormComponent.FindAll($"#{validationMessageId}");
         Assert.That(validationMessageElement, Is.Empty);
     }
 
@@ -225,80 +245,6 @@ internal sealed class EntityFormTestCommons(
         MockPostStatusCode(chachar, ApiNames.CHARACTERS, statusCode);
 
     /// <summary>
-    /// Calls the given action with the process dialog error message.
-    /// Useful for capturing the error message.
-    /// </summary>
-    /// <param name="usingAction">The action to be given the error message and run</param>
-    public void UseErrorMessage(Action<string?> usingAction)
-    {
-        _ = _processDialogMock
-            .Setup(processDialog =>
-                processDialog.SetErrorAsync(
-                    (IEntityForm)_formComponent.Instance, // Yes, the cast is necessary and it works.
-                    It.IsAny<string>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .Callback((IModal _, string errorMessage, CancellationToken _) => usingAction(errorMessage));
-    }
-
-    /// <summary>
-    /// Calls the given action with the process dialog success message as the only parameter.
-    /// Useful for capturing the success message.
-    /// </summary>
-    /// <param name="usingAction">The action to be given the success message and run</param>
-    public void UseSuccessMessage(Action<string?> usingAction) =>
-        _ = _processDialogMock
-            .Setup(processDialog =>
-                processDialog.SetSuccessAsync(
-                    (IEntityForm)_formComponent.Instance, // Yes, the cast is necessary and it works.
-                    It.IsAny<string>(),
-                    It.IsAny<CancellationToken>()
-                )
-            )
-            .Callback((IModal _, string successMessage, CancellationToken _) => usingAction(successMessage));
-
-    /// <summary>
-    /// Tests an error message in the process dialog.
-    /// </summary>
-    /// <param name="errorMessage">The actual error message in the process dialog</param>
-    /// <param name="expectedErrorMessage">The expected error message</param>
-    public void ProcessDialogErrorMessageTest(string? errorMessage, string expectedErrorMessage)
-    {
-        Assert.That(errorMessage, Is.Not.Null);
-        Assert.That(errorMessage, Is.EqualTo(expectedErrorMessage));
-
-        _processDialogMock.Verify(processDialog =>
-            processDialog.SetErrorAsync(
-                (IEntityForm)_formComponent.Instance, // Yes, the cast is necessary and it works.
-                expectedErrorMessage,
-                It.IsAny<CancellationToken>()
-            ),
-            Times.Once
-        );
-    }
-
-    /// <summary>
-    /// Tests a success message in the process dialog.
-    /// </summary>
-    /// <param name="successMessage">The actual success message in the process dialog</param>
-    /// <param name="expectedSuccessMessage">The expected success message</param>
-    public void ProcessDialogSuccessMessageTest(string? successMessage, string expectedSuccessMessage)
-    {
-        Assert.That(successMessage, Is.Not.Null);
-        Assert.That(successMessage, Is.EqualTo(expectedSuccessMessage));
-
-        _processDialogMock.Verify(processDialog =>
-            processDialog.SetSuccessAsync(
-                (IEntityForm)_formComponent.Instance, // Yes, the cast is necessary and it works.
-                expectedSuccessMessage,
-                It.IsAny<CancellationToken>()
-            ),
-            Times.Once
-        );
-    }
-
-    /// <summary>
     /// Simulates clicking on the first button in an entity selector.
     /// If used in a scenario where clicking a specific button is needed,
     /// entities must be mocked so that the first one in the list is the desired one.
@@ -311,13 +257,13 @@ internal sealed class EntityFormTestCommons(
     )
     {
         // Open the selector
-        var openRadicalSelectorButton = _formComponent.Find($"#{selectorInputId}");
+        var openRadicalSelectorButton = _entityFormComponent.Find($"#{selectorInputId}");
         Assert.That(openRadicalSelectorButton, Is.Not.Null);
         openRadicalSelectorButton.Click();
 
         // Click on the first button in the selector.
         // Mocking of proper clicking to a concrete button is too complicated and not worth the struggle.
-        var buttonDivs = _formComponent.FindAll(DIV).Where(div => div.ClassList.Contains(selectorCssClass));
+        var buttonDivs = _entityFormComponent.FindAll(DIV).Where(div => div.ClassList.Contains(selectorCssClass));
         var firstButtonDiv = buttonDivs.FirstOrDefault();
         Assert.That(firstButtonDiv, Is.Not.Null);
         firstButtonDiv!.Click();
@@ -326,11 +272,11 @@ internal sealed class EntityFormTestCommons(
     /// <summary>
     /// Mocks return HTTP status code on the entity client when the given entity is posted.
     /// </summary>
-    /// <typeparam name="T">Type of the posted entity</typeparam>
+    /// <typeparam name="T1">Type of the posted entity</typeparam>
     /// <param name="entity">The entity posted</param>
     /// <param name="apiName">API name corresponding to the entity</param>
     /// <param name="statusCode">The HTTP status code to return</param>
-    private void MockPostStatusCode<T>(T entity, string apiName, HttpStatusCode statusCode) where T : IEntity =>
+    private void MockPostStatusCode<T1>(T1 entity, string apiName, HttpStatusCode statusCode) where T1 : IEntity =>
         _entityClientMock
             .Setup(entityClient => entityClient.PostEntityAsync(apiName, entity, It.IsAny<CancellationToken>()))
             .Returns(Task.Run(() => statusCode));

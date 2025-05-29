@@ -33,6 +33,7 @@ public static class IDs
     public const string CHACHAR_VIEW_DIALOG_DELETE_TOOLTIP = "chachar-view-dialog-delete-tooltip";
     public const string CHACHAR_VIEW_DIALOG_ROOT = "chachar-view-dialog-root";
     public const string PROCESS_DIALOG = "process-dialog";
+    public const string PROCESS_DIALOG_BODY = "process-dialog-body";
     public const string PROCESS_DIALOG_BUTTON_BACK = "process-dialog-button-back";
     public const string PROCESS_DIALOG_BUTTON_PROCEED = "process-dialog-button-proceed";
     public const string PROCESS_DIALOG_HEADER = "process-dialog-header";
