@@ -1,6 +1,7 @@
 using AngleSharp.Diffing.Extensions;
 using AngleSharp.Dom;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
+using AsciiPinyin.Web.Client.Test.Constants.JSInterop;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Test.Constants;
 using Bunit;
@@ -48,6 +49,13 @@ internal sealed class EntityViewDialogTestCommons<T>(
         Assert.That(deleteButton!.ClassList, Does.Not.Contain(CssClasses.OPACITY_25));
 
         return deleteButton;
+    }
+
+    public async Task DeleteButtonClickTest(IElement deleteButton, JSRuntimeInvocationHandler setTitleHandler, string expectedTitle)
+    {
+        setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
+        await deleteButton.ClickAsync(new());
+        _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, expectedTitle);
     }
 
     private static string DeleteButtonTooltipTest(IElement deleteButtonTooltipElement)

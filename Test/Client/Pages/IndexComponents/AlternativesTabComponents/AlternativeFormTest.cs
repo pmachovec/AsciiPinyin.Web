@@ -19,7 +19,6 @@ using Moq;
 using NUnit.Framework;
 using System.Globalization;
 using System.Net;
-using System.Text;
 using TestContext = Bunit.TestContext;
 
 namespace Asciipinyin.Web.Client.Test.Pages.IndexComponents.AlternativesTabComponents;
@@ -35,6 +34,7 @@ internal sealed class AlternativeFormTest : IDisposable
     private const string INDEX_TITLE = nameof(INDEX_TITLE);
     private const string MUST_BE_CHINESE_CHARACTER = nameof(MUST_BE_CHINESE_CHARACTER);
     private const string PROCESSING = nameof(PROCESSING);
+    private const string PROCESSING_DOTS = $"{PROCESSING}...";
     private const string PROCESSING_ERROR = nameof(PROCESSING_ERROR);
     private const string SELECT_BASE_CHARACTER = nameof(SELECT_BASE_CHARACTER);
     private const string SUCCESS = nameof(SUCCESS);
@@ -121,7 +121,7 @@ internal sealed class AlternativeFormTest : IDisposable
         _jsInteropSetter = new(_testContext.JSInterop);
 
         _jsInteropSetter.SetUpSetTitles(
-            $"{PROCESSING}...",
+            PROCESSING_DOTS,
             SELECT_BASE_CHARACTER
         );
 
@@ -308,11 +308,11 @@ internal sealed class AlternativeFormTest : IDisposable
     [TestCase("r̻̝", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(AlternativeFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 2")]
     [TestCase("r̝̊", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(AlternativeFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 3")]
     [TestCase("ɼ", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(AlternativeFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
-    public void SubmitTheCharacterWrongTest(string inputValue, string expectedError)
+    public async Task SubmitTheCharacterWrongTest(string inputValue, string expectedError)
     {
         // Multi-character inputs are unreachable thanks to PreventMultipleCharacters, no need to test this case.
 
-        _entityFormTestCommons.SubmitInvalidInputTest(
+        await _entityFormTestCommons.SubmitInvalidInputTest(
             inputValue,
             expectedError,
             IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT,
@@ -333,7 +333,7 @@ internal sealed class AlternativeFormTest : IDisposable
     [TestCase("𬩽", TestName = $"{nameof(AlternativeFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK extension E")]
     [TestCase("𭕄", TestName = $"{nameof(AlternativeFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK extension F")]
     [TestCase("\U000310f9", TestName = $"{nameof(AlternativeFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK extension G")]
-    public void SubmitTheCharacterCorrectTest(string inputValue)
+    public async Task SubmitTheCharacterCorrectTest(string inputValue)
     {
         // Multi-character inputs are unreachable thanks to PreventMultipleCharacters, no need to test this case.
 
@@ -343,7 +343,7 @@ internal sealed class AlternativeFormTest : IDisposable
             TextUtils.GetStringFirstCharacterAsString(inputValue)
          ).SetVoidResult();
 
-        _entityFormTestCommons.SubmitValidInputTest(
+        await _entityFormTestCommons.SubmitValidInputTest(
             inputValue,
             IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT,
             IDs.ALTERNATIVE_FORM_THE_CHARACTER_VALIDATION_MESSAGE,
@@ -372,14 +372,14 @@ internal sealed class AlternativeFormTest : IDisposable
         _entityFormTestCommons.NumberInputUnchangedTest(inputValue, IDs.ALTERNATIVE_FORM_STROKES_INPUT);
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(AlternativeFormTest)}.{nameof(SubmitStrokesWrongTest)} - empty string")]
-    public void SubmitStrokesWrongTest(string inputValue, string expectedError)
+    public async Task SubmitStrokesWrongTest(string inputValue, string expectedError)
     {
         // Empty strokes is the only reachable wrong input.
         // Invalid inputs are unreachable thanks to PreventStrokesInvalidAsync, no need to test this case.
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.ALTERNATIVE_FORM_STROKES_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.ALTERNATIVE_FORM_STROKES_INPUT, inputValue).SetVoidResult();
 
-        _entityFormTestCommons.SubmitInvalidInputTest(
+        await _entityFormTestCommons.SubmitInvalidInputTest(
             inputValue,
             expectedError,
             IDs.ALTERNATIVE_FORM_STROKES_INPUT,
@@ -394,12 +394,12 @@ internal sealed class AlternativeFormTest : IDisposable
     [TestCase("13", TestName = $"{nameof(AlternativeFormTest)}.{nameof(SubmitStrokesCorrectTest)} - thirteen")]
     [TestCase("66", TestName = $"{nameof(AlternativeFormTest)}.{nameof(SubmitStrokesCorrectTest)} - sixty-six")]
     [TestCase("99", TestName = $"{nameof(AlternativeFormTest)}.{nameof(SubmitStrokesCorrectTest)} - ninety-nine")]
-    public void SubmitStrokesCorrectTest(string inputValue)
+    public async Task SubmitStrokesCorrectTest(string inputValue)
     {
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.ALTERNATIVE_FORM_STROKES_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.ALTERNATIVE_FORM_STROKES_INPUT, inputValue).SetVoidResult();
 
-        _entityFormTestCommons.SubmitValidInputTest(
+        await _entityFormTestCommons.SubmitValidInputTest(
             inputValue,
             IDs.ALTERNATIVE_FORM_STROKES_INPUT,
             IDs.ALTERNATIVE_FORM_STROKES_VALIDATION_MESSAGE,
@@ -407,22 +407,30 @@ internal sealed class AlternativeFormTest : IDisposable
         );
     }
 
-    [TestCase(TestName = $"{nameof(AlternativeFormTest)}.{nameof(SubmitOriginalInvalidTest)} - original not selected")]
-    public void SubmitOriginalInvalidTest() =>
-        _entityFormTestCommons.SubmitInvalidButtonInputTest(
+    [Test]
+    public async Task SubmitOriginalInvalidTest() =>
+        await _entityFormTestCommons.SubmitInvalidButtonInputTest(
             COMPULSORY_VALUE,
             IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
             IDs.ALTERNATIVE_FORM_ORIGINAL_VALIDATION_MESSAGE,
             IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON
         );
 
-    [TestCase(TestName = $"{nameof(AlternativeFormTest)}.{nameof(SubmitOriginalValidTest)} - original selected")]
-    public void SubmitOriginalValidTest()
+    [Test]
+    public async Task SubmitOriginalValidTest()
     {
-        _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_ALTERNATIVE).SetVoidResult();
-        SelectOriginal();
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_ALTERNATIVE).SetVoidResult();
+        var setOriginalSelectorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_BASE_CHARACTER).SetVoidResult();
 
-        _entityFormTestCommons.SubmitValidButtonInputTest(
+        await SelectOriginalAsync(
+            setOriginalSelectorTitleHandler,
+            setFormTitleHandler,
+            SELECT_BASE_CHARACTER,
+            CREATE_NEW_ALTERNATIVE,
+            afterClickCalledTimes: 1
+        );
+
+        await _entityFormTestCommons.SubmitValidButtonInputTest(
             IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
             IDs.ALTERNATIVE_FORM_ORIGINAL_VALIDATION_MESSAGE,
             IDs.ALTERNATIVE_FORM_SUBMIT_BUTTON
@@ -433,8 +441,11 @@ internal sealed class AlternativeFormTest : IDisposable
     public async Task OpenCloseTest()
     {
         var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_ALTERNATIVE).SetVoidResult();
+        var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
+
         await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE);
-        await _entityModalTestCommons.CloseTest(INDEX_TITLE);
+        await _entityModalTestCommons.CloseTest(setIndexTitleHandler, INDEX_TITLE);
+        _entityModalTestCommons.TitlesOrderTest(CREATE_NEW_ALTERNATIVE, INDEX_TITLE);
     }
 
     [Test]
@@ -463,15 +474,32 @@ internal sealed class AlternativeFormTest : IDisposable
     {
         _entityFormTestCommons.MockPostStatusCode(_alternative12, HttpStatusCode.InternalServerError);
         var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_ALTERNATIVE).SetVoidResult();
+        var setOriginalSelectorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_BASE_CHARACTER).SetVoidResult();
         var setProcessDialogErrorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, ERROR).SetVoidResult();
 
         await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE);
-        SelectOriginal();
-        await SubmitAsync(_alternative12);
-        _entityModalTestCommons.ProcessDialogErrorTest(setProcessDialogErrorTitleHandler, ERROR, PROCESSING_ERROR);
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest();
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(setFormTitleHandler, IDs.ALTERNATIVE_FORM_ROOT, CREATE_NEW_ALTERNATIVE, calledTimes: 3);
+
+        await SelectOriginalAsync(
+            setOriginalSelectorTitleHandler,
+            setFormTitleHandler,
+            SELECT_BASE_CHARACTER,
+            CREATE_NEW_ALTERNATIVE
+        );
+
+        await SubmitAsync(_alternative12, setProcessDialogErrorTitleHandler, ERROR);
+        _entityModalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
+        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE, calledTimes: 3);
         Assert.That(_alternatives, Does.Not.Contain(_alternative12));
+        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.ALTERNATIVE_FORM_ROOT);
+
+        _entityModalTestCommons.TitlesOrderTest(
+            CREATE_NEW_ALTERNATIVE,
+            SELECT_BASE_CHARACTER,
+            CREATE_NEW_ALTERNATIVE,
+            PROCESSING_DOTS,
+            ERROR,
+            CREATE_NEW_ALTERNATIVE
+        );
     }
 
     [Test]
@@ -479,30 +507,46 @@ internal sealed class AlternativeFormTest : IDisposable
     {
         _entityFormTestCommons.MockPostStatusCode(_alternative12, HttpStatusCode.OK);
         var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_ALTERNATIVE).SetVoidResult();
-        var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
+        var setOriginalSelectorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_BASE_CHARACTER).SetVoidResult();
         var setProcessDialogSuccessTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SUCCESS).SetVoidResult();
+        var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
 
         await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE);
-        SelectOriginal();
-        await SubmitAsync(_alternative12);
+
+        await SelectOriginalAsync(
+            setOriginalSelectorTitleHandler,
+            setFormTitleHandler,
+            SELECT_BASE_CHARACTER,
+            CREATE_NEW_ALTERNATIVE
+        );
+
+        await SubmitAsync(_alternative12, setProcessDialogSuccessTitleHandler, SUCCESS);
 
         _entityModalTestCommons.ProcessDialogSuccessTest(
-            setProcessDialogSuccessTitleHandler,
-            SUCCESS,
             ALTERNATIVE_CREATED,
             _alternative12.TheCharacter!,
             _alternative12.OriginalCharacter!,
             _alternative12.OriginalRealPinyin!
         );
 
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest();
-        _entityModalTestCommons.ModalClosedTest(setIndexTitleHandler, IDs.ALTERNATIVE_FORM_ROOT, INDEX_TITLE);
+        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
         Assert.That(_alternatives, Does.Contain(_alternative12));
+        _entityModalTestCommons.ModalClosedTest(IDs.ALTERNATIVE_FORM_ROOT);
+
+        _entityModalTestCommons.TitlesOrderTest(
+            CREATE_NEW_ALTERNATIVE,
+            SELECT_BASE_CHARACTER,
+            CREATE_NEW_ALTERNATIVE,
+            PROCESSING_DOTS,
+            SUCCESS,
+            INDEX_TITLE
+        );
     }
 
     private async Task SubmitAlternativeAlreadyExistsTest(Alternative alternative)
     {
         var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_ALTERNATIVE).SetVoidResult();
+        var setOriginalSelectorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_BASE_CHARACTER).SetVoidResult();
         var setProcessDialogErrorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, ERROR).SetVoidResult();
 
         var expectedErrorMessage = string.Format(
@@ -514,18 +558,48 @@ internal sealed class AlternativeFormTest : IDisposable
         );
 
         await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE);
-        SelectOriginal();
-        await SubmitAsync(alternative);
-        _entityModalTestCommons.ProcessDialogErrorTest(setProcessDialogErrorTitleHandler, ERROR, expectedErrorMessage);
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest();
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(setFormTitleHandler, IDs.ALTERNATIVE_FORM_ROOT, CREATE_NEW_ALTERNATIVE, calledTimes: 3);
+
+        await SelectOriginalAsync(
+            setOriginalSelectorTitleHandler,
+            setFormTitleHandler,
+            SELECT_BASE_CHARACTER,
+            CREATE_NEW_ALTERNATIVE
+        );
+
+        await SubmitAsync(alternative, setProcessDialogErrorTitleHandler, ERROR);
+        _entityModalTestCommons.ProcessDialogErrorTest(expectedErrorMessage);
+        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE, calledTimes: 3);
         Assert.That(_alternatives, Does.Contain(alternative));
+        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.ALTERNATIVE_FORM_ROOT);
+
+        _entityModalTestCommons.TitlesOrderTest(
+            CREATE_NEW_ALTERNATIVE,
+            SELECT_BASE_CHARACTER,
+            CREATE_NEW_ALTERNATIVE,
+            PROCESSING_DOTS,
+            ERROR,
+            CREATE_NEW_ALTERNATIVE
+        );
     }
 
-    private void SelectOriginal() =>
-        _entityFormTestCommons.ClickFirstInSelector(IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT, CssClasses.ORIGINAL_SELECTOR);
+    private async Task SelectOriginalAsync(
+        JSRuntimeInvocationHandler setTitleHandler,
+        JSRuntimeInvocationHandler setAfterClickTitleHandler,
+        string expectedTitle,
+        string expectedAfterClickTitle,
+        int afterClickCalledTimes = 2
+    ) =>
+        await _entityFormTestCommons.ClickFirstInSelector(
+            IDs.ALTERNATIVE_FORM_ORIGINAL_INPUT,
+            CssClasses.ORIGINAL_SELECTOR,
+            setTitleHandler,
+            setAfterClickTitleHandler,
+            expectedTitle,
+            expectedAfterClickTitle,
+            afterClickCalledTimes
+        );
 
-    private async Task SubmitAsync(Alternative alternative)
+    private async Task SubmitAsync(Alternative alternative, JSRuntimeInvocationHandler setTitleHandler, string expectedTitle)
     {
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.ALTERNATIVE_FORM_THE_CHARACTER_INPUT).SetResult(true);
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.ALTERNATIVE_FORM_STROKES_INPUT).SetResult(true);
@@ -549,6 +623,8 @@ internal sealed class AlternativeFormTest : IDisposable
         theCharacterInput.Change(alternative.TheCharacter);
         strokesInput.Change(alternative.Strokes);
 
+        setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
         await formSubmitButton.ClickAsync(_mouseEventArgs);
+        _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, expectedTitle);
     }
 }

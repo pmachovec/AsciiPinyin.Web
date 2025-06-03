@@ -24,19 +24,19 @@ internal sealed class EntityFormTestCommons<T>(
     /// <summary>
     /// Tests if correct HTML title and CSS classes are set when the form is opened without a specific entity.
     /// </summary>
-    /// <param name="title">Expected HTML title</param>
+    /// <param name="expectedTitle">Expected HTML title</param>
     /// <returns>Task of the asynchronous operation</returns>
-    public async Task OpenTest(JSRuntimeInvocationHandler setTitleHandler, string title)
+    public async Task OpenTest(JSRuntimeInvocationHandler setTitleHandler, string expectedTitle)
     {
         var modalRoot = _entityFormComponent.Find($"#{entityFormRootId}");
-        setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, title);
+        setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
         Assert.That(modalRoot.ClassList, Does.Contain(CssClasses.D_NONE));
         Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.D_BLOCK));
         Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.SHOW));
 
         await _entityFormComponent.Instance.OpenAsync(_indexMock.Object, CancellationToken.None);
 
-        _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, title);
+        _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, expectedTitle);
         Assert.That(modalRoot.ClassList, Does.Contain(CssClasses.D_BLOCK));
         Assert.That(modalRoot.ClassList, Does.Contain(CssClasses.SHOW));
         Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.D_NONE));
@@ -133,7 +133,8 @@ internal sealed class EntityFormTestCommons<T>(
     /// <param name="inputId">ID of the input</param>
     /// <param name="validationMessageId">ID of the ValidationMessage element for the input</param>
     /// <param name="submitButtonId">ID of the submit button of the form</param>
-    public void SubmitInvalidInputTest(
+    /// <returns>Task of the asynchronous operation</returns>
+    public async Task SubmitInvalidInputTest(
         string inputValue,
         string expectedError,
         string inputId,
@@ -144,7 +145,7 @@ internal sealed class EntityFormTestCommons<T>(
         var formInput = _entityFormComponent.Find($"#{inputId}");
         var formSubmitButton = _entityFormComponent.Find($"#{submitButtonId}");
         formInput.Change(inputValue);
-        formSubmitButton.Click();
+        await formSubmitButton.ClickAsync(new());
 
         Assert.That(formInput.ClassList, Does.Contain(CssClasses.INVALID));
 
@@ -161,7 +162,8 @@ internal sealed class EntityFormTestCommons<T>(
     /// <param name="inputId">ID of the input</param>
     /// <param name="validationMessageId">ID of the ValidationMessage element for the input</param>
     /// <param name="submitButtonId">ID of the submit button of the form</param>
-    public void SubmitInvalidButtonInputTest(
+    /// <returns>Task of the asynchronous operation</returns>
+    public async Task SubmitInvalidButtonInputTest(
         string expectedError,
         string inputId,
         string validationMessageId,
@@ -170,7 +172,7 @@ internal sealed class EntityFormTestCommons<T>(
     {
         var formInput = _entityFormComponent.Find($"#{inputId}");
         var formSubmitButton = _entityFormComponent.Find($"#{submitButtonId}");
-        formSubmitButton.Click();
+        await formSubmitButton.ClickAsync(new());
 
         Assert.That(formInput.ClassList, Does.Contain(CssClasses.INVALID));
 
@@ -187,7 +189,8 @@ internal sealed class EntityFormTestCommons<T>(
     /// <param name="inputId">ID of the input</param>
     /// <param name="validationMessageId">ID of the ValidationMessage element for the input</param>
     /// <param name="submitButtonId">ID of the submit button of the form</param>
-    public void SubmitValidInputTest(
+    /// <returns>Task of the asynchronous operation</returns>
+    public async Task SubmitValidInputTest(
         string inputValue,
         string inputId,
         string validationMessageId,
@@ -197,7 +200,7 @@ internal sealed class EntityFormTestCommons<T>(
         var formInput = _entityFormComponent.Find($"#{inputId}");
         var formSubmitButton = _entityFormComponent.Find($"#{submitButtonId}");
         formInput.Change(inputValue);
-        formSubmitButton.Click();
+        await formSubmitButton.ClickAsync(new());
 
         Assert.That(formInput.ClassList, Does.Not.Contain(CssClasses.INVALID));
 
@@ -212,7 +215,8 @@ internal sealed class EntityFormTestCommons<T>(
     /// <param name="inputId">ID of the input</param>
     /// <param name="validationMessageId">ID of the ValidationMessage element for the input</param>
     /// <param name="submitButtonId">ID of the submit button of the form</param>
-    public void SubmitValidButtonInputTest(
+    /// <returns>Task of the asynchronous operation</returns>
+    public async Task SubmitValidButtonInputTest(
         string inputId,
         string validationMessageId,
         string submitButtonId
@@ -220,7 +224,7 @@ internal sealed class EntityFormTestCommons<T>(
     {
         var formInput = _entityFormComponent.Find($"#{inputId}");
         var formSubmitButton = _entityFormComponent.Find($"#{submitButtonId}");
-        formSubmitButton.Click();
+        await formSubmitButton.ClickAsync(new());
 
         Assert.That(formInput.ClassList, Does.Not.Contain(CssClasses.INVALID));
 
@@ -251,22 +255,40 @@ internal sealed class EntityFormTestCommons<T>(
     /// </summary>
     /// <param name="selectorInputId">ID of the selector input</param>
     /// <param name="selectorCssClass">CSS class of the selector</param>
-    public void ClickFirstInSelector(
+    public async Task ClickFirstInSelector(
         string selectorInputId,
-        string selectorCssClass
+        string selectorCssClass,
+        JSRuntimeInvocationHandler setTitleHandler,
+        JSRuntimeInvocationHandler setAfterClickTitleHandler,
+        string expectedTitle,
+        string expectedAfterClickTitle,
+        int afterClickCalledTimes = 2
     )
     {
         // Open the selector
         var openRadicalSelectorButton = _entityFormComponent.Find($"#{selectorInputId}");
         Assert.That(openRadicalSelectorButton, Is.Not.Null);
-        openRadicalSelectorButton.Click();
+        setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
+        await openRadicalSelectorButton.ClickAsync(new());
+        _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, expectedTitle);
 
         // Click on the first button in the selector.
         // Mocking of proper clicking to a concrete button is too complicated and not worth the struggle.
         var buttonDivs = _entityFormComponent.FindAll(DIV).Where(div => div.ClassList.Contains(selectorCssClass));
         var firstButtonDiv = buttonDivs.FirstOrDefault();
         Assert.That(firstButtonDiv, Is.Not.Null);
-        firstButtonDiv!.Click();
+
+        if (afterClickCalledTimes == 1)
+        {
+            setAfterClickTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedAfterClickTitle);
+        }
+        else
+        {
+            _ = setAfterClickTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, afterClickCalledTimes - 1, expectedAfterClickTitle);
+        }
+
+        await firstButtonDiv!.ClickAsync(new());
+        _ = setAfterClickTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, afterClickCalledTimes, expectedAfterClickTitle);
     }
 
     /// <summary>

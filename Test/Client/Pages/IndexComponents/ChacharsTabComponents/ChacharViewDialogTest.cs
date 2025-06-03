@@ -16,7 +16,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Moq;
 using NUnit.Framework;
-using System.Globalization;
 using System.Net;
 using TestContext = Bunit.TestContext;
 
@@ -35,6 +34,7 @@ internal sealed class ChacharViewDialogTest : IDisposable
     private const string IS_RADICAL_FOR_OTHERS = nameof(IS_RADICAL_FOR_OTHERS);
     private const string OK = nameof(OK);
     private const string PROCESSING = nameof(PROCESSING);
+    private const string PROCESSING_DOTS = $"{PROCESSING}...";
     private const string PROCESSING_ERROR = nameof(PROCESSING_ERROR);
     private const string SUCCESS = nameof(SUCCESS);
     private const string WARNING = nameof(WARNING);
@@ -243,7 +243,7 @@ internal sealed class ChacharViewDialogTest : IDisposable
             string.Empty
         ).SetVoidResult();
 
-        _jsInteropSetter.SetUpSetTitles($"{PROCESSING}...");
+        _jsInteropSetter.SetUpSetTitles(PROCESSING_DOTS);
         _jsInteropSetter.SetUpSetZIndex(IDs.CHACHAR_VIEW_DIALOG_ROOT);
 
         _ = _testContext.Services
@@ -300,25 +300,33 @@ internal sealed class ChacharViewDialogTest : IDisposable
         var setDialogTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, dialogTitle).SetVoidResult();
         var setProcessDialogWarningTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, WARNING).SetVoidResult();
         var setProcessDialogErrorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, ERROR).SetVoidResult();
+        var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
 
         await _entityModalTestCommons.OpenTest(_radicalChachar4, setDialogTitleHandler, dialogTitle);
         var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
-        await deleteButton.ClickAsync(new());
+        await _entityViewDialogTestCommons.DeleteButtonClickTest(deleteButton, setProcessDialogWarningTitleHandler, WARNING);
 
-        _entityModalTestCommons.ProcessDialogWarningTest(
-            setProcessDialogWarningTitleHandler,
-            WARNING,
-            CHARACTER_WILL_BE_DELETED,
+        _entityModalTestCommons.ProcessDialogWarningTest(CHARACTER_WILL_BE_DELETED,
             _radicalChachar4.TheCharacter!,
             _radicalChachar4.RealPinyin!
         );
 
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest();
-        _entityModalTestCommons.ProcessDialogErrorTest(setProcessDialogErrorTitleHandler, ERROR, PROCESSING_ERROR);
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest();
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(setDialogTitleHandler, IDs.CHACHAR_VIEW_DIALOG_ROOT, dialogTitle);
-        await _entityModalTestCommons.CloseTest(INDEX_TITLE);
+        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setProcessDialogErrorTitleHandler, ERROR);
+        _entityModalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
+        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setDialogTitleHandler, dialogTitle);
+        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_VIEW_DIALOG_ROOT);
+        await _entityModalTestCommons.CloseTest(setIndexTitleHandler, INDEX_TITLE);
         Assert.That(_chachars, Does.Contain(_radicalChachar4));
+
+        _entityModalTestCommons.TitlesOrderTest(
+            PROCESSING_DOTS,
+            dialogTitle,
+            WARNING,
+            PROCESSING_DOTS,
+            ERROR,
+            dialogTitle,
+            INDEX_TITLE
+        );
     }
 
     [Test]
@@ -327,23 +335,30 @@ internal sealed class ChacharViewDialogTest : IDisposable
         var dialogTitle = $"{StringConstants.ASCII_PINYIN} - {_radicalChachar5.TheCharacter}";
         var setDialogTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, dialogTitle).SetVoidResult();
         var setProcessDialogWarningTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, WARNING).SetVoidResult();
+        var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
 
         await _entityModalTestCommons.OpenTest(_radicalChachar5, setDialogTitleHandler, dialogTitle);
         var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
-        await deleteButton.ClickAsync(new());
+        await _entityViewDialogTestCommons.DeleteButtonClickTest(deleteButton, setProcessDialogWarningTitleHandler, WARNING);
 
         _entityModalTestCommons.ProcessDialogWarningTest(
-            setProcessDialogWarningTitleHandler,
-            WARNING,
             CHARACTER_WILL_BE_DELETED,
             _radicalChachar5.TheCharacter!,
             _radicalChachar5.RealPinyin!
         );
 
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest();
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(setDialogTitleHandler, IDs.CHACHAR_VIEW_DIALOG_ROOT, dialogTitle);
-        await _entityModalTestCommons.CloseTest(INDEX_TITLE);
+        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setDialogTitleHandler, dialogTitle);
+        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_VIEW_DIALOG_ROOT);
+        await _entityModalTestCommons.CloseTest(setIndexTitleHandler, INDEX_TITLE);
         Assert.That(_chachars, Does.Contain(_radicalChachar5));
+
+        _entityModalTestCommons.TitlesOrderTest(
+            PROCESSING_DOTS,
+            dialogTitle,
+            WARNING,
+            dialogTitle,
+            INDEX_TITLE
+        );
     }
 
     [Test]
@@ -360,10 +375,20 @@ internal sealed class ChacharViewDialogTest : IDisposable
 
     private async Task OpenCloseDeleteButtonDisabledTest(Chachar chachar, params string[] expectedTooltipParts)
     {
-        await _entityModalTestCommons.OpenTest(chachar, $"{StringConstants.ASCII_PINYIN} - {chachar.TheCharacter}");
+        var dialogTitle = $"{StringConstants.ASCII_PINYIN} - {chachar.TheCharacter}";
+        var setDialogTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, dialogTitle).SetVoidResult();
+        var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
+
+        await _entityModalTestCommons.OpenTest(chachar, setDialogTitleHandler, dialogTitle);
         _entityViewDialogTestCommons.DeleteButtonDisabledTest(CANNOT_BE_DELETED, expectedTooltipParts);
-        await _entityModalTestCommons.CloseTest(INDEX_TITLE);
+        await _entityModalTestCommons.CloseTest(setIndexTitleHandler, INDEX_TITLE);
         Assert.That(_chachars, Does.Contain(chachar));
+
+        _entityModalTestCommons.TitlesOrderTest(
+            PROCESSING_DOTS,
+            dialogTitle,
+            INDEX_TITLE
+        );
     }
 
     private async Task DeleteChacharTest(Chachar chachar)
@@ -376,28 +401,33 @@ internal sealed class ChacharViewDialogTest : IDisposable
 
         await _entityModalTestCommons.OpenTest(chachar, setDialogTitleHandler, dialogTitle);
         var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
-        await deleteButton.ClickAsync(new());
+        await _entityViewDialogTestCommons.DeleteButtonClickTest(deleteButton, setProcessDialogWarningTitleHandler, WARNING);
 
         _entityModalTestCommons.ProcessDialogWarningTest(
-            setProcessDialogWarningTitleHandler,
-            WARNING,
             CHARACTER_WILL_BE_DELETED,
             chachar.TheCharacter!,
             chachar.RealPinyin!
         );
 
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest();
+        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setProcessDialogSuccessTitleHandler, SUCCESS);
 
         _entityModalTestCommons.ProcessDialogSuccessTest(
-            setProcessDialogSuccessTitleHandler,
-            SUCCESS,
             CHARACTER_DELETED,
             chachar.TheCharacter!,
             chachar.RealPinyin!
         );
 
         Assert.That(_chachars, Does.Not.Contain(chachar));
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest();
-        _entityModalTestCommons.ModalClosedTest(setIndexTitleHandler, IDs.CHACHAR_VIEW_DIALOG_ROOT, INDEX_TITLE);
+        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
+        _entityModalTestCommons.ModalClosedTest(IDs.CHACHAR_VIEW_DIALOG_ROOT);
+
+        _entityModalTestCommons.TitlesOrderTest(
+            PROCESSING_DOTS,
+            dialogTitle,
+            WARNING,
+            PROCESSING_DOTS,
+            SUCCESS,
+            INDEX_TITLE
+        );
     }
 }

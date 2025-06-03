@@ -19,7 +19,6 @@ using Moq;
 using NUnit.Framework;
 using System.Globalization;
 using System.Net;
-using System.Text;
 using TestContext = Bunit.TestContext;
 
 namespace Asciipinyin.Web.Client.Test.Pages.IndexComponents.ChacharsTabComponents;
@@ -38,6 +37,7 @@ internal sealed class ChacharFormTest : IDisposable
     private const string ONLY_ASCII_ALLOWED = nameof(ONLY_ASCII_ALLOWED);
     private const string ONLY_IPA_ALLOWED = nameof(ONLY_IPA_ALLOWED);
     private const string PROCESSING = nameof(PROCESSING);
+    private const string PROCESSING_DOTS = $"{PROCESSING}...";
     private const string PROCESSING_ERROR = nameof(PROCESSING_ERROR);
     private const string SELECT_RADICAL = nameof(SELECT_RADICAL);
     private const string SELECT_RADICAL_ALTERNATIVE = nameof(SELECT_RADICAL_ALTERNATIVE);
@@ -213,7 +213,7 @@ internal sealed class ChacharFormTest : IDisposable
 
         _jsInteropSetter.SetUpSetTitles(
             CREATE_NEW_CHARACTER,
-            $"{PROCESSING}...",
+            PROCESSING_DOTS,
             SELECT_RADICAL,
             SELECT_RADICAL_ALTERNATIVE
         );
@@ -405,9 +405,9 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("r̻̝", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 2")]
     [TestCase("r̝̊", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - Czech 'Ř' in IPA - version 3")]
     [TestCase("ɼ", MUST_BE_CHINESE_CHARACTER, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterWrongTest)} - Czech 'Ř' in IPA - deprecated version")]
-    public void SubmitTheCharacterWrongTest(string inputValue, string expectedError) =>
+    public async Task SubmitTheCharacterWrongTest(string inputValue, string expectedError) =>
         // Multi-character inputs are unreachable thanks to PreventMultipleCharacters, no need to test this case.
-        _entityFormTestCommons.SubmitInvalidInputTest(
+        await _entityFormTestCommons.SubmitInvalidInputTest(
             inputValue,
             expectedError,
             IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
@@ -427,7 +427,7 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("𬩽", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK extension E")]
     [TestCase("𭕄", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK extension F")]
     [TestCase("\U000310f9", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitTheCharacterCorrectTest)} - single Chinese character - CJK extension G")]
-    public void SubmitTheCharacterCorrectTest(string inputValue)
+    public async Task SubmitTheCharacterCorrectTest(string inputValue)
     {
         // Multi-character inputs are unreachable thanks to PreventMultipleCharacters, no need to test this case.
 
@@ -437,7 +437,7 @@ internal sealed class ChacharFormTest : IDisposable
             TextUtils.GetStringFirstCharacterAsString(inputValue)
         ).SetVoidResult();
 
-        _entityFormTestCommons.SubmitValidInputTest(
+        await _entityFormTestCommons.SubmitValidInputTest(
             inputValue,
             IDs.CHACHAR_FORM_THE_CHARACTER_INPUT,
             IDs.CHACHAR_FORM_THE_CHARACTER_VALIDATION_MESSAGE,
@@ -546,8 +546,8 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("𫇂\t𫟖\t𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
     [TestCase("𫇂\n𫟖\t𬩽 ", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
     [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", ONLY_ASCII_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinWrongTest)} - crazy combination of 40 characters, symbols and whitespaces")]
-    public void SubmitPinyinWrongTest(string inputValue, string expectedError) =>
-        _entityFormTestCommons.SubmitInvalidInputTest(
+    public async Task SubmitPinyinWrongTest(string inputValue, string expectedError) =>
+        await _entityFormTestCommons.SubmitInvalidInputTest(
             inputValue,
             expectedError,
             IDs.CHACHAR_FORM_PINYIN_INPUT,
@@ -560,8 +560,8 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("abc", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinCorrectTest)} - multiple ASCII characters lowercase")]
     [TestCase("ABC", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinCorrectTest)} - multiple ASCII characters uppercase")]
     [TestCase("AbCdE", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitPinyinCorrectTest)} - multiple ASCII characters case combination")]
-    public void SubmitPinyinCorrectTest(string inputValue) =>
-        _entityFormTestCommons.SubmitValidInputTest(
+    public async Task SubmitPinyinCorrectTest(string inputValue) =>
+        await _entityFormTestCommons.SubmitValidInputTest(
             inputValue,
             IDs.CHACHAR_FORM_PINYIN_INPUT,
             IDs.CHACHAR_FORM_PINYIN_VALIDATION_MESSAGE,
@@ -663,8 +663,8 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("𫇂\t𫟖\t𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Chinese characters - CJK extensions combination with tabulars")]
     [TestCase("𫇂\n𫟖\t𬩽 ", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - multiple Chinese characters - CJK extensions combination with new line, tabular and space")]
     [TestCase("0-1${@}#'\"\\`.:;aAāĀřŘяЯr̝r̻̝r̝̊中⺫㆕   大考验𫇂\n𫟖\t𬩽", ONLY_IPA_ALLOWED, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaWrongTest)} - crazy combination of 40 characters, symbols and whitespaces")]
-    public void SubmitIpaWrongTest(string inputValue, string expectedError) =>
-        _entityFormTestCommons.SubmitInvalidInputTest(
+    public async Task SubmitIpaWrongTest(string inputValue, string expectedError) =>
+        await _entityFormTestCommons.SubmitInvalidInputTest(
             inputValue,
             expectedError,
             IDs.CHACHAR_FORM_IPA_INPUT,
@@ -683,8 +683,8 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("r̝r̻̝r̝̊", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaCorrectTest)} - Czech 'Ř' in IPA - versions 1, 2 and 3 together")]
     [TestCase("ʈʂʊŋ", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaCorrectTest)} - '中' in IPA")]
     [TestCase("pr̝i:liʃʒlucɔutʃki:ku:ɲu:pjɛlɟa:bɛlskɛ:ɔ:di", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitIpaCorrectTest)} - Czech text in IPA")]
-    public void SubmitIpaCorrectTest(string inputValue) =>
-        _entityFormTestCommons.SubmitValidInputTest(
+    public async Task SubmitIpaCorrectTest(string inputValue) =>
+        await _entityFormTestCommons.SubmitValidInputTest(
             inputValue,
             IDs.CHACHAR_FORM_IPA_INPUT,
             IDs.CHACHAR_FORM_IPA_VALIDATION_MESSAGE,
@@ -706,14 +706,14 @@ internal sealed class ChacharFormTest : IDisposable
         _entityFormTestCommons.NumberInputUnchangedTest(inputValue, IDs.CHACHAR_FORM_TONE_INPUT);
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitToneWrongTest)} - empty string")]
-    public void SubmitToneWrongTest(string inputValue, string expectedError)
+    public async Task SubmitToneWrongTest(string inputValue, string expectedError)
     {
         // Empty tone is the only reachable wrong input.
         // Invalid inputs are unreachable thanks to PreventToneInvalidAsync, no need to test this case.
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_TONE_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_TONE_INPUT, inputValue).SetVoidResult();
 
-        _entityFormTestCommons.SubmitInvalidInputTest(
+        await _entityFormTestCommons.SubmitInvalidInputTest(
             inputValue,
             expectedError,
             IDs.CHACHAR_FORM_TONE_INPUT,
@@ -725,12 +725,12 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("0", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitToneCorrectTest)} - zero")]
     [TestCase("1", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitToneCorrectTest)} - one")]
     [TestCase("4", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitToneCorrectTest)} - four")]
-    public void SubmitToneCorrectTest(string inputValue)
+    public async Task SubmitToneCorrectTest(string inputValue)
     {
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_TONE_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_TONE_INPUT, inputValue).SetVoidResult();
 
-        _entityFormTestCommons.SubmitValidInputTest(
+        await _entityFormTestCommons.SubmitValidInputTest(
             inputValue,
             IDs.CHACHAR_FORM_TONE_INPUT,
             IDs.CHACHAR_FORM_TONE_VALIDATION_MESSAGE,
@@ -759,14 +759,14 @@ internal sealed class ChacharFormTest : IDisposable
         _entityFormTestCommons.NumberInputUnchangedTest(inputValue, IDs.CHACHAR_FORM_STROKES_INPUT);
 
     [TestCase("", COMPULSORY_VALUE, TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitStrokesWrongTest)} - empty string")]
-    public void SubmitStrokesWrongTest(string inputValue, string expectedError)
+    public async Task SubmitStrokesWrongTest(string inputValue, string expectedError)
     {
         // Empty strokes is the only reachable wrong input.
         // Invalid inputs are unreachable thanks to PreventStrokesInvalidAsync, no need to test this case.
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_STROKES_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_STROKES_INPUT, inputValue).SetVoidResult();
 
-        _entityFormTestCommons.SubmitInvalidInputTest(
+        await _entityFormTestCommons.SubmitInvalidInputTest(
             inputValue,
             expectedError,
             IDs.CHACHAR_FORM_STROKES_INPUT,
@@ -781,12 +781,12 @@ internal sealed class ChacharFormTest : IDisposable
     [TestCase("13", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitStrokesCorrectTest)} - thirteen")]
     [TestCase("66", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitStrokesCorrectTest)} - sixty-six")]
     [TestCase("99", TestName = $"{nameof(ChacharFormTest)}.{nameof(SubmitStrokesCorrectTest)} - ninety-nine")]
-    public void SubmitStrokesCorrectTest(string inputValue)
+    public async Task SubmitStrokesCorrectTest(string inputValue)
     {
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_STROKES_INPUT).SetResult(true);
         _ = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_VALUE, IDs.CHACHAR_FORM_STROKES_INPUT, inputValue).SetVoidResult();
 
-        _entityFormTestCommons.SubmitValidInputTest(
+        await _entityFormTestCommons.SubmitValidInputTest(
             inputValue,
             IDs.CHACHAR_FORM_STROKES_INPUT,
             IDs.CHACHAR_FORM_STROKES_VALIDATION_MESSAGE,
@@ -798,8 +798,11 @@ internal sealed class ChacharFormTest : IDisposable
     public async Task OpenCloseTest()
     {
         var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
+        var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
+
         await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
-        await _entityModalTestCommons.CloseTest(INDEX_TITLE);
+        await _entityModalTestCommons.CloseTest(setIndexTitleHandler, INDEX_TITLE);
+        _entityModalTestCommons.TitlesOrderTest(CREATE_NEW_CHARACTER, INDEX_TITLE);
     }
 
     [Test]
@@ -819,7 +822,7 @@ internal sealed class ChacharFormTest : IDisposable
             Strokes = _radicalChachar1.Strokes
         };
 
-        await SubmitChacharAlreadyExistsNonKeyFieldDiffersTest(_radicalChachar1, radicalChacharClone);
+        await SubmitRadicalChacharAlreadyExistsNonKeyFieldDiffersTest(_radicalChachar1, radicalChacharClone);
     }
 
     [Test]
@@ -834,7 +837,7 @@ internal sealed class ChacharFormTest : IDisposable
             Strokes = (short)(_radicalChachar1.Strokes! + 1)
         };
 
-        await SubmitChacharAlreadyExistsNonKeyFieldDiffersTest(_radicalChachar1, radicalChacharClone);
+        await SubmitRadicalChacharAlreadyExistsNonKeyFieldDiffersTest(_radicalChachar1, radicalChacharClone);
     }
 
     [Test]
@@ -847,43 +850,214 @@ internal sealed class ChacharFormTest : IDisposable
         await SubmitChacharAlreadyExistsTest(_nonRadicalChacharWithAlternative11);
 
     [Test]
-    public async Task SubmitRadicalChacharProcessingErrorTest() =>
-        await SubmitChacharProcessingErrorTest(_radicalChachar4);
+    public async Task SubmitRadicalChacharProcessingErrorTest()
+    {
+        _entityFormTestCommons.MockPostStatusCode(_radicalChachar4, HttpStatusCode.InternalServerError);
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
+        var setProcessDialogErrorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, ERROR).SetVoidResult();
+
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
+        await SubmitAsync(_radicalChachar4, setProcessDialogErrorTitleHandler, ERROR);
+        _entityModalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
+        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
+        Assert.That(_chachars, Does.Not.Contain(_radicalChachar4));
+        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_FORM_ROOT);
+
+        _entityModalTestCommons.TitlesOrderTest(
+            CREATE_NEW_CHARACTER,
+            PROCESSING_DOTS,
+            ERROR,
+            CREATE_NEW_CHARACTER
+        );
+    }
 
     [Test]
     public async Task SubmitNonRadicalChacharWithoutAlternativeProcessingErrorTest()
     {
-        SelectRadical();
-        await SubmitChacharProcessingErrorTest(_nonRadicalChacharWithoutAlternative32);
+        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithoutAlternative32, HttpStatusCode.InternalServerError);
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
+        var setRadicalSelectorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_RADICAL).SetVoidResult();
+        var setProcessDialogErrorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, ERROR).SetVoidResult();
+
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
+
+        await SelectRadicalAsync(
+            setRadicalSelectorTitleHandler,
+            setFormTitleHandler,
+            SELECT_RADICAL,
+            CREATE_NEW_CHARACTER
+        );
+
+        await SubmitAsync(_nonRadicalChacharWithoutAlternative32, setProcessDialogErrorTitleHandler, ERROR);
+        _entityModalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
+        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_CHARACTER, calledTimes: 3);
+        Assert.That(_chachars, Does.Not.Contain(_nonRadicalChacharWithoutAlternative32));
+        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_FORM_ROOT);
+
+        _entityModalTestCommons.TitlesOrderTest(
+            CREATE_NEW_CHARACTER,
+            SELECT_RADICAL,
+            CREATE_NEW_CHARACTER,
+            PROCESSING_DOTS,
+            ERROR,
+            CREATE_NEW_CHARACTER
+        );
     }
 
     [Test]
     public async Task SubmitNonRadicalChacharWithAlternativeProcessingErrorTest()
     {
-        SelectRadicalAndAlternative();
-        await SubmitChacharProcessingErrorTest(_nonRadicalChacharWithAlternative12);
+        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithAlternative12, HttpStatusCode.InternalServerError);
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
+        var setRadicalSelectorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_RADICAL).SetVoidResult();
+        var setAlternativeSelectorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_RADICAL_ALTERNATIVE).SetVoidResult();
+        var setProcessDialogErrorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, ERROR).SetVoidResult();
+
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
+
+        await SelectRadicalAndAlternative(
+            setRadicalSelectorTitleHandler,
+            setAlternativeSelectorTitleHandler,
+            setFormTitleHandler,
+            SELECT_RADICAL,
+            SELECT_RADICAL_ALTERNATIVE,
+            CREATE_NEW_CHARACTER
+        );
+
+        await SubmitAsync(_nonRadicalChacharWithAlternative12, setProcessDialogErrorTitleHandler, ERROR);
+        _entityModalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
+        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_CHARACTER, calledTimes: 4);
+        Assert.That(_chachars, Does.Not.Contain(_nonRadicalChacharWithAlternative12));
+        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_FORM_ROOT);
+
+        _entityModalTestCommons.TitlesOrderTest(
+            CREATE_NEW_CHARACTER,
+            SELECT_RADICAL,
+            CREATE_NEW_CHARACTER,
+            SELECT_RADICAL_ALTERNATIVE,
+            CREATE_NEW_CHARACTER,
+            PROCESSING_DOTS,
+            ERROR,
+            CREATE_NEW_CHARACTER
+        );
     }
 
     [Test]
-    public async Task SubmitRadicalChacharOkTest() =>
-        await SubmitChacharOkTest(_radicalChachar4);
+    public async Task SubmitRadicalChacharOkTest()
+    {
+        _entityFormTestCommons.MockPostStatusCode(_radicalChachar4, HttpStatusCode.OK);
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
+        var setProcessDialogSuccessTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SUCCESS).SetVoidResult();
+        var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
+
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
+        await SubmitAsync(_radicalChachar4, setProcessDialogSuccessTitleHandler, SUCCESS);
+
+        _entityModalTestCommons.ProcessDialogSuccessTest(
+            CHARACTER_CREATED,
+            _radicalChachar4.TheCharacter!,
+            _radicalChachar4.RealPinyin!
+        );
+
+        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
+        _entityModalTestCommons.ModalClosedTest(IDs.CHACHAR_FORM_ROOT);
+        Assert.That(_chachars, Does.Contain(_radicalChachar4));
+
+        _entityModalTestCommons.TitlesOrderTest(
+            CREATE_NEW_CHARACTER,
+            PROCESSING_DOTS,
+            SUCCESS,
+            INDEX_TITLE
+        );
+    }
 
     [Test]
     public async Task SubmitNonRadicalChacharWithoutAlternativeOkTest()
     {
-        SelectRadical();
-        await SubmitChacharOkTest(_nonRadicalChacharWithoutAlternative32);
+        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithoutAlternative32, HttpStatusCode.OK);
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
+        var setRadicalSelectorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_RADICAL).SetVoidResult();
+        var setProcessDialogSuccessTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SUCCESS).SetVoidResult();
+        var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
+
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
+
+        await SelectRadicalAsync(
+            setRadicalSelectorTitleHandler,
+            setFormTitleHandler,
+            SELECT_RADICAL,
+            CREATE_NEW_CHARACTER
+        );
+
+        await SubmitAsync(_nonRadicalChacharWithoutAlternative32, setProcessDialogSuccessTitleHandler, SUCCESS);
+
+        _entityModalTestCommons.ProcessDialogSuccessTest(
+            CHARACTER_CREATED,
+            _nonRadicalChacharWithoutAlternative32.TheCharacter!,
+            _nonRadicalChacharWithoutAlternative32.RealPinyin!
+        );
+
+        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
+        Assert.That(_chachars, Does.Contain(_nonRadicalChacharWithoutAlternative32));
+        _entityModalTestCommons.ModalClosedTest(IDs.CHACHAR_FORM_ROOT);
+
+        _entityModalTestCommons.TitlesOrderTest(
+            CREATE_NEW_CHARACTER,
+            SELECT_RADICAL,
+            CREATE_NEW_CHARACTER,
+            PROCESSING_DOTS,
+            SUCCESS,
+            INDEX_TITLE
+        );
     }
 
 
     [Test]
     public async Task SubmitNonRadicalChacharWithAlternativeOkTest()
     {
-        SelectRadicalAndAlternative();
-        await SubmitChacharOkTest(_nonRadicalChacharWithAlternative12);
+        _entityFormTestCommons.MockPostStatusCode(_nonRadicalChacharWithAlternative12, HttpStatusCode.OK);
+        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
+        var setRadicalSelectorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_RADICAL).SetVoidResult();
+        var setAlternativeSelectorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_RADICAL_ALTERNATIVE).SetVoidResult();
+        var setProcessDialogSuccessTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SUCCESS).SetVoidResult();
+        var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
+
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
+
+        await SelectRadicalAndAlternative(
+            setRadicalSelectorTitleHandler,
+            setAlternativeSelectorTitleHandler,
+            setFormTitleHandler,
+            SELECT_RADICAL,
+            SELECT_RADICAL_ALTERNATIVE,
+            CREATE_NEW_CHARACTER
+        );
+
+        await SubmitAsync(_nonRadicalChacharWithAlternative12, setProcessDialogSuccessTitleHandler, SUCCESS);
+
+        _entityModalTestCommons.ProcessDialogSuccessTest(
+            CHARACTER_CREATED,
+            _nonRadicalChacharWithAlternative12.TheCharacter!,
+            _nonRadicalChacharWithAlternative12.RealPinyin!
+        );
+
+        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
+        Assert.That(_chachars, Does.Contain(_nonRadicalChacharWithAlternative12));
+        _entityModalTestCommons.ModalClosedTest(IDs.CHACHAR_FORM_ROOT);
+
+        _entityModalTestCommons.TitlesOrderTest(
+            CREATE_NEW_CHARACTER,
+            SELECT_RADICAL,
+            CREATE_NEW_CHARACTER,
+            SELECT_RADICAL_ALTERNATIVE,
+            CREATE_NEW_CHARACTER,
+            PROCESSING_DOTS,
+            SUCCESS,
+            INDEX_TITLE
+        );
     }
 
-    private async Task SubmitChacharAlreadyExistsNonKeyFieldDiffersTest(Chachar chachar, Chachar chacharClone)
+    private async Task SubmitRadicalChacharAlreadyExistsNonKeyFieldDiffersTest(Chachar chachar, Chachar chacharClone)
     {
         await SubmitChacharAlreadyExistsTest(chachar);
         Assert.That(_chachars, Does.Contain(chacharClone));
@@ -903,60 +1077,63 @@ internal sealed class ChacharFormTest : IDisposable
         );
 
         await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
-        await SubmitAsync(chachar);
-        _entityModalTestCommons.ProcessDialogErrorTest(setProcessDialogErrorTitleHandler, ERROR, expectedErrorMessage);
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest();
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(setFormTitleHandler, IDs.CHACHAR_FORM_ROOT, CREATE_NEW_CHARACTER);
+        await SubmitAsync(chachar, setProcessDialogErrorTitleHandler, ERROR);
+        _entityModalTestCommons.ProcessDialogErrorTest(expectedErrorMessage);
+        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
         Assert.That(_chachars, Does.Contain(chachar));
+        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_FORM_ROOT);
+
+        _entityModalTestCommons.TitlesOrderTest(
+            CREATE_NEW_CHARACTER,
+            PROCESSING_DOTS,
+            ERROR,
+            CREATE_NEW_CHARACTER
+        );
     }
 
-    private async Task SubmitChacharProcessingErrorTest(Chachar chachar)
-    {
-        _entityFormTestCommons.MockPostStatusCode(chachar, HttpStatusCode.InternalServerError);
-        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
-        var setProcessDialogErrorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, ERROR).SetVoidResult();
-
-        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
-        await SubmitAsync(chachar);
-        _entityModalTestCommons.ProcessDialogErrorTest(setProcessDialogErrorTitleHandler, ERROR, PROCESSING_ERROR);
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest();
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(setFormTitleHandler, IDs.CHACHAR_FORM_ROOT, CREATE_NEW_CHARACTER);
-        Assert.That(_chachars, Does.Not.Contain(chachar));
-    }
-
-    private async Task SubmitChacharOkTest(Chachar chachar)
-    {
-        _entityFormTestCommons.MockPostStatusCode(chachar, HttpStatusCode.OK);
-        var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_CHARACTER).SetVoidResult();
-        var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
-        var setProcessDialogSuccessTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SUCCESS).SetVoidResult();
-
-        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
-        await SubmitAsync(chachar);
-
-        _entityModalTestCommons.ProcessDialogSuccessTest(
-            setProcessDialogSuccessTitleHandler,
-            SUCCESS,
-            CHARACTER_CREATED,
-            chachar.TheCharacter!,
-            chachar.RealPinyin!
+    private async Task SelectRadicalAsync(
+        JSRuntimeInvocationHandler setTitleHandler,
+        JSRuntimeInvocationHandler setAfterClickTitleHandler,
+        string expectedTitle,
+        string expectedAfterClickTitle
+    ) =>
+        await _entityFormTestCommons.ClickFirstInSelector(
+            IDs.CHACHAR_FORM_RADICAL_INPUT,
+            CssClasses.RADICAL_SELECTOR,
+            setTitleHandler,
+            setAfterClickTitleHandler,
+            expectedTitle,
+            expectedAfterClickTitle
         );
 
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest();
-        _entityModalTestCommons.ModalClosedTest(setIndexTitleHandler, IDs.CHACHAR_FORM_ROOT, INDEX_TITLE);
-        Assert.That(_chachars, Does.Contain(chachar));
-    }
-
-    private void SelectRadical() =>
-        _entityFormTestCommons.ClickFirstInSelector(IDs.CHACHAR_FORM_RADICAL_INPUT, CssClasses.RADICAL_SELECTOR);
-
-    private void SelectRadicalAndAlternative()
+    private async Task SelectRadicalAndAlternative(
+        JSRuntimeInvocationHandler setRadicalSelectorTitleHandler,
+        JSRuntimeInvocationHandler setAlternativeSelectorTitleHandler,
+        JSRuntimeInvocationHandler setAfterClickTitleHandler,
+        string expectedRadicalSelectorTitle,
+        string expectedAlternativeSelectorTitle,
+        string expectedAfterClickTitle
+    )
     {
-        SelectRadical();
-        _entityFormTestCommons.ClickFirstInSelector(IDs.CHACHAR_FORM_ALTERNATIVE_INPUT, CssClasses.ALTERNATIVE_SELECTOR);
+        await SelectRadicalAsync(
+            setRadicalSelectorTitleHandler,
+            setAfterClickTitleHandler,
+            expectedRadicalSelectorTitle,
+            expectedAfterClickTitle
+        );
+
+        await _entityFormTestCommons.ClickFirstInSelector(
+            IDs.CHACHAR_FORM_ALTERNATIVE_INPUT,
+            CssClasses.ALTERNATIVE_SELECTOR,
+            setAlternativeSelectorTitleHandler,
+            setAfterClickTitleHandler,
+            expectedAlternativeSelectorTitle,
+            expectedAfterClickTitle,
+            afterClickCalledTimes: 3
+        );
     }
 
-    private async Task SubmitAsync(Chachar chachar)
+    private async Task SubmitAsync(Chachar chachar, JSRuntimeInvocationHandler setTitleHandler, string expectedTitle)
     {
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_THE_CHARACTER_INPUT).SetResult(true);
         _ = _testContext.JSInterop.Setup<bool>(DOMFunctions.IS_VALID_INPUT, IDs.CHACHAR_FORM_PINYIN_INPUT).SetResult(true);
@@ -983,6 +1160,8 @@ internal sealed class ChacharFormTest : IDisposable
         toneInput.Change(chachar.Tone);
         strokesInput.Change(chachar.Strokes);
 
+        setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
         await formSubmitButton.ClickAsync(_mouseEventArgs);
+        _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, expectedTitle);
     }
 }
