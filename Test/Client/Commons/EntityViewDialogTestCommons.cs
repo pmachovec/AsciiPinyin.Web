@@ -51,6 +51,18 @@ internal sealed class EntityViewDialogTestCommons<T>(
         return deleteButton;
     }
 
+    [
+        System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Performance",
+            "CA1822:Mark members as static",
+            Justification = "With static calls, each would need to explicitly specify generic types. With the current instance approach, generics are fixed per instance."
+        ),
+        System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "CodeQuality",
+            "IDE0079:Remove unnecessary suppression",
+            Justification = "The CA1822 suppression is marked as unnecessary, which is not true."
+    )
+    ]
     public async Task DeleteButtonClickTest(IElement deleteButton, JSRuntimeInvocationHandler setTitleHandler, string expectedTitle)
     {
         setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);

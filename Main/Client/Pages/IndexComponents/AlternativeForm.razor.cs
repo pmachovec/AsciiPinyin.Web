@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Localization;
 using System.Globalization;
 
-namespace AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
+namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
 {

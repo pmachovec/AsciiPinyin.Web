@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Localization;
 using System.Globalization;
 
-namespace AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
+namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
 {

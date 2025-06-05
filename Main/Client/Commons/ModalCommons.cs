@@ -70,8 +70,10 @@ public sealed class ModalCommons(
         }
         else
         {
-            await _jSInteropDOM.SetTitleAsync(modal.ModalLowerLevel!.HtmlTitle, cancellationToken);
-            await CloseModalHigherLevelAsync(modal, cancellationToken);
+            await Task.WhenAll(
+                _jSInteropDOM.SetTitleAsync(modal.ModalLowerLevel!.HtmlTitle, cancellationToken),
+                CloseModalHigherLevelAsync(modal, cancellationToken)
+            );
         }
     }
 
@@ -88,8 +90,10 @@ public sealed class ModalCommons(
         }
         else
         {
-            await CloseModalHigherLevelAsync(modal, cancellationToken);
-            await CloseAllAsyncCommon(modal.ModalLowerLevel!, cancellationToken);
+            await Task.WhenAll(
+                CloseModalHigherLevelAsync(modal, cancellationToken),
+                CloseAllAsyncCommon(modal.ModalLowerLevel!, cancellationToken)
+            );
         }
     }
 

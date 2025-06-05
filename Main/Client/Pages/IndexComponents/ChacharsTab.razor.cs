@@ -1,5 +1,4 @@
 using AsciiPinyin.Web.Client.JSInterop;
-using AsciiPinyin.Web.Client.Pages.IndexComponents.ChacharsTabComponents;
 using AsciiPinyin.Web.Shared.ComponentInterfaces;
 using AsciiPinyin.Web.Shared.Constants;
 using AsciiPinyin.Web.Shared.Models;
@@ -11,10 +10,6 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public class ChacharsTabBase : ComponentBase, IEntityTab
 {
-    protected ChacharForm ChacharForm { get; set; } = default!;
-
-    protected ChacharViewDialog ChacharViewDialog { get; set; } = default!;
-
     public string Classes { get; set; } = string.Empty;
 
     public string HtmlTitle { get; private set; } = string.Empty;
@@ -50,8 +45,8 @@ public class ChacharsTabBase : ComponentBase, IEntityTab
     }
 
     protected async Task ShowChacharFormAsync(CancellationToken cancellationToken) =>
-        await ChacharForm.OpenAsync(Index, cancellationToken);
+        await Index.ChacharForm.OpenAsync(Index, cancellationToken);
 
     protected async Task ShowChacharViewDialogAsync(Chachar chachar, CancellationToken cancellationToken) =>
-        await ChacharViewDialog.OpenAsync(chachar, Index, cancellationToken);
+        await Index.ChacharViewDialog.OpenAsync(chachar, Index, cancellationToken);
 }

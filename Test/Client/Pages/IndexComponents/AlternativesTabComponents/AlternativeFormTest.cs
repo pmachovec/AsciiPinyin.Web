@@ -5,7 +5,6 @@ using AsciiPinyin.Web.Client.HttpClients;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
-using AsciiPinyin.Web.Client.Pages.IndexComponents.AlternativesTabComponents;
 using AsciiPinyin.Web.Client.Test.Constants.JSInterop;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Resources;

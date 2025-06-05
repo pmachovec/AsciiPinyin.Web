@@ -7,6 +7,14 @@ namespace AsciiPinyin.Web.Client.Pages;
 
 public interface IIndex : IPage
 {
+    ChacharForm ChacharForm { get; }
+
+    ChacharViewDialog ChacharViewDialog { get; }
+
+    AlternativeForm AlternativeForm { get; }
+
+    AlternativeViewDialog AlternativeViewDialog { get; }
+
     IProcessDialog ProcessDialog { get; }
 
     IEntityTab SelectedTab { get; }

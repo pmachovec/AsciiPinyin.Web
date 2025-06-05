@@ -37,7 +37,7 @@ namespace AsciiPinyin.Web.Server.Test.Commons;
     System.Diagnostics.CodeAnalysis.SuppressMessage(
         "CodeQuality",
         "IDE0079:Remove unnecessary suppression",
-        Justification = "When the CA1822 is applied to the whole class, it's marked as unnecessary, which is not true."
+        Justification = "The CA1822 suppression is marked as unnecessary, which is not true."
     )
 ]
 internal class EntityControllerTestCommons<T1, T2>(

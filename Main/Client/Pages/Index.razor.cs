@@ -14,15 +14,23 @@ public class IndexBase : ComponentBase, IIndex
 {
     private static IEntityTab? _selectedTab;
 
-    protected AlternativesTab AlternativesTab { get; set; } = default!;
+    public ChacharsTab ChacharsTab { get; set; } = default!;
 
-    protected ChacharsTab ChacharsTab { get; set; } = default!;
+    public ChacharForm ChacharForm { get; set; } = default!;
+
+    public ChacharViewDialog ChacharViewDialog { get; set; } = default!;
+
+    public AlternativesTab AlternativesTab { get; set; } = default!;
+
+    public AlternativeForm AlternativeForm { get; set; } = default!;
+
+    public AlternativeViewDialog AlternativeViewDialog { get; set; } = default!;
+
+    public IProcessDialog ProcessDialog { get; set; } = default!;
 
     protected string BackdropClasses { get; private set; } = CssClasses.D_NONE;
 
     public string HtmlTitle { get; private set; } = string.Empty;
-
-    public IProcessDialog ProcessDialog { get; set; } = default!;
 
     public IEntityTab SelectedTab => _selectedTab!;
 
