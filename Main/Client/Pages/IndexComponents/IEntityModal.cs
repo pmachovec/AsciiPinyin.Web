@@ -6,6 +6,8 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public interface IEntityModal<T> : IModal, IComponent where T : IEntity
 {
+    Task OpenAsync(T entity, IModal modalLowerLevel, CancellationToken cancellationToken);
+
     Task OpenAsync(T entity, IPage page, CancellationToken cancellationToken);
 
     Task CloseAsync(CancellationToken cancellationToken);

@@ -63,10 +63,20 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
         EditContext.OnValidationRequested += (_, _) => ValidateAdditional();
     }
 
+    public async Task OpenAsync(Alternative alternative, IModal modalLowerLevel, CancellationToken cancellationToken)
+    {
+        Alternative = alternative;
+        ModalLowerLevel = modalLowerLevel;
+        Page = null;
+        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
+    }
+
     public async Task OpenAsync(Alternative alternative, IPage page, CancellationToken cancellationToken)
     {
         Alternative = alternative;
-        await OpenAsync(page, cancellationToken);
+        ModalLowerLevel = null;
+        Page = page;
+        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
     }
 
     public async Task OpenAsync(IPage page, CancellationToken cancellationToken)

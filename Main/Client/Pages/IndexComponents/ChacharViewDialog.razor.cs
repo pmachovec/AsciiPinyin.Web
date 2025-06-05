@@ -50,9 +50,52 @@ public class ChacharViewDialogBase : ComponentBase, IEntityModal<Chachar>
 
     public async Task OpenAsync(
         Chachar chachar,
+        IModal modalLowerLevel,
+        CancellationToken cancellationToken
+    )
+    {
+        ModalLowerLevel = modalLowerLevel;
+        Page = null;
+        await OpenAsync(chachar, cancellationToken);
+    }
+
+    public async Task OpenAsync(
+        Chachar chachar,
         IPage page,
         CancellationToken cancellationToken
     )
+    {
+        ModalLowerLevel = null;
+        Page = page;
+        await OpenAsync(chachar, cancellationToken);
+    }
+
+    public async Task CloseAsync(CancellationToken cancellationToken)
+    {
+        Chachar = null;
+        await ModalCommons.CloseAsyncCommon(this, cancellationToken);
+    }
+
+    public void AddClasses(params string[] classes) => Classes += $" {string.Join(' ', classes)}";
+
+    public void SetClasses(params string[] classes) => Classes = string.Join(' ', classes);
+
+    public async Task StateHasChangedAsync() => await InvokeAsync(StateHasChanged);
+
+    protected async Task InitiateDeleteAsync(CancellationToken cancellationToken) =>
+        await Index.ProcessDialog.SetWarningAsync(
+            this,
+            string.Format(
+                CultureInfo.InvariantCulture,
+                Localizer[Resource.CharacterWillBeDeleted],
+                Chachar!.TheCharacter!,
+                Chachar.RealPinyin!
+            ),
+            SubmitDeleteAsync,
+            cancellationToken
+        );
+
+    private async Task OpenAsync(Chachar chachar, CancellationToken cancellationToken)
     {
         await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
 
@@ -66,8 +109,6 @@ public class ChacharViewDialogBase : ComponentBase, IEntityModal<Chachar>
         var databaseIntegrityErrorMessages = new List<string>();
         DeleteTitle = string.Empty;
         DisableDeleteCss = string.Empty;
-        ModalLowerLevel = null;
-        Page = page;
         HtmlTitle = $"{StringConstants.ASCII_PINYIN} - {chachar.TheCharacter}";
         Chachar = chachar;
 
@@ -107,31 +148,6 @@ public class ChacharViewDialogBase : ComponentBase, IEntityModal<Chachar>
         await ModalCommons.OpenAsyncCommon(this, cancellationToken);
         await Index.ProcessDialog.CloseAsync(cancellationToken);
     }
-
-    public async Task CloseAsync(CancellationToken cancellationToken)
-    {
-        Chachar = null;
-        await ModalCommons.CloseAsyncCommon(this, cancellationToken);
-    }
-
-    public void AddClasses(params string[] classes) => Classes += $" {string.Join(' ', classes)}";
-
-    public void SetClasses(params string[] classes) => Classes = string.Join(' ', classes);
-
-    public async Task StateHasChangedAsync() => await InvokeAsync(StateHasChanged);
-
-    protected async Task InitiateDeleteAsync(CancellationToken cancellationToken) =>
-        await Index.ProcessDialog.SetWarningAsync(
-            this,
-            string.Format(
-                CultureInfo.InvariantCulture,
-                Localizer[Resource.CharacterWillBeDeleted],
-                Chachar!.TheCharacter!,
-                Chachar.RealPinyin!
-            ),
-            SubmitDeleteAsync,
-            cancellationToken
-        );
 
     private string GetErrorMessageFormatted(IEnumerable<string> databaseIntegrityErrorMessages)
     {

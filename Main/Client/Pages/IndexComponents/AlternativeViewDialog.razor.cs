@@ -49,42 +49,24 @@ public class AlternativeViewDialogBase : ComponentBase, IEntityModal<Alternative
 
     public async Task OpenAsync(
         Alternative alternative,
+        IModal modalLowerLevel,
+        CancellationToken cancellationToken
+    )
+    {
+        ModalLowerLevel = modalLowerLevel;
+        Page = null;
+        await OpenAsync(alternative, cancellationToken);
+    }
+
+    public async Task OpenAsync(
+        Alternative alternative,
         IPage page,
         CancellationToken cancellationToken
     )
     {
-        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
-
-        await JSInteropDOM.SetAttributeAsync(
-            IDs.ALTERNATIVE_VIEW_DIALOG_DELETE_TOOLTIP,
-            Attributes.DATA_BS_ORIGINAL_TITLE,
-            string.Empty,
-            cancellationToken
-        );
-
-        DeleteTitle = string.Empty;
-        DisableDeleteCss = string.Empty;
         ModalLowerLevel = null;
         Page = page;
-        HtmlTitle = $"{StringConstants.ASCII_PINYIN} - {alternative.TheCharacter}";
-        Alternative = alternative;
-
-        var chacharsWithThis = Index.Chachars.Where(chachar =>
-            chachar.RadicalAlternativeCharacter == Alternative!.TheCharacter
-            && chachar.RadicalCharacter == Alternative.OriginalCharacter
-            && chachar.RadicalPinyin == Alternative.OriginalPinyin
-            && chachar.RadicalTone == Alternative.OriginalTone
-        );
-
-        if (chacharsWithThis.Any())
-        {
-            DisableDeleteCss = $"{CssClasses.DISABLED} {CssClasses.OPACITY_25}";
-            DeleteTitle = $"{Localizer[Resource.CannotBeDeleted]} {Localizer[Resource.AlternativeUsedByCharactersInDb]}";
-            await InvokeAsync(StateHasChanged);
-        }
-
-        await ModalCommons.OpenAsyncCommon(this, cancellationToken);
-        await Index.ProcessDialog.CloseAsync(cancellationToken);
+        await OpenAsync(alternative, cancellationToken);
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken)
@@ -112,6 +94,40 @@ public class AlternativeViewDialogBase : ComponentBase, IEntityModal<Alternative
             SubmitDeleteAsync,
             cancellationToken
         );
+
+    private async Task OpenAsync(Alternative alternative, CancellationToken cancellationToken)
+    {
+        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
+
+        await JSInteropDOM.SetAttributeAsync(
+            IDs.ALTERNATIVE_VIEW_DIALOG_DELETE_TOOLTIP,
+            Attributes.DATA_BS_ORIGINAL_TITLE,
+            string.Empty,
+            cancellationToken
+        );
+
+        DeleteTitle = string.Empty;
+        DisableDeleteCss = string.Empty;
+        HtmlTitle = $"{StringConstants.ASCII_PINYIN} - {alternative.TheCharacter}";
+        Alternative = alternative;
+
+        var chacharsWithThis = Index.Chachars.Where(chachar =>
+            chachar.RadicalAlternativeCharacter == Alternative!.TheCharacter
+            && chachar.RadicalCharacter == Alternative.OriginalCharacter
+            && chachar.RadicalPinyin == Alternative.OriginalPinyin
+            && chachar.RadicalTone == Alternative.OriginalTone
+        );
+
+        if (chacharsWithThis.Any())
+        {
+            DisableDeleteCss = $"{CssClasses.DISABLED} {CssClasses.OPACITY_25}";
+            DeleteTitle = $"{Localizer[Resource.CannotBeDeleted]} {Localizer[Resource.AlternativeUsedByCharactersInDb]}";
+            await InvokeAsync(StateHasChanged);
+        }
+
+        await ModalCommons.OpenAsyncCommon(this, cancellationToken);
+        await Index.ProcessDialog.CloseAsync(cancellationToken);
+    }
 
     private async Task SubmitDeleteAsync(CancellationToken cancellationToken)
     {

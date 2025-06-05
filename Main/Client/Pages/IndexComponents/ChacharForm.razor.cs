@@ -89,9 +89,19 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
         }
     }
 
+    public async Task OpenAsync(Chachar chachar, IModal modalLowerLevel, CancellationToken cancellationToken)
+    {
+        Chachar = chachar;
+        ModalLowerLevel = modalLowerLevel;
+        Page = null;
+        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
+    }
+
     public async Task OpenAsync(Chachar chachar, IPage page, CancellationToken cancellationToken)
     {
         Chachar = chachar;
+        ModalLowerLevel = null;
+        Page = page;
         await OpenAsync(page, cancellationToken);
     }
 
