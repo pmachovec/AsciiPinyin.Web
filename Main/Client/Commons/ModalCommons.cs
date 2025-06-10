@@ -1,4 +1,5 @@
 using AsciiPinyin.Web.Client.ComponentInterfaces;
+using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.Exceptions;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages;
@@ -20,13 +21,13 @@ public sealed class ModalCommons(
     {
         ThrowOnInvalidModal(modal);
 
-        if (modal.Page is not null)
+        if (modal.ModalLowerLevel is { } modalLowerLevel)
         {
-            await OpenFirstLevelAsync(modal, cancellationToken);
+            await OpenHigherLevelAsync(modal, modalLowerLevel, cancellationToken);
         }
         else
         {
-            await OpenHigherLevelAsync(modal, cancellationToken);
+            await OpenFirstLevelAsync(modal, modal.Page!, cancellationToken);
         }
     }
 
@@ -48,17 +49,16 @@ public sealed class ModalCommons(
     {
         ThrowOnInvalidModal(modal);
 
-        if (modal.Page is not null)
+        if (modal.ModalLowerLevel is { } modalLowerLevel)
         {
-            await _jSInteropDOM.SetTitleAsync(modal.Page!.HtmlTitle, cancellationToken);
-            await CloseFirstLevelAsync(modal, cancellationToken);
+            await Task.WhenAll(
+                _jSInteropDOM.SetTitleAsync(modalLowerLevel.HtmlTitle, cancellationToken),
+                CloseHigherLevelAsync(modal, modalLowerLevel, cancellationToken)
+            );
         }
         else
         {
-            await Task.WhenAll(
-                _jSInteropDOM.SetTitleAsync(modal.ModalLowerLevel!.HtmlTitle, cancellationToken),
-                CloseHigherLevelAsync(modal, cancellationToken)
-            );
+            await CloseWithoutBackdropAsync(modal, cancellationToken);
         }
     }
 
@@ -67,20 +67,35 @@ public sealed class ModalCommons(
         CancellationToken cancellationToken
     )
     {
-        ThrowOnInvalidModal(modal);
+        var (modals, backdrops, title) = GetModalsBackdropsTitle(modal);
+        await _jSInteropDOM.SetTitleAsync(title, cancellationToken);
 
-        if (modal.Page is not null)
+        foreach (var anotherModal in modals)
         {
-            await _jSInteropDOM.SetTitleAsync(modal.Page!.HtmlTitle, cancellationToken);
-            await CloseFirstLevelAsync(modal, cancellationToken);
+            anotherModal.SetClasses(CssClasses.D_BLOCK);
         }
-        else
+
+        foreach (var backdrop in backdrops)
         {
-            await Task.WhenAll(
-                CloseHigherLevelAsync(modal, cancellationToken),
-                CloseAllAsyncCommon(modal.ModalLowerLevel!, cancellationToken)
-            );
+            backdrop.SetClasses(CssClasses.D_BLOCK);
         }
+
+        await Task.WhenAll(modals.Select(modal => modal.StateHasChangedAsync()));
+        await Task.WhenAll(backdrops.Select(backdrop => backdrop.StateHasChangedAsync()));
+        await Task.Delay(IntConstants.MODAL_HIDE_DELAY, cancellationToken);
+
+        foreach (var anotherModal in modals)
+        {
+            anotherModal.SetClasses(CssClasses.D_NONE);
+        }
+
+        foreach (var backdrop in backdrops)
+        {
+            backdrop.SetClasses(CssClasses.D_NONE);
+        }
+
+        await Task.WhenAll(modals.Select(modal => modal.StateHasChangedAsync()));
+        await Task.WhenAll(backdrops.Select(backdrop => backdrop.StateHasChangedAsync()));
     }
 
     public async Task<bool> PostAsync<T>(
@@ -130,6 +145,109 @@ public sealed class ModalCommons(
         }
     }
 
+    private static async Task OpenFirstLevelAsync(IModal modal, IPage page, CancellationToken cancellationToken)
+    {
+        modal.SetClasses(CssClasses.D_BLOCK);
+        modal.Backdrop = page.Backdrop;
+        modal.Backdrop.SetClasses(CssClasses.D_BLOCK);
+        modal.Backdrop.ZIndex = NumberConstants.BACKDROP_INITIAL_INDEX;
+        modal.ZIndex = modal.Backdrop.ZIndex + 1;
+
+        await Task.WhenAll(
+            modal.StateHasChangedAsync(),
+            modal.Backdrop.StateHasChangedAsync()
+        );
+
+        await Task.Delay(IntConstants.MODAL_SHOW_DELAY, cancellationToken);
+        modal.AddClasses(CssClasses.SHOW);
+        modal.Backdrop.AddClasses(CssClasses.SHOW);
+
+        await Task.WhenAll(
+            modal.StateHasChangedAsync(),
+            modal.Backdrop.StateHasChangedAsync()
+        );
+    }
+
+    private static async Task OpenHigherLevelAsync(IModal modal, IModal modalLowerLevel, CancellationToken cancellationToken)
+    {
+        modal.ZIndex = modalLowerLevel.ZIndex + 1;
+        modal.SetClasses(CssClasses.D_BLOCK);
+        List<Task> awaitables = [modal.StateHasChangedAsync()];
+
+        if (modalLowerLevel.Backdrop is not null)
+        {
+            modal.Backdrop = modalLowerLevel.Backdrop;
+            modal.Backdrop.ZIndex += 1;
+            modalLowerLevel.ZIndex -= 1;
+            modalLowerLevel.Backdrop = null;
+            awaitables.Add(modalLowerLevel.StateHasChangedAsync());
+            awaitables.Add(modal.Backdrop.StateHasChangedAsync());
+        }
+
+        await Task.WhenAll(awaitables);
+        await Task.Delay(IntConstants.MODAL_SHOW_DELAY, cancellationToken);
+        modal.AddClasses(CssClasses.SHOW);
+        await modal.StateHasChangedAsync();
+    }
+
+    private static async Task CloseWithoutBackdropAsync(IModal modal, CancellationToken cancellationToken)
+    {
+        modal.SetClasses(CssClasses.D_BLOCK);
+        await modal.StateHasChangedAsync();
+        await Task.Delay(IntConstants.MODAL_HIDE_DELAY, cancellationToken);
+        modal.SetClasses(CssClasses.D_NONE);
+        await modal.StateHasChangedAsync();
+    }
+
+    private static async Task CloseHigherLevelAsync(IModal modal, IModal modalLowerLevel, CancellationToken cancellationToken)
+    {
+        List<Task> awaitables = [];
+
+        if (modal.Backdrop is { } backdrop)
+        {
+            modalLowerLevel.Backdrop = backdrop;
+            modalLowerLevel.Backdrop.ZIndex -= 1;
+            modalLowerLevel.ZIndex += 1;
+            awaitables.Add(modalLowerLevel.StateHasChangedAsync());
+            awaitables.Add(modalLowerLevel.Backdrop.StateHasChangedAsync());
+        }
+
+        modal.SetClasses(CssClasses.D_BLOCK);
+        await Task.WhenAll(awaitables);
+        await Task.Delay(IntConstants.MODAL_HIDE_DELAY, cancellationToken);
+        modal.SetClasses(CssClasses.D_NONE);
+        await modal.StateHasChangedAsync();
+    }
+
+    private static (List<IModal>, List<IBackdrop>, string) GetModalsBackdropsTitle(IModal modal)
+    {
+        ThrowOnInvalidModal(modal);
+
+        List<IModal> modals;
+        List<IBackdrop> backdrops;
+        string title;
+
+        if (modal.ModalLowerLevel is { } modalLowerLevel)
+        {
+            (modals, backdrops, title) = GetModalsBackdropsTitle(modalLowerLevel);
+        }
+        else
+        {
+            modals = [];
+            backdrops = [];
+            title = modal.Page!.HtmlTitle;
+        }
+
+        modals.Add(modal);
+
+        if (modal.Backdrop is { } backdrop)
+        {
+            backdrops.Add(backdrop);
+        }
+
+        return (modals, backdrops, title);
+    }
+
     private static void ThrowOnInvalidModal(IModal modal)
     {
         if (modal.Page is not null && modal.ModalLowerLevel is not null)
@@ -147,79 +265,5 @@ public sealed class ModalCommons(
                 + " It must have configured exactly one of them."
             );
         }
-    }
-
-    private async Task LowerAllZIndexesAsync(IModal modal, int higherLevelZIndex, CancellationToken cancellationToken)
-    {
-        if (modal.ModalLowerLevel is { } modalLowerLevel)
-        {
-            await LowerAllZIndexesAsync(modalLowerLevel, higherLevelZIndex - 1, cancellationToken);
-        }
-
-        await _jSInteropDOM.SetZIndexAsync(
-            modal.RootId,
-            higherLevelZIndex - 1,
-            cancellationToken
-        );
-    }
-
-    private async Task IncreaseAllZIndexesAsync(IModal modal, int lowerLevelZIndex, CancellationToken cancellationToken)
-    {
-        await _jSInteropDOM.SetZIndexAsync(
-            modal.RootId,
-            lowerLevelZIndex + 1,
-            cancellationToken
-        );
-
-        if (modal.ModalLowerLevel is { } modalLowerLevel)
-        {
-            await IncreaseAllZIndexesAsync(modalLowerLevel, lowerLevelZIndex + 1, cancellationToken);
-        }
-    }
-
-    private static async Task OpenFirstLevelAsync(IModal modal, CancellationToken cancellationToken)
-    {
-        modal.SetClasses(CssClasses.D_BLOCK);
-        modal.Page!.SetBackdropClasses(CssClasses.D_BLOCK);
-        await modal.StateHasChangedAsync();
-        await modal.Page.StateHasChangedAsync();
-        await Task.Delay(IntConstants.MODAL_SHOW_DELAY, cancellationToken);
-        modal.AddClasses(CssClasses.SHOW);
-        modal.Page.AddBackdropClasses(CssClasses.SHOW);
-        await modal.StateHasChangedAsync();
-        await modal.Page.StateHasChangedAsync();
-    }
-
-    private async Task OpenHigherLevelAsync(IModal modal, CancellationToken cancellationToken)
-    {
-        await LowerAllZIndexesAsync(modal.ModalLowerLevel!, NumberConstants.INDEX_BACKDROP_Z, cancellationToken);
-        modal.SetClasses(CssClasses.D_BLOCK);
-        await modal.StateHasChangedAsync();
-        await Task.Delay(IntConstants.MODAL_SHOW_DELAY, cancellationToken);
-        modal.AddClasses(CssClasses.SHOW);
-        await modal.StateHasChangedAsync();
-    }
-
-    private static async Task CloseFirstLevelAsync(IModal modal, CancellationToken cancellationToken)
-    {
-        modal.SetClasses(CssClasses.D_BLOCK);
-        modal.Page!.SetBackdropClasses(CssClasses.D_BLOCK);
-        await modal.StateHasChangedAsync();
-        await modal.Page.StateHasChangedAsync();
-        await Task.Delay(IntConstants.MODAL_HIDE_DELAY, cancellationToken);
-        modal.SetClasses(CssClasses.D_NONE);
-        modal.Page.SetBackdropClasses(CssClasses.D_NONE);
-        await modal.StateHasChangedAsync();
-        await modal.Page.StateHasChangedAsync();
-    }
-
-    private async Task CloseHigherLevelAsync(IModal modal, CancellationToken cancellationToken)
-    {
-        modal.SetClasses(CssClasses.D_BLOCK);
-        await modal.StateHasChangedAsync();
-        await IncreaseAllZIndexesAsync(modal.ModalLowerLevel!, NumberConstants.INDEX_BACKDROP_Z, cancellationToken);
-        await Task.Delay(IntConstants.MODAL_HIDE_DELAY, cancellationToken);
-        modal.SetClasses(CssClasses.D_NONE);
-        await modal.StateHasChangedAsync();
     }
 }

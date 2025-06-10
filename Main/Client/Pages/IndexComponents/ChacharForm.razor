@@ -12,6 +12,7 @@
     class="modal fade @Classes"
     tabindex="-1"
     role="dialog"
+    style="z-index: @ZIndex"
     id="@IDs.CHACHAR_FORM_ROOT">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -101,7 +102,7 @@
                                 type="button"
                                 class="btn-input-text form-control"
                                 id="@IDs.CHACHAR_FORM_RADICAL_INPUT"
-                                @onclick="async _ => await OpenRadicalSelectorAsync(CancellationToken.None)">
+                                @onclick="async _ => await RadicalSelector.OpenAsync(this, CancellationToken.None)">
                                 @Chachar.RadicalCharacter
                             </button>
                             <button
@@ -119,7 +120,7 @@
                                 type="button"
                                 class="btn-input-text form-control"
                                 id="@IDs.CHACHAR_FORM_ALTERNATIVE_INPUT"
-                                @onclick="async _ => await OpenAlternativeSelectorAsync(CancellationToken.None)">
+                                @onclick="async _ => await AlternativeSelector.OpenAsync(this, CancellationToken.None)">
                                 @Chachar.RadicalAlternativeCharacter
                             </button>
                             <button

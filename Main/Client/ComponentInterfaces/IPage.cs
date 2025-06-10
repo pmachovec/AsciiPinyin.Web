@@ -4,9 +4,7 @@ public interface IPage
 {
     string HtmlTitle { get; }
 
-    void AddBackdropClasses(params string[] classes);
-
-    void SetBackdropClasses(params string[] classes);
+    IBackdrop Backdrop { get; }
 
     Task StateHasChangedAsync();
 }

@@ -33,11 +33,15 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
 
     public string HtmlTitle { get; private set; } = string.Empty;
 
+    public IBackdrop? Backdrop { get; set; }
+
     public IModal? ModalLowerLevel { get; private set; }
 
     public IPage? Page { get; private set; }
 
     public string RootId { get; } = IDs.CHACHAR_FORM_ROOT;
+
+    public int ZIndex { get; set; }
 
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
@@ -100,8 +104,6 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
     public async Task OpenAsync(Chachar chachar, IPage page, CancellationToken cancellationToken)
     {
         Chachar = chachar;
-        ModalLowerLevel = null;
-        Page = page;
         await OpenAsync(page, cancellationToken);
     }
 
@@ -113,25 +115,13 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken) =>
-        await ModalCommons.CloseAsyncCommon(this, cancellationToken);
+        await ModalCommons.CloseAllAsyncCommon(this, cancellationToken);
 
     public void AddClasses(params string[] classes) => Classes += $" {string.Join(' ', classes)}";
 
     public void SetClasses(params string[] classes) => Classes = string.Join(' ', classes);
 
     public async Task StateHasChangedAsync() => await InvokeAsync(StateHasChanged);
-
-    protected async Task OpenRadicalSelectorAsync(CancellationToken cancellationToken) =>
-        await Task.WhenAll(
-            JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, NumberConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
-            RadicalSelector.OpenAsync(this, cancellationToken)
-        );
-
-    protected async Task OpenAlternativeSelectorAsync(CancellationToken cancellationToken) =>
-        await Task.WhenAll(
-            JSInteropDOM.SetZIndexAsync(IDs.CHACHAR_FORM_ROOT, NumberConstants.INDEX_BACKDROP_Z - 1, cancellationToken),
-            AlternativeSelector.OpenAsync(this, cancellationToken)
-        );
 
     protected async Task SelectRadicalAsync(Chachar radicalChachar, CancellationToken cancellationToken)
     {

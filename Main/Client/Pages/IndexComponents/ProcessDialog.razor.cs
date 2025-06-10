@@ -34,11 +34,15 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
 
     public string HtmlTitle { get; private set; } = string.Empty;
 
+    public IBackdrop? Backdrop { get; set; }
+
     public IModal? ModalLowerLevel { get; private set; }
 
     public IPage? Page { get; private set; }
 
     public string RootId { get; } = IDs.PROCESS_DIALOG;
+
+    public int ZIndex { get; set; }
 
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
@@ -49,20 +53,18 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
     [Inject]
     protected IStringLocalizer<Resource> Localizer { get; set; } = default!;
 
+    public async Task SetProcessingAsync(IPage page, CancellationToken cancellationToken)
+    {
+        ModalLowerLevel = null;
+        Page = page;
+        await SetProcessingAsync(cancellationToken);
+    }
+
     public async Task SetProcessingAsync(IModal modalLowerLevel, CancellationToken cancellationToken)
     {
-        Page = null;
         ModalLowerLevel = modalLowerLevel;
-        HtmlTitle = $"{Localizer[Resource.Processing]}...";
-        await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
-
-        LoadingClasses = CssClasses.D_BLOCK;
-        HeaderClasses = CssClasses.D_NONE;
-        BodyTextClasses = CssClasses.D_NONE;
-        FooterClasses = CssClasses.D_NONE;
-
-        await ModalCommons.OpenAsyncCommon(this, cancellationToken);
-        await StateHasChangedAsync();
+        Page = null;
+        await SetProcessingAsync(cancellationToken);
     }
 
     public async Task SetSuccessAsync(
@@ -71,8 +73,8 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         CancellationToken cancellationToken
     )
     {
-        Page = null;
         ModalLowerLevel = modalLowerLevel;
+        Page = null;
         HtmlTitle = Localizer[Resource.Success];
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
 
@@ -98,8 +100,8 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         CancellationToken cancellationToken
     )
     {
-        Page = null;
         ModalLowerLevel = modalLowerLevel;
+        Page = null;
         HtmlTitle = Localizer[Resource.Error];
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
 
@@ -124,8 +126,8 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         CancellationToken cancellationToken
     )
     {
-        Page = null;
         ModalLowerLevel = modalLowerLevel;
+        Page = null;
         HtmlTitle = Localizer[Resource.Warning];
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
 
@@ -156,4 +158,18 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
 
     protected async Task CloseAllAsync(CancellationToken cancellationToken)
         => await ModalCommons.CloseAllAsyncCommon(this, cancellationToken);
+
+    private async Task SetProcessingAsync(CancellationToken cancellationToken)
+    {
+        HtmlTitle = $"{Localizer[Resource.Processing]}...";
+        await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
+
+        LoadingClasses = CssClasses.D_BLOCK;
+        HeaderClasses = CssClasses.D_NONE;
+        BodyTextClasses = CssClasses.D_NONE;
+        FooterClasses = CssClasses.D_NONE;
+
+        await ModalCommons.OpenAsyncCommon(this, cancellationToken);
+        await StateHasChangedAsync();
+    }
 }

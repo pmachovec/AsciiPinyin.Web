@@ -1,4 +1,5 @@
 using AsciiPinyin.Web.Client.Commons;
+using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Shared.ComponentInterfaces;
@@ -14,21 +15,21 @@ public class IndexBase : ComponentBase, IIndex
 {
     private static IEntityTab? _selectedTab;
 
-    public ChacharsTab ChacharsTab { get; set; } = default!;
+    public ChacharsTab ChacharsTab { get; protected set; } = default!;
 
-    public ChacharForm ChacharForm { get; set; } = default!;
+    public ChacharForm ChacharForm { get; protected set; } = default!;
 
-    public ChacharViewDialog ChacharViewDialog { get; set; } = default!;
+    public ChacharViewDialog ChacharViewDialog { get; protected set; } = default!;
 
-    public AlternativesTab AlternativesTab { get; set; } = default!;
+    public AlternativesTab AlternativesTab { get; protected set; } = default!;
 
-    public AlternativeForm AlternativeForm { get; set; } = default!;
+    public AlternativeForm AlternativeForm { get; protected set; } = default!;
 
-    public AlternativeViewDialog AlternativeViewDialog { get; set; } = default!;
+    public AlternativeViewDialog AlternativeViewDialog { get; protected set; } = default!;
 
-    public IProcessDialog ProcessDialog { get; set; } = default!;
+    public IProcessDialog ProcessDialog { get; protected set; } = default!;
 
-    protected string BackdropClasses { get; private set; } = CssClasses.D_NONE;
+    public IBackdrop Backdrop { get; protected set; } = default!;
 
     public string HtmlTitle { get; private set; } = string.Empty;
 
@@ -46,10 +47,6 @@ public class IndexBase : ComponentBase, IIndex
 
     [Inject]
     private IJSInteropDOM JSInteropDOM { get; set; } = default!;
-
-    public void AddBackdropClasses(params string[] classes) => BackdropClasses += $" {string.Join(' ', classes)}";
-
-    public void SetBackdropClasses(params string[] classes) => BackdropClasses = string.Join(' ', classes);
 
     public async Task StateHasChangedAsync() => await InvokeAsync(StateHasChanged);
 

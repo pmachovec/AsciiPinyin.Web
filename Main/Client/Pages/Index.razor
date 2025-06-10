@@ -1,3 +1,4 @@
+@using AsciiPinyin.Web.Client.Components
 @using AsciiPinyin.Web.Client.Pages.IndexComponents
 @using AsciiPinyin.Web.Shared.Components
 @using AsciiPinyin.Web.Shared.Constants
@@ -8,12 +9,8 @@
 @inherits IndexBase
 
 <div
-    class="modal-backdrop fade @BackdropClasses"
-    style="z-index: @NumberConstants.INDEX_BACKDROP_Z">
-</div>
-
-<div
     class="container pb-5"
+    style="z-index: @NumberConstants.PAGE_INDEX"
     id="@IDs.INDEX_ROOT">
     <NavBar
         AlternativesTab="AlternativesTab"
@@ -26,6 +23,7 @@
     <ChacharsTab @ref="ChacharsTab" Index="@this" />
 </div>
 
+<Backdrop @ref="Backdrop" />
 <ChacharForm @ref="ChacharForm" Index="this" />
 <ChacharViewDialog @ref="ChacharViewDialog" Index="this" />
 <AlternativeForm @ref="AlternativeForm" Index="@this" />

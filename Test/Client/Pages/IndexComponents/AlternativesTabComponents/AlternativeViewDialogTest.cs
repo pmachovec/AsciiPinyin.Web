@@ -2,6 +2,7 @@ using Asciipinyin.Web.Client.Test.Commons;
 using Asciipinyin.Web.Client.Test.Constants.JSInterop;
 using Asciipinyin.Web.Client.Test.Tools;
 using AsciiPinyin.Web.Client.Commons;
+using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.HttpClients;
 using AsciiPinyin.Web.Client.JSInterop;
 using AsciiPinyin.Web.Client.Pages;
@@ -118,6 +119,7 @@ internal sealed class AlternativeViewDialogTest : IDisposable
     private EntityModalTestCommons<Alternative> _entityModalTestCommons = default!;
     private EntityViewDialogTestCommons<Alternative> _entityViewDialogTestCommons = default!;
     private IRenderedComponent<AlternativeViewDialog> _alternativeViewDialogComponent = default!;
+    private IRenderedComponent<Backdrop> _backdropComponent = default!;
     private IRenderedComponent<ProcessDialog> _processDialogComponent = default!;
     private JSInteropSetter _jsInteropSetter = default!;
     private TestContext _testContext = default!;
@@ -206,7 +208,12 @@ internal sealed class AlternativeViewDialogTest : IDisposable
             .AddSingleton<IJSInteropDOM, JSInteropDOM>()
             .AddSingleton<IModalCommons, ModalCommons>();
 
+        _backdropComponent = _testContext.RenderComponent<Backdrop>();
         _processDialogComponent = _testContext.RenderComponent<ProcessDialog>();
+
+        _ = _indexMock
+            .Setup(index => index.Backdrop)
+            .Returns(_backdropComponent.Instance);
 
         _ = _indexMock
             .Setup(index => index.ProcessDialog)

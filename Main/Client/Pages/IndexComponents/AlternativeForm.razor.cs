@@ -29,11 +29,15 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
 
     public string HtmlTitle { get; private set; } = string.Empty;
 
+    public IBackdrop? Backdrop { get; set; }
+
     public IModal? ModalLowerLevel { get; private set; }
 
     public IPage? Page { get; private set; }
 
     public string RootId { get; } = IDs.ALTERNATIVE_FORM_ROOT;
+
+    public int ZIndex { get; set; }
 
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
@@ -87,7 +91,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken) =>
-        await ModalCommons.CloseAsyncCommon(this, cancellationToken);
+        await ModalCommons.CloseAllAsyncCommon(this, cancellationToken);
 
     public void AddClasses(params string[] classes) => Classes += $" {string.Join(' ', classes)}";
 
@@ -98,18 +102,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
     protected async Task OpenOriginalSelectorAsync(CancellationToken cancellationToken)
     {
         ClearOriginal();
-
-        await Task.WhenAll(
-            JSInteropDOM.SetZIndexAsync(
-                IDs.ALTERNATIVE_FORM_ROOT,
-                NumberConstants.INDEX_BACKDROP_Z - 1,
-                cancellationToken
-            ),
-            OriginalSelector.OpenAsync(
-                this,
-                cancellationToken
-            )
-        );
+        await OriginalSelector.OpenAsync(this, cancellationToken);
     }
 
     protected async Task SelectOriginalAsync(Chachar originalChachar, CancellationToken cancellationToken)

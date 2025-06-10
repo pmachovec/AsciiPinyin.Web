@@ -14,7 +14,11 @@ public class EntitySelectorBase<T> : ComponentBase, IModal where T : IEntity
 
     public IPage? Page { get; private set; }
 
+    public IBackdrop? Backdrop { get; set; } = default!;
+
     public IModal? ModalLowerLevel { get; private set; }
+
+    public int ZIndex { get; set; }
 
     [Inject]
     private IModalCommons ModalCommons { get; set; } = default!;
