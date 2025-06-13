@@ -135,7 +135,10 @@ internal sealed class AlternativeFormTest : IDisposable
             .AddSingleton<IJSInteropDOM, JSInteropDOM>()
             .AddSingleton<IModalCommons, ModalCommons>();
 
-        _backdropComponent = _testContext.RenderComponent<Backdrop>();
+        _backdropComponent = _testContext.RenderComponent<Backdrop>(
+            parameters => parameters.Add(parameter => parameter.RootId, IDs.INDEX_BACKDROP_ROOT)
+        );
+
         _processDialogComponent = _testContext.RenderComponent<ProcessDialog>();
 
         _ = _indexMock
@@ -152,18 +155,22 @@ internal sealed class AlternativeFormTest : IDisposable
 
         _entityFormTestCommons = new(
             _alternativeFormComponent,
+            _backdropComponent,
             _testContext.JSInterop,
             _entityClientMock,
             _indexMock,
-            IDs.ALTERNATIVE_FORM_ROOT
+            IDs.ALTERNATIVE_FORM_ROOT,
+            IDs.INDEX_BACKDROP_ROOT
         );
 
         _entityModalTestCommons = new(
             _alternativeFormComponent,
+            _backdropComponent,
             _processDialogComponent,
             _testContext.JSInterop,
             _indexMock,
-            IDs.ALTERNATIVE_FORM_ROOT
+            IDs.ALTERNATIVE_FORM_ROOT,
+            IDs.INDEX_BACKDROP_ROOT
         );
     }
 
@@ -428,12 +435,13 @@ internal sealed class AlternativeFormTest : IDisposable
         var setFormTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, CREATE_NEW_ALTERNATIVE).SetVoidResult();
         var setOriginalSelectorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SELECT_BASE_CHARACTER).SetVoidResult();
 
+        await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE);
+
         await SelectOriginalAsync(
             setOriginalSelectorTitleHandler,
             setFormTitleHandler,
             SELECT_BASE_CHARACTER,
-            CREATE_NEW_ALTERNATIVE,
-            afterClickCalledTimes: 1
+            CREATE_NEW_ALTERNATIVE
         );
 
         await _entityFormTestCommons.SubmitValidButtonInputTest(

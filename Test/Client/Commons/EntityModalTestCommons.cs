@@ -1,11 +1,11 @@
 using AngleSharp.Dom;
+using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.Pages;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Client.Test.Constants.JSInterop;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Test.Constants;
 using Bunit;
-using Microsoft.AspNetCore.Components;
 using Moq;
 using NUnit.Framework;
 using System.Globalization;
@@ -15,34 +15,44 @@ namespace Asciipinyin.Web.Client.Test.Commons;
 internal sealed class EntityModalTestCommons<T>
 (
     IRenderedComponent<IEntityModal<T>> _entityModalComponent,
-    IRenderedComponent<IComponent> _processDialogComponent,
+    IRenderedComponent<IBackdrop> _backdropComponent,
+    IRenderedComponent<IModal> _processDialogComponent,
     BunitJSInterop _jsInterop,
     Mock<IIndex> _indexMock,
-    string modalRootId
+    string modalRootId,
+    string _backdropRootId
 ) where T : IEntity
 {
     public async Task OpenTest(T entity, JSRuntimeInvocationHandler setTitleHandler, string expectedTitle)
     {
         var modalRoot = _entityModalComponent.Find($"#{modalRootId}");
+        var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
+
         setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
         AssertHidden(modalRoot);
+        AssertBackdropHidden(backdropRoot, _entityModalComponent);
 
         await _entityModalComponent.Instance.OpenAsync(entity, _indexMock.Object, CancellationToken.None);
 
         _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, expectedTitle);
         AssertVisible(modalRoot);
+        AssertBackdropVisible(backdropRoot, _entityModalComponent);
     }
 
     public async Task CloseTest(JSRuntimeInvocationHandler setTitleHandler, string expectedTitle)
     {
         var modalRoot = _entityModalComponent.Find($"#{modalRootId}");
+        var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
+
         setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
         AssertVisible(modalRoot);
+        AssertBackdropVisible(backdropRoot, _entityModalComponent);
 
         await _entityModalComponent.Instance.CloseAsync(CancellationToken.None);
 
         _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, expectedTitle);
         AssertHidden(modalRoot);
+        AssertBackdropHidden(backdropRoot, _entityModalComponent);
     }
 
     public async Task ClickProcessDialogBackButtonTest(JSRuntimeInvocationHandler setTitleHandler, string expectedTitle, int calledTimes = 2)
@@ -93,6 +103,9 @@ internal sealed class EntityModalTestCommons<T>
         Assert.That(processDialogHeader.ClassList, Does.Not.Contain(CssClasses.D_NONE));
         Assert.That(processDialogBody, Is.Not.Null);
         Assert.That(processDialogBody.TextContent, Is.EqualTo(expectedMessage));
+
+        var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
+        AssertBackdropVisible(backdropRoot, _processDialogComponent, 2);
     }
 
     public void ProcessDialogErrorTest(string expectedMessage)
@@ -110,6 +123,9 @@ internal sealed class EntityModalTestCommons<T>
         Assert.That(processDialogHeader.ClassList, Does.Not.Contain(CssClasses.D_NONE));
         Assert.That(processDialogBody, Is.Not.Null);
         Assert.That(processDialogBody.TextContent, Is.EqualTo(expectedMessage));
+
+        var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
+        AssertBackdropVisible(backdropRoot, _processDialogComponent, 2);
     }
 
     public void ProcessDialogSuccessTest(string expectedMessageTemplate, params string[] expectedMessageParams)
@@ -128,21 +144,31 @@ internal sealed class EntityModalTestCommons<T>
         Assert.That(processDialogHeader.ClassList, Does.Not.Contain(CssClasses.D_NONE));
         Assert.That(processDialogBody, Is.Not.Null);
         Assert.That(processDialogBody.TextContent, Is.EqualTo(expectedMessage));
+
+        var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
+        AssertBackdropVisible(backdropRoot, _processDialogComponent, 2);
     }
 
     public void ProcessDialogOverModalClosedTest(string modalId)
     {
         var processDialogRoot = _processDialogComponent.Find($"#{IDs.PROCESS_DIALOG}");
         var modalRoot = _entityModalComponent.Find($"#{modalId}");
+        var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
+
         AssertHidden(processDialogRoot);
         AssertVisible(modalRoot);
+        Assert.That(_processDialogComponent.Instance.Backdrop, Is.Null);
+        AssertBackdropVisible(backdropRoot, _entityModalComponent);
     }
 
     public void ModalClosedTest(string modalId)
     {
         var modalRoot = _entityModalComponent.Find($"#{modalId}");
+        var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
+
         Assert.That(modalRoot, Is.Not.Null);
         AssertHidden(modalRoot);
+        AssertBackdropHidden(backdropRoot, _entityModalComponent);
     }
 
     public void TitlesOrderTest(params string[] expectedTitles)
@@ -175,5 +201,24 @@ internal sealed class EntityModalTestCommons<T>
         Assert.That(modalRoot!.ClassList, Does.Contain(CssClasses.D_NONE));
         Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.D_BLOCK));
         Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.SHOW));
+    }
+
+    private static void AssertBackdropVisible<T1>(IElement? backdropRoot, IRenderedComponent<T1> modalComponent, int expectedZIndex = 1) where T1 : IModal
+    {
+        Assert.That(backdropRoot, Is.Not.Null);
+        Assert.That(backdropRoot!.ClassList, Does.Contain(CssClasses.D_BLOCK));
+        Assert.That(backdropRoot.ClassList, Does.Contain(CssClasses.SHOW));
+        Assert.That(backdropRoot.ClassList, Does.Not.Contain(CssClasses.D_NONE));
+        Assert.That(modalComponent.Instance.Backdrop, Is.Not.Null);
+        Assert.That(modalComponent.Instance.Backdrop!.ZIndex, Is.EqualTo(expectedZIndex));
+    }
+
+    private static void AssertBackdropHidden<T1>(IElement? backdropRoot, IRenderedComponent<T1> modalComponent) where T1 : IModal
+    {
+        Assert.That(backdropRoot, Is.Not.Null);
+        Assert.That(backdropRoot!.ClassList, Does.Contain(CssClasses.D_NONE));
+        Assert.That(backdropRoot.ClassList, Does.Not.Contain(CssClasses.D_BLOCK));
+        Assert.That(backdropRoot.ClassList, Does.Not.Contain(CssClasses.SHOW));
+        Assert.That(modalComponent.Instance.Backdrop, Is.Null);
     }
 }

@@ -1,3 +1,4 @@
+using AsciiPinyin.Web.Client.ComponentInterfaces;
 using AsciiPinyin.Web.Client.HttpClients;
 using AsciiPinyin.Web.Client.Pages;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
@@ -13,26 +14,30 @@ namespace Asciipinyin.Web.Client.Test.Commons;
 
 internal sealed class EntityFormTestCommons<T>(
     IRenderedComponent<IEntityForm<T>> _entityFormComponent,
+    IRenderedComponent<IBackdrop> _backdropComponent,
     BunitJSInterop _jsInterop,
     Mock<IEntityClient> _entityClientMock,
     Mock<IIndex> _indexMock,
-    string entityFormRootId
+    string _entityFormRootId,
+    string _backdropRootId
 ) where T : IEntity
 {
     private const string DIV = "div";
 
-    /// <summary>
-    /// Tests if correct HTML title and CSS classes are set when the form is opened without a specific entity.
-    /// </summary>
-    /// <param name="expectedTitle">Expected HTML title</param>
-    /// <returns>Task of the asynchronous operation</returns>
     public async Task OpenTest(JSRuntimeInvocationHandler setTitleHandler, string expectedTitle)
     {
-        var modalRoot = _entityFormComponent.Find($"#{entityFormRootId}");
+        var modalRoot = _entityFormComponent.Find($"#{_entityFormRootId}");
         setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
         Assert.That(modalRoot.ClassList, Does.Contain(CssClasses.D_NONE));
         Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.D_BLOCK));
         Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.SHOW));
+
+        var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
+        Assert.That(backdropRoot, Is.Not.Null);
+        Assert.That(backdropRoot.ClassList, Does.Contain(CssClasses.D_NONE));
+        Assert.That(backdropRoot.ClassList, Does.Not.Contain(CssClasses.D_BLOCK));
+        Assert.That(backdropRoot.ClassList, Does.Not.Contain(CssClasses.SHOW));
+        Assert.That(_entityFormComponent.Instance.Backdrop, Is.Null);
 
         await _entityFormComponent.Instance.OpenAsync(_indexMock.Object, CancellationToken.None);
 
@@ -40,14 +45,15 @@ internal sealed class EntityFormTestCommons<T>(
         Assert.That(modalRoot.ClassList, Does.Contain(CssClasses.D_BLOCK));
         Assert.That(modalRoot.ClassList, Does.Contain(CssClasses.SHOW));
         Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.D_NONE));
+
+        var backdrop = _entityFormComponent.Instance.Backdrop;
+        Assert.That(backdrop, Is.Not.Null);
+        Assert.That(backdrop!.ZIndex, Is.EqualTo(1));
+        Assert.That(backdropRoot.ClassList, Does.Contain(CssClasses.D_BLOCK));
+        Assert.That(backdropRoot.ClassList, Does.Contain(CssClasses.SHOW));
+        Assert.That(backdropRoot.ClassList, Does.Not.Contain(CssClasses.D_NONE));
     }
 
-    /// <summary>
-    /// Tests if a string input, when it's given a value, keeps the value unchanged
-    /// - if an eventual 'oninput' event does not alter the value.
-    /// </summary>
-    /// <param name="inputValue">Value given to the input</param>
-    /// <param name="inputId">ID of the input</param>
     public void StringInputUnchangedTest(
         string inputValue,
         string inputId
@@ -61,12 +67,6 @@ internal sealed class EntityFormTestCommons<T>(
         _ = setValueInvocationHandler.SetVoidResult();
     }
 
-    /// <summary>
-    /// Tests if a number input, when it's given a value, changes the value to the one that was in it before
-    /// - if an 'oninput' event replaces the given value with the previous one.
-    /// </summary>
-    /// <param name="previousValidInput">Previous value of the input.</param>
-    /// <param name="inputId">ID of the input.</param>
     public void NumberInputAdjustedTest(
         short? previousValidInput,
         string inputId
@@ -84,12 +84,6 @@ internal sealed class EntityFormTestCommons<T>(
         InputValueSetTest(It.IsAny<short>(), previousValidInput, inputId);
     }
 
-    /// <summary>
-    /// Tests if a number input, when it's given a value, keeps the value unchanged
-    /// - if an eventual 'oninput' event does not alter the value.
-    /// </summary>
-    /// <param name="theInput">Value given to the input</param>
-    /// <param name="inputId">ID of the input</param>
     public void NumberInputUnchangedTest(
         short? theInput,
         string inputId
@@ -99,14 +93,6 @@ internal sealed class EntityFormTestCommons<T>(
         InputValueSetTest(theInput, theInput, inputId);
     }
 
-    /// <summary>
-    /// Sets the given value to the given input and verifies if it matches the ecxpected value afterwards.
-    /// There are automatic input value adjustments on some inputs.
-    /// </summary>
-    /// <typeparam name="T1">Type of the value to set</typeparam>
-    /// <param name="valueToSet">The value to set</param>
-    /// <param name="expectedContent">Expected input content after the value is set</param>
-    /// <param name="inputId">ID of the input</param>
     public void InputValueSetTest<T1>(
         T1 valueToSet,
         T1 expectedContent,
@@ -124,16 +110,6 @@ internal sealed class EntityFormTestCommons<T>(
         _ = setValueInvocationHandler.SetVoidResult();
     }
 
-    /// <summary>
-    /// Tests behavior of an input and its corresponding ValidationMessage element when the input contains an invalid value and the form is submitted.
-    /// The input is expected to be assigned the 'invalid' class by blazor.
-    /// </summary>
-    /// <param name="inputValue">Invalid value in the input</param>
-    /// <param name="expectedError">Expected error message to appear in the ValidationMessage element</param>
-    /// <param name="inputId">ID of the input</param>
-    /// <param name="validationMessageId">ID of the ValidationMessage element for the input</param>
-    /// <param name="submitButtonId">ID of the submit button of the form</param>
-    /// <returns>Task of the asynchronous operation</returns>
     public async Task SubmitInvalidInputTest(
         string inputValue,
         string expectedError,
@@ -154,15 +130,6 @@ internal sealed class EntityFormTestCommons<T>(
         Assert.That(validationMessageElement.InnerHtml, Is.EqualTo(expectedError));
     }
 
-    /// <summary>
-    /// Tests behavior of a button input and its corresponding ValidationMessage element when the input contains an invalid value and the form is submitted.
-    /// The input is expected to be assigned the 'invalid' CSS class.
-    /// </summary>
-    /// <param name="expectedError">Expected error message to appear in the ValidationMessage element</param>
-    /// <param name="inputId">ID of the input</param>
-    /// <param name="validationMessageId">ID of the ValidationMessage element for the input</param>
-    /// <param name="submitButtonId">ID of the submit button of the form</param>
-    /// <returns>Task of the asynchronous operation</returns>
     public async Task SubmitInvalidButtonInputTest(
         string expectedError,
         string inputId,
@@ -181,15 +148,6 @@ internal sealed class EntityFormTestCommons<T>(
         Assert.That(validationMessageElement.InnerHtml, Is.EqualTo(expectedError));
     }
 
-    /// <summary>
-    /// Tests behavior of an input and its corresponding ValidationMessage element when the input contains a valid value and the form is submitted.
-    /// The input is expected not to be assigned the 'invalid' class neither by blazor nor by JS interoperability.
-    /// </summary>
-    /// <param name="inputValue">Valid value in the input</param>
-    /// <param name="inputId">ID of the input</param>
-    /// <param name="validationMessageId">ID of the ValidationMessage element for the input</param>
-    /// <param name="submitButtonId">ID of the submit button of the form</param>
-    /// <returns>Task of the asynchronous operation</returns>
     public async Task SubmitValidInputTest(
         string inputValue,
         string inputId,
@@ -208,14 +166,6 @@ internal sealed class EntityFormTestCommons<T>(
         Assert.That(validationMessageElement, Is.Empty);
     }
 
-    /// <summary>
-    /// Tests behavior of a button input and its corresponding ValidationMessage element when the input contains a valid value and the form is submitted.
-    /// The input is expected not to be assigned the 'invalid' class neither by blazor nor by JS interoperability.
-    /// </summary>
-    /// <param name="inputId">ID of the input</param>
-    /// <param name="validationMessageId">ID of the ValidationMessage element for the input</param>
-    /// <param name="submitButtonId">ID of the submit button of the form</param>
-    /// <returns>Task of the asynchronous operation</returns>
     public async Task SubmitValidButtonInputTest(
         string inputId,
         string validationMessageId,
@@ -232,29 +182,12 @@ internal sealed class EntityFormTestCommons<T>(
         Assert.That(validationMessageElement, Is.Empty);
     }
 
-    /// <summary>
-    /// Mocks return HTTP status code on the entity client when the given Alternative is posted.
-    /// </summary>
-    /// <param name="alternative">The alternative to be posted</param>
-    /// <param name="statusCode">The HTTP status code to return</param>
     public void MockPostStatusCode(Alternative alternative, HttpStatusCode statusCode) =>
         MockPostStatusCode(alternative, ApiNames.ALTERNATIVES, statusCode);
 
-    /// <summary>
-    /// Mocks return HTTP status code on the entity client when the given Chachar is posted.
-    /// </summary>
-    /// <param name="chachar">The chachar posted</param>
-    /// <param name="statusCode">The HTTP status code to return</param>
     public void MockPostStatusCode(Chachar chachar, HttpStatusCode statusCode) =>
         MockPostStatusCode(chachar, ApiNames.CHARACTERS, statusCode);
 
-    /// <summary>
-    /// Simulates clicking on the first button in an entity selector.
-    /// If used in a scenario where clicking a specific button is needed,
-    /// entities must be mocked so that the first one in the list is the desired one.
-    /// </summary>
-    /// <param name="selectorInputId">ID of the selector input</param>
-    /// <param name="selectorCssClass">CSS class of the selector</param>
     public async Task ClickFirstInSelector(
         string selectorInputId,
         string selectorCssClass,
@@ -267,10 +200,14 @@ internal sealed class EntityFormTestCommons<T>(
     {
         // Open the selector
         var openRadicalSelectorButton = _entityFormComponent.Find($"#{selectorInputId}");
+        var backdrop = _entityFormComponent.Instance.Backdrop;
         Assert.That(openRadicalSelectorButton, Is.Not.Null);
         setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
+        Assert.That(backdrop, Is.Not.Null);
+        Assert.That(backdrop!.ZIndex, Is.EqualTo(1));
         await openRadicalSelectorButton.ClickAsync(new());
         _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, expectedTitle);
+        Assert.That(backdrop.ZIndex, Is.EqualTo(2));
 
         // Click on the first button in the selector.
         // Mocking of proper clicking to a concrete button is too complicated and not worth the struggle.
@@ -289,15 +226,9 @@ internal sealed class EntityFormTestCommons<T>(
 
         await firstButtonDiv!.ClickAsync(new());
         _ = setAfterClickTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, afterClickCalledTimes, expectedAfterClickTitle);
+        Assert.That(backdrop.ZIndex, Is.EqualTo(1));
     }
 
-    /// <summary>
-    /// Mocks return HTTP status code on the entity client when the given entity is posted.
-    /// </summary>
-    /// <typeparam name="T1">Type of the posted entity</typeparam>
-    /// <param name="entity">The entity posted</param>
-    /// <param name="apiName">API name corresponding to the entity</param>
-    /// <param name="statusCode">The HTTP status code to return</param>
     private void MockPostStatusCode<T1>(T1 entity, string apiName, HttpStatusCode statusCode) where T1 : IEntity =>
         _entityClientMock
             .Setup(entityClient => entityClient.PostEntityAsync(apiName, entity, It.IsAny<CancellationToken>()))

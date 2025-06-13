@@ -232,7 +232,10 @@ internal sealed class ChacharFormTest : IDisposable
             .AddSingleton<IJSInteropDOM, JSInteropDOM>()
             .AddSingleton<IModalCommons, ModalCommons>();
 
-        _backdropComponent = _testContext.RenderComponent<Backdrop>();
+        _backdropComponent = _testContext.RenderComponent<Backdrop>(
+            parameters => parameters.Add(parameter => parameter.RootId, IDs.INDEX_BACKDROP_ROOT)
+        );
+
         _processDialogComponent = _testContext.RenderComponent<ProcessDialog>();
 
         _ = _indexMock
@@ -249,18 +252,22 @@ internal sealed class ChacharFormTest : IDisposable
 
         _entityFormTestCommons = new(
             _chacharFormComponent,
+            _backdropComponent,
             _testContext.JSInterop,
             _entityClientMock,
             _indexMock,
-            IDs.CHACHAR_FORM_ROOT
+            IDs.CHACHAR_FORM_ROOT,
+            IDs.INDEX_BACKDROP_ROOT
         );
 
         _entityModalTestCommons = new(
             _chacharFormComponent,
+            _backdropComponent,
             _processDialogComponent,
             _testContext.JSInterop,
             _indexMock,
-            IDs.CHACHAR_FORM_ROOT
+            IDs.CHACHAR_FORM_ROOT,
+            IDs.INDEX_BACKDROP_ROOT
         );
     }
 

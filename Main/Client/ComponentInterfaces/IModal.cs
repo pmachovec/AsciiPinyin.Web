@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Components;
+
 namespace AsciiPinyin.Web.Client.ComponentInterfaces;
 
-public interface IModal
+public interface IModal : IComponent
 {
     string HtmlTitle { get; }
 

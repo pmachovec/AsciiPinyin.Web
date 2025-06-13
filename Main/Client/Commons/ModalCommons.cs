@@ -94,7 +94,14 @@ public sealed class ModalCommons(
             backdrop.SetClasses(CssClasses.D_NONE);
         }
 
-        await Task.WhenAll(modals.Select(modal => modal.StateHasChangedAsync()));
+        await Task.WhenAll(
+            modals.Select(modal =>
+            {
+                modal.Backdrop = null;
+                return modal.StateHasChangedAsync();
+            })
+        );
+
         await Task.WhenAll(backdrops.Select(backdrop => backdrop.StateHasChangedAsync()));
     }
 
@@ -210,6 +217,7 @@ public sealed class ModalCommons(
             modalLowerLevel.ZIndex += 1;
             awaitables.Add(modalLowerLevel.StateHasChangedAsync());
             awaitables.Add(modalLowerLevel.Backdrop.StateHasChangedAsync());
+            modal.Backdrop = null;
         }
 
         modal.SetClasses(CssClasses.D_BLOCK);

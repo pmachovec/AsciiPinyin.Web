@@ -6,9 +6,12 @@ namespace AsciiPinyin.Web.Client.Components;
 
 public class BackdropBase : ComponentBase, IBackdrop
 {
+    protected string Classes { get; private set; } = CssClasses.D_NONE;
+
     public int ZIndex { get; set; } = NumberConstants.BACKDROP_INITIAL_INDEX;
 
-    protected string Classes { get; private set; } = CssClasses.D_NONE;
+    [Parameter, EditorRequired]
+    public required string RootId { get; init; }
 
     public void AddClasses(params string[] classes) => Classes += $" {string.Join(' ', classes)}";
 

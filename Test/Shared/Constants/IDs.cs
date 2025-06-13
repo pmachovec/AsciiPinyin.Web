@@ -32,6 +32,7 @@ public static class IDs
     public const string CHACHAR_FORM_TONE_VALIDATION_MESSAGE = "chachar-form-tone-validation-message";
     public const string CHACHAR_VIEW_DIALOG_DELETE_TOOLTIP = "chachar-view-dialog-delete-tooltip";
     public const string CHACHAR_VIEW_DIALOG_ROOT = "chachar-view-dialog-root";
+    public const string INDEX_BACKDROP_ROOT = "index-backdrop-root";
     public const string PROCESS_DIALOG = "process-dialog";
     public const string PROCESS_DIALOG_BODY = "process-dialog-body";
     public const string PROCESS_DIALOG_BUTTON_BACK = "process-dialog-button-back";

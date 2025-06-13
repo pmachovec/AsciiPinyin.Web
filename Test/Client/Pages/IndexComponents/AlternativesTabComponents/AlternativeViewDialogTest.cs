@@ -208,7 +208,10 @@ internal sealed class AlternativeViewDialogTest : IDisposable
             .AddSingleton<IJSInteropDOM, JSInteropDOM>()
             .AddSingleton<IModalCommons, ModalCommons>();
 
-        _backdropComponent = _testContext.RenderComponent<Backdrop>();
+        _backdropComponent = _testContext.RenderComponent<Backdrop>(
+            parameters => parameters.Add(parameter => parameter.RootId, IDs.INDEX_BACKDROP_ROOT)
+        );
+
         _processDialogComponent = _testContext.RenderComponent<ProcessDialog>();
 
         _ = _indexMock
@@ -230,10 +233,12 @@ internal sealed class AlternativeViewDialogTest : IDisposable
 
         _entityModalTestCommons = new(
             _alternativeViewDialogComponent,
+            _backdropComponent,
             _processDialogComponent,
             _testContext.JSInterop,
             _indexMock,
-            IDs.ALTERNATIVE_VIEW_DIALOG_ROOT
+            IDs.ALTERNATIVE_VIEW_DIALOG_ROOT,
+            IDs.INDEX_BACKDROP_ROOT
         );
     }
 

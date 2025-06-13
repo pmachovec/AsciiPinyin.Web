@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Components;
+
 namespace AsciiPinyin.Web.Client.ComponentInterfaces;
 
-public interface IBackdrop
+public interface IBackdrop : IComponent
 {
     int ZIndex { get; set; }
 
