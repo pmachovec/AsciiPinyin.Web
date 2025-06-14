@@ -61,11 +61,11 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; already exists in the database..
+        ///   Looks up a localized string similar to The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;({2})&lt;/b&gt; already exists..
         /// </summary>
-        public static string AlternativeAlreadyInDb {
+        public static string AlternativeAlreadyExists {
             get {
-                return ResourceManager.GetString("AlternativeAlreadyInDb", resourceCulture);
+                return ResourceManager.GetString("AlternativeAlreadyExists", resourceCulture);
             }
         }
         
@@ -79,7 +79,7 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; was successfully created..
+        ///   Looks up a localized string similar to The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;({2})&lt;/b&gt; was successfully created..
         /// </summary>
         public static string AlternativeCreated {
             get {
@@ -88,7 +88,7 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; was successfully deleted..
+        ///   Looks up a localized string similar to The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;({2})&lt;/b&gt; was successfully deleted..
         /// </summary>
         public static string AlternativeDeleted {
             get {
@@ -106,7 +106,7 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Alternatives exist for the character in the database..
+        ///   Looks up a localized string similar to Alternatives exist for the character..
         /// </summary>
         public static string AlternativesExistForCharacter {
             get {
@@ -115,7 +115,7 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are characters in the database with this alternative as the radical..
+        ///   Looks up a localized string similar to There are characters with this alternative as the radical..
         /// </summary>
         public static string AlternativeUsedByCharactersInDb {
             get {
@@ -124,7 +124,7 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; will be deleted from the database. This operation can&apos;t be undone. Continue?.
+        ///   Looks up a localized string similar to The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;({2})&lt;/b&gt; will be deleted. This operation can&apos;t be undone. Continue?.
         /// </summary>
         public static string AlternativeWillBeDeleted {
             get {
@@ -170,16 +170,16 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; already exists in the database..
+        ///   Looks up a localized string similar to The character &lt;b&gt;{0}&amp;nbsp;({1})&lt;/b&gt; already exists..
         /// </summary>
-        public static string CharacterAlreadyInDb {
+        public static string CharacterAlreadyExists {
             get {
-                return ResourceManager.GetString("CharacterAlreadyInDb", resourceCulture);
+                return ResourceManager.GetString("CharacterAlreadyExists", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; was successfully created..
+        ///   Looks up a localized string similar to The character &lt;b&gt;{0}&amp;nbsp;({1})&lt;/b&gt; was successfully created..
         /// </summary>
         public static string CharacterCreated {
             get {
@@ -188,7 +188,7 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; was successfully deleted..
+        ///   Looks up a localized string similar to The character &lt;b&gt;{0}&amp;nbsp;({1})&lt;/b&gt; was successfully deleted..
         /// </summary>
         public static string CharacterDeleted {
             get {
@@ -197,7 +197,7 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The character is radical for other characters in the database..
+        ///   Looks up a localized string similar to The character is radical for other characters..
         /// </summary>
         public static string CharacterIsRadicalForOthers {
             get {
@@ -215,7 +215,7 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; will be deleted from the database. This operation can&apos;t be undone. Proceed?.
+        ///   Looks up a localized string similar to The character &lt;b&gt;{0}&amp;nbsp;({1})&lt;/b&gt; will be deleted. This operation can&apos;t be undone. Proceed?.
         /// </summary>
         public static string CharacterWillBeDeleted {
             get {

@@ -265,7 +265,7 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
 
             return string.Format(
                 CultureInfo.InvariantCulture,
-                Localizer[Resource.CharacterAlreadyInDb],
+                Localizer[Resource.CharacterAlreadyExists],
                 chachar.TheCharacter,
                 chachar.RealPinyin
             );

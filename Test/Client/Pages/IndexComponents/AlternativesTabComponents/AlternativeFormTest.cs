@@ -25,8 +25,8 @@ namespace Asciipinyin.Web.Client.Test.Pages.IndexComponents.AlternativesTabCompo
 
 internal sealed class AlternativeFormTest : IDisposable
 {
-    private const string ALTERNATIVE_ALREADY_IN_DB = "Alternative '{0}' - '{1}' - '{2}' already in DB";
-    private const string ALTERNATIVE_CREATED = "Alternative '{0}' - '{1}' - '{2}' created";
+    private const string ALTERNATIVE_ALREADY_EXISTS = "Alternative {0} for character {1} ({2}) already in exists";
+    private const string ALTERNATIVE_CREATED = "Alternative {0} for character {1} ({2}) created";
 
     private const string COMPULSORY_VALUE = nameof(COMPULSORY_VALUE);
     private const string CREATE_NEW_ALTERNATIVE = nameof(CREATE_NEW_ALTERNATIVE);
@@ -88,7 +88,7 @@ internal sealed class AlternativeFormTest : IDisposable
     public void OneTimeSetUp()
     {
         _localizerMockSetter.SetUpResources(
-            (Resource.AlternativeAlreadyInDb, ALTERNATIVE_ALREADY_IN_DB),
+            (Resource.AlternativeAlreadyExists, ALTERNATIVE_ALREADY_EXISTS),
             (Resource.AlternativeCreated, ALTERNATIVE_CREATED),
             (Resource.CreateNewAlternative, CREATE_NEW_ALTERNATIVE),
             (Resource.CompulsoryValue, COMPULSORY_VALUE),
@@ -565,7 +565,7 @@ internal sealed class AlternativeFormTest : IDisposable
 
         var expectedErrorMessage = string.Format(
             CultureInfo.InvariantCulture,
-            ALTERNATIVE_ALREADY_IN_DB,
+            ALTERNATIVE_ALREADY_EXISTS,
             alternative.TheCharacter,
             alternative.OriginalCharacter,
             alternative.OriginalRealPinyin

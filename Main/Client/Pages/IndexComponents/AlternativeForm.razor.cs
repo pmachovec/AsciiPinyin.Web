@@ -218,7 +218,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
 
             return string.Format(
                 CultureInfo.InvariantCulture,
-                Localizer[Resource.AlternativeAlreadyInDb],
+                Localizer[Resource.AlternativeAlreadyExists],
                 alternative.TheCharacter,
                 alternative.OriginalCharacter,
                 alternative.OriginalRealPinyin

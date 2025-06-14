@@ -217,26 +217,26 @@
     <value>Back
 </value>
   </data>
-  <data name="CharacterAlreadyInDb" xml:space="preserve">
-    <value>The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; already exists in the database.</value>
+  <data name="CharacterAlreadyExists" xml:space="preserve">
+    <value>The character &lt;b&gt;{0}&amp;nbsp;({1})&lt;/b&gt; already exists.</value>
   </data>
   <data name="CharacterCreated" xml:space="preserve">
-    <value>The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; was successfully created.</value>
+    <value>The character &lt;b&gt;{0}&amp;nbsp;({1})&lt;/b&gt; was successfully created.</value>
   </data>
   <data name="CharacterDeleted" xml:space="preserve">
-    <value>The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; was successfully deleted.</value>
+    <value>The character &lt;b&gt;{0}&amp;nbsp;({1})&lt;/b&gt; was successfully deleted.</value>
   </data>
   <data name="ProcessingError" xml:space="preserve">
     <value>An error occured during processing. Contact force majeure.</value>
   </data>
-  <data name="AlternativeAlreadyInDb" xml:space="preserve">
-    <value>The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; already exists in the database.</value>
+  <data name="AlternativeAlreadyExists" xml:space="preserve">
+    <value>The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;({2})&lt;/b&gt; already exists.</value>
   </data>
   <data name="AlternativeCreated" xml:space="preserve">
-    <value>The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; was successfully created.</value>
+    <value>The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;({2})&lt;/b&gt; was successfully created.</value>
   </data>
   <data name="AlternativeDeleted" xml:space="preserve">
-    <value>The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; was successfully deleted.</value>
+    <value>The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;({2})&lt;/b&gt; was successfully deleted.</value>
   </data>
   <data name="Warning" xml:space="preserve">
     <value>Warning</value>
@@ -245,21 +245,21 @@
     <value>Proceed</value>
   </data>
   <data name="CharacterWillBeDeleted" xml:space="preserve">
-    <value>The character &lt;b&gt;{0}&amp;nbsp;-&amp;nbsp;{1}&lt;/b&gt; will be deleted from the database. This operation can't be undone. Proceed?</value>
+    <value>The character &lt;b&gt;{0}&amp;nbsp;({1})&lt;/b&gt; will be deleted. This operation can't be undone. Proceed?</value>
   </data>
   <data name="AlternativeWillBeDeleted" xml:space="preserve">
-    <value>The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;-&amp;nbsp;{2}&lt;/b&gt; will be deleted from the database. This operation can't be undone. Continue?</value>
+    <value>The alternative &lt;b&gt;{0}&lt;/b&gt; for the character &lt;b&gt;{1}&amp;nbsp;({2})&lt;/b&gt; will be deleted. This operation can't be undone. Continue?</value>
   </data>
   <data name="CannotBeDeleted" xml:space="preserve">
     <value>Cannot be deleted.</value>
   </data>
   <data name="CharacterIsRadicalForOthers" xml:space="preserve">
-    <value>The character is radical for other characters in the database.</value>
+    <value>The character is radical for other characters.</value>
   </data>
   <data name="AlternativesExistForCharacter" xml:space="preserve">
-    <value>Alternatives exist for the character in the database.</value>
+    <value>Alternatives exist for the character.</value>
   </data>
   <data name="AlternativeUsedByCharactersInDb" xml:space="preserve">
-    <value>There are characters in the database with this alternative as the radical.</value>
+    <value>There are characters with this alternative as the radical.</value>
   </data>
 </root>

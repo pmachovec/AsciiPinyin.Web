@@ -26,8 +26,8 @@ namespace Asciipinyin.Web.Client.Test.Pages.IndexComponents.ChacharsTabComponent
 [TestFixture]
 internal sealed class ChacharFormTest : IDisposable
 {
-    private const string CHARACTER_ALREADY_IN_DB = "Character '{0}' - '{1}' already in DB";
-    private const string CHARACTER_CREATED = "Character '{0}' - '{1}' created";
+    private const string CHARACTER_ALREADY_EXISTS = "Character {0} ({1}) already exists";
+    private const string CHARACTER_CREATED = "Character {0} ({1}) created";
 
     private const string COMPULSORY_VALUE = nameof(COMPULSORY_VALUE);
     private const string CREATE_NEW_CHARACTER = nameof(CREATE_NEW_CHARACTER);
@@ -169,7 +169,7 @@ internal sealed class ChacharFormTest : IDisposable
     public void OneTimeSetUp()
     {
         _localizerMockSetter.SetUpResources(
-            (Resource.CharacterAlreadyInDb, CHARACTER_ALREADY_IN_DB),
+            (Resource.CharacterAlreadyExists, CHARACTER_ALREADY_EXISTS),
             (Resource.CharacterCreated, CHARACTER_CREATED),
             (Resource.CompulsoryValue, COMPULSORY_VALUE),
             (Resource.CreateNewCharacter, CREATE_NEW_CHARACTER),
@@ -1084,7 +1084,7 @@ internal sealed class ChacharFormTest : IDisposable
 
         var expectedErrorMessage = string.Format(
             CultureInfo.InvariantCulture,
-            CHARACTER_ALREADY_IN_DB,
+            CHARACTER_ALREADY_EXISTS,
             chachar.TheCharacter,
             chachar.RealPinyin
         );
