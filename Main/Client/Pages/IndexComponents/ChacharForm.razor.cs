@@ -70,28 +70,7 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
         SetUpEditContext();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        // No need to set these properties for these elements explicitly in the HTML part.
-        if (AvailableAlternatives.Any())
-        {
-            ClearAlternativeClasses = CssClasses.BTN_OUTLINE_PRIMARY;
-
-            await Task.WhenAll(
-                JSInteropDOM.EnableAsync(IDs.CHACHAR_FORM_ALTERNATIVE_INPUT, CancellationToken.None),
-                JSInteropDOM.EnableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CancellationToken.None)
-            );
-        }
-        else
-        {
-            ClearAlternativeClasses = CssClasses.BTN_OUTLINE_SECONDARY;
-
-            await Task.WhenAll(
-                JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_ALTERNATIVE_INPUT, CancellationToken.None),
-                JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, CancellationToken.None)
-            );
-        }
-    }
+    protected override async Task OnAfterRenderAsync(bool firstRender) => await SetClearAlternativeButtonAsync(CancellationToken.None);
 
     public async Task OpenAsync(Chachar chachar, IModal modalLowerLevel, CancellationToken cancellationToken)
     {
@@ -161,8 +140,12 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
             && alternative.OriginalTone == radicalChachar.Tone
         );
 
-        StateHasChanged();
-        await RadicalSelector.CloseAsync(cancellationToken);
+        await StateHasChangedAsync();
+
+        await Task.WhenAll(
+            SetClearAlternativeButtonAsync(cancellationToken),
+            RadicalSelector.CloseAsync(cancellationToken)
+        );
     }
 
     protected async Task SelectAlternativeAsync(Alternative alternative, CancellationToken cancellationToken)
@@ -172,13 +155,14 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
         await AlternativeSelector.CloseAsync(cancellationToken);
     }
 
-    protected void ClearRadical()
+    protected async Task ClearRadicalAsync(CancellationToken cancellationToken)
     {
         Chachar.RadicalCharacter = null;
         Chachar.RadicalPinyin = null;
         Chachar.RadicalTone = null;
         Chachar.RadicalAlternativeCharacter = null;
         AvailableAlternatives = [];
+        await DisableClearAlternativeButtonAsync(cancellationToken);
         StateHasChanged();
     }
 
@@ -277,6 +261,44 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
         }
     }
 
+    private void SetUpEditContext()
+    {
+        EditContext = new(Chachar);
+        _ = new FormValidationHandler<ChacharForm, Chachar>(Logger, Localizer, EditContext);
+    }
+
+    private async Task SetClearAlternativeButtonAsync(CancellationToken cancellationToken)
+    {
+        if (AvailableAlternatives.Any())
+        {
+            await EnableClearAlternativeButtonAsync(cancellationToken);
+        }
+        else
+        {
+            await DisableClearAlternativeButtonAsync(cancellationToken);
+        }
+    }
+
+    private async Task EnableClearAlternativeButtonAsync(CancellationToken cancellationToken)
+    {
+        ClearAlternativeClasses = CssClasses.BTN_OUTLINE_PRIMARY;
+
+        await Task.WhenAll(
+            JSInteropDOM.EnableAsync(IDs.CHACHAR_FORM_ALTERNATIVE_INPUT, cancellationToken),
+            JSInteropDOM.EnableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, cancellationToken)
+        );
+    }
+
+    private async Task DisableClearAlternativeButtonAsync(CancellationToken cancellationToken)
+    {
+        ClearAlternativeClasses = CssClasses.BTN_OUTLINE_SECONDARY;
+
+        await Task.WhenAll(
+            JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_ALTERNATIVE_INPUT, cancellationToken),
+            JSInteropDOM.DisableAsync(IDs.CHACHAR_FORM_CLEAR_ALTERNATIVE, cancellationToken)
+        );
+    }
+
     private string? GetDatabaseIntegrityErrorText(Chachar chachar)
     {
         if (Index.Chachars.Contains(chachar))
@@ -292,11 +314,5 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
         }
 
         return null;
-    }
-
-    private void SetUpEditContext()
-    {
-        EditContext = new(Chachar);
-        _ = new FormValidationHandler<ChacharForm, Chachar>(Logger, Localizer, EditContext);
     }
 }

@@ -108,7 +108,7 @@
                             <button
                                 type="button"
                                 class="btn @CssClasses.BTN_OUTLINE_PRIMARY"
-                                @onclick="ClearRadical">
+                                @onclick="async _ => await ClearRadicalAsync(CancellationToken.None)">
                                 &#x2715;
                             </button>
                         </div>
