@@ -64,7 +64,6 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
     {
         HtmlTitle = Localizer[Resource.CreateNewAlternative];
         SetUpEditContext();
-        EditContext.OnValidationRequested += (_, _) => ValidateAdditional();
     }
 
     public async Task OpenAsync(Alternative alternative, IModal modalLowerLevel, CancellationToken cancellationToken)
@@ -72,6 +71,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
         Alternative = alternative;
         ModalLowerLevel = modalLowerLevel;
         Page = null;
+        SetUpEditContext();
         await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
     }
 
@@ -80,13 +80,17 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
         Alternative = alternative;
         ModalLowerLevel = null;
         Page = page;
+        SetUpEditContext();
         await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
     }
 
     public async Task OpenAsync(IPage page, CancellationToken cancellationToken)
     {
+        Alternative = new();
         ModalLowerLevel = null;
         Page = page;
+        OriginalSelectorClasses = string.Empty;
+        SetUpEditContext();
         await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
     }
 
@@ -161,16 +165,6 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
         EditContext.NotifyFieldChanged(fieldIdentifier);
     }
 
-    protected void ValidateAdditional()
-    {
-        var originalField = new FieldIdentifier(Alternative, nameof(Alternative.OriginalCharacter));
-
-        if (EditContext.GetValidationMessages(originalField).Any())
-        {
-            OriginalSelectorClasses = CssClasses.INVALID;
-        }
-    }
-
     protected async Task CheckAndSubmitAsync(CancellationToken cancellationToken)
     {
         await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
@@ -188,7 +182,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
         }
         else
         {
-            var isPostSuccessful = await ModalCommons.PostAsync(
+            await ModalCommons.PostAsync(
                 this,
                 Alternative,
                 Index,
@@ -202,11 +196,6 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
                 Alternative.OriginalCharacter!,
                 Alternative.OriginalRealPinyin!
             );
-
-            if (isPostSuccessful)
-            {
-                ClearForm();
-            }
         }
     }
 
@@ -228,15 +217,20 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
         return null;
     }
 
-    private void ClearForm()
-    {
-        Alternative = new();
-        SetUpEditContext();
-    }
-
     private void SetUpEditContext()
     {
         EditContext = new(Alternative);
         _ = new FormValidationHandler<AlternativeForm, Alternative>(Logger, Localizer, EditContext);
+        EditContext.OnValidationRequested += (_, _) => ValidateAdditional();
+    }
+
+    private void ValidateAdditional()
+    {
+        var originalField = new FieldIdentifier(Alternative, nameof(Alternative.OriginalCharacter));
+
+        if (EditContext.GetValidationMessages(originalField).Any())
+        {
+            OriginalSelectorClasses = CssClasses.INVALID;
+        }
     }
 }

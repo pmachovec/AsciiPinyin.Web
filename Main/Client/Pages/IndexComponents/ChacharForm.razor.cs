@@ -96,21 +96,46 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
     public async Task OpenAsync(Chachar chachar, IModal modalLowerLevel, CancellationToken cancellationToken)
     {
         Chachar = chachar;
+
+        AvailableAlternatives = Chachar.IsRadical
+            ? []
+            : Index.Alternatives.Where(alternative =>
+                alternative.OriginalCharacter == Chachar.RadicalCharacter
+                && alternative.OriginalPinyin == Chachar.RadicalPinyin
+                && alternative.OriginalTone == Chachar.RadicalTone
+            );
+
         ModalLowerLevel = modalLowerLevel;
         Page = null;
+        SetUpEditContext();
         await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
     }
 
     public async Task OpenAsync(Chachar chachar, IPage page, CancellationToken cancellationToken)
     {
         Chachar = chachar;
-        await OpenAsync(page, cancellationToken);
+
+        AvailableAlternatives = Chachar.IsRadical
+            ? []
+            : Index.Alternatives.Where(alternative =>
+                alternative.OriginalCharacter == Chachar.RadicalCharacter
+                && alternative.OriginalPinyin == Chachar.RadicalPinyin
+                && alternative.OriginalTone == Chachar.RadicalTone
+            );
+
+        ModalLowerLevel = null;
+        Page = page;
+        SetUpEditContext();
+        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
     }
 
     public async Task OpenAsync(IPage page, CancellationToken cancellationToken)
     {
+        Chachar = new();
+        AvailableAlternatives = [];
         ModalLowerLevel = null;
         Page = page;
+        SetUpEditContext();
         await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
     }
 
@@ -236,7 +261,7 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
         }
         else
         {
-            var isPostSuccessful = await ModalCommons.PostAsync(
+            await ModalCommons.PostAsync(
                 this,
                 Chachar,
                 Index,
@@ -249,11 +274,6 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
                 Chachar.TheCharacter!,
                 Chachar.RealPinyin!
             );
-
-            if (isPostSuccessful)
-            {
-                ClearForm();
-            }
         }
     }
 
@@ -272,12 +292,6 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
         }
 
         return null;
-    }
-
-    private void ClearForm()
-    {
-        Chachar = new();
-        SetUpEditContext();
     }
 
     private void SetUpEditContext()

@@ -105,7 +105,7 @@ public sealed class ModalCommons(
         await Task.WhenAll(backdrops.Select(backdrop => backdrop.StateHasChangedAsync()));
     }
 
-    public async Task<bool> PostAsync<T>(
+    public async Task PostAsync<T>(
         IModal modal,
         T entity,
         IIndex index,
@@ -136,7 +136,6 @@ public sealed class ModalCommons(
 
             _ = indexAlterCollection(entity);
             await index.StateHasChangedAsync();
-            return true;
         }
         else
         {
@@ -147,8 +146,6 @@ public sealed class ModalCommons(
                 _localizer[Resource.ProcessingError],
                 cancellationToken
             );
-
-            return false;
         }
     }
 

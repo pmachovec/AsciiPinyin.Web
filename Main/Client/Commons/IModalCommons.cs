@@ -28,7 +28,7 @@ public interface IModalCommons
         CancellationToken cancellationToken
     );
 
-    Task<bool> PostAsync<T>(
+    Task PostAsync<T>(
         IModal modal,
         T entity,
         IIndex index,
