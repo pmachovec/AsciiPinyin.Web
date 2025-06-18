@@ -61,7 +61,9 @@ public class ChacharViewDialogBase : ComponentBase, IEntityModal<Chachar>
         Page = page;
         ModalLowerLevel = null;
         await Index.ProcessDialog.SetProcessingAsync(page, cancellationToken);
-        await OpenAsync(chachar, cancellationToken);
+        await OpenAsyncCommon(chachar, cancellationToken);
+        await ModalCommons.OpenFirstLevelAsyncCommon(this, HtmlTitle, cancellationToken);
+        await Index.ProcessDialog.CloseWithoutBackdropAsync(cancellationToken);
     }
 
     public async Task OpenAsync(
@@ -72,7 +74,9 @@ public class ChacharViewDialogBase : ComponentBase, IEntityModal<Chachar>
     {
         ModalLowerLevel = modalLowerLevel;
         await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
-        await OpenAsync(chachar, cancellationToken);
+        await OpenAsyncCommon(chachar, cancellationToken);
+        await ModalCommons.OpenHigherLevelAsyncCommon(this, HtmlTitle, cancellationToken);
+        await Index.ProcessDialog.CloseWithoutBackdropAsync(cancellationToken);
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken)
@@ -100,7 +104,7 @@ public class ChacharViewDialogBase : ComponentBase, IEntityModal<Chachar>
             cancellationToken
         );
 
-    private async Task OpenAsync(Chachar chachar, CancellationToken cancellationToken)
+    private async Task OpenAsyncCommon(Chachar chachar, CancellationToken cancellationToken)
     {
         await JSInteropDOM.SetAttributeAsync(
             IDs.CHACHAR_VIEW_DIALOG_DELETE_TOOLTIP,
@@ -147,9 +151,6 @@ public class ChacharViewDialogBase : ComponentBase, IEntityModal<Chachar>
             DeleteTitle = GetErrorMessageFormatted(databaseIntegrityErrorMessages);
             await InvokeAsync(StateHasChanged);
         }
-
-        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
-        await Index.ProcessDialog.CloseAsync(cancellationToken);
     }
 
     private string GetErrorMessageFormatted(IEnumerable<string> databaseIntegrityErrorMessages)

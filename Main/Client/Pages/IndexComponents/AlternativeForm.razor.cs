@@ -72,7 +72,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
         ModalLowerLevel = modalLowerLevel;
         Page = null;
         SetUpEditContext();
-        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
+        await ModalCommons.OpenHigherLevelAsyncCommon(this, HtmlTitle, cancellationToken);
     }
 
     public async Task OpenAsync(Alternative alternative, IPage page, CancellationToken cancellationToken)
@@ -81,7 +81,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
         ModalLowerLevel = null;
         Page = page;
         SetUpEditContext();
-        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
+        await ModalCommons.OpenFirstLevelAsyncCommon(this, HtmlTitle, cancellationToken);
     }
 
     public async Task OpenAsync(IPage page, CancellationToken cancellationToken)
@@ -91,7 +91,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
         Page = page;
         OriginalSelectorClasses = string.Empty;
         SetUpEditContext();
-        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
+        await ModalCommons.OpenFirstLevelAsyncCommon(this, HtmlTitle, cancellationToken);
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken) =>

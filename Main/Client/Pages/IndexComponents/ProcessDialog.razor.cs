@@ -57,14 +57,18 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
     {
         ModalLowerLevel = null;
         Page = page;
-        await SetProcessingAsync(cancellationToken);
+        await SetProcessingAsyncCommon(cancellationToken);
+        await ModalCommons.OpenFirstLevelAsyncCommon(this, cancellationToken);
+        await StateHasChangedAsync();
     }
 
     public async Task SetProcessingAsync(IModal modalLowerLevel, CancellationToken cancellationToken)
     {
         ModalLowerLevel = modalLowerLevel;
         Page = null;
-        await SetProcessingAsync(cancellationToken);
+        await SetProcessingAsyncCommon(cancellationToken);
+        await ModalCommons.OpenHigherLevelAsyncCommon(this, cancellationToken);
+        await StateHasChangedAsync();
     }
 
     public async Task SetSuccessAsync(
@@ -90,7 +94,7 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         ButtonProceedClasses = CssClasses.D_BLOCK;
         FooterClasses = CssClasses.D_FLEX;
 
-        await ModalCommons.OpenAsyncCommon(this, cancellationToken);
+        await ModalCommons.OpenHigherLevelAsyncCommon(this, cancellationToken);
         await StateHasChangedAsync();
     }
 
@@ -115,7 +119,7 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         ButtonProceedClasses = CssClasses.D_NONE;
         FooterClasses = CssClasses.D_FLEX;
 
-        await ModalCommons.OpenAsyncCommon(this, cancellationToken);
+        await ModalCommons.OpenHigherLevelAsyncCommon(this, cancellationToken);
         await StateHasChangedAsync();
     }
 
@@ -143,12 +147,12 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         ButtonProceedClasses = CssClasses.D_BLOCK;
         FooterClasses = CssClasses.D_FLEX;
 
-        await ModalCommons.OpenAsyncCommon(this, cancellationToken);
+        await ModalCommons.OpenHigherLevelAsyncCommon(this, cancellationToken);
         await StateHasChangedAsync();
     }
 
-    public async Task CloseAsync(CancellationToken cancellationToken) =>
-        await ModalCommons.CloseAsyncCommon(this, cancellationToken);
+    public async Task CloseWithoutBackdropAsync(CancellationToken cancellationToken) =>
+        await ModalCommons.CloseWithoutBackdropAsyncCommon(this, cancellationToken);
 
     public void AddClasses(params string[] classes) => Classes += $" {string.Join(' ', classes)}";
 
@@ -159,7 +163,7 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
     protected async Task CloseAllAsync(CancellationToken cancellationToken)
         => await ModalCommons.CloseAllAsyncCommon(this, cancellationToken);
 
-    private async Task SetProcessingAsync(CancellationToken cancellationToken)
+    private async Task SetProcessingAsyncCommon(CancellationToken cancellationToken)
     {
         HtmlTitle = $"{Localizer[Resource.Processing]}...";
         await JSInteropDOM.SetTitleAsync(HtmlTitle, cancellationToken);
@@ -168,8 +172,5 @@ public class ProcessDialogBase : ComponentBase, IProcessDialog
         HeaderClasses = CssClasses.D_NONE;
         BodyTextClasses = CssClasses.D_NONE;
         FooterClasses = CssClasses.D_NONE;
-
-        await ModalCommons.OpenAsyncCommon(this, cancellationToken);
-        await StateHasChangedAsync();
     }
 }

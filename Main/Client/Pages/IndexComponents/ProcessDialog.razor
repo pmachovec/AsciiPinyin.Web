@@ -35,7 +35,7 @@
                     type="button"
                     class="btn btn-modal btn-danger @ButtonBackClasses"
                     id="@IDs.PROCESS_DIALOG_BUTTON_BACK"
-                    @onclick="async _ => await ModalCommons.CloseAsyncCommon(this, CancellationToken.None)">
+                    @onclick="async _ => await ModalCommons.CloseHigherLevelAsyncCommon(this, CancellationToken.None)">
                     <span>@Localizer[Resource.Back]</span>
                 </button>
                 <button

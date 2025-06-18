@@ -50,16 +50,11 @@ public class EntitySelectorBase<T> : ComponentBase, IModal where T : IEntity
     )
     {
         ModalLowerLevel = modalLowerLevel;
-
-        await ModalCommons.OpenAsyncCommon(
-            this,
-            HtmlTitle,
-            cancellationToken
-        );
+        await ModalCommons.OpenHigherLevelAsyncCommon(this, HtmlTitle, cancellationToken);
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken) =>
-        await ModalCommons.CloseAsyncCommon(this, cancellationToken);
+        await ModalCommons.CloseHigherLevelAsyncCommon(this, cancellationToken);
 
     public void AddClasses(params string[] classes) => Classes += $" {string.Join(' ', classes)}";
 

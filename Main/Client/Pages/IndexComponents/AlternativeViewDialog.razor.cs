@@ -51,27 +51,23 @@ public class AlternativeViewDialogBase : ComponentBase, IEntityModal<Alternative
     [Parameter, EditorRequired]
     public required IIndex Index { get; init; }
 
-    public async Task OpenAsync(
-        Alternative alternative,
-        IPage page,
-        CancellationToken cancellationToken
-    )
+    public async Task OpenAsync(Alternative alternative, IPage page, CancellationToken cancellationToken)
     {
         Page = page;
         ModalLowerLevel = null;
         await Index.ProcessDialog.SetProcessingAsync(page, cancellationToken);
-        await OpenAsync(alternative, cancellationToken);
+        await OpenAsyncCommon(alternative, cancellationToken);
+        await ModalCommons.OpenFirstLevelAsyncCommon(this, HtmlTitle, cancellationToken);
+        await Index.ProcessDialog.CloseWithoutBackdropAsync(cancellationToken);
     }
 
-    public async Task OpenAsync(
-        Alternative alternative,
-        IModal modalLowerLevel,
-        CancellationToken cancellationToken
-    )
+    public async Task OpenAsync(Alternative alternative, IModal modalLowerLevel, CancellationToken cancellationToken)
     {
         ModalLowerLevel = modalLowerLevel;
         await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
-        await OpenAsync(alternative, cancellationToken);
+        await OpenAsyncCommon(alternative, cancellationToken);
+        await ModalCommons.OpenHigherLevelAsyncCommon(this, HtmlTitle, cancellationToken);
+        await Index.ProcessDialog.CloseWithoutBackdropAsync(cancellationToken);
     }
 
     public async Task CloseAsync(CancellationToken cancellationToken)
@@ -100,7 +96,7 @@ public class AlternativeViewDialogBase : ComponentBase, IEntityModal<Alternative
             cancellationToken
         );
 
-    private async Task OpenAsync(Alternative alternative, CancellationToken cancellationToken)
+    private async Task OpenAsyncCommon(Alternative alternative, CancellationToken cancellationToken)
     {
         await JSInteropDOM.SetAttributeAsync(
             IDs.ALTERNATIVE_VIEW_DIALOG_DELETE_TOOLTIP,
@@ -127,9 +123,6 @@ public class AlternativeViewDialogBase : ComponentBase, IEntityModal<Alternative
             DeleteTitle = $"{Localizer[Resource.CannotBeDeleted]} {Localizer[Resource.AlternativeUsedByCharactersInDb]}";
             await InvokeAsync(StateHasChanged);
         }
-
-        await ModalCommons.OpenAsyncCommon(this, HtmlTitle, cancellationToken);
-        await Index.ProcessDialog.CloseAsync(cancellationToken);
     }
 
     private async Task SubmitDeleteAsync(CancellationToken cancellationToken)

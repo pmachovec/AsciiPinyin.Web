@@ -7,26 +7,19 @@ namespace AsciiPinyin.Web.Client.Commons;
 
 public interface IModalCommons
 {
-    Task OpenAsyncCommon(
-        IModal modal,
-        string htmlTitle,
-        CancellationToken cancellationToken
-    );
+    Task OpenFirstLevelAsyncCommon(IModal modal, string htmlTitle, CancellationToken cancellationToken);
 
-    Task OpenAsyncCommon(
-        IModal modal,
-        CancellationToken cancellationToken
-    );
+    Task OpenFirstLevelAsyncCommon(IModal modal, CancellationToken cancellationToken);
 
-    Task CloseAsyncCommon(
-        IModal modal,
-        CancellationToken cancellationToken
-    );
+    Task OpenHigherLevelAsyncCommon(IModal modal, string htmlTitle, CancellationToken cancellationToken);
 
-    Task CloseAllAsyncCommon(
-        IModal modal,
-        CancellationToken cancellationToken
-    );
+    Task OpenHigherLevelAsyncCommon(IModal modal, CancellationToken cancellationToken);
+
+    Task CloseHigherLevelAsyncCommon(IModal modal, CancellationToken cancellationToken);
+
+    Task CloseWithoutBackdropAsyncCommon(IModal modal, CancellationToken cancellationToken);
+
+    Task CloseAllAsyncCommon(IModal modal,  CancellationToken cancellationToken);
 
     Task PostAsync<T>(
         IModal modal,

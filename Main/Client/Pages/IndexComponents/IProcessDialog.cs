@@ -14,5 +14,5 @@ public interface IProcessDialog : IModal
 
     Task SetWarningAsync(IModal modalLowerLevel, string message, Func<CancellationToken, Task> methodOnProceedAsync, CancellationToken cancellationToken);
 
-    Task CloseAsync(CancellationToken cancellationToken);
+    Task CloseWithoutBackdropAsync(CancellationToken cancellationToken);
 }
