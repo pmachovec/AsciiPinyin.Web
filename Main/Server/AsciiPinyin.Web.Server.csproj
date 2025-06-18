@@ -30,8 +30,16 @@
         <ProjectReference Include="..\Shared\AsciiPinyin.Web.Shared.csproj" />
     </ItemGroup>
 
+    <PropertyGroup>
+        <NLogConfigFile>nlog.config.yaml</NLogConfigFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <NLogConfigFile>nlog.config.Development.yaml</NLogConfigFile>
+    </PropertyGroup>
+
     <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
-        <Copy SourceFiles="..\..\nlog.config.yaml" DestinationFolder="$(OutDir)\NLog" />
+        <Copy SourceFiles="..\..\$(NLogConfigFile)" DestinationFiles="$(OutDir)\NLog\nlog.config.yaml" />
     </Target>
 
 </Project>
