@@ -75,15 +75,6 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
         await ModalCommons.OpenHigherLevelAsyncCommon(this, HtmlTitle, cancellationToken);
     }
 
-    public async Task OpenAsync(Alternative alternative, IPage page, CancellationToken cancellationToken)
-    {
-        Alternative = alternative;
-        ModalLowerLevel = null;
-        Page = page;
-        SetUpEditContext();
-        await ModalCommons.OpenFirstLevelAsyncCommon(this, HtmlTitle, cancellationToken);
-    }
-
     public async Task OpenAsync(IPage page, CancellationToken cancellationToken)
     {
         Alternative = new();

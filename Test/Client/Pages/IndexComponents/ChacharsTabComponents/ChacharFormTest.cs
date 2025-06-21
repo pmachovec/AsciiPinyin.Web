@@ -265,7 +265,6 @@ internal sealed class ChacharFormTest : IDisposable
             _backdropComponent,
             _processDialogComponent,
             _testContext.JSInterop,
-            _indexMock,
             IDs.CHACHAR_FORM_ROOT,
             IDs.INDEX_BACKDROP_ROOT
         );

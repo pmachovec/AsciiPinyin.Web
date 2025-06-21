@@ -1,12 +1,10 @@
 using AngleSharp.Dom;
 using AsciiPinyin.Web.Client.ComponentInterfaces;
-using AsciiPinyin.Web.Client.Pages;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Client.Test.Constants.JSInterop;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Test.Constants;
 using Bunit;
-using Moq;
 using NUnit.Framework;
 using System.Globalization;
 
@@ -18,30 +16,13 @@ internal sealed class EntityModalTestCommons<T>
     IRenderedComponent<IBackdrop> _backdropComponent,
     IRenderedComponent<IModal> _processDialogComponent,
     BunitJSInterop _jsInterop,
-    Mock<IIndex> _indexMock,
-    string modalRootId,
+    string _modalRootId,
     string _backdropRootId
 ) where T : IEntity
 {
-    public async Task OpenTest(T entity, JSRuntimeInvocationHandler setTitleHandler, string expectedTitle)
-    {
-        var modalRoot = _entityModalComponent.Find($"#{modalRootId}");
-        var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
-
-        setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
-        AssertHidden(modalRoot);
-        AssertBackdropHidden(backdropRoot, _entityModalComponent);
-
-        await _entityModalComponent.Instance.OpenAsync(entity, _indexMock.Object, CancellationToken.None);
-
-        _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, expectedTitle);
-        AssertVisible(modalRoot);
-        AssertBackdropVisible(backdropRoot, _entityModalComponent);
-    }
-
     public async Task CloseTest(JSRuntimeInvocationHandler setTitleHandler, string expectedTitle)
     {
-        var modalRoot = _entityModalComponent.Find($"#{modalRootId}");
+        var modalRoot = _entityModalComponent.Find($"#{_modalRootId}");
         var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
 
         setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
@@ -187,7 +168,7 @@ internal sealed class EntityModalTestCommons<T>
         }
     }
 
-    private static void AssertVisible(IElement? modalRoot)
+    public static void AssertVisible(IElement? modalRoot)
     {
         Assert.That(modalRoot, Is.Not.Null);
         Assert.That(modalRoot!.ClassList, Does.Contain(CssClasses.D_BLOCK));
@@ -195,7 +176,7 @@ internal sealed class EntityModalTestCommons<T>
         Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.D_NONE));
     }
 
-    private static void AssertHidden(IElement? modalRoot)
+    public static void AssertHidden(IElement? modalRoot)
     {
         Assert.That(modalRoot, Is.Not.Null);
         Assert.That(modalRoot!.ClassList, Does.Contain(CssClasses.D_NONE));
@@ -203,7 +184,7 @@ internal sealed class EntityModalTestCommons<T>
         Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.SHOW));
     }
 
-    private static void AssertBackdropVisible<T1>(IElement? backdropRoot, IRenderedComponent<T1> modalComponent, int expectedZIndex = 1) where T1 : IModal
+    public static void AssertBackdropVisible<T1>(IElement? backdropRoot, IRenderedComponent<T1> modalComponent, int expectedZIndex = 1) where T1 : IModal
     {
         Assert.That(backdropRoot, Is.Not.Null);
         Assert.That(backdropRoot!.ClassList, Does.Contain(CssClasses.D_BLOCK));
@@ -213,7 +194,7 @@ internal sealed class EntityModalTestCommons<T>
         Assert.That(modalComponent.Instance.Backdrop!.ZIndex, Is.EqualTo(expectedZIndex));
     }
 
-    private static void AssertBackdropHidden<T1>(IElement? backdropRoot, IRenderedComponent<T1> modalComponent) where T1 : IModal
+    public static void AssertBackdropHidden<T1>(IElement? backdropRoot, IRenderedComponent<T1> modalComponent) where T1 : IModal
     {
         Assert.That(backdropRoot, Is.Not.Null);
         Assert.That(backdropRoot!.ClassList, Does.Contain(CssClasses.D_NONE));

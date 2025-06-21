@@ -27,31 +27,22 @@ internal sealed class EntityFormTestCommons<T>(
     public async Task OpenTest(JSRuntimeInvocationHandler setTitleHandler, string expectedTitle)
     {
         var modalRoot = _entityFormComponent.Find($"#{_entityFormRootId}");
-        setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
-        Assert.That(modalRoot.ClassList, Does.Contain(CssClasses.D_NONE));
-        Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.D_BLOCK));
-        Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.SHOW));
-
         var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
-        Assert.That(backdropRoot, Is.Not.Null);
-        Assert.That(backdropRoot.ClassList, Does.Contain(CssClasses.D_NONE));
-        Assert.That(backdropRoot.ClassList, Does.Not.Contain(CssClasses.D_BLOCK));
-        Assert.That(backdropRoot.ClassList, Does.Not.Contain(CssClasses.SHOW));
+
+        setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
+        EntityModalTestCommons<T>.AssertHidden(modalRoot);
+        EntityModalTestCommons<T>.AssertBackdropHidden(backdropRoot, _entityFormComponent);
         Assert.That(_entityFormComponent.Instance.Backdrop, Is.Null);
 
         await _entityFormComponent.Instance.OpenAsync(_indexMock.Object, CancellationToken.None);
 
         _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, expectedTitle);
-        Assert.That(modalRoot.ClassList, Does.Contain(CssClasses.D_BLOCK));
-        Assert.That(modalRoot.ClassList, Does.Contain(CssClasses.SHOW));
-        Assert.That(modalRoot.ClassList, Does.Not.Contain(CssClasses.D_NONE));
+        EntityModalTestCommons<T>.AssertVisible(modalRoot);
+        EntityModalTestCommons<T>.AssertBackdropVisible(backdropRoot, _entityFormComponent);
 
         var backdrop = _entityFormComponent.Instance.Backdrop;
         Assert.That(backdrop, Is.Not.Null);
         Assert.That(backdrop!.ZIndex, Is.EqualTo(1));
-        Assert.That(backdropRoot.ClassList, Does.Contain(CssClasses.D_BLOCK));
-        Assert.That(backdropRoot.ClassList, Does.Contain(CssClasses.SHOW));
-        Assert.That(backdropRoot.ClassList, Does.Not.Contain(CssClasses.D_NONE));
     }
 
     public void StringInputUnchangedTest(

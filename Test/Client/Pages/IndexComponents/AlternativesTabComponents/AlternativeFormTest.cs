@@ -168,7 +168,6 @@ internal sealed class AlternativeFormTest : IDisposable
             _backdropComponent,
             _processDialogComponent,
             _testContext.JSInterop,
-            _indexMock,
             IDs.ALTERNATIVE_FORM_ROOT,
             IDs.INDEX_BACKDROP_ROOT
         );

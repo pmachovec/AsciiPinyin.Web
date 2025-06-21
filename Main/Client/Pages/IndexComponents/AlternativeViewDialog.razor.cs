@@ -11,7 +11,7 @@ using System.Globalization;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
-public class AlternativeViewDialogBase : ComponentBase, IEntityModal<Alternative>
+public class AlternativeViewDialogBase : ComponentBase, IEntityViewDialog<Alternative>
 {
     protected Alternative? Alternative { get; set; }
 

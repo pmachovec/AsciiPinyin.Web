@@ -90,24 +90,6 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
         await ModalCommons.OpenHigherLevelAsyncCommon(this, HtmlTitle, cancellationToken);
     }
 
-    public async Task OpenAsync(Chachar chachar, IPage page, CancellationToken cancellationToken)
-    {
-        Chachar = chachar;
-
-        AvailableAlternatives = Chachar.IsRadical
-            ? []
-            : Index.Alternatives.Where(alternative =>
-                alternative.OriginalCharacter == Chachar.RadicalCharacter
-                && alternative.OriginalPinyin == Chachar.RadicalPinyin
-                && alternative.OriginalTone == Chachar.RadicalTone
-            );
-
-        ModalLowerLevel = null;
-        Page = page;
-        SetUpEditContext();
-        await ModalCommons.OpenFirstLevelAsyncCommon(this, HtmlTitle, cancellationToken);
-    }
-
     public async Task OpenAsync(IPage page, CancellationToken cancellationToken)
     {
         Chachar = new();

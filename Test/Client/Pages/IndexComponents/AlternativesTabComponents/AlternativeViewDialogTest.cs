@@ -228,7 +228,11 @@ internal sealed class AlternativeViewDialogTest : IDisposable
 
         _entityViewDialogTestCommons = new(
             _alternativeViewDialogComponent,
-            IDs.ALTERNATIVE_VIEW_DIALOG_DELETE_TOOLTIP
+            _backdropComponent,
+            _indexMock,
+            IDs.ALTERNATIVE_VIEW_DIALOG_DELETE_TOOLTIP,
+            IDs.ALTERNATIVE_VIEW_DIALOG_ROOT,
+            IDs.INDEX_BACKDROP_ROOT
         );
 
         _entityModalTestCommons = new(
@@ -236,7 +240,6 @@ internal sealed class AlternativeViewDialogTest : IDisposable
             _backdropComponent,
             _processDialogComponent,
             _testContext.JSInterop,
-            _indexMock,
             IDs.ALTERNATIVE_VIEW_DIALOG_ROOT,
             IDs.INDEX_BACKDROP_ROOT
         );
@@ -254,7 +257,7 @@ internal sealed class AlternativeViewDialogTest : IDisposable
         var setDialogTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, dialogTitle).SetVoidResult();
         var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
 
-        await _entityModalTestCommons.OpenTest(_alternative11, setDialogTitleHandler, dialogTitle);
+        await _entityViewDialogTestCommons.OpenTest(_alternative11, setDialogTitleHandler, dialogTitle);
         _entityViewDialogTestCommons.DeleteButtonDisabledTest(CANNOT_BE_DELETED, USED_BY_CHACHARS);
         await _entityModalTestCommons.CloseTest(setIndexTitleHandler, INDEX_TITLE);
         Assert.That(_alternatives, Does.Contain(_alternative11));
@@ -275,7 +278,7 @@ internal sealed class AlternativeViewDialogTest : IDisposable
         var setProcessDialogErrorTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, ERROR).SetVoidResult();
         var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
 
-        await _entityModalTestCommons.OpenTest(_alternative21, setDialogTitleHandler, dialogTitle);
+        await _entityViewDialogTestCommons.OpenTest(_alternative21, setDialogTitleHandler, dialogTitle);
         var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
         await _entityViewDialogTestCommons.DeleteButtonClickTest(deleteButton, setProcessDialogWarningTitleHandler, WARNING);
 
@@ -312,7 +315,7 @@ internal sealed class AlternativeViewDialogTest : IDisposable
         var setProcessDialogWarningTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, WARNING).SetVoidResult();
         var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
 
-        await _entityModalTestCommons.OpenTest(_alternative31, setDialogTitleHandler, dialogTitle);
+        await _entityViewDialogTestCommons.OpenTest(_alternative31, setDialogTitleHandler, dialogTitle);
         var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
         await _entityViewDialogTestCommons.DeleteButtonClickTest(deleteButton, setProcessDialogWarningTitleHandler, WARNING);
 
@@ -346,7 +349,7 @@ internal sealed class AlternativeViewDialogTest : IDisposable
         var setProcessDialogSuccessTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, SUCCESS).SetVoidResult();
         var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
 
-        await _entityModalTestCommons.OpenTest(_alternative31, setDialogTitleHandler, dialogTitle);
+        await _entityViewDialogTestCommons.OpenTest(_alternative31, setDialogTitleHandler, dialogTitle);
         var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
         await _entityViewDialogTestCommons.DeleteButtonClickTest(deleteButton, setProcessDialogWarningTitleHandler, WARNING);
 

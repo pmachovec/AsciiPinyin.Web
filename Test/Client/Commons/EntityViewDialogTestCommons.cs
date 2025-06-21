@@ -1,22 +1,45 @@
 using AngleSharp.Diffing.Extensions;
 using AngleSharp.Dom;
+using AsciiPinyin.Web.Client.ComponentInterfaces;
+using AsciiPinyin.Web.Client.Pages;
 using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Client.Test.Constants.JSInterop;
 using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Test.Constants;
 using Bunit;
+using Moq;
 using NUnit.Framework;
 
 namespace Asciipinyin.Web.Client.Test.Commons;
 
 internal sealed class EntityViewDialogTestCommons<T>(
-    IRenderedComponent<IEntityModal<T>> _entityViewDialogComponent,
-    string entityViewDialogDeleteTooltipId
+    IRenderedComponent<IEntityViewDialog<T>> _entityViewDialogComponent,
+    IRenderedComponent<IBackdrop> _backdropComponent,
+    Mock<IIndex> _indexMock,
+    string _entityViewDialogDeleteTooltipId,
+    string _modalRootId,
+    string _backdropRootId
 ) where T : IEntity
 {
+    public async Task OpenTest(T entity, JSRuntimeInvocationHandler setTitleHandler, string expectedTitle)
+    {
+        var modalRoot = _entityViewDialogComponent.Find($"#{_modalRootId}");
+        var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
+
+        setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
+        EntityModalTestCommons<T>.AssertHidden(modalRoot);
+        EntityModalTestCommons<T>.AssertBackdropHidden(backdropRoot, _entityViewDialogComponent);
+
+        await _entityViewDialogComponent.Instance.OpenAsync(entity, _indexMock.Object, CancellationToken.None);
+
+        _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, expectedTitle);
+        EntityModalTestCommons<T>.AssertVisible(modalRoot);
+        EntityModalTestCommons<T>.AssertBackdropVisible(backdropRoot, _entityViewDialogComponent);
+    }
+
     public void DeleteButtonDisabledTest(string expectedTooltipStart, params string[] expectedTooltipParts)
     {
-        var deleteButtonTooltipElement = _entityViewDialogComponent.Find($"#{entityViewDialogDeleteTooltipId}");
+        var deleteButtonTooltipElement = _entityViewDialogComponent.Find($"#{_entityViewDialogDeleteTooltipId}");
         var deleteButtonTooltip = DeleteButtonTooltipTest(deleteButtonTooltipElement);
 
         if (expectedTooltipParts.Length == 1)
@@ -39,7 +62,7 @@ internal sealed class EntityViewDialogTestCommons<T>(
 
     public IElement DeleteButtonEnabledTest()
     {
-        var deleteButtonTooltipElement = _entityViewDialogComponent.Find($"#{entityViewDialogDeleteTooltipId}");
+        var deleteButtonTooltipElement = _entityViewDialogComponent.Find($"#{_entityViewDialogDeleteTooltipId}");
         var deleteButtonTooltip = DeleteButtonTooltipTest(deleteButtonTooltipElement);
         Assert.That(deleteButtonTooltip, Is.Empty);
 

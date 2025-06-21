@@ -12,7 +12,7 @@ using System.Text;
 
 namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
-public class ChacharViewDialogBase : ComponentBase, IEntityModal<Chachar>
+public class ChacharViewDialogBase : ComponentBase, IEntityViewDialog<Chachar>
 {
     protected Chachar? Chachar { get; set; }
 
