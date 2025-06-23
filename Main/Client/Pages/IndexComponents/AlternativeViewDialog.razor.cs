@@ -61,15 +61,6 @@ public class AlternativeViewDialogBase : ComponentBase, IEntityViewDialog<Altern
         await Index.ProcessDialog.CloseWithoutBackdropAsync(cancellationToken);
     }
 
-    public async Task OpenAsync(Alternative alternative, IModal modalLowerLevel, CancellationToken cancellationToken)
-    {
-        ModalLowerLevel = modalLowerLevel;
-        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
-        await OpenAsyncCommon(alternative, cancellationToken);
-        await ModalCommons.OpenHigherLevelAsyncCommon(this, HtmlTitle, cancellationToken);
-        await Index.ProcessDialog.CloseWithoutBackdropAsync(cancellationToken);
-    }
-
     public async Task CloseAsync(CancellationToken cancellationToken)
     {
         Alternative = null;

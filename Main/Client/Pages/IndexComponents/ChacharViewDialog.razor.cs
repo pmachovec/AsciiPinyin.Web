@@ -66,19 +66,6 @@ public class ChacharViewDialogBase : ComponentBase, IEntityViewDialog<Chachar>
         await Index.ProcessDialog.CloseWithoutBackdropAsync(cancellationToken);
     }
 
-    public async Task OpenAsync(
-        Chachar chachar,
-        IModal modalLowerLevel,
-        CancellationToken cancellationToken
-    )
-    {
-        ModalLowerLevel = modalLowerLevel;
-        await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
-        await OpenAsyncCommon(chachar, cancellationToken);
-        await ModalCommons.OpenHigherLevelAsyncCommon(this, HtmlTitle, cancellationToken);
-        await Index.ProcessDialog.CloseWithoutBackdropAsync(cancellationToken);
-    }
-
     public async Task CloseAsync(CancellationToken cancellationToken)
     {
         Chachar = null;

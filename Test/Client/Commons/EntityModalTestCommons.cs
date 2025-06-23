@@ -12,7 +12,7 @@ namespace Asciipinyin.Web.Client.Test.Commons;
 
 internal sealed class EntityModalTestCommons<T>
 (
-    IRenderedComponent<IEntityModal<T>> _entityModalComponent,
+    IRenderedComponent<IEntityModal> _entityModalComponent,
     IRenderedComponent<IBackdrop> _backdropComponent,
     IRenderedComponent<IModal> _processDialogComponent,
     BunitJSInterop _jsInterop,

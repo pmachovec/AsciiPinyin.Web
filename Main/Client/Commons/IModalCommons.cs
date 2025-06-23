@@ -19,7 +19,7 @@ public interface IModalCommons
 
     Task CloseWithoutBackdropAsyncCommon(IModal modal, CancellationToken cancellationToken);
 
-    Task CloseAllAsyncCommon(IModal modal,  CancellationToken cancellationToken);
+    Task CloseAllAsyncCommon(IModal modal, CancellationToken cancellationToken);
 
     Task PostAsync<T>(
         IModal modal,
