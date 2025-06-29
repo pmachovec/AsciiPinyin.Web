@@ -27,14 +27,14 @@ internal sealed class EntityViewDialogTestCommons<T>(
         var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
 
         setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
-        EntityModalTestCommons<T>.AssertHidden(modalRoot);
-        EntityModalTestCommons<T>.AssertBackdropHidden(backdropRoot, _entityViewDialogComponent);
+        ModalTestCommons.AssertHidden(modalRoot);
+        ModalTestCommons.AssertBackdropHidden(backdropRoot, _entityViewDialogComponent);
 
         await _entityViewDialogComponent.Instance.OpenAsync(entity, _indexMock.Object, CancellationToken.None);
 
         _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, expectedTitle);
-        EntityModalTestCommons<T>.AssertVisible(modalRoot);
-        EntityModalTestCommons<T>.AssertBackdropVisible(backdropRoot, _entityViewDialogComponent);
+        ModalTestCommons.AssertVisible(modalRoot);
+        ModalTestCommons.AssertBackdropVisible(backdropRoot, _entityViewDialogComponent);
     }
 
     public void DeleteButtonDisabledTest(string expectedTooltipStart, params string[] expectedTooltipParts)

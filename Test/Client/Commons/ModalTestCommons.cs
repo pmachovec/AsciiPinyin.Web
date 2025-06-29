@@ -1,8 +1,6 @@
 using AngleSharp.Dom;
 using AsciiPinyin.Web.Client.ComponentInterfaces;
-using AsciiPinyin.Web.Client.Pages.IndexComponents;
 using AsciiPinyin.Web.Client.Test.Constants.JSInterop;
-using AsciiPinyin.Web.Shared.Models;
 using AsciiPinyin.Web.Shared.Test.Constants;
 using Bunit;
 using NUnit.Framework;
@@ -10,17 +8,17 @@ using System.Globalization;
 
 namespace Asciipinyin.Web.Client.Test.Commons;
 
-internal sealed class EntityModalTestCommons<T>
+internal sealed class ModalTestCommons
 (
-    IRenderedComponent<IEntityModal> _entityModalComponent,
+    IRenderedComponent<IModal> _entityModalComponent,
     IRenderedComponent<IBackdrop> _backdropComponent,
     IRenderedComponent<IModal> _processDialogComponent,
     BunitJSInterop _jsInterop,
     string _modalRootId,
     string _backdropRootId
-) where T : IEntity
+)
 {
-    public async Task CloseTest(JSRuntimeInvocationHandler setTitleHandler, string expectedTitle)
+    public async Task CloseTest(Func<CancellationToken, Task> modalCloseAsync, JSRuntimeInvocationHandler setTitleHandler, string expectedTitle)
     {
         var modalRoot = _entityModalComponent.Find($"#{_modalRootId}");
         var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
@@ -29,7 +27,7 @@ internal sealed class EntityModalTestCommons<T>
         AssertVisible(modalRoot);
         AssertBackdropVisible(backdropRoot, _entityModalComponent);
 
-        await _entityModalComponent.Instance.CloseAsync(CancellationToken.None);
+        await modalCloseAsync(CancellationToken.None);
 
         _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, expectedTitle);
         AssertHidden(modalRoot);

@@ -158,7 +158,7 @@ internal sealed class ChacharFormTest : IDisposable
 
     private HashSet<Chachar> _chachars = default!;
     private EntityFormTestCommons<Chachar> _entityFormTestCommons = default!;
-    private EntityModalTestCommons<Chachar> _entityModalTestCommons = default!;
+    private ModalTestCommons _modalTestCommons = default!;
     private IRenderedComponent<Backdrop> _backdropComponent = default!;
     private IRenderedComponent<ChacharForm> _chacharFormComponent = default!;
     private IRenderedComponent<ProcessDialog> _processDialogComponent = default!;
@@ -260,7 +260,7 @@ internal sealed class ChacharFormTest : IDisposable
             IDs.INDEX_BACKDROP_ROOT
         );
 
-        _entityModalTestCommons = new(
+        _modalTestCommons = new(
             _chacharFormComponent,
             _backdropComponent,
             _processDialogComponent,
@@ -813,8 +813,8 @@ internal sealed class ChacharFormTest : IDisposable
         var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
 
         await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
-        await _entityModalTestCommons.CloseTest(setIndexTitleHandler, INDEX_TITLE);
-        _entityModalTestCommons.TitlesOrderTest(CREATE_NEW_CHARACTER, INDEX_TITLE);
+        await _modalTestCommons.CloseTest(_chacharFormComponent.Instance.CloseAsync, setIndexTitleHandler, INDEX_TITLE);
+        _modalTestCommons.TitlesOrderTest(CREATE_NEW_CHARACTER, INDEX_TITLE);
     }
 
     [Test]
@@ -870,12 +870,12 @@ internal sealed class ChacharFormTest : IDisposable
 
         await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
         await SubmitAsync(_radicalChachar4, setProcessDialogErrorTitleHandler, ERROR);
-        _entityModalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
+        _modalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
+        await _modalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
         Assert.That(_chachars, Does.Not.Contain(_radicalChachar4));
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_FORM_ROOT);
+        _modalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_FORM_ROOT);
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             CREATE_NEW_CHARACTER,
             PROCESSING_DOTS,
             ERROR,
@@ -901,12 +901,12 @@ internal sealed class ChacharFormTest : IDisposable
         );
 
         await SubmitAsync(_nonRadicalChacharWithoutAlternative32, setProcessDialogErrorTitleHandler, ERROR);
-        _entityModalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_CHARACTER, calledTimes: 3);
+        _modalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
+        await _modalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_CHARACTER, calledTimes: 3);
         Assert.That(_chachars, Does.Not.Contain(_nonRadicalChacharWithoutAlternative32));
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_FORM_ROOT);
+        _modalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_FORM_ROOT);
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             CREATE_NEW_CHARACTER,
             SELECT_RADICAL,
             CREATE_NEW_CHARACTER,
@@ -937,12 +937,12 @@ internal sealed class ChacharFormTest : IDisposable
         );
 
         await SubmitAsync(_nonRadicalChacharWithAlternative12, setProcessDialogErrorTitleHandler, ERROR);
-        _entityModalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_CHARACTER, calledTimes: 4);
+        _modalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
+        await _modalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_CHARACTER, calledTimes: 4);
         Assert.That(_chachars, Does.Not.Contain(_nonRadicalChacharWithAlternative12));
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_FORM_ROOT);
+        _modalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_FORM_ROOT);
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             CREATE_NEW_CHARACTER,
             SELECT_RADICAL,
             CREATE_NEW_CHARACTER,
@@ -965,17 +965,17 @@ internal sealed class ChacharFormTest : IDisposable
         await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
         await SubmitAsync(_radicalChachar4, setProcessDialogSuccessTitleHandler, SUCCESS);
 
-        _entityModalTestCommons.ProcessDialogSuccessTest(
+        _modalTestCommons.ProcessDialogSuccessTest(
             CHARACTER_CREATED,
             _radicalChachar4.TheCharacter!,
             _radicalChachar4.RealPinyin!
         );
 
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
-        _entityModalTestCommons.ModalClosedTest(IDs.CHACHAR_FORM_ROOT);
+        await _modalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
+        _modalTestCommons.ModalClosedTest(IDs.CHACHAR_FORM_ROOT);
         Assert.That(_chachars, Does.Contain(_radicalChachar4));
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             CREATE_NEW_CHARACTER,
             PROCESSING_DOTS,
             SUCCESS,
@@ -1003,17 +1003,17 @@ internal sealed class ChacharFormTest : IDisposable
 
         await SubmitAsync(_nonRadicalChacharWithoutAlternative32, setProcessDialogSuccessTitleHandler, SUCCESS);
 
-        _entityModalTestCommons.ProcessDialogSuccessTest(
+        _modalTestCommons.ProcessDialogSuccessTest(
             CHARACTER_CREATED,
             _nonRadicalChacharWithoutAlternative32.TheCharacter!,
             _nonRadicalChacharWithoutAlternative32.RealPinyin!
         );
 
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
+        await _modalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
         Assert.That(_chachars, Does.Contain(_nonRadicalChacharWithoutAlternative32));
-        _entityModalTestCommons.ModalClosedTest(IDs.CHACHAR_FORM_ROOT);
+        _modalTestCommons.ModalClosedTest(IDs.CHACHAR_FORM_ROOT);
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             CREATE_NEW_CHARACTER,
             SELECT_RADICAL,
             CREATE_NEW_CHARACTER,
@@ -1047,17 +1047,17 @@ internal sealed class ChacharFormTest : IDisposable
 
         await SubmitAsync(_nonRadicalChacharWithAlternative12, setProcessDialogSuccessTitleHandler, SUCCESS);
 
-        _entityModalTestCommons.ProcessDialogSuccessTest(
+        _modalTestCommons.ProcessDialogSuccessTest(
             CHARACTER_CREATED,
             _nonRadicalChacharWithAlternative12.TheCharacter!,
             _nonRadicalChacharWithAlternative12.RealPinyin!
         );
 
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
+        await _modalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
         Assert.That(_chachars, Does.Contain(_nonRadicalChacharWithAlternative12));
-        _entityModalTestCommons.ModalClosedTest(IDs.CHACHAR_FORM_ROOT);
+        _modalTestCommons.ModalClosedTest(IDs.CHACHAR_FORM_ROOT);
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             CREATE_NEW_CHARACTER,
             SELECT_RADICAL,
             CREATE_NEW_CHARACTER,
@@ -1090,12 +1090,12 @@ internal sealed class ChacharFormTest : IDisposable
 
         await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
         await SubmitAsync(chachar, setProcessDialogErrorTitleHandler, ERROR);
-        _entityModalTestCommons.ProcessDialogErrorTest(expectedErrorMessage);
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
+        _modalTestCommons.ProcessDialogErrorTest(expectedErrorMessage);
+        await _modalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_CHARACTER);
         Assert.That(_chachars, Does.Contain(chachar));
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_FORM_ROOT);
+        _modalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_FORM_ROOT);
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             CREATE_NEW_CHARACTER,
             PROCESSING_DOTS,
             ERROR,

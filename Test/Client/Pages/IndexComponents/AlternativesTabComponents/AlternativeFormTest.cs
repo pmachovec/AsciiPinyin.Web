@@ -77,7 +77,7 @@ internal sealed class AlternativeFormTest : IDisposable
 
     private HashSet<Alternative> _alternatives = default!;
     private EntityFormTestCommons<Alternative> _entityFormTestCommons = default!;
-    private EntityModalTestCommons<Alternative> _entityModalTestCommons = default!;
+    private ModalTestCommons _modalTestCommons = default!;
     private IRenderedComponent<AlternativeForm> _alternativeFormComponent = default!;
     private IRenderedComponent<Backdrop> _backdropComponent = default!;
     private IRenderedComponent<ProcessDialog> _processDialogComponent = default!;
@@ -163,7 +163,7 @@ internal sealed class AlternativeFormTest : IDisposable
             IDs.INDEX_BACKDROP_ROOT
         );
 
-        _entityModalTestCommons = new(
+        _modalTestCommons = new(
             _alternativeFormComponent,
             _backdropComponent,
             _processDialogComponent,
@@ -457,8 +457,8 @@ internal sealed class AlternativeFormTest : IDisposable
         var setIndexTitleHandler = _testContext.JSInterop.SetupVoid(DOMFunctions.SET_TITLE, INDEX_TITLE).SetVoidResult();
 
         await _entityFormTestCommons.OpenTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE);
-        await _entityModalTestCommons.CloseTest(setIndexTitleHandler, INDEX_TITLE);
-        _entityModalTestCommons.TitlesOrderTest(CREATE_NEW_ALTERNATIVE, INDEX_TITLE);
+        await _modalTestCommons.CloseTest(_alternativeFormComponent.Instance.CloseAsync, setIndexTitleHandler, INDEX_TITLE);
+        _modalTestCommons.TitlesOrderTest(CREATE_NEW_ALTERNATIVE, INDEX_TITLE);
     }
 
     [Test]
@@ -500,12 +500,12 @@ internal sealed class AlternativeFormTest : IDisposable
         );
 
         await SubmitAsync(_alternative12, setProcessDialogErrorTitleHandler, ERROR);
-        _entityModalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE, calledTimes: 3);
+        _modalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
+        await _modalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE, calledTimes: 3);
         Assert.That(_alternatives, Does.Not.Contain(_alternative12));
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.ALTERNATIVE_FORM_ROOT);
+        _modalTestCommons.ProcessDialogOverModalClosedTest(IDs.ALTERNATIVE_FORM_ROOT);
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             CREATE_NEW_ALTERNATIVE,
             SELECT_BASE_CHARACTER,
             CREATE_NEW_ALTERNATIVE,
@@ -535,18 +535,18 @@ internal sealed class AlternativeFormTest : IDisposable
 
         await SubmitAsync(_alternative12, setProcessDialogSuccessTitleHandler, SUCCESS);
 
-        _entityModalTestCommons.ProcessDialogSuccessTest(
+        _modalTestCommons.ProcessDialogSuccessTest(
             ALTERNATIVE_CREATED,
             _alternative12.TheCharacter!,
             _alternative12.OriginalCharacter!,
             _alternative12.OriginalRealPinyin!
         );
 
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
+        await _modalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
         Assert.That(_alternatives, Does.Contain(_alternative12));
-        _entityModalTestCommons.ModalClosedTest(IDs.ALTERNATIVE_FORM_ROOT);
+        _modalTestCommons.ModalClosedTest(IDs.ALTERNATIVE_FORM_ROOT);
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             CREATE_NEW_ALTERNATIVE,
             SELECT_BASE_CHARACTER,
             CREATE_NEW_ALTERNATIVE,
@@ -580,12 +580,12 @@ internal sealed class AlternativeFormTest : IDisposable
         );
 
         await SubmitAsync(alternative, setProcessDialogErrorTitleHandler, ERROR);
-        _entityModalTestCommons.ProcessDialogErrorTest(expectedErrorMessage);
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE, calledTimes: 3);
+        _modalTestCommons.ProcessDialogErrorTest(expectedErrorMessage);
+        await _modalTestCommons.ClickProcessDialogBackButtonTest(setFormTitleHandler, CREATE_NEW_ALTERNATIVE, calledTimes: 3);
         Assert.That(_alternatives, Does.Contain(alternative));
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.ALTERNATIVE_FORM_ROOT);
+        _modalTestCommons.ProcessDialogOverModalClosedTest(IDs.ALTERNATIVE_FORM_ROOT);
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             CREATE_NEW_ALTERNATIVE,
             SELECT_BASE_CHARACTER,
             CREATE_NEW_ALTERNATIVE,

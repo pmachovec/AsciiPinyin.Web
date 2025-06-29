@@ -43,6 +43,8 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
 
     public int ZIndex { get; set; }
 
+    public Func<CancellationToken, Task> CloseAsync { get; private set; } = default!;
+
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
 
@@ -85,6 +87,7 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
             );
 
         ModalLowerLevel = modalLowerLevel;
+        CloseAsync = async (cancellationToken) => await ModalCommons.CloseHigherLevelAsyncCommon(this, cancellationToken);
         Page = null;
         SetUpEditContext();
         await ModalCommons.OpenHigherLevelAsyncCommon(this, HtmlTitle, cancellationToken);
@@ -95,13 +98,11 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
         Chachar = new();
         AvailableAlternatives = [];
         ModalLowerLevel = null;
+        CloseAsync = async (cancellationToken) => await ModalCommons.CloseAllAsyncCommon(this, cancellationToken);
         Page = page;
         SetUpEditContext();
         await ModalCommons.OpenFirstLevelAsyncCommon(this, HtmlTitle, cancellationToken);
     }
-
-    public async Task CloseAsync(CancellationToken cancellationToken) =>
-        await ModalCommons.CloseAllAsyncCommon(this, cancellationToken);
 
     public void AddClasses(params string[] classes) => Classes += $" {string.Join(' ', classes)}";
 

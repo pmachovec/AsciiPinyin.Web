@@ -116,7 +116,7 @@ internal sealed class AlternativeViewDialogTest : IDisposable
     private static readonly LocalizerMockSetter _localizerMockSetter = new(_localizerMock);
 
     private HashSet<Alternative> _alternatives = default!;
-    private EntityModalTestCommons<Alternative> _entityModalTestCommons = default!;
+    private ModalTestCommons _modalTestCommons = default!;
     private EntityViewDialogTestCommons<Alternative> _entityViewDialogTestCommons = default!;
     private IRenderedComponent<AlternativeViewDialog> _alternativeViewDialogComponent = default!;
     private IRenderedComponent<Backdrop> _backdropComponent = default!;
@@ -235,7 +235,7 @@ internal sealed class AlternativeViewDialogTest : IDisposable
             IDs.INDEX_BACKDROP_ROOT
         );
 
-        _entityModalTestCommons = new(
+        _modalTestCommons = new(
             _alternativeViewDialogComponent,
             _backdropComponent,
             _processDialogComponent,
@@ -259,10 +259,10 @@ internal sealed class AlternativeViewDialogTest : IDisposable
 
         await _entityViewDialogTestCommons.OpenTest(_alternative11, setDialogTitleHandler, dialogTitle);
         _entityViewDialogTestCommons.DeleteButtonDisabledTest(CANNOT_BE_DELETED, USED_BY_CHACHARS);
-        await _entityModalTestCommons.CloseTest(setIndexTitleHandler, INDEX_TITLE);
+        await _modalTestCommons.CloseTest(_alternativeViewDialogComponent.Instance.CloseAsync, setIndexTitleHandler, INDEX_TITLE);
         Assert.That(_alternatives, Does.Contain(_alternative11));
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             PROCESSING_DOTS,
             dialogTitle,
             INDEX_TITLE
@@ -282,21 +282,21 @@ internal sealed class AlternativeViewDialogTest : IDisposable
         var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
         await _entityViewDialogTestCommons.DeleteButtonClickTest(deleteButton, setProcessDialogWarningTitleHandler, WARNING);
 
-        _entityModalTestCommons.ProcessDialogWarningTest(
+        _modalTestCommons.ProcessDialogWarningTest(
             ALTERNATIVE_WILL_BE_DELETED,
             _alternative21.TheCharacter!,
             _alternative21.OriginalCharacter!,
             _alternative21.OriginalRealPinyin!
         );
 
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setProcessDialogErrorTitleHandler, ERROR);
-        _entityModalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setDialogTitleHandler, dialogTitle);
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.ALTERNATIVE_VIEW_DIALOG_ROOT);
-        await _entityModalTestCommons.CloseTest(setIndexTitleHandler, INDEX_TITLE);
+        await _modalTestCommons.ClickProcessDialogProceedButtonTest(setProcessDialogErrorTitleHandler, ERROR);
+        _modalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
+        await _modalTestCommons.ClickProcessDialogBackButtonTest(setDialogTitleHandler, dialogTitle);
+        _modalTestCommons.ProcessDialogOverModalClosedTest(IDs.ALTERNATIVE_VIEW_DIALOG_ROOT);
+        await _modalTestCommons.CloseTest(_alternativeViewDialogComponent.Instance.CloseAsync, setIndexTitleHandler, INDEX_TITLE);
         Assert.That(_alternatives, Does.Contain(_alternative21));
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             PROCESSING_DOTS,
             dialogTitle,
             WARNING,
@@ -319,19 +319,19 @@ internal sealed class AlternativeViewDialogTest : IDisposable
         var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
         await _entityViewDialogTestCommons.DeleteButtonClickTest(deleteButton, setProcessDialogWarningTitleHandler, WARNING);
 
-        _entityModalTestCommons.ProcessDialogWarningTest(
+        _modalTestCommons.ProcessDialogWarningTest(
             ALTERNATIVE_WILL_BE_DELETED,
             _alternative31.TheCharacter!,
             _alternative31.OriginalCharacter!,
             _alternative31.OriginalRealPinyin!
         );
 
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setDialogTitleHandler, dialogTitle);
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.ALTERNATIVE_VIEW_DIALOG_ROOT);
-        await _entityModalTestCommons.CloseTest(setIndexTitleHandler, INDEX_TITLE);
+        await _modalTestCommons.ClickProcessDialogBackButtonTest(setDialogTitleHandler, dialogTitle);
+        _modalTestCommons.ProcessDialogOverModalClosedTest(IDs.ALTERNATIVE_VIEW_DIALOG_ROOT);
+        await _modalTestCommons.CloseTest(_alternativeViewDialogComponent.Instance.CloseAsync, setIndexTitleHandler, INDEX_TITLE);
         Assert.That(_alternatives, Does.Contain(_alternative31));
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             PROCESSING_DOTS,
             dialogTitle,
             WARNING,
@@ -353,16 +353,16 @@ internal sealed class AlternativeViewDialogTest : IDisposable
         var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
         await _entityViewDialogTestCommons.DeleteButtonClickTest(deleteButton, setProcessDialogWarningTitleHandler, WARNING);
 
-        _entityModalTestCommons.ProcessDialogWarningTest(
+        _modalTestCommons.ProcessDialogWarningTest(
             ALTERNATIVE_WILL_BE_DELETED,
             _alternative31.TheCharacter!,
             _alternative31.OriginalCharacter!,
             _alternative31.OriginalRealPinyin!
         );
 
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setProcessDialogSuccessTitleHandler, SUCCESS);
+        await _modalTestCommons.ClickProcessDialogProceedButtonTest(setProcessDialogSuccessTitleHandler, SUCCESS);
 
-        _entityModalTestCommons.ProcessDialogSuccessTest(
+        _modalTestCommons.ProcessDialogSuccessTest(
             ALTERNATIVE_DELETED,
             _alternative31.TheCharacter!,
             _alternative31.OriginalCharacter!,
@@ -370,10 +370,10 @@ internal sealed class AlternativeViewDialogTest : IDisposable
         );
 
         Assert.That(_alternatives, Does.Not.Contain(_alternative31));
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
-        _entityModalTestCommons.ModalClosedTest(IDs.ALTERNATIVE_VIEW_DIALOG_ROOT);
+        await _modalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
+        _modalTestCommons.ModalClosedTest(IDs.ALTERNATIVE_VIEW_DIALOG_ROOT);
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             PROCESSING_DOTS,
             dialogTitle,
             WARNING,

@@ -30,15 +30,15 @@ internal sealed class EntityFormTestCommons<T>(
         var backdropRoot = _backdropComponent.Find($"#{_backdropRootId}");
 
         setTitleHandler.VerifyNotInvoke(DOMFunctions.SET_TITLE, expectedTitle);
-        EntityModalTestCommons<T>.AssertHidden(modalRoot);
-        EntityModalTestCommons<T>.AssertBackdropHidden(backdropRoot, _entityFormComponent);
+        ModalTestCommons.AssertHidden(modalRoot);
+        ModalTestCommons.AssertBackdropHidden(backdropRoot, _entityFormComponent);
         Assert.That(_entityFormComponent.Instance.Backdrop, Is.Null);
 
         await _entityFormComponent.Instance.OpenAsync(_indexMock.Object, CancellationToken.None);
 
         _ = setTitleHandler.VerifyInvoke(DOMFunctions.SET_TITLE, expectedTitle);
-        EntityModalTestCommons<T>.AssertVisible(modalRoot);
-        EntityModalTestCommons<T>.AssertBackdropVisible(backdropRoot, _entityFormComponent);
+        ModalTestCommons.AssertVisible(modalRoot);
+        ModalTestCommons.AssertBackdropVisible(backdropRoot, _entityFormComponent);
 
         var backdrop = _entityFormComponent.Instance.Backdrop;
         Assert.That(backdrop, Is.Not.Null);

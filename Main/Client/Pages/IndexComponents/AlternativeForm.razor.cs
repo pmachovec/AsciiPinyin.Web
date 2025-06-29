@@ -39,6 +39,8 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
 
     public int ZIndex { get; set; }
 
+    public Func<CancellationToken, Task> CloseAsync { get; private set; } = default!;
+
     [Inject]
     private IEntityClient EntityClient { get; set; } = default!;
 
@@ -70,6 +72,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
     {
         Alternative = alternative;
         ModalLowerLevel = modalLowerLevel;
+        CloseAsync = async (cancellationToken) => await ModalCommons.CloseHigherLevelAsyncCommon(this, cancellationToken);
         Page = null;
         SetUpEditContext();
         await ModalCommons.OpenHigherLevelAsyncCommon(this, HtmlTitle, cancellationToken);
@@ -79,14 +82,12 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
     {
         Alternative = new();
         ModalLowerLevel = null;
+        CloseAsync = async (cancellationToken) => await ModalCommons.CloseAllAsyncCommon(this, cancellationToken);
         Page = page;
         OriginalSelectorClasses = string.Empty;
         SetUpEditContext();
         await ModalCommons.OpenFirstLevelAsyncCommon(this, HtmlTitle, cancellationToken);
     }
-
-    public async Task CloseAsync(CancellationToken cancellationToken) =>
-        await ModalCommons.CloseAllAsyncCommon(this, cancellationToken);
 
     public void AddClasses(params string[] classes) => Classes += $" {string.Join(' ', classes)}";
 

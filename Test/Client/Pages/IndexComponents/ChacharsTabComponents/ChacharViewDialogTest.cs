@@ -140,7 +140,7 @@ internal sealed class ChacharViewDialogTest : IDisposable
     private static readonly LocalizerMockSetter _localizerMockSetter = new(_localizerMock);
 
     private HashSet<Chachar> _chachars = default!;
-    private EntityModalTestCommons<Chachar> _entityModalTestCommons = default!;
+    private ModalTestCommons _modalTestCommons = default!;
     private EntityViewDialogTestCommons<Chachar> _entityViewDialogTestCommons = default!;
     private IRenderedComponent<Backdrop> _backdropComponent = default!;
     private IRenderedComponent<ChacharViewDialog> _chacharViewDialogComponent = default!;
@@ -280,7 +280,7 @@ internal sealed class ChacharViewDialogTest : IDisposable
             IDs.INDEX_BACKDROP_ROOT
         );
 
-        _entityModalTestCommons = new(
+        _modalTestCommons = new(
             _chacharViewDialogComponent,
             _backdropComponent,
             _processDialogComponent,
@@ -320,19 +320,19 @@ internal sealed class ChacharViewDialogTest : IDisposable
         var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
         await _entityViewDialogTestCommons.DeleteButtonClickTest(deleteButton, setProcessDialogWarningTitleHandler, WARNING);
 
-        _entityModalTestCommons.ProcessDialogWarningTest(CHARACTER_WILL_BE_DELETED,
+        _modalTestCommons.ProcessDialogWarningTest(CHARACTER_WILL_BE_DELETED,
             _radicalChachar4.TheCharacter!,
             _radicalChachar4.RealPinyin!
         );
 
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setProcessDialogErrorTitleHandler, ERROR);
-        _entityModalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setDialogTitleHandler, dialogTitle);
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_VIEW_DIALOG_ROOT);
-        await _entityModalTestCommons.CloseTest(setIndexTitleHandler, INDEX_TITLE);
+        await _modalTestCommons.ClickProcessDialogProceedButtonTest(setProcessDialogErrorTitleHandler, ERROR);
+        _modalTestCommons.ProcessDialogErrorTest(PROCESSING_ERROR);
+        await _modalTestCommons.ClickProcessDialogBackButtonTest(setDialogTitleHandler, dialogTitle);
+        _modalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_VIEW_DIALOG_ROOT);
+        await _modalTestCommons.CloseTest(_chacharViewDialogComponent.Instance.CloseAsync, setIndexTitleHandler, INDEX_TITLE);
         Assert.That(_chachars, Does.Contain(_radicalChachar4));
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             PROCESSING_DOTS,
             dialogTitle,
             WARNING,
@@ -355,18 +355,18 @@ internal sealed class ChacharViewDialogTest : IDisposable
         var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
         await _entityViewDialogTestCommons.DeleteButtonClickTest(deleteButton, setProcessDialogWarningTitleHandler, WARNING);
 
-        _entityModalTestCommons.ProcessDialogWarningTest(
+        _modalTestCommons.ProcessDialogWarningTest(
             CHARACTER_WILL_BE_DELETED,
             _radicalChachar5.TheCharacter!,
             _radicalChachar5.RealPinyin!
         );
 
-        await _entityModalTestCommons.ClickProcessDialogBackButtonTest(setDialogTitleHandler, dialogTitle);
-        _entityModalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_VIEW_DIALOG_ROOT);
-        await _entityModalTestCommons.CloseTest(setIndexTitleHandler, INDEX_TITLE);
+        await _modalTestCommons.ClickProcessDialogBackButtonTest(setDialogTitleHandler, dialogTitle);
+        _modalTestCommons.ProcessDialogOverModalClosedTest(IDs.CHACHAR_VIEW_DIALOG_ROOT);
+        await _modalTestCommons.CloseTest(_chacharViewDialogComponent.Instance.CloseAsync, setIndexTitleHandler, INDEX_TITLE);
         Assert.That(_chachars, Does.Contain(_radicalChachar5));
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             PROCESSING_DOTS,
             dialogTitle,
             WARNING,
@@ -395,10 +395,10 @@ internal sealed class ChacharViewDialogTest : IDisposable
 
         await _entityViewDialogTestCommons.OpenTest(chachar, setDialogTitleHandler, dialogTitle);
         _entityViewDialogTestCommons.DeleteButtonDisabledTest(CANNOT_BE_DELETED, expectedTooltipParts);
-        await _entityModalTestCommons.CloseTest(setIndexTitleHandler, INDEX_TITLE);
+        await _modalTestCommons.CloseTest(_chacharViewDialogComponent.Instance.CloseAsync, setIndexTitleHandler, INDEX_TITLE);
         Assert.That(_chachars, Does.Contain(chachar));
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             PROCESSING_DOTS,
             dialogTitle,
             INDEX_TITLE
@@ -417,25 +417,25 @@ internal sealed class ChacharViewDialogTest : IDisposable
         var deleteButton = _entityViewDialogTestCommons.DeleteButtonEnabledTest();
         await _entityViewDialogTestCommons.DeleteButtonClickTest(deleteButton, setProcessDialogWarningTitleHandler, WARNING);
 
-        _entityModalTestCommons.ProcessDialogWarningTest(
+        _modalTestCommons.ProcessDialogWarningTest(
             CHARACTER_WILL_BE_DELETED,
             chachar.TheCharacter!,
             chachar.RealPinyin!
         );
 
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setProcessDialogSuccessTitleHandler, SUCCESS);
+        await _modalTestCommons.ClickProcessDialogProceedButtonTest(setProcessDialogSuccessTitleHandler, SUCCESS);
 
-        _entityModalTestCommons.ProcessDialogSuccessTest(
+        _modalTestCommons.ProcessDialogSuccessTest(
             CHARACTER_DELETED,
             chachar.TheCharacter!,
             chachar.RealPinyin!
         );
 
         Assert.That(_chachars, Does.Not.Contain(chachar));
-        await _entityModalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
-        _entityModalTestCommons.ModalClosedTest(IDs.CHACHAR_VIEW_DIALOG_ROOT);
+        await _modalTestCommons.ClickProcessDialogProceedButtonTest(setIndexTitleHandler, INDEX_TITLE);
+        _modalTestCommons.ModalClosedTest(IDs.CHACHAR_VIEW_DIALOG_ROOT);
 
-        _entityModalTestCommons.TitlesOrderTest(
+        _modalTestCommons.TitlesOrderTest(
             PROCESSING_DOTS,
             dialogTitle,
             WARNING,
