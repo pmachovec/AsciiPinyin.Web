@@ -52,19 +52,49 @@ public sealed class EntityClient(
         T entity,
         CancellationToken cancellationToken
     ) where T : IEntity =>
-        await PostEntityCommonsAsync(LogCommons.LogCreateInfo, entitiesApiName, entity, cancellationToken);
+        await SubmitEntityCommonsAsync(
+            LogCommons.LogCreateInfo,
+            entitiesApiName,
+            entity,
+            _httpClient.PostAsJsonAsync,
+            HttpMethod.Post,
+            cancellationToken
+        );
 
     public async Task<HttpStatusCode> PostDeleteEntityAsync<T>(
         string entitiesApiName,
         T entity,
         CancellationToken cancellationToken
     ) where T : IEntity =>
-        await PostEntityCommonsAsync(LogCommons.LogDeleteInfo, $"{entitiesApiName}/{ApiNames.DELETE}", entity, cancellationToken);
+        await SubmitEntityCommonsAsync(
+            LogCommons.LogDeleteInfo,
+            $"{entitiesApiName}/{ApiNames.DELETE}",
+            entity,
+            _httpClient.PostAsJsonAsync,
+            HttpMethod.Post,
+            cancellationToken
+        );
 
-    private async Task<HttpStatusCode> PostEntityCommonsAsync<T>(
+    public async Task<HttpStatusCode> PutEntityAsync<T>(
+        string entitiesApiName,
+        T entity,
+        CancellationToken cancellationToken
+    ) where T : IEntity =>
+        await SubmitEntityCommonsAsync(
+            LogCommons.LogDeleteInfo,
+            entitiesApiName,
+            entity,
+            _httpClient.PutAsJsonAsync,
+            HttpMethod.Put,
+            cancellationToken
+        );
+
+    private async Task<HttpStatusCode> SubmitEntityCommonsAsync<T>(
         Action<ILogger<EntityClient>, Type, IEntity> logAction,
         string entitiesApiName,
         T entity,
+        Func<string, T, CancellationToken, Task<HttpResponseMessage>> submitAsJsonAsync,
+        HttpMethod httpMethod,
         CancellationToken cancellationToken
     ) where T : IEntity
     {
@@ -73,7 +103,7 @@ public sealed class EntityClient(
 
         try
         {
-            result = await _httpClient.PostAsJsonAsync(entitiesApiName, entity, cancellationToken);
+            result = await submitAsJsonAsync(entitiesApiName, entity, cancellationToken);
         }
         catch (Exception e)
         {
@@ -83,7 +113,7 @@ public sealed class EntityClient(
 
         if (result is null)
         {
-            LogCommons.LogApiNullError(_logger, HttpMethod.Post, entitiesApiName);
+            LogCommons.LogApiNullError(_logger, httpMethod, entitiesApiName);
             return HttpStatusCode.InternalServerError;
         }
 

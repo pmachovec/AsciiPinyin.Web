@@ -9,6 +9,21 @@ namespace AsciiPinyin.Web.Shared.Models;
 [Table(TableNames.CHACHAR)]
 public sealed class Chachar : IEntity
 {
+    public Chachar() { }
+
+    public Chachar(Chachar chachar)
+    {
+        TheCharacter = chachar.TheCharacter;
+        Pinyin = chachar.Pinyin;
+        Tone = chachar.Tone;
+        Ipa = chachar.Ipa;
+        Strokes = chachar.Strokes;
+        RadicalCharacter = chachar.RadicalCharacter;
+        RadicalPinyin = chachar.RadicalPinyin;
+        RadicalTone = chachar.RadicalTone;
+        RadicalAlternativeCharacter = chachar.RadicalAlternativeCharacter;
+    }
+
     [
         Column(JsonPropertyNames.THE_CHARACTER),
         DisplayName(JsonPropertyNames.THE_CHARACTER),

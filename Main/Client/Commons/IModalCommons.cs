@@ -21,14 +21,14 @@ public interface IModalCommons
 
     Task CloseAllAsyncCommon(IModal modal, CancellationToken cancellationToken);
 
-    Task PostAsync<T>(
+    Task<bool> SubmitAsync<T>(
         IModal modal,
         T entity,
         IIndex index,
-        Func<string, T, CancellationToken, Task<HttpStatusCode>> entityClientPostAsync,
+        Func<string, T, CancellationToken, Task<HttpStatusCode>> entityClientSubmitAsync,
+        HttpMethod httpMethod,
         string entitiesApiName,
         ILogger<IModal> logger,
-        Func<T, bool> indexAlterCollection,
         string successMessageResource,
         CancellationToken cancellationToken,
         params string[] successMessageParams

@@ -51,12 +51,12 @@ public class AlternativeViewDialogBase : ComponentBase, IEntityViewDialog<Altern
     [Parameter, EditorRequired]
     public required IIndex Index { get; init; }
 
-    public async Task OpenAsync(Alternative alternative, IPage page, CancellationToken cancellationToken)
+    public async Task OpenAsync(Alternative entity, IPage page, CancellationToken cancellationToken)
     {
         Page = page;
         ModalLowerLevel = null;
         await Index.ProcessDialog.SetProcessingAsync(page, cancellationToken);
-        await OpenAsyncCommon(alternative, cancellationToken);
+        await OpenAsyncCommon(entity, cancellationToken);
         await ModalCommons.OpenFirstLevelAsyncCommon(this, HtmlTitle, cancellationToken);
         await Index.ProcessDialog.CloseWithoutBackdropAsync(cancellationToken);
     }
@@ -120,19 +120,25 @@ public class AlternativeViewDialogBase : ComponentBase, IEntityViewDialog<Altern
     {
         await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
 
-        await ModalCommons.PostAsync(
+        var isSuccess = await ModalCommons.SubmitAsync(
             this,
             Alternative!,
             Index,
             EntityClient.PostDeleteEntityAsync,
+            HttpMethod.Post,
             ApiNames.ALTERNATIVES,
             Logger,
-            Index.Alternatives.Remove,
             Resource.AlternativeDeleted,
             cancellationToken,
             Alternative!.TheCharacter!,
             Alternative.OriginalCharacter!,
             Alternative.OriginalRealPinyin!
         );
+
+        if (isSuccess)
+        {
+            _ = Index.Alternatives.Remove(Alternative);
+            await Index.StateHasChangedAsync();
+        }
     }
 }

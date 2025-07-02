@@ -17,6 +17,9 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
 {
+    private Chachar? _oldChachar;
+    private Func<CancellationToken, Task> _submitAsync = default!;
+
     protected string Classes { get; private set; } = CssClasses.D_NONE;
 
     protected string ClearAlternativeClasses { get; private set; } = string.Empty;
@@ -74,9 +77,11 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
 
     protected override async Task OnAfterRenderAsync(bool firstRender) => await SetClearAlternativeButtonAsync(CancellationToken.None);
 
-    public async Task OpenAsync(Chachar chachar, IModal modalLowerLevel, CancellationToken cancellationToken)
+    public async Task OpenAsync(Chachar entity, IModal modalLowerLevel, CancellationToken cancellationToken)
     {
-        Chachar = chachar;
+        Chachar = entity;
+        _oldChachar = new Chachar(entity);
+        _submitAsync = PutAsync;
 
         AvailableAlternatives = Chachar.IsRadical
             ? []
@@ -96,6 +101,7 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
     public async Task OpenAsync(IPage page, CancellationToken cancellationToken)
     {
         Chachar = new();
+        _submitAsync = PostAsync;
         AvailableAlternatives = [];
         ModalLowerLevel = null;
         CloseAsync = async (cancellationToken) => await ModalCommons.CloseAllAsyncCommon(this, cancellationToken);
@@ -228,19 +234,58 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
         }
         else
         {
-            await ModalCommons.PostAsync(
-                this,
-                Chachar,
-                Index,
-                EntityClient.PostEntityAsync,
-                ApiNames.CHARACTERS,
-                Logger,
-                Index.Chachars.Add,
-                Resource.CharacterCreated,
-                cancellationToken,
-                Chachar.TheCharacter!,
-                Chachar.RealPinyin!
-            );
+            await _submitAsync(cancellationToken);
+        }
+    }
+
+    private async Task PostAsync(CancellationToken cancellationToken)
+    {
+        var isSuccess = await ModalCommons.SubmitAsync(
+            this,
+            Chachar,
+            Index,
+            EntityClient.PostEntityAsync,
+            HttpMethod.Post,
+            ApiNames.CHARACTERS,
+            Logger,
+            Resource.CharacterCreated,
+            cancellationToken,
+            Chachar.TheCharacter!,
+            Chachar.RealPinyin!
+        );
+
+        if (isSuccess)
+        {
+            _ = Index.Chachars.Add(Chachar);
+            await Index.StateHasChangedAsync();
+        }
+    }
+
+    private async Task PutAsync(CancellationToken cancellationToken)
+    {
+        var isSuccess = await ModalCommons.SubmitAsync(
+            this,
+            Chachar,
+            Index,
+            EntityClient.PutEntityAsync,
+            HttpMethod.Put,
+            ApiNames.CHARACTERS,
+            Logger,
+            Resource.CharacterChanged,
+            cancellationToken,
+            Chachar.TheCharacter!,
+            Chachar.RealPinyin!
+        );
+
+        if (isSuccess)
+        {
+            if (_oldChachar is not null)
+            {
+                _ = Index.Chachars.Remove(_oldChachar);
+            }
+
+            _ = Index.Chachars.Add(Chachar);
+            await Index.StateHasChangedAsync();
         }
     }
 

@@ -17,6 +17,9 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
 {
+    private Alternative? _oldAlternative;
+    private Func<CancellationToken, Task> _submitAsync = default!;
+
     protected string Classes { get; private set; } = CssClasses.D_NONE;
 
     protected string OriginalSelectorClasses { get; private set; } = string.Empty;
@@ -68,9 +71,11 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
         SetUpEditContext();
     }
 
-    public async Task OpenAsync(Alternative alternative, IModal modalLowerLevel, CancellationToken cancellationToken)
+    public async Task OpenAsync(Alternative entity, IModal modalLowerLevel, CancellationToken cancellationToken)
     {
-        Alternative = alternative;
+        Alternative = entity;
+        _oldAlternative = new Alternative(entity);
+        _submitAsync = PutAsync;
         ModalLowerLevel = modalLowerLevel;
         CloseAsync = async (cancellationToken) => await ModalCommons.CloseHigherLevelAsyncCommon(this, cancellationToken);
         Page = null;
@@ -81,6 +86,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
     public async Task OpenAsync(IPage page, CancellationToken cancellationToken)
     {
         Alternative = new();
+        _submitAsync = PostAsync;
         ModalLowerLevel = null;
         CloseAsync = async (cancellationToken) => await ModalCommons.CloseAllAsyncCommon(this, cancellationToken);
         Page = page;
@@ -174,20 +180,60 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
         }
         else
         {
-            await ModalCommons.PostAsync(
-                this,
-                Alternative,
-                Index,
-                EntityClient.PostEntityAsync,
-                ApiNames.ALTERNATIVES,
-                Logger,
-                Index.Alternatives.Add,
-                Resource.AlternativeCreated,
-                cancellationToken,
-                Alternative.TheCharacter!,
-                Alternative.OriginalCharacter!,
-                Alternative.OriginalRealPinyin!
-            );
+            await _submitAsync(cancellationToken);
+        }
+    }
+
+    private async Task PostAsync(CancellationToken cancellationToken)
+    {
+        var isSuccess = await ModalCommons.SubmitAsync(
+            this,
+            Alternative,
+            Index,
+            EntityClient.PostEntityAsync,
+            HttpMethod.Post,
+            ApiNames.ALTERNATIVES,
+            Logger,
+            Resource.AlternativeCreated,
+            cancellationToken,
+            Alternative.TheCharacter!,
+            Alternative.OriginalCharacter!,
+            Alternative.OriginalRealPinyin!
+        );
+
+        if (isSuccess)
+        {
+            _ = Index.Alternatives.Add(Alternative);
+            await Index.StateHasChangedAsync();
+        }
+    }
+
+    private async Task PutAsync(CancellationToken cancellationToken)
+    {
+        var isSuccess = await ModalCommons.SubmitAsync(
+            this,
+            Alternative,
+            Index,
+            EntityClient.PutEntityAsync,
+            HttpMethod.Put,
+            ApiNames.ALTERNATIVES,
+            Logger,
+            Resource.AlternativeChanged,
+            cancellationToken,
+            Alternative.TheCharacter!,
+            Alternative.OriginalCharacter!,
+            Alternative.OriginalRealPinyin!
+        );
+
+        if (isSuccess)
+        {
+            if (_oldAlternative is not null)
+            {
+                _ = Index.Alternatives.Remove(_oldAlternative);
+            }
+
+            _ = Index.Alternatives.Add(Alternative);
+            await Index.StateHasChangedAsync();
         }
     }
 

@@ -21,4 +21,10 @@ public interface IEntityClient
         T entity,
         CancellationToken cancellationToken
     ) where T : IEntity;
+
+    Task<HttpStatusCode> PutEntityAsync<T>(
+        string entitiesApiName,
+        T entity,
+        CancellationToken cancellationToken
+    ) where T : IEntity;
 }

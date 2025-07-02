@@ -53,7 +53,7 @@ public class ChacharViewDialogBase : ComponentBase, IEntityViewDialog<Chachar>
     public required IIndex Index { get; init; }
 
     public async Task OpenAsync(
-        Chachar chachar,
+        Chachar entity,
         IPage page,
         CancellationToken cancellationToken
     )
@@ -61,7 +61,7 @@ public class ChacharViewDialogBase : ComponentBase, IEntityViewDialog<Chachar>
         Page = page;
         ModalLowerLevel = null;
         await Index.ProcessDialog.SetProcessingAsync(page, cancellationToken);
-        await OpenAsyncCommon(chachar, cancellationToken);
+        await OpenAsyncCommon(entity, cancellationToken);
         await ModalCommons.OpenFirstLevelAsyncCommon(this, HtmlTitle, cancellationToken);
         await Index.ProcessDialog.CloseWithoutBackdropAsync(cancellationToken);
     }
@@ -163,18 +163,24 @@ public class ChacharViewDialogBase : ComponentBase, IEntityViewDialog<Chachar>
     {
         await Index.ProcessDialog.SetProcessingAsync(this, cancellationToken);
 
-        await ModalCommons.PostAsync(
+        var isSuccess = await ModalCommons.SubmitAsync(
             this,
             Chachar!,
             Index,
             EntityClient.PostDeleteEntityAsync,
+            HttpMethod.Post,
             ApiNames.CHARACTERS,
             Logger,
-            Index.Chachars.Remove,
             Resource.CharacterDeleted,
             cancellationToken,
             Chachar!.TheCharacter!,
             Chachar.RealPinyin!
         );
+
+        if (isSuccess)
+        {
+            _ = Index.Chachars.Remove(Chachar);
+            await Index.StateHasChangedAsync();
+        }
     }
 }

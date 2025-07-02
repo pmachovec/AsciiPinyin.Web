@@ -154,24 +154,24 @@ public sealed class ModalCommons(
         await Task.WhenAll(backdrops.Select(backdrop => backdrop.StateHasChangedAsync()));
     }
 
-    public async Task PostAsync<T>(
+    public async Task<bool> SubmitAsync<T>(
         IModal modal,
         T entity,
         IIndex index,
-        Func<string, T, CancellationToken, Task<HttpStatusCode>> entityClientPostAsync,
+        Func<string, T, CancellationToken, Task<HttpStatusCode>> entityClientSubmitAsync,
+        HttpMethod httpMethod,
         string entitiesApiName,
         ILogger<IModal> logger,
-        Func<T, bool> indexAlterCollection,
         string successMessageResource,
         CancellationToken cancellationToken,
         params string[] successMessageParams
     ) where T : IEntity
     {
-        var postResult = await entityClientPostAsync(entitiesApiName, entity, cancellationToken);
+        var postResult = await entityClientSubmitAsync(entitiesApiName, entity, cancellationToken);
 
         if (postResult == HttpStatusCode.OK)
         {
-            LogCommons.LogHttpMethodSuccessInfo(logger, HttpMethod.Post);
+            LogCommons.LogHttpMethodSuccessInfo(logger, httpMethod);
 
             await index.ProcessDialog.SetSuccessAsync(
                 modal,
@@ -183,18 +183,19 @@ public sealed class ModalCommons(
                 cancellationToken
             );
 
-            _ = indexAlterCollection(entity);
-            await index.StateHasChangedAsync();
+            return true;
         }
         else
         {
-            LogCommons.LogHttpMethodFailedError(logger, HttpMethod.Post);
+            LogCommons.LogHttpMethodFailedError(logger, httpMethod);
 
             await index.ProcessDialog.SetErrorAsync(
                 modal,
                 _localizer[Resource.ProcessingError],
                 cancellationToken
             );
+
+            return false;
         }
     }
 

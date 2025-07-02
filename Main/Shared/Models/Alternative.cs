@@ -9,6 +9,17 @@ namespace AsciiPinyin.Web.Shared.Models;
 [Table(TableNames.ALTERNATIVE)]
 public sealed class Alternative : IEntity
 {
+    public Alternative() { }
+
+    public Alternative(Alternative alternative)
+    {
+        TheCharacter = alternative.TheCharacter;
+        OriginalCharacter = alternative.OriginalCharacter;
+        OriginalPinyin = alternative.OriginalPinyin;
+        OriginalTone = alternative.OriginalTone;
+        Strokes = alternative.Strokes;
+    }
+
     [
         Column(JsonPropertyNames.THE_CHARACTER),
         DisplayName(JsonPropertyNames.THE_CHARACTER),

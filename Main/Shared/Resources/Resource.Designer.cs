@@ -70,6 +70,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The alternative for the character &lt;b&gt;{1}&amp;nbsp;({2})&lt;/b&gt; was successfully changed to &lt;b&gt;{0}&lt;/b&gt;..
+        /// </summary>
+        public static string AlternativeChanged {
+            get {
+                return ResourceManager.GetString("AlternativeChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Alternative character.
         /// </summary>
         public static string AlternativeCharacter {
@@ -175,6 +184,15 @@ namespace AsciiPinyin.Web.Shared.Resources {
         public static string CharacterAlreadyExists {
             get {
                 return ResourceManager.GetString("CharacterAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The character was successfully changed to &lt;b&gt;{0}&amp;nbsp;({1})&lt;/b&gt;..
+        /// </summary>
+        public static string CharacterChanged {
+            get {
+                return ResourceManager.GetString("CharacterChanged", resourceCulture);
             }
         }
         
