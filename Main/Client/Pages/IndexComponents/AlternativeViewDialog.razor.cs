@@ -87,6 +87,9 @@ public class AlternativeViewDialogBase : ComponentBase, IEntityViewDialog<Altern
             cancellationToken
         );
 
+    protected async Task OpenFormAsync(CancellationToken cancellationToken) =>
+        await Index.AlternativeForm.OpenAsync(Alternative!, this, cancellationToken);
+
     private async Task OpenAsyncCommon(Alternative alternative, CancellationToken cancellationToken)
     {
         await JSInteropDOM.SetAttributeAsync(

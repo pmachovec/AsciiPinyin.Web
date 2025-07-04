@@ -17,7 +17,7 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
 {
-    private Alternative? _oldAlternative;
+    private Alternative _oldAlternative = default!;
     private Func<CancellationToken, Task> _submitAsync = default!;
 
     protected string Classes { get; private set; } = CssClasses.D_NONE;
@@ -73,8 +73,8 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
 
     public async Task OpenAsync(Alternative entity, IModal modalLowerLevel, CancellationToken cancellationToken)
     {
-        Alternative = entity;
-        _oldAlternative = new Alternative(entity);
+        Alternative = new(entity);
+        _oldAlternative = new(entity);
         _submitAsync = PutAsync;
         ModalLowerLevel = modalLowerLevel;
         CloseAsync = async (cancellationToken) => await ModalCommons.CloseHigherLevelAsyncCommon(this, cancellationToken);
@@ -227,11 +227,7 @@ public class AlternativeFormBase : ComponentBase, IEntityForm<Alternative>
 
         if (isSuccess)
         {
-            if (_oldAlternative is not null)
-            {
-                _ = Index.Alternatives.Remove(_oldAlternative);
-            }
-
+            _ = Index.Alternatives.Remove(_oldAlternative);
             _ = Index.Alternatives.Add(Alternative);
             await Index.StateHasChangedAsync();
         }

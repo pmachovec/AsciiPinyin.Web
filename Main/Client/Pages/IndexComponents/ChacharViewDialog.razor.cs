@@ -91,6 +91,9 @@ public class ChacharViewDialogBase : ComponentBase, IEntityViewDialog<Chachar>
             cancellationToken
         );
 
+    protected async Task OpenFormAsync(CancellationToken cancellationToken) =>
+        await Index.ChacharForm.OpenAsync(Chachar!, this, cancellationToken);
+
     private async Task OpenAsyncCommon(Chachar chachar, CancellationToken cancellationToken)
     {
         await JSInteropDOM.SetAttributeAsync(

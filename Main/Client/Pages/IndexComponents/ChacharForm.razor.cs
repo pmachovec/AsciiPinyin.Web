@@ -17,7 +17,7 @@ namespace AsciiPinyin.Web.Client.Pages.IndexComponents;
 
 public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
 {
-    private Chachar? _oldChachar;
+    private Chachar _oldChachar = default!;
     private Func<CancellationToken, Task> _submitAsync = default!;
 
     protected string Classes { get; private set; } = CssClasses.D_NONE;
@@ -79,8 +79,8 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
 
     public async Task OpenAsync(Chachar entity, IModal modalLowerLevel, CancellationToken cancellationToken)
     {
-        Chachar = entity;
-        _oldChachar = new Chachar(entity);
+        Chachar = new(entity);
+        _oldChachar = new(entity);
         _submitAsync = PutAsync;
 
         AvailableAlternatives = Chachar.IsRadical
@@ -279,11 +279,7 @@ public class ChacharFormBase : ComponentBase, IEntityForm<Chachar>
 
         if (isSuccess)
         {
-            if (_oldChachar is not null)
-            {
-                _ = Index.Chachars.Remove(_oldChachar);
-            }
-
+            _ = Index.Chachars.Remove(_oldChachar);
             _ = Index.Chachars.Add(Chachar);
             await Index.StateHasChangedAsync();
         }

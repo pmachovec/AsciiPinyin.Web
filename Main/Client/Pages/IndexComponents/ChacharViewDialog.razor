@@ -45,7 +45,8 @@
                 </Tooltip>
                 <button
                     type="button"
-                    class="btn btn-modal btn-primary ms-3">
+                    class="btn btn-modal btn-primary ms-3"
+                    @onclick="async _ => await OpenFormAsync(CancellationToken.None)">
                     <span>@Localizer[Resource.Edit]</span>
                 </button>
             </div>

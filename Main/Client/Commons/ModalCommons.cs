@@ -95,6 +95,7 @@ public sealed class ModalCommons(
         }
 
         modal.SetClasses(CssClasses.D_BLOCK);
+        await modal.StateHasChangedAsync();
         await Task.WhenAll(awaitables);
         await Task.Delay(IntConstants.MODAL_HIDE_DELAY, cancellationToken);
         modal.SetClasses(CssClasses.D_NONE);
