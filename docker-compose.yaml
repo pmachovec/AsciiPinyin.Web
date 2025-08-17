@@ -1,5 +1,3 @@
-version: '0.1.0'
-
 services:
   asciipinyin.web:
     container_name: asciipinyin.web
