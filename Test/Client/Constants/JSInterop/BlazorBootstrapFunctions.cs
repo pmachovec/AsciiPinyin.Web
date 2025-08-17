@@ -1,4 +1,4 @@
-namespace Asciipinyin.Web.Client.Test.Constants.JSInterop;
+namespace AsciiPinyin.Web.Client.Test.Constants.JSInterop;
 
 internal static class BlazorBootstrapFunctions
 {

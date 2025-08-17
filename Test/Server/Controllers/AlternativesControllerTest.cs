@@ -1,4 +1,4 @@
-using Asciipinyin.Web.Server.Test.Constants;
+using AsciiPinyin.Web.Server.Test.Constants;
 using AsciiPinyin.Web.Server.Controllers;
 using AsciiPinyin.Web.Server.Data;
 using AsciiPinyin.Web.Server.Test.Commons;
@@ -14,7 +14,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Errors = AsciiPinyin.Web.Shared.Test.Constants.Errors;
 
-namespace Asciipinyin.Web.Server.Test.Controllers;
+namespace AsciiPinyin.Web.Server.Test.Controllers;
 
 [TestFixture]
 internal sealed class AlternativesControllerTest

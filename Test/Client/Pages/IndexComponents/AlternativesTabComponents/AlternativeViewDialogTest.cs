@@ -1,6 +1,6 @@
-using Asciipinyin.Web.Client.Test.Commons;
-using Asciipinyin.Web.Client.Test.Constants.JSInterop;
-using Asciipinyin.Web.Client.Test.Tools;
+using AsciiPinyin.Web.Client.Test.Commons;
+using AsciiPinyin.Web.Client.Test.Constants.JSInterop;
+using AsciiPinyin.Web.Client.Test.Tools;
 using AsciiPinyin.Web.Client.Commons;
 using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.HttpClients;
@@ -19,7 +19,7 @@ using NUnit.Framework;
 using System.Net;
 using TestContext = Bunit.TestContext;
 
-namespace Asciipinyin.Web.Client.Test.Pages.IndexComponents.AlternativesTabComponents;
+namespace AsciiPinyin.Web.Client.Test.Pages.IndexComponents.AlternativesTabComponents;
 
 internal sealed class AlternativeViewDialogTest : IDisposable
 {

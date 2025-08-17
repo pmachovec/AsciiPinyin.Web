@@ -1,4 +1,4 @@
-using Asciipinyin.Web.Server.Test.Constants;
+using AsciiPinyin.Web.Server.Test.Constants;
 using AsciiPinyin.Web.Server.Commons;
 using AsciiPinyin.Web.Server.Controllers;
 using AsciiPinyin.Web.Server.Controllers.ActionFilters;

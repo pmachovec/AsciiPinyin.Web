@@ -10,7 +10,7 @@ using Bunit;
 using Moq;
 using NUnit.Framework;
 
-namespace Asciipinyin.Web.Client.Test.Commons;
+namespace AsciiPinyin.Web.Client.Test.Commons;
 
 internal sealed class EntityViewDialogTestCommons<T>(
     IRenderedComponent<IEntityViewDialog<T>> _entityViewDialogComponent,

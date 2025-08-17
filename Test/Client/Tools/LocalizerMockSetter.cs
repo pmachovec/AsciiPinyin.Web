@@ -2,7 +2,7 @@ using AsciiPinyin.Web.Shared.Resources;
 using Microsoft.Extensions.Localization;
 using Moq;
 
-namespace Asciipinyin.Web.Client.Test.Tools;
+namespace AsciiPinyin.Web.Client.Test.Tools;
 
 internal sealed class LocalizerMockSetter(Mock<IStringLocalizer<Resource>> _localizerMock)
 {

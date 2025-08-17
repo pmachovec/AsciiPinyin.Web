@@ -1,5 +1,5 @@
-using Asciipinyin.Web.Client.Test.Commons;
-using Asciipinyin.Web.Client.Test.Tools;
+using AsciiPinyin.Web.Client.Test.Commons;
+using AsciiPinyin.Web.Client.Test.Tools;
 using AsciiPinyin.Web.Client.Commons;
 using AsciiPinyin.Web.Client.Components;
 using AsciiPinyin.Web.Client.HttpClients;
@@ -21,7 +21,7 @@ using System.Globalization;
 using System.Net;
 using TestContext = Bunit.TestContext;
 
-namespace Asciipinyin.Web.Client.Test.Pages.IndexComponents.ChacharsTabComponents;
+namespace AsciiPinyin.Web.Client.Test.Pages.IndexComponents.ChacharsTabComponents;
 
 [TestFixture]
 internal sealed class ChacharFormTest : IDisposable

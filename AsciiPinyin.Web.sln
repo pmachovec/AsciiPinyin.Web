@@ -19,8 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Packages.props = Directory.Packages.props
 		docker-compose.yaml = docker-compose.yaml
 		Dockerfile = Dockerfile
-		nlog.config.yaml = nlog.config.yaml
 		nlog.config.Development.yaml = nlog.config.Development.yaml
+		nlog.config.yaml = nlog.config.yaml
 		nuget.config = nuget.config
 	EndProjectSection
 EndProject
@@ -30,9 +30,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{6594E954-7
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsciiPinyin.Web.Shared.Test", "Test\Shared\AsciiPinyin.Web.Shared.Test.csproj", "{BF702B43-EC3B-4EF1-9A90-A4092087F4D5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Asciipinyin.Web.Client.Test", "Test\Client\Asciipinyin.Web.Client.Test.csproj", "{78443D4E-554A-48C4-A439-C7CF3C80AE35}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsciiPinyin.Web.Client.Test", "Test\Client\AsciiPinyin.Web.Client.Test.csproj", "{78443D4E-554A-48C4-A439-C7CF3C80AE35}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Asciipinyin.Web.Server.Test", "Test\Server\Asciipinyin.Web.Server.Test.csproj", "{C046B031-ED04-42FD-A00D-F35CCCCD340A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AsciiPinyin.Web.Server.Test", "Test\Server\AsciiPinyin.Web.Server.Test.csproj", "{C046B031-ED04-42FD-A00D-F35CCCCD340A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

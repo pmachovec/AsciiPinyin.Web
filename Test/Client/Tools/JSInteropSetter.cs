@@ -1,7 +1,7 @@
 using AsciiPinyin.Web.Client.Test.Constants.JSInterop;
 using Bunit;
 
-namespace Asciipinyin.Web.Client.Test.Tools;
+namespace AsciiPinyin.Web.Client.Test.Tools;
 
 internal sealed class JSInteropSetter(BunitJSInterop _jsInterop)
 {

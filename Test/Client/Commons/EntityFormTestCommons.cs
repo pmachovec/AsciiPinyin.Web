@@ -10,7 +10,7 @@ using Moq;
 using NUnit.Framework;
 using System.Net;
 
-namespace Asciipinyin.Web.Client.Test.Commons;
+namespace AsciiPinyin.Web.Client.Test.Commons;
 
 internal sealed class EntityFormTestCommons<T>(
     IRenderedComponent<IEntityForm<T>> _entityFormComponent,

@@ -6,7 +6,7 @@ using Bunit;
 using NUnit.Framework;
 using System.Globalization;
 
-namespace Asciipinyin.Web.Client.Test.Commons;
+namespace AsciiPinyin.Web.Client.Test.Commons;
 
 internal sealed class ModalTestCommons
 (
