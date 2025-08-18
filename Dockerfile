@@ -25,9 +25,14 @@ COPY . .
 
 RUN dotnet build --no-restore Main/Server/AsciiPinyin.Web.Server.csproj -c Release -o /app/build
 
-RUN for proj in Test/**/*.csproj; do \
-        dotnet test --no-restore --verbosity normal $proj || exit 1; \
-    done
+ARG SKIP_TESTS=false
+ARG VERBOSITY=normal
+
+RUN if [ "$SKIP_TESTS" != "true" ]; then \
+        for proj in Test/**/*.csproj; do \
+            dotnet test --no-restore --verbosity $VERBOSITY $proj || exit 1; \
+        done \
+    fi
 
 
 FROM build AS publish
